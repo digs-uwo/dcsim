@@ -1,6 +1,6 @@
 package edu.uwo.csd.dcsim2;
 
-import resmanager.CpuManager;
+import edu.uwo.csd.dcsim2.resmanager.*;
 import edu.uwo.csd.dcsim2.core.*;
 
 public class Host extends SimulationEntity {
