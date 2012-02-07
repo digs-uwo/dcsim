@@ -1,6 +1,5 @@
 package edu.uwo.csd.dcsim2.resmanager;
 
-public class CpuManager {
-
+public class BandwidthManager {
 
 }

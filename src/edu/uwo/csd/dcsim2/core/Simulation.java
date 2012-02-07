@@ -8,7 +8,7 @@ public class Simulation {
 	private static Simulation simulation;
 	
 	private TreeSet<Event> eventQueue;
-	private long simulationTime;
+	private long simulationTime; //in milliseconds
 	private ArrayList<SimulationEntity> simulationEntities;
 	
 	public static Simulation getSimulation() {
