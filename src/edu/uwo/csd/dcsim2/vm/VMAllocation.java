@@ -7,14 +7,16 @@ public class VMAllocation {
 	VM vm;
 	VMDescription vmDescription;
 	
-	private Vector<VirtualCore> vCores;
+	private Vector<Integer> vCoreCapacityAlloc;
+	private Vector<Integer> vCoreCapacityScheduled;
 	private int memoryAlloc;	
 	private int bandwidthAlloc;
 	private long storageAlloc;
 	
 	public VMAllocation(VMDescription vmDescription) {
 		this.vmDescription = vmDescription;
-		vCores = new Vector<VirtualCore>();
+		vCoreCapacityAlloc = new Vector<Integer>();
+		vCoreCapacityScheduled = new Vector<Integer>();
 		vm = null;
 	}
 	
@@ -30,8 +32,12 @@ public class VMAllocation {
 		return vmDescription;
 	}
 	
-	public Vector<VirtualCore> getVCores() {
-		return vCores;
+	public Vector<Integer> getVCoreCapacityAlloc() {
+		return vCoreCapacityAlloc;
+	}
+	
+	public Vector<Integer> getVCoreCapacityScheduled() {
+		return vCoreCapacityScheduled;
 	}
 	
 	public void setMemoryAlloc(int memoryAlloc) {
