@@ -1,16 +1,20 @@
-package edu.uwo.csd.dcsim2;
+package edu.uwo.csd.dcsim2.vm;
+
+import java.util.Vector;
 
 public class VMAllocation {
 
 	VM vm;
+	VMDescription vmDescription;
 	
-	private int cpuAlloc //array? list? how should this be done? Map<coreID, alloc>?
+	private Vector<VirtualCore> vCores;
 	private int memoryAlloc;	
 	private int bandwidthAlloc;
 	private long storageAlloc;
 	
-	public VMAllocation() {
-			
+	public VMAllocation(VMDescription vmDescription) {
+		this.vmDescription = vmDescription;
+		vCores = new Vector<VirtualCore>();
 		vm = null;
 	}
 	
@@ -20,6 +24,14 @@ public class VMAllocation {
 	
 	public VM getVm() {
 		return vm;
+	}
+	
+	public VMDescription getVMDescription() {
+		return vmDescription;
+	}
+	
+	public Vector<VirtualCore> getVCores() {
+		return vCores;
 	}
 	
 	public void setMemoryAlloc(int memoryAlloc) {

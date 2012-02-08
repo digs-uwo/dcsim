@@ -1,9 +1,15 @@
 package edu.uwo.csd.dcsim2.core;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.TreeSet;
 import java.util.ArrayList;
 
 public class Simulation {
+	
+	private static String homeDirectory = null;
+	private static String LOG_DIRECTORY = "/log";
+	private static String CONFIG_DIRECTORY = "/config";
 	
 	private static Simulation simulation;
 	
@@ -64,4 +70,41 @@ public class Simulation {
 		simulationEntities.add(entity);
 	}
 	
+	
+	/**
+	 * Helper functions
+	 */
+	
+	/**
+	 * Get the directory of the manager application
+	 * @return The directory of the manager application
+	 */
+	public static String getHomeDirectory() {
+		if (homeDirectory == null) {
+			File dir = new File(".");
+			try {
+				homeDirectory = dir.getCanonicalPath();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		return homeDirectory;
+	}
+	
+	/**
+	 * Get the directory that contains log files
+	 * @return The directory that contains log files.
+	 */
+	public static String getLogDirectory() {
+		return getHomeDirectory() + LOG_DIRECTORY;
+	}
+	
+	/**
+	 * Get the directory that contains configuration files
+	 * @return The directory that contains configuration files.
+	 */
+	public static String getConfigDirectory() {
+		return getHomeDirectory() + CONFIG_DIRECTORY;
+	}
 }

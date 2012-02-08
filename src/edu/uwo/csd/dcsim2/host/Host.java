@@ -1,12 +1,13 @@
-package edu.uwo.csd.dcsim2;
+package edu.uwo.csd.dcsim2.host;
 
-import edu.uwo.csd.dcsim2.resmanager.*;
+import java.util.Vector;
+
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.vm.*;
 
 public class Host extends SimulationEntity {
 
-	private int cores;
-	private int coreCapacity;
+	private Vector<Processor> processors;
 	private int memory;	
 	private int bandwidth;
 	private long storage;
@@ -16,9 +17,16 @@ public class Host extends SimulationEntity {
 	private BandwidthManager bandwidthManager;
 	private StorageManager storageManager;
 	
+	private Vector<VMAllocation> vmAllocations;
+	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF;}
 	
 	private HostState state;
+	
+	public Host() {
+		processors = new Vector<Processor>();
+		vmAllocations = new Vector<VMAllocation>();
+	}
 	
 	@Override
 	public void handleEvent(Event e) {
@@ -65,12 +73,8 @@ public class Host extends SimulationEntity {
 	
 	//ACCESSOR METHODS
 	
-	public int getCores() {
-		return cores;
-	}
-	
-	public int getCoreCapacity() {
-		return coreCapacity;
+	public Vector<Processor> getProcessors() {
+		return processors;
 	}
 	
 	public int getMemory() {
@@ -123,5 +127,9 @@ public class Host extends SimulationEntity {
 	
 	public void setStorageManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
+	}
+	
+	public Vector<VMAllocation> vmAllocations() {
+		return vmAllocations;
 	}
 }
