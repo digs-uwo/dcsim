@@ -3,9 +3,13 @@ package edu.uwo.csd.dcsim2.host;
 import java.util.Vector;
 
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.host.resourcemanager.BandwidthManager;
+import edu.uwo.csd.dcsim2.host.resourcemanager.CpuManager;
+import edu.uwo.csd.dcsim2.host.resourcemanager.MemoryManager;
+import edu.uwo.csd.dcsim2.host.resourcemanager.StorageManager;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class Host extends SimulationEntity {
+public class Host extends UpdatingSimulationEntity {
 
 	private Vector<Processor> processors;
 	private int memory;	
@@ -23,9 +27,40 @@ public class Host extends SimulationEntity {
 	
 	private HostState state;
 	
-	public Host() {
+	public Host(int nProcessors, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
+		
 		processors = new Vector<Processor>();
-		vmAllocations = new Vector<VMAllocation>();
+		for (int i = 0; i < nProcessors; ++i) {
+			processors.add(new Processor(nCores, coreCapacity));
+		}
+		
+		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager);
+	}
+	
+	public Host(Vector<Processor> processors, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
+		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager);		
+	}
+	
+	private void initializeHost(Vector<Processor> processors, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
+		
+		this.processors = processors;
+		this.memory = memory;
+		this.bandwidth = bandwidth;
+		this.storage = storage;
+		
+		this.cpuManager = cpuManager;
+		cpuManager.setHost(this);
+		
+		this.memoryManager = memoryManager;
+		memoryManager.setHost(this);
+		
+		this.storageManager = storageManager;
+		storageManager.setHost(this);
+		
+		vmAllocations = new Vector<VMAllocation>();	
 	}
 	
 	@Override
@@ -39,6 +74,54 @@ public class Host extends SimulationEntity {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public boolean isCapable(VMDescription vmDescription) {
+		return cpuManager.isCapable(vmDescription) && 
+				memoryManager.isCapable(vmDescription) &&	
+				bandwidthManager.isCapable(vmDescription) && 
+				storageManager.isCapable(vmDescription);
+	}
+	
+	public boolean hasCapacity(VMDescription vmDescription) {
+		return cpuManager.hasCapacity(vmDescription) &&
+				memoryManager.hasCapacity(vmDescription) &&
+				bandwidthManager.hasCapacity(vmDescription) &&
+				storageManager.hasCapacity(vmDescription);
+	}
+	
+	public VMAllocation allocate(VMDescription vmDescription) {
+		VMAllocation vmAllocation = new VMAllocation(vmDescription, this);
+		
+		if (!cpuManager.allocateResource(vmAllocation)) {
+			//TODO exception?
+			return null;
+		}
+		
+		if (!memoryManager.allocateResource(vmAllocation)) {
+			cpuManager.deallocateResource(vmAllocation);
+			//TODO exception?
+			return null;
+		}
+		
+		if (!bandwidthManager.allocateResource(vmAllocation)) {
+			cpuManager.deallocateResource(vmAllocation);
+			memoryManager.deallocateResource(vmAllocation);
+			//TODO exception?
+			return null;
+		}
+		
+		if (!storageManager.allocateResource(vmAllocation)) {
+			cpuManager.deallocateResource(vmAllocation);
+			memoryManager.deallocateResource(vmAllocation);
+			bandwidthManager.deallocateResource(vmAllocation);
+			//TODO exception?
+			return null;
+		}
+		
+		vmAllocations.add(vmAllocation);
+		return vmAllocation;
+	}
+	
 	
 	public void suspend() {
 		if (state == HostState.ON) {

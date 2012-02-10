@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2;
 
 import edu.uwo.csd.dcsim2.core.*;
 
-public class Datacentre extends SimulationEntity {
+public class Datacentre extends UpdatingSimulationEntity {
 
 	@Override
 	public void handleEvent(Event e) {

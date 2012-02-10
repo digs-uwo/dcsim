@@ -10,6 +10,13 @@ public class Processor {
 		cores = new Vector<Core>();
 	}
 	
+	public Processor(int nCores, int coreCapacity) {
+		cores = new Vector<Core>();
+		for (int i = 0; i < nCores; ++i) {
+			cores.add(new Core(coreCapacity));
+		}
+	}
+	
 	public Vector<Core> getCores() {
 		return cores;
 	}

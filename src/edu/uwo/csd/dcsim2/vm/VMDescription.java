@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.vm;
 
+import edu.uwo.csd.dcsim2.application.*;
+
 public class VMDescription {
 
 	private int vCores;
@@ -7,45 +9,43 @@ public class VMDescription {
 	private int memory;	
 	private int bandwidth;
 	private long storage;
+	private ApplicationFactory applicationFactory;
+	
+	public VMDescription(int vCores, int vCoreCapacity, int memory, int bandwidth, long storage, ApplicationFactory applicationFactory) {
+		this.vCores = vCores;
+		this.vCoreCapacity = vCoreCapacity;
+		this.memory = memory;
+		this.bandwidth = bandwidth;
+		this.storage = storage;
+		this.applicationFactory = applicationFactory;
+	}
+	
+	public VM createVM() {
+		return new VM(this, applicationFactory.createApplication());
+	}
 	
 	public int getVCores() {
 		return vCores;
-	}
-	
-	public void setVCores(int vCores) {
-		this.vCores = vCores;
 	}
 	
 	public int getVCoreCapacity() {
 		return vCoreCapacity;
 	}
 	
-	public void setVCoreCapacity(int vCoreCapacity) {
-		this.vCoreCapacity = vCoreCapacity;
-	}
-	
 	public int getMemory() {
 		return memory;
-	}
-	
-	public void setMemory(int memory) {
-		this.memory = memory;
 	}
 	
 	public int getBandwidth() {
 		return bandwidth;
 	}
 	
-	public void setBandwidth(int bandwidth) {
-		this.bandwidth = bandwidth;
-	}
-	
 	public long getStorage() {
 		return storage;
 	}
 	
-	public void setStorage(int storage) {
-		this.storage = storage;
+	public ApplicationFactory getApplicationFactory() {
+		return applicationFactory;
 	}
 	
 }

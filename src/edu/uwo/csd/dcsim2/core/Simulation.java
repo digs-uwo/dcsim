@@ -3,7 +3,7 @@ package edu.uwo.csd.dcsim2.core;
 import java.io.File;
 import java.io.IOException;
 import java.util.TreeSet;
-import java.util.ArrayList;
+import java.util.Vector;
 
 public class Simulation {
 	
@@ -15,7 +15,7 @@ public class Simulation {
 	
 	private TreeSet<Event> eventQueue;
 	private long simulationTime; //in milliseconds
-	private ArrayList<SimulationEntity> simulationEntities;
+	private Vector<SimulationEntity> simulationEntities;
 	
 	public static Simulation getSimulation() {
 		if (simulation == null)
@@ -26,7 +26,7 @@ public class Simulation {
 	private Simulation() {
 		eventQueue = new TreeSet<Event>(new EventComparator());
 		simulationTime = 0;
-		simulationEntities = new ArrayList<SimulationEntity>();
+		simulationEntities = new Vector<SimulationEntity>();
 	}
 	
 	public void run() {
@@ -42,7 +42,9 @@ public class Simulation {
 					
 					//update simulation entities
 					for (SimulationEntity entity : simulationEntities) {
-						entity.updateEntity();
+						if (entity instanceof UpdatingSimulationEntity) {
+							((UpdatingSimulationEntity)entity).updateEntity();
+						}
 					}
 				}
 				
@@ -63,7 +65,7 @@ public class Simulation {
 	 * @param count
 	 */
 	public void presetEntityCount(int count) {
-		simulationEntities = new ArrayList<SimulationEntity>(count);
+		simulationEntities = new Vector<SimulationEntity>(count);
 	}
 	
 	public void registerEntity(SimulationEntity entity) {
