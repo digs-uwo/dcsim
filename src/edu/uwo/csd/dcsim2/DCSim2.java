@@ -17,6 +17,10 @@ public class DCSim2 {
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
 		
 		logger.info("Starting DCSim2");
+
 	}
+	
+
+
 	
 }

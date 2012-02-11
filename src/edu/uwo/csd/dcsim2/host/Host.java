@@ -23,7 +23,7 @@ public class Host extends UpdatingSimulationEntity {
 	
 	private Vector<VMAllocation> vmAllocations;
 	
-	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF;}
+	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	
 	private HostState state;
 	
@@ -82,11 +82,11 @@ public class Host extends UpdatingSimulationEntity {
 				storageManager.isCapable(vmDescription);
 	}
 	
-	public boolean hasCapacity(VMDescription vmDescription) {
-		return cpuManager.hasCapacity(vmDescription) &&
-				memoryManager.hasCapacity(vmDescription) &&
-				bandwidthManager.hasCapacity(vmDescription) &&
-				storageManager.hasCapacity(vmDescription);
+	public boolean hasCapacity(VMAllocation vmAllocation) {
+		return cpuManager.hasCapacity(vmAllocation) &&
+				memoryManager.hasCapacity(vmAllocation) &&
+				bandwidthManager.hasCapacity(vmAllocation) &&
+				storageManager.hasCapacity(vmAllocation);
 	}
 	
 	public VMAllocation allocate(VMDescription vmDescription) {
@@ -148,9 +148,16 @@ public class Host extends UpdatingSimulationEntity {
 		} else if (state == HostState.OFF) {
 			state = HostState.POWERING_ON;
 			//TODO: send message with off to on delay which when received sets state to ON
+		} else if (state == HostState.FAILED){
+			state = HostState.POWERING_ON;
+			//TODO: send message with failed to on delay which when received sets state to ON
 		} else {
 			//TODO: handle how? report? should not happen
 		}
+	}
+	
+	public void fail() {
+		state = HostState.FAILED;
 	}
 
 	

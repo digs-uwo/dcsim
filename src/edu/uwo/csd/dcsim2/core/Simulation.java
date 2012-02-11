@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 import java.util.Vector;
 
 public class Simulation {
@@ -13,9 +13,10 @@ public class Simulation {
 	
 	private static Simulation simulation;
 	
-	private TreeSet<Event> eventQueue;
+	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
 	private Vector<SimulationEntity> simulationEntities;
+	private long duration;
 	
 	public static Simulation getSimulation() {
 		if (simulation == null)
@@ -24,7 +25,7 @@ public class Simulation {
 	}
 	
 	private Simulation() {
-		eventQueue = new TreeSet<Event>(new EventComparator());
+		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
 		simulationEntities = new Vector<SimulationEntity>();
 	}
@@ -32,8 +33,8 @@ public class Simulation {
 	public void run() {
 		Event e;
 		
-		while (!eventQueue.isEmpty()) {
-			e = eventQueue.pollFirst();
+		while (!eventQueue.isEmpty() && simulationTime <= duration) {
+			e = eventQueue.poll();
 			if (e.getTime() >= simulationTime) {
 				
 				//check if simulationTime is advancing
@@ -55,8 +56,20 @@ public class Simulation {
 		}
 	}
 	
+	public void sendEvent(Event event) {
+		eventQueue.add(event);
+	}
+	
 	public long getSimulationTime() {
 		return simulationTime;
+	}
+	
+	public long getDuration() {
+		return duration;
+	}
+	
+	public void setDuration(long duration) {
+		this.duration = duration;
 	}
 	
 	/**

@@ -16,7 +16,7 @@ public abstract class ResourceManager {
 	}
 	
 	public abstract boolean isCapable(VMDescription vmDescription);
-	public abstract boolean hasCapacity(VMDescription vmDescription);
+	public abstract boolean hasCapacity(VMAllocation vmAllocate);
 	public abstract boolean allocateResource(VMAllocation vmAllocation);
 	public abstract boolean deallocateResource(VMAllocation vmAllocation);
 	
