@@ -11,7 +11,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class Host extends UpdatingSimulationEntity {
 
-	private Vector<Processor> processors;
+	private Vector<Cpu> processors;
 	private int memory;	
 	private int bandwidth;
 	private long storage;
@@ -20,6 +20,7 @@ public class Host extends UpdatingSimulationEntity {
 	private MemoryManager memoryManager;
 	private BandwidthManager bandwidthManager;
 	private StorageManager storageManager;
+	private CpuScheduler cpuScheduler;
 	
 	private Vector<VMAllocation> vmAllocations;
 	
@@ -28,23 +29,23 @@ public class Host extends UpdatingSimulationEntity {
 	private HostState state;
 	
 	public Host(int nProcessors, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
-		processors = new Vector<Processor>();
+		processors = new Vector<Cpu>();
 		for (int i = 0; i < nProcessors; ++i) {
-			processors.add(new Processor(nCores, coreCapacity));
+			processors.add(new Cpu(nCores, coreCapacity));
 		}
 		
-		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager);
+		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 	}
 	
-	public Host(Vector<Processor> processors, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
-		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager);		
+	public Host(Vector<Cpu> processors, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
+		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);		
 	}
 	
-	private void initializeHost(Vector<Processor> processors, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager) {
+	private void initializeHost(Vector<Cpu> processors, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
 		this.processors = processors;
 		this.memory = memory;
@@ -59,6 +60,9 @@ public class Host extends UpdatingSimulationEntity {
 		
 		this.storageManager = storageManager;
 		storageManager.setHost(this);
+		
+		this.cpuScheduler = cpuScheduler;
+		cpuScheduler.setHost(this);
 		
 		vmAllocations = new Vector<VMAllocation>();	
 	}
@@ -163,7 +167,7 @@ public class Host extends UpdatingSimulationEntity {
 	
 	//ACCESSOR METHODS
 	
-	public Vector<Processor> getProcessors() {
+	public Vector<Cpu> getProcessors() {
 		return processors;
 	}
 	
@@ -217,6 +221,14 @@ public class Host extends UpdatingSimulationEntity {
 	
 	public void setStorageManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
+	}
+	
+	public CpuScheduler getCpuScheduler() {
+		return cpuScheduler;
+	}
+	
+	public void setCpuScheduler(CpuScheduler cpuScheduler) {
+		this.cpuScheduler = cpuScheduler;
 	}
 	
 	public Vector<VMAllocation> vmAllocations() {

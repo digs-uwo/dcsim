@@ -2,12 +2,12 @@ package edu.uwo.csd.dcsim2.host;
 
 import java.util.Vector;
 
-public class Processor {
+public class Cpu {
 	
 	int cores;
 	int coreCapacity;
 
-	public Processor(int cores, int coreCapacity) {
+	public Cpu(int cores, int coreCapacity) {
 		this.cores = cores;
 		this.coreCapacity = coreCapacity;
 	}
