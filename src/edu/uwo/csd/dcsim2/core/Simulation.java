@@ -1,11 +1,15 @@
 package edu.uwo.csd.dcsim2.core;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
 public class Simulation {
+	
+	private static Logger logger = Logger.getLogger(Simulation.class);
 	
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
@@ -17,6 +21,7 @@ public class Simulation {
 	private long simulationTime; //in milliseconds
 	private Vector<SimulationEntity> simulationEntities;
 	private long duration;
+	private SimulationUpdateController simulationUpdateController;
 	
 	public static Simulation getSimulation() {
 		if (simulation == null)
@@ -28,6 +33,7 @@ public class Simulation {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
 		simulationEntities = new Vector<SimulationEntity>();
+		simulationUpdateController = null;
 	}
 	
 	public void run() {
@@ -40,6 +46,9 @@ public class Simulation {
 				//check if simulationTime is advancing
 				if (simulationTime != e.getTime()) {
 					simulationTime = e.getTime();
+					
+					if (simulationUpdateController != null)
+						simulationUpdateController.updateSimulation(simulationTime);
 					
 					//update simulation entities
 					for (SimulationEntity entity : simulationEntities) {
@@ -70,6 +79,10 @@ public class Simulation {
 	
 	public void setDuration(long duration) {
 		this.duration = duration;
+	}
+	
+	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {
+		this.simulationUpdateController = simulationUpdateController;
 	}
 	
 	/**

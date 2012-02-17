@@ -1,34 +1,49 @@
 package edu.uwo.csd.dcsim2.application;
 
-public abstract class ApplicationTier implements WorkProducer, WorkConsumer {
+import java.util.ArrayList;
 
-	private WorkProducer workSource;
+public abstract class ApplicationTier implements WorkConsumer {
+
 	private WorkConsumer workTarget;
 	private LoadBalancer loadBalancer;
+	private ArrayList<Application> applications;
 	
-	private int outgoingWork;
-	
-	public ApplicationTier(WorkProducer workSource, WorkConsumer workTarget) {
-		outgoingWork = 0;
-		this.workSource = workSource;
+	public ApplicationTier(WorkConsumer workTarget, LoadBalancer loadBalancer) {
 		this.workTarget = workTarget;
+		this.loadBalancer = loadBalancer;
+		applications = new ArrayList<Application>();
 	}
 
-	public abstract Application createApplication();
-
-	public int getDepth() {
-		int depth = 1;
+	public Application createApplication() {
+		Application newApp = instantiateApplication();
+		this.applications.add(newApp);
 		
-		WorkProducer parent = workSource;
-		while (parent instanceof ApplicationTier) {
-			++depth;
-			parent = ((ApplicationTier)parent).getWorkSource();
+		return newApp;
+	}
+	
+	public void removeApplication(Application application) {
+		this.applications.remove(application);
+	}
+	
+	protected abstract Application instantiateApplication();
+
+	public int getHeight() {
+		int height = 1;
+		
+		WorkConsumer child = workTarget;
+		while (child instanceof ApplicationTier) {
+			++height;
+			child = ((ApplicationTier)child).getWorkTarget();
 		}
-		return depth;
+		return height;
 	}
 
-	public WorkProducer getWorkSource() {
-		return workSource;
+	public ArrayList<Application> getApplications() {
+		return applications;
+	}
+	
+	public LoadBalancer getLoadBalancer() {
+		return loadBalancer;
 	}
 	
 	public WorkConsumer getWorkTarget() {
@@ -37,16 +52,7 @@ public abstract class ApplicationTier implements WorkProducer, WorkConsumer {
 	
 	@Override
 	public void addWork(int work) {
-		outgoingWork += work;
+		loadBalancer.addWork(work);
 	}
-
-	@Override
-	public int retrieveWork() {
-		int out = outgoingWork;
-		outgoingWork = 0;
-		return out;
-	}
-	
-	
 	
 }

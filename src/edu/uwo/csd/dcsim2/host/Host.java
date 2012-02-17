@@ -9,9 +9,9 @@ import edu.uwo.csd.dcsim2.host.resourcemanager.MemoryManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.StorageManager;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class Host extends UpdatingSimulationEntity {
+public class Host extends SimulationEntity {
 
-	private Vector<Cpu> processors;
+	private Vector<Cpu> cpus;
 	private int memory;	
 	private int bandwidth;
 	private long storage;
@@ -28,26 +28,26 @@ public class Host extends UpdatingSimulationEntity {
 	
 	private HostState state;
 	
-	public Host(int nProcessors, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
-		processors = new Vector<Cpu>();
-		for (int i = 0; i < nProcessors; ++i) {
-			processors.add(new Cpu(nCores, coreCapacity));
+		cpus = new Vector<Cpu>();
+		for (int i = 0; i < nCpu; ++i) {
+			cpus.add(new Cpu(nCores, coreCapacity));
 		}
 		
-		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 	}
 	
-	public Host(Vector<Cpu> processors, int memory, int bandwidth, long storage,
+	public Host(Vector<Cpu> cpus, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
-		initializeHost(processors, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);		
+		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);		
 	}
 	
-	private void initializeHost(Vector<Cpu> processors, int memory, int bandwidth, long storage,
+	private void initializeHost(Vector<Cpu> cpus, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
-		this.processors = processors;
+		this.cpus = cpus;
 		this.memory = memory;
 		this.bandwidth = bandwidth;
 		this.storage = storage;
@@ -64,7 +64,10 @@ public class Host extends UpdatingSimulationEntity {
 		this.cpuScheduler = cpuScheduler;
 		cpuScheduler.setHost(this);
 		
-		vmAllocations = new Vector<VMAllocation>();	
+		vmAllocations = new Vector<VMAllocation>();
+		
+		//set default state
+		state = HostState.ON;
 	}
 	
 	@Override
@@ -73,11 +76,6 @@ public class Host extends UpdatingSimulationEntity {
 		
 	}
 
-	@Override
-	protected void update() {
-		// TODO Auto-generated method stub
-		
-	}
 	
 	public boolean isCapable(VMDescription vmDescription) {
 		return cpuManager.isCapable(vmDescription) && 
@@ -86,43 +84,18 @@ public class Host extends UpdatingSimulationEntity {
 				storageManager.isCapable(vmDescription);
 	}
 	
-	public boolean hasCapacity(VMAllocation vmAllocation) {
-		return cpuManager.hasCapacity(vmAllocation) &&
-				memoryManager.hasCapacity(vmAllocation) &&
-				bandwidthManager.hasCapacity(vmAllocation) &&
-				storageManager.hasCapacity(vmAllocation);
+	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
+		return cpuManager.hasCapacity(vmAllocationRequest) &&
+				memoryManager.hasCapacity(vmAllocationRequest) &&
+				bandwidthManager.hasCapacity(vmAllocationRequest) &&
+				storageManager.hasCapacity(vmAllocationRequest);
 	}
 	
-	public VMAllocation allocate(VMDescription vmDescription) {
-		VMAllocation vmAllocation = new VMAllocation(vmDescription, this);
+	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) {
+		VMAllocation vmAllocation = new VMAllocation(vmAllocationRequest.getVMDescription(), this);
 		
-		if (!cpuManager.allocateResource(vmAllocation)) {
-			//TODO exception?
-			return null;
-		}
+		//TODO allocate VM
 		
-		if (!memoryManager.allocateResource(vmAllocation)) {
-			cpuManager.deallocateResource(vmAllocation);
-			//TODO exception?
-			return null;
-		}
-		
-		if (!bandwidthManager.allocateResource(vmAllocation)) {
-			cpuManager.deallocateResource(vmAllocation);
-			memoryManager.deallocateResource(vmAllocation);
-			//TODO exception?
-			return null;
-		}
-		
-		if (!storageManager.allocateResource(vmAllocation)) {
-			cpuManager.deallocateResource(vmAllocation);
-			memoryManager.deallocateResource(vmAllocation);
-			bandwidthManager.deallocateResource(vmAllocation);
-			//TODO exception?
-			return null;
-		}
-		
-		vmAllocations.add(vmAllocation);
 		return vmAllocation;
 	}
 	
@@ -164,11 +137,10 @@ public class Host extends UpdatingSimulationEntity {
 		state = HostState.FAILED;
 	}
 
-	
 	//ACCESSOR METHODS
 	
-	public Vector<Cpu> getProcessors() {
-		return processors;
+	public Vector<Cpu> getCpus() {
+		return cpus;
 	}
 	
 	public int getMemory() {
@@ -231,7 +203,7 @@ public class Host extends UpdatingSimulationEntity {
 		this.cpuScheduler = cpuScheduler;
 	}
 	
-	public Vector<VMAllocation> vmAllocations() {
+	public Vector<VMAllocation> getVMAllocations() {
 		return vmAllocations;
 	}
 }

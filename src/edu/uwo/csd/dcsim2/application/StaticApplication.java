@@ -2,7 +2,8 @@ package edu.uwo.csd.dcsim2.application;
 
 public class StaticApplication extends Application {
 
-	public StaticApplication(int cores, int coreCapacity, int memory, int bandwidth, long storage) {
+	public StaticApplication(int cores, int coreCapacity, int memory, int bandwidth, long storage, ApplicationTier applicationTier) {
+		super(applicationTier);
 		for (int i = 0; i < cores; ++i) {
 			coreCapacityNeed.add(coreCapacity);
 		}

@@ -8,9 +8,11 @@ public abstract class Application {
 	protected int memoryNeed;
 	protected int bandwidthNeed;
 	protected long storageNeed;
+	private ApplicationTier applicationTier;
 	
-	public Application() {
+	public Application(ApplicationTier applicationTier) {
 		coreCapacityNeed = new Vector<Integer>();
+		this.applicationTier = applicationTier;
 	}
 	
 	public abstract void updateResourceNeeds();

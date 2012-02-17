@@ -65,5 +65,4 @@ public class VMAllocation {
 	public void setStorageAllocation(StorageAllocation storageAllocation) {
 		this.storageAllocation = storageAllocation;
 	}
-	
 }

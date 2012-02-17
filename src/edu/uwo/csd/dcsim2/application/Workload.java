@@ -1,23 +1,30 @@
 package edu.uwo.csd.dcsim2.application;
 
-public abstract class Workload implements WorkProducer, WorkConsumer {
+public abstract class Workload implements WorkConsumer {
 
-	private int pendingWork;
 	private int totalWork;
 	private int completedWork;
-	
-	
+	private WorkConsumer workTarget;
 	
 	@Override
 	public void addWork(int work) {
 		completedWork += work;
 	}
 
-	@Override
-	public int retrieveWork() {
-		int out = pendingWork;
-		pendingWork = 0;
-		return out;
+	protected abstract int retrievePendingWork(); 
+	
+	public void update() {
+		int pendingWork = retrievePendingWork();
+		totalWork += pendingWork;
+		workTarget.addWork(pendingWork);
+	}
+	
+	public int getTotalWork() {
+		return totalWork;
+	}
+	
+	public int getCompletedWork() {
+		return completedWork;
 	}
 
 }

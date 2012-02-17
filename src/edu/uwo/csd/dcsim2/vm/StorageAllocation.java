@@ -2,22 +2,21 @@ package edu.uwo.csd.dcsim2.vm;
 
 public class StorageAllocation {
 	
-	private VMAllocation vmAllocation;
-	private int storageAlloc;
+	private long storageAlloc;
 	
-	public StorageAllocation(VMAllocation vmAllocation) {
-		this.vmAllocation = vmAllocation;
+	public StorageAllocation() {
+		storageAlloc = 0;
 	}
 	
-	public int getStorageAlloc() {
-		return storageAlloc;
-	}
-	
-	public void setStorageAlloc(int storageAlloc) {
+	public StorageAllocation(long storageAlloc) {
 		this.storageAlloc = storageAlloc;
 	}
 	
-	public VMAllocation getVMAllocation() {
-		return vmAllocation;
+	public long getStorageAlloc() {
+		return storageAlloc;
+	}
+	
+	public void setStorageAlloc(long storageAlloc) {
+		this.storageAlloc = storageAlloc;
 	}
 }

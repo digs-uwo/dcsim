@@ -5,19 +5,17 @@ import java.util.Vector;
 public class CpuAllocation {
 
 	private Vector<Integer> coreCapacityAlloc;
-	private VMAllocation vmAllocation;
 	
-	public CpuAllocation(VMAllocation vmAllocation) {
-		this.vmAllocation = vmAllocation;
+	public CpuAllocation() {
 		coreCapacityAlloc = new Vector<Integer>();
+	}
+	
+	public CpuAllocation(Vector<Integer> coreCapacityAlloc) {
+		this.coreCapacityAlloc = coreCapacityAlloc;
 	}
 	
 	public Vector<Integer> getCoreCapacityAlloc() {
 		return coreCapacityAlloc;
-	}
-	
-	public VMAllocation getVMAllocation() {
-		return vmAllocation;
 	}
 	
 }

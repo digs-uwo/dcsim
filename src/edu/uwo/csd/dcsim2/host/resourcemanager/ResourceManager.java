@@ -15,9 +15,21 @@ public abstract class ResourceManager {
 		this.host = host;
 	}
 	
+	/**
+	 * Verify whether this Host possesses the required capabilities to Host a VM with the specified
+	 * VMDescription. Does not consider current allocation of other VMs running on the host.
+	 * @param vmDescription
+	 * @return
+	 */
 	public abstract boolean isCapable(VMDescription vmDescription);
-	public abstract boolean hasCapacity(VMAllocation vmAllocate);
-	public abstract boolean allocateResource(VMAllocation vmAllocation);
-	public abstract boolean deallocateResource(VMAllocation vmAllocation);
 	
+	/**
+	 * Determine if the Host has enough remaining capacity to host the VM.
+	 * @param vmAllocate
+	 * @return
+	 */
+	public abstract boolean hasCapacity(VMAllocationRequest vmAllocationRequest);
+	public abstract boolean allocateResource(VMAllocationRequest vmAllocationRequest);
+	public abstract boolean deallocateResource(VMAllocationRequest vmAllocationRequest);
+	public abstract boolean updateAllocations();
 }
