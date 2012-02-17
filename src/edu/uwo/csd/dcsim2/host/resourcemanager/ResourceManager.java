@@ -29,7 +29,8 @@ public abstract class ResourceManager {
 	 * @return
 	 */
 	public abstract boolean hasCapacity(VMAllocationRequest vmAllocationRequest);
-	public abstract boolean allocateResource(VMAllocationRequest vmAllocationRequest);
-	public abstract boolean deallocateResource(VMAllocationRequest vmAllocationRequest);
-	public abstract boolean updateAllocations();
+	
+	public abstract void allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation);
+	public abstract void deallocateResource(VMAllocation vmAllocation);
+	public abstract void updateAllocations();
 }

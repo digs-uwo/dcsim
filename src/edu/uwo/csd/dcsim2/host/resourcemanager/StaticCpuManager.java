@@ -1,23 +1,29 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
+import java.util.*;
+
 import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
 
+	Map<VMAllocation, CpuAllocation> allocationMap;
+	
+	public StaticCpuManager() {
+		allocationMap = new HashMap<VMAllocation, CpuAllocation>();
+	}
+	
 	//TODO should this be moved to a 'SimpleCpuManager' superclass, which implements basic functions
 	//considering all CPUs a 'one big CPU' and leaves the allocation abstract?
 	private int getAllocatedCpu() {
 		int allocatedCPU = 0;
 		
-		for (VMAllocation vmAllocation : getHost().getVMAllocations()) {
-			if (vmAllocation.getCpuAllocation() != null) {
-				for (Integer coreCapacity : vmAllocation.getCpuAllocation().getCoreCapacityAlloc()) {
-					allocatedCPU += coreCapacity;
-				}
+		for (CpuAllocation cpuAllocation : allocationMap.values()) {
+			for (Integer coreCapacity : cpuAllocation.getCoreCapacityAlloc()) {
+				allocatedCPU += coreCapacity;
 			}
 		}
-		
+	
 		return allocatedCPU;
 	}
 	
@@ -51,30 +57,31 @@ public class StaticCpuManager extends CpuManager {
 			}
 		}
 		
-		if (requiredCapacity <= getAvailableCpu())
-			return true;
-		
-		return false;
+		return requiredCapacity <= getAvailableCpu();
 	}
 
 	@Override
-	public boolean allocateResource(VMAllocationRequest vmAllocationRequest) {
+	public void allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation) {
 
-		
-		
-		return false;
+		if (hasCapacity(vmAllocationRequest)) {
+			CpuAllocation newAlloc = new CpuAllocation();
+			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreCapacityAlloc()) {
+				newAlloc.getCoreCapacityAlloc().add(coreCapacity);
+			}
+			vmAllocation.setCpuAllocation(newAlloc);
+			allocationMap.put(vmAllocation, newAlloc);			
+		}
 	}
 
 	@Override
-	public boolean deallocateResource(VMAllocationRequest vmAllocationRequest) {
-		// TODO Auto-generated method stub
-		return false;
+	public void deallocateResource(VMAllocation vmAllocation) {
+		vmAllocation.setCpuAllocation(null);
+		allocationMap.remove(vmAllocation);
 	}
 
 	@Override
-	public boolean updateAllocations() {
-		// TODO Auto-generated method stub
-		return false;
+	public void updateAllocations() {
+		//do nothing, allocation is static
 	}
 
 }

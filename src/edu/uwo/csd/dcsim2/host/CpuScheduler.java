@@ -27,6 +27,7 @@ public abstract class CpuScheduler {
 	public abstract boolean processVM(VMAllocation vmAllocation);
 	public abstract void endRound();
 	public abstract void endScheduling();
+	public abstract void completeRemainingScheduling();
 	
 	protected Vector<Cpu> getAvailableCpuCapacity() {
 		return availableCpuCapacity;
