@@ -8,8 +8,7 @@ public abstract class LoadBalancer {
 	Map<Application, Integer> applicationWorkPending;
 	int incomingWork;
 	
-	public LoadBalancer(ApplicationTier applicationTier) {
-		this.applicationTier = applicationTier;
+	public LoadBalancer() {
 		applicationWorkPending = new HashMap<Application, Integer>();
 		incomingWork = 0;
 	}
@@ -37,6 +36,10 @@ public abstract class LoadBalancer {
 	
 	public ApplicationTier getApplicationTier() {
 		return applicationTier;
+	}
+	
+	public void setApplicationTier(ApplicationTier applicationTier) {
+		this.applicationTier = applicationTier;
 	}
 	
 }

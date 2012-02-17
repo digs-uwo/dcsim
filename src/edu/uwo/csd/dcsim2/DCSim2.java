@@ -5,15 +5,18 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import edu.uwo.csd.dcsim2.application.StaticWorkload;
+import edu.uwo.csd.dcsim2.application.WebServerTier;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
+import edu.uwo.csd.dcsim2.vm.*;
 
 public class DCSim2 implements SimulationUpdateController {
 
 	private static Logger logger = Logger.getLogger(DCSim2.class);
 	
-	private ArrayList<Datacentre> datacentres;
+	private ArrayList<DataCentre> datacentres;
 	
 	public DCSim2() {
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
@@ -21,10 +24,10 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		Simulation.getSimulation().setSimulationUpdateController(this);
 		
-		datacentres = new ArrayList<Datacentre>();
+		datacentres = new ArrayList<DataCentre>();
 	}
 
-	public void addDatacentre(Datacentre dc) {
+	public void addDatacentre(DataCentre dc) {
 		datacentres.add(dc);
 	}
 	
@@ -43,12 +46,39 @@ public class DCSim2 implements SimulationUpdateController {
 		DCSim2 simulator = new DCSim2();
 		
 		//create datacentre
-		Datacentre dc = new Datacentre();
+		DataCentre dc = new DataCentre();
 		
 		//create hosts
-		
+		dc.addHosts(createHosts(1));
 		
 		simulator.addDatacentre(dc);
+	}
+	
+	public static VMDescription createVMDesc() {
+		
+		//Build service
+		
+		//create workload (external)
+		StaticWorkload workload = new StaticWorkload(100);
+		
+		//create single tier (web tier)
+		WebServerTier webServerTier = new WebServerTier(workload);
+		
+		//add a load balancer to the tier, if necessary
+		//webServerTier.setLoadBalancer(new EqualShareLoadBalancer());
+		
+		//set the tier as the target for the external workload
+		workload.setWorkTarget(webServerTier);
+		
+		//build VMDescription
+		int vCores = 1; //requires 1 core
+		int vCoreCapacity = 1000; //1000 cpu shares
+		int memory = 8192; //8GB
+		int bandwidth = 16; //16MB
+		long storage = 102400; //100GB
+		VMDescription vmDescription = new VMDescription(vCores, vCoreCapacity, memory, bandwidth, storage, webServerTier);
+
+		return vmDescription;
 	}
 	
 	public static ArrayList<Host> createHosts(int nHosts) {

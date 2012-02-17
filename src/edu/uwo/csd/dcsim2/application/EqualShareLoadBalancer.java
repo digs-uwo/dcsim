@@ -5,10 +5,6 @@ import java.util.Map;
 
 public class EqualShareLoadBalancer extends LoadBalancer {
 
-	public EqualShareLoadBalancer(ApplicationTier applicationTier) {
-		super(applicationTier);
-	}
-
 	@Override
 	public Map<Application, Integer> distributeWork(int work, Map<Application, Integer> applicationWorkPending) {
 		int workPerApp;

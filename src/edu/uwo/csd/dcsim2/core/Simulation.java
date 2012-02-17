@@ -15,7 +15,7 @@ public class Simulation {
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
 	
-	private static Simulation simulation;
+	private static Simulation simulation = new Simulation(); //initialize singleton
 	
 	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
@@ -24,8 +24,6 @@ public class Simulation {
 	private SimulationUpdateController simulationUpdateController;
 	
 	public static Simulation getSimulation() {
-		if (simulation == null)
-			simulation = new Simulation();
 		return simulation;
 	}
 	
