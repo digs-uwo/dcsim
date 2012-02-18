@@ -25,5 +25,6 @@ public class MasterCpuScheduler {
 	
 	public void scheduleCpu() {
 		//TODO order VMs, schedule CPU
+		//check that host is powered on
 	}
 }

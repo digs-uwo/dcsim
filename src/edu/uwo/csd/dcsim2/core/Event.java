@@ -5,13 +5,13 @@ import java.util.Map;
 
 public class Event {
 
-	private long type;
+	private int type;
 	private long time;
 	private SimulationEntity source;
 	private SimulationEntity target;
 	private Map<String, Object> data;
 	
-	public Event(long type, long time, SimulationEntity source, SimulationEntity target) {
+	public Event(int type, long time, SimulationEntity source, SimulationEntity target) {
 		this.type = type;
 		this.time = time;
 		this.source = source;
@@ -19,7 +19,7 @@ public class Event {
 		data = new HashMap<String, Object>();
 	}
 	
-	public long getType() {
+	public int getType() {
 		return type;
 	}
 	

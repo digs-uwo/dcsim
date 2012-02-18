@@ -11,6 +11,14 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class Host extends SimulationEntity {
 
+	/**
+	 * Event types for events that Host receives
+	 */
+	public static final int HOST_SUBMIT_VM_EVENT = 1;
+	public static final int HOST_POWER_ON_EVENT = 2;
+	public static final int HOST_POWER_OFF_EVENT = 3;
+	public static final int HOST_SUSPEND_EVENT = 4;
+	
 	private Vector<Cpu> cpus;
 	private int memory;	
 	private int bandwidth;
@@ -72,8 +80,30 @@ public class Host extends SimulationEntity {
 	
 	@Override
 	public void handleEvent(Event e) {
-		// TODO Auto-generated method stub
-		
+		switch (e.getType()) {
+			case Host.HOST_SUBMIT_VM_EVENT:
+				VMAllocationRequest vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
+				submitVM(vmAllocationRequest);
+				break;
+			case Host.HOST_POWER_ON_EVENT:
+				powerOn();
+				break;
+			case Host.HOST_POWER_OFF_EVENT:
+				powerOff();
+				break;
+			case Host.HOST_SUSPEND_EVENT:
+				suspend();
+				break;
+			default:
+				//TODO throw exception
+				break;
+		}
+	}
+	
+	private void submitVM(VMAllocationRequest vmAllocationRequest) {
+		VMAllocation newAllocation = allocate(vmAllocationRequest);
+		newAllocation.setVm(newAllocation.getVMDescription().createVM());
+		vmAllocations.add(newAllocation);
 	}
 
 	
@@ -94,7 +124,17 @@ public class Host extends SimulationEntity {
 	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) {
 		VMAllocation vmAllocation = new VMAllocation(vmAllocationRequest.getVMDescription(), this);
 		
-		//TODO allocate VM
+		//allocate CPU
+		cpuManager.allocateResource(vmAllocationRequest, vmAllocation);
+		
+		//allocate memory
+		memoryManager.allocateResource(vmAllocationRequest, vmAllocation);
+		
+		//allocate bandwidth
+		bandwidthManager.allocateResource(vmAllocationRequest, vmAllocation);
+		
+		//allocate storage
+		storageManager.allocateResource(vmAllocationRequest, vmAllocation);
 		
 		return vmAllocation;
 	}

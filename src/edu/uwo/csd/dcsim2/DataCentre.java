@@ -1,17 +1,16 @@
 package edu.uwo.csd.dcsim2;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 
 public class DataCentre extends SimulationEntity {
 
-	private LinkedList<Host> hosts;
+	private ArrayList<Host> hosts;
 	
 	public DataCentre() {
-		hosts = new LinkedList<Host>();
+		hosts = new ArrayList<Host>();
 	}
 	
 	public void addHost(Host host) {
@@ -20,6 +19,10 @@ public class DataCentre extends SimulationEntity {
 	
 	public void addHosts(ArrayList<Host> hosts) {
 		hosts.addAll(hosts);
+	}
+	
+	public ArrayList<Host> getHosts() {
+		return hosts;
 	}
 	
 	@Override

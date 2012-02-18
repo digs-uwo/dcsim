@@ -6,38 +6,6 @@ import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
-
-	Map<VMAllocation, CpuAllocation> allocationMap;
-	
-	public StaticCpuManager() {
-		allocationMap = new HashMap<VMAllocation, CpuAllocation>();
-	}
-	
-	//TODO should this be moved to a 'SimpleCpuManager' superclass, which implements basic functions
-	//considering all CPUs a 'one big CPU' and leaves the allocation abstract?
-	private int getAllocatedCpu() {
-		int allocatedCPU = 0;
-		
-		for (CpuAllocation cpuAllocation : allocationMap.values()) {
-			for (Integer coreCapacity : cpuAllocation.getCoreCapacityAlloc()) {
-				allocatedCPU += coreCapacity;
-			}
-		}
-	
-		return allocatedCPU;
-	}
-	
-	private int getTotalCpu() {
-		int totalCpu = 0;
-		for (Cpu cpu : getHost().getCpus()) {
-			totalCpu += cpu.getCores() * cpu.getCoreCapacity();
-		}
-		return totalCpu;
-	}
-	
-	private int getAvailableCpu() {
-		return getTotalCpu() - getAllocatedCpu();
-	}
 	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
