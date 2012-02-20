@@ -10,6 +10,7 @@ public class Event {
 	private SimulationEntity source;
 	private SimulationEntity target;
 	private Map<String, Object> data;
+	private long sendOrder;
 	
 	public Event(int type, long time, SimulationEntity source, SimulationEntity target) {
 		this.type = type;
@@ -37,6 +38,14 @@ public class Event {
 	
 	public Map<String, Object> getData() {
 		return data;
+	}
+	
+	protected void setSendOrder(long sendOrder) {
+		this.sendOrder = sendOrder;
+	}
+	
+	protected long getSendOrder() {
+		return sendOrder;
 	}
 	
 }
