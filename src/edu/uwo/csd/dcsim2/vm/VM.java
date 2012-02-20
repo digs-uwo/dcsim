@@ -11,10 +11,7 @@ public class VM extends SimulationEntity {
 	
 	private int id;
 	private VMDescription vmDescription;
-	private ArrayList<Integer> vCoreInUse;
-	private int memoryInUse;
-	private int bandwidthInUse;
-	private long storageInUse;
+	private VirtualResources resourcesInUse;
 	
 	private Application application;
 	
@@ -25,17 +22,13 @@ public class VM extends SimulationEntity {
 		this.vmDescription = vmDescription;
 		this.application = application;
 	
-		//initialize core list
-		vCoreInUse = new ArrayList<Integer>();
-		for (int i = 0; i < vmDescription.getVCores(); ++i) {
-			vCoreInUse.add(0);
-		}
-		
-		memoryInUse = 0;
-		bandwidthInUse = 0;
-		storageInUse = 0;
+		this.resourcesInUse = new VirtualResources(vmDescription.getVCores());
 		
 		vmAllocation = null;
+	}
+	
+	public void processWork(int cpu) {
+		
 	}
 	
 	public int getId() {
@@ -58,32 +51,8 @@ public class VM extends SimulationEntity {
 		this.vmAllocation = vmAllocation;
 	}
 	
-	public ArrayList<Integer> getVCoreInUse() {
-		return vCoreInUse;
-	}
-	
-	public int getMemoryInUse() {
-		return memoryInUse;
-	}
-	
-	public void setMemoryInUse(int memoryInUse) {
-		this.memoryInUse = memoryInUse;
-	}
-	
-	public int getBandwidthInUse() {
-		return bandwidthInUse;
-	}
-	
-	public void setBandwidthInUse(int bandwidthInUse) {
-		this.bandwidthInUse = bandwidthInUse;
-	}
-	
-	public long getStorageInUse() {
-		return storageInUse;
-	}
-	
-	public void setStorageInUse(long storageInUse) {
-		this.storageInUse = storageInUse;
+	public VirtualResources getResourcesInUse() {
+		return resourcesInUse;
 	}
 	
 	@Override

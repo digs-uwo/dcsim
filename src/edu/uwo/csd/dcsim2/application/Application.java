@@ -1,36 +1,37 @@
 package edu.uwo.csd.dcsim2.application;
 
-import java.util.Vector;
+import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class Application {
 
-	protected Vector<Integer> coreCapacityNeed;
-	protected int memoryNeed;
-	protected int bandwidthNeed;
-	protected long storageNeed;
+	protected VirtualResources resourcesRequired;
 	private ApplicationTier applicationTier;
 	
 	public Application(ApplicationTier applicationTier) {
-		coreCapacityNeed = new Vector<Integer>();
+		resourcesRequired = new VirtualResources();
 		this.applicationTier = applicationTier;
 	}
 	
-	public abstract void updateResourceNeeds();
-	
-	public Vector<Integer> getCoreCapacityNeed() {
-		return coreCapacityNeed;
+	public VirtualResources updateResourcesRequired() {
+		int incomingWork = applicationTier.retrieveWork(this);
+		if (incomingWork > 0) {
+			resourcesRequired = VirtualResources.add(resourcesRequired, convertWorkToResources(incomingWork));
+		}
+		return resourcesRequired;
 	}
 	
-	public int getMemoryNeed() {
-		return memoryNeed;
+	public void processWork(VirtualResources resourcesAvailable) {
+		int workComplete = convertResourcesToWork(resourcesAvailable);
+		applicationTier.getWorkTarget().addWork(workComplete);
+		
+		resourcesRequired = VirtualResources.subtract(resourcesRequired, resourcesAvailable);
 	}
 	
-	public int getBandwidthNeed() {
-		return bandwidthNeed;
-	}
+	protected abstract VirtualResources convertWorkToResources(int work);
+	protected abstract int convertResourcesToWork(VirtualResources resources);
 	
-	public long getStorageNeed() {
-		return storageNeed;
+	public VirtualResources getResourcesRequired() {
+		return resourcesRequired;
 	}
-	
+
 }
