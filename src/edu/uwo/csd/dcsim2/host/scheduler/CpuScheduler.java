@@ -1,7 +1,9 @@
-package edu.uwo.csd.dcsim2.host;
+package edu.uwo.csd.dcsim2.host.scheduler;
 
 import java.util.Vector;
 
+import edu.uwo.csd.dcsim2.host.Cpu;
+import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class CpuScheduler {

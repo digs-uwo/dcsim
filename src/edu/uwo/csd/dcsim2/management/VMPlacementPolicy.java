@@ -8,7 +8,7 @@ import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class VMPlacementPolicy extends SimulationEntity {
-
+	
 	DataCentre datacentre;
 	
 	public VMPlacementPolicy() {
@@ -27,5 +27,11 @@ public abstract class VMPlacementPolicy extends SimulationEntity {
 	public abstract boolean submitVM(VMAllocationRequest vmAllocationRequest);
 	public abstract boolean submitVMs(ArrayList<VMAllocationRequest> vmAllocationRequests);	
 	public abstract boolean submitVM(VMAllocationRequest vmAllocationRequest, Host host);
+	
+	@Override
+	public void handleEvent(Event e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

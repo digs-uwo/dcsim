@@ -7,7 +7,9 @@ import java.io.*;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
-public class Simulation {
+public class Simulation extends SimulationEntity {
+	
+	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	
 	private static Logger logger = Logger.getLogger(Simulation.class);
 	
@@ -21,11 +23,11 @@ public class Simulation {
 	
 	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
-	private Vector<SimulationEntity> simulationEntities;
 	private long duration;
-	private SimulationUpdateController simulationUpdateController;
 	private long eventSendCount = 0;
 	
+	private SimulationUpdateController simulationUpdateController;
+		
 	public static Simulation getSimulation() {
 		return simulation;
 	}
@@ -33,7 +35,6 @@ public class Simulation {
 	private Simulation() {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
-		simulationEntities = new Vector<SimulationEntity>();
 		simulationUpdateController = null;
 		
 		/*
@@ -52,8 +53,12 @@ public class Simulation {
 		
 	}
 	
-	public void run() {
+	public void run(long duration) {
 		Event e;
+		
+		//configure simulation duration
+		this.duration = duration;
+		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
 		
 		while (!eventQueue.isEmpty() && simulationTime <= duration) {
 			e = eventQueue.poll();
@@ -67,7 +72,7 @@ public class Simulation {
 						simulationUpdateController.updateSimulation(simulationTime);
 					
 					//update simulation entities
-					for (SimulationEntity entity : simulationEntities) {
+					for (SimulationEntity entity : SimulationEntity.getSimulationEntities()) {
 						if (entity instanceof UpdatingSimulationEntity) {
 							((UpdatingSimulationEntity)entity).updateEntity();
 						}
@@ -86,6 +91,16 @@ public class Simulation {
 		eventQueue.add(event);
 	}
 	
+	@Override
+	public void handleEvent(Event e) {
+		switch (e.getType()) {
+			case Simulation.SIMULATION_TERMINATE_EVENT:
+				//Do nothing. This ensures that the simulation is fully up-to-date upon termination.
+				logger.info("Terminating Simulation");
+				break;
+		}
+	}
+	
 	public long getSimulationTime() {
 		return simulationTime;
 	}
@@ -94,27 +109,9 @@ public class Simulation {
 		return duration;
 	}
 	
-	public void setDuration(long duration) {
-		this.duration = duration;
-	}
-	
 	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {
 		this.simulationUpdateController = simulationUpdateController;
 	}
-	
-	/**
-	 * Preset the size of the entity list. If the number of SimulationEntities to be created is known a priori,
-	 * preseting the size (before creating any SimulationEntity objects) will optimize registerEntity() performance.
-	 * @param count
-	 */
-	public void presetEntityCount(int count) {
-		simulationEntities = new Vector<SimulationEntity>(count);
-	}
-	
-	public void registerEntity(SimulationEntity entity) {
-		simulationEntities.add(entity);
-	}
-	
 	
 	/**
 	 * Helper functions
@@ -166,4 +163,6 @@ public class Simulation {
 			return properties.getProperty(name);
 		}
 	}
+
+	
 }

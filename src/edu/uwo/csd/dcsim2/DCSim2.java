@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import edu.uwo.csd.dcsim2.application.StaticWorkload;
-import edu.uwo.csd.dcsim2.application.WebServerTier;
+import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
+import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.vm.*;
+import edu.uwo.csd.dcsim2.management.*;
 
 public class DCSim2 implements SimulationUpdateController {
 
@@ -19,8 +20,12 @@ public class DCSim2 implements SimulationUpdateController {
 	private ArrayList<DataCentre> datacentres;
 	
 	public DCSim2() {
+		/*
+		 * Set up logging
+		 */
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
 		logger.info("Starting DCSim2");
+		
 		
 		Simulation.getSimulation().setSimulationUpdateController(this);
 		
@@ -32,8 +37,7 @@ public class DCSim2 implements SimulationUpdateController {
 	}
 	
 	public void runSimulation(long duration) {
-		Simulation.getSimulation().setDuration(duration);
-		Simulation.getSimulation().run();
+		Simulation.getSimulation().run(duration);
 	}
 
 	@Override
@@ -46,12 +50,23 @@ public class DCSim2 implements SimulationUpdateController {
 		DCSim2 simulator = new DCSim2();
 		
 		//create datacentre
-		DataCentre dc = new DataCentre();
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
+		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		//create hosts
-		dc.addHosts(createHosts(1));
+		dc.addHosts(createHosts(2));
 		
-		simulator.addDatacentre(dc);
+		simulator.addDatacentre(dc); //TODO why? is this necessary?
+		
+		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
+		for (int i = 0; i < 3; ++i) {
+			vmList.add(new VMAllocationRequest(createVMDesc()));
+		}
+		
+		dc.getVMPlacementPolicy().submitVMs(vmList);
+		
+		simulator.runSimulation(10000);
+		
 	}
 	
 	public static VMDescription createVMDesc() {
@@ -98,11 +113,13 @@ public class DCSim2 implements SimulationUpdateController {
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),
-					null);
+					new FixedAllocCpuScheduler());
 			hosts.add(host);
 		}
 		
 		return hosts;
 	}
+	
+
 	
 }

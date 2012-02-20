@@ -1,12 +1,14 @@
 package edu.uwo.csd.dcsim2.host;
 
 import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.BandwidthManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.CpuManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.MemoryManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.StorageManager;
+import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class Host extends SimulationEntity {
@@ -15,10 +17,17 @@ public class Host extends SimulationEntity {
 	 * Event types for events that Host receives
 	 */
 	public static final int HOST_SUBMIT_VM_EVENT = 1;
+	
 	public static final int HOST_POWER_ON_EVENT = 2;
 	public static final int HOST_POWER_OFF_EVENT = 3;
 	public static final int HOST_SUSPEND_EVENT = 4;
+	public static final int HOST_COMPLETE_POWER_ON_EVENT = 5;
+	public static final int HOST_COMPLETE_SUSPEND_EVENT = 6;
+	public static final int HOST_COMPLETE_POWER_OFF_EVENT = 7;
 	
+	private static int nextId = 1;
+	
+	private int id;
 	private Vector<Cpu> cpus;
 	private int memory;	
 	private int bandwidth;
@@ -33,6 +42,7 @@ public class Host extends SimulationEntity {
 	private Vector<VMAllocation> vmAllocations;
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
+	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	
 	private HostState state;
 	
@@ -55,6 +65,7 @@ public class Host extends SimulationEntity {
 	private void initializeHost(Vector<Cpu> cpus, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
+		this.id = nextId++;
 		this.cpus = cpus;
 		this.memory = memory;
 		this.bandwidth = bandwidth;
@@ -65,6 +76,9 @@ public class Host extends SimulationEntity {
 		
 		this.memoryManager = memoryManager;
 		memoryManager.setHost(this);
+		
+		this.bandwidthManager  = bandwidthManager;
+		bandwidthManager.setHost(this);
 		
 		this.storageManager = storageManager;
 		storageManager.setHost(this);
@@ -80,6 +94,15 @@ public class Host extends SimulationEntity {
 	
 	@Override
 	public void handleEvent(Event e) {
+		
+		/**if the Host is in the process of powering on, queue any received events. This effectively
+		 * simulates the event sender retrying until the host has powered on, in a simplified fashion.
+		 */
+		if (state == Host.HostState.POWERING_ON) {
+			powerOnEventQueue.add(e);
+			return;
+		}
+		
 		switch (e.getType()) {
 			case Host.HOST_SUBMIT_VM_EVENT:
 				VMAllocationRequest vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
@@ -88,11 +111,20 @@ public class Host extends SimulationEntity {
 			case Host.HOST_POWER_ON_EVENT:
 				powerOn();
 				break;
+			case Host.HOST_COMPLETE_POWER_ON_EVENT:
+				completePowerOn();
+				break;
 			case Host.HOST_POWER_OFF_EVENT:
 				powerOff();
 				break;
+			case Host.HOST_COMPLETE_POWER_OFF_EVENT:
+				completePowerOff();
+				break;
 			case Host.HOST_SUSPEND_EVENT:
 				suspend();
+				break;
+			case Host.HOST_COMPLETE_SUSPEND_EVENT:
+				completeSuspend();
 				break;
 			default:
 				//TODO throw exception
@@ -100,10 +132,17 @@ public class Host extends SimulationEntity {
 		}
 	}
 	
-	private void submitVM(VMAllocationRequest vmAllocationRequest) {
+	public void submitVM(VMAllocationRequest vmAllocationRequest) {
+		
+		//create new allocation & allocate it resources
 		VMAllocation newAllocation = allocate(vmAllocationRequest);
-		newAllocation.setVm(newAllocation.getVMDescription().createVM());
+		
+		//add the allocation to the Host list of allocations
 		vmAllocations.add(newAllocation);
+		
+		//create a new VM in the allocation
+		newAllocation.setVm(newAllocation.getVMDescription().createVM());
+		
 	}
 
 	
@@ -140,44 +179,89 @@ public class Host extends SimulationEntity {
 	}
 	
 	
+	/*
+	 * HOST STATE OPERATIONS
+	 */
+	
 	public void suspend() {
-		if (state == HostState.ON) {
+		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
-			//TODO: send message with suspend delay which when received sets state to SUSPENDED
-		} else {
-			//TODO: handle how? report? should not happen
+			long delay = Long.parseLong(Simulation.getSimulation().getProperty("hostSuspendDelay"));
+			Simulation.getSimulation().sendEvent(
+					new Event(Host.HOST_COMPLETE_SUSPEND_EVENT,
+							Simulation.getSimulation().getSimulationTime() + delay,
+							this, this));
 		}
 	}
 	
 	public void powerOff() {
-		if (state == HostState.ON || state == HostState.SUSPENDED) {
+		if (state != HostState.OFF && state != HostState.POWERING_OFF) {
 			state = HostState.POWERING_OFF;
-			//TODO: send message with power off delay which when received sets state to OFF
-		} else {
-			//TODO: handle how? report? should not happen
+			long delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOffDelay"));
+			Simulation.getSimulation().sendEvent(
+					new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
+							Simulation.getSimulation().getSimulationTime() + delay,
+							this, this));
 		}
 	}
 	
 	public void powerOn() {
-		if (state == HostState.SUSPENDED) {
+		if (state != HostState.ON && state != HostState.POWERING_ON) {
 			state = HostState.POWERING_ON;
-			//TODO: send message with suspend to on delay which when received sets state to ON
-		} else if (state == HostState.OFF) {
-			state = HostState.POWERING_ON;
-			//TODO: send message with off to on delay which when received sets state to ON
-		} else if (state == HostState.FAILED){
-			state = HostState.POWERING_ON;
-			//TODO: send message with failed to on delay which when received sets state to ON
-		} else {
-			//TODO: handle how? report? should not happen
+			long delay = 0;
+			switch (state) {
+				case SUSPENDED:
+					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromSuspendDelay"));
+					break;
+				case OFF:
+					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromOffDelay"));
+					break;
+				case FAILED:					
+					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromFailedDelay"));
+					break;
+				case POWERING_OFF:
+					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOffOffDelay"));
+					delay += Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromOffDelay"));
+					break;
+				case SUSPENDING:
+					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostSuspendDelay"));
+					delay += Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromSuspendDelay"));
+					break;
+			}
+
+			Simulation.getSimulation().sendEvent(
+				new Event(Host.HOST_COMPLETE_POWER_ON_EVENT,
+						Simulation.getSimulation().getSimulationTime() + delay,
+						this, this));
 		}
+	}
+	
+	private void completePowerOn() {
+		if (state != HostState.ON) {
+			state = HostState.ON;
+			for (Event e : powerOnEventQueue) {
+				handleEvent(e);
+			}
+		}
+	}
+	
+	private void completePowerOff() {
+		state = HostState.OFF;
+	}
+	
+	private void completeSuspend() {
+		state = HostState.SUSPENDED;
 	}
 	
 	public void fail() {
 		state = HostState.FAILED;
 	}
 
-	//ACCESSOR METHODS
+	//ACCESSOR & MUTATOR METHODS
+	
+	public int getId() {
+		return id;
+	}
 	
 	public Vector<Cpu> getCpus() {
 		return cpus;

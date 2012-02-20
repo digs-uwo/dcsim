@@ -1,6 +1,7 @@
-package edu.uwo.csd.dcsim2.host;
+package edu.uwo.csd.dcsim2.host.scheduler;
 
 import java.util.*;
+
 
 public class MasterCpuScheduler {
 

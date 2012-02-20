@@ -3,6 +3,9 @@ package edu.uwo.csd.dcsim2.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import org.apache.log4j.Logger;
+
+import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.comparator.*;
@@ -10,14 +13,17 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 
+	private static Logger logger = Logger.getLogger(VMPlacementPolicyFFD.class);
+	
 	@Override
 	public boolean submitVM(VMAllocationRequest vmAllocationRequest) {
+
 		ArrayList<Host> sortedHosts = sortHostList();
 		Host target = findTargetHost(vmAllocationRequest, sortedHosts);
-		
+
 		if (target != null)
 			return submitVM(vmAllocationRequest, target);
-		
+
 		return false;			
 	}
 
@@ -60,17 +66,13 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 					);
 		}
 		
-		Event e = new Event(Host.HOST_SUBMIT_VM_EVENT, 
-				Simulation.getSimulation().getSimulationTime(),
-				this,
-				host);
-		e.getData().put("vmAllocationRequest", vmAllocationRequest);
-		Simulation.getSimulation().sendEvent(e);
-		
+		host.submitVM(vmAllocationRequest);
+		logger.info("Submitted VM to Host #" + host.getId());
 	}
 
 	private ArrayList<Host> sortHostList() {
 		ArrayList<Host> sorted = new ArrayList<Host>();
+		
 		sorted.addAll(datacentre.getHosts());
 		Collections.sort(sorted, new HostCpuUtilizationComparator());
 		Collections.reverse(sorted); //switch to decreasing order
@@ -86,12 +88,6 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 		}
 		
 		return null;
-	}
-
-	@Override
-	public void handleEvent(Event e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 

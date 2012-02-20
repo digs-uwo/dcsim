@@ -1,14 +1,17 @@
 package edu.uwo.csd.dcsim2.vm;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 
 public class VM extends SimulationEntity {
 
+	private static int nextId = 1;
+	
+	private int id;
 	private VMDescription vmDescription;
-	private Vector<Integer> vCoreInUse;
+	private ArrayList<Integer> vCoreInUse;
 	private int memoryInUse;
 	private int bandwidthInUse;
 	private long storageInUse;
@@ -18,11 +21,13 @@ public class VM extends SimulationEntity {
 	private VMAllocation vmAllocation;
 	
 	public VM(VMDescription vmDescription, Application application) {
+		this.id = nextId++;
 		this.vmDescription = vmDescription;
 		this.application = application;
 	
 		//initialize core list
-		for (int i = 0; i < vCoreInUse.size(); ++i) {
+		vCoreInUse = new ArrayList<Integer>();
+		for (int i = 0; i < vmDescription.getVCores(); ++i) {
 			vCoreInUse.add(0);
 		}
 		
@@ -31,6 +36,10 @@ public class VM extends SimulationEntity {
 		storageInUse = 0;
 		
 		vmAllocation = null;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	public Application getApplication() {
@@ -49,7 +58,7 @@ public class VM extends SimulationEntity {
 		this.vmAllocation = vmAllocation;
 	}
 	
-	public Vector<Integer> getVCoreInUse() {
+	public ArrayList<Integer> getVCoreInUse() {
 		return vCoreInUse;
 	}
 	
