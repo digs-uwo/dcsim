@@ -24,7 +24,6 @@ public class FixedAllocCpuScheduler extends CpuScheduler {
 		if (availableCpu == 0) {
 			this.setState(CpuSchedulerState.COMPLETE);
 		}
-		System.out.println(this.getHost().getId() + " CPUAvailable: " + availableCpu + " state: " + this.getState());
 	}
 
 	@Override
@@ -59,7 +58,6 @@ public class FixedAllocCpuScheduler extends CpuScheduler {
 		
 		if (availableCpu <= 0) {
 			this.setState(CpuSchedulerState.COMPLETE);
-			System.out.println(this.getHost().getId() + " CPUAvailable: " + availableCpu + " state: " + this.getState());
 		}
 		
 		
