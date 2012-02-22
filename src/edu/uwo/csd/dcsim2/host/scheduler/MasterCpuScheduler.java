@@ -64,7 +64,7 @@ public class MasterCpuScheduler {
 					//update the resources required by the VMs application
 					if (vmAllocation.getHost().getCpuScheduler().getState() != CpuScheduler.CpuSchedulerState.COMPLETE) {
 						vmAllocation.getVm().getApplication().updateResourcesRequired();
-						notDone = notDone || vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation);
+						notDone = notDone | vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation);
 					}
 				}
 			}

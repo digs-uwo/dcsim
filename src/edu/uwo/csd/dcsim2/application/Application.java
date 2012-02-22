@@ -18,10 +18,10 @@ public abstract class Application {
 			if (resourcesRequired == null) {
 				resourcesRequired = calculateRequiredResources(incomingWork);
 			} else {
-				resourcesRequired = VirtualResources.add(resourcesRequired, calculateRequiredResources(incomingWork));
+				resourcesRequired = resourcesRequired.add(calculateRequiredResources(incomingWork));
 			}
 		}
-		System.out.println("required resources cores: " + resourcesRequired.getCores().size());
+
 		return resourcesRequired;
 	}
 	
@@ -31,7 +31,7 @@ public abstract class Application {
 		
 		applicationTier.getWorkTarget().addWork(completedWork.getWorkCompleted());
 		
-		resourcesRequired = VirtualResources.subtract(resourcesRequired, completedWork.getResourcesConsumed());
+		resourcesRequired = resourcesRequired.subtract(completedWork.getResourcesConsumed());
 		
 		//return consumed resources
 		return completedWork.resourcesConsumed;

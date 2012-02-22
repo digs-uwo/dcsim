@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.vm.*;
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.*;
 
 public class FixedAllocCpuScheduler extends CpuScheduler {
@@ -23,6 +24,7 @@ public class FixedAllocCpuScheduler extends CpuScheduler {
 		if (availableCpu == 0) {
 			this.setState(CpuSchedulerState.COMPLETE);
 		}
+		System.out.println(this.getHost().getId() + " CPUAvailable: " + availableCpu + " state: " + this.getState());
 	}
 
 	@Override
@@ -33,35 +35,31 @@ public class FixedAllocCpuScheduler extends CpuScheduler {
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
 		
-		logger.debug("Scheduling VM #" + vmAllocation.getVm().getId() + " on Host #" + vmAllocation.getHost().getId());
-		
 		VirtualResources resourcesRequired = vmAllocation.getVm().getApplication().getResourcesRequired();
 		
-		int cpuScheduled = 0;		
-		for (int core : resourcesRequired.getCores()) {
-			cpuScheduled += core;
-		}	
+		int cpuScheduled = resourcesRequired.getTotalCpu();
 		
 		// if vm has no demand, return false
 		if (cpuScheduled == 0) {
 			return false;
 		}
 		
-		cpuScheduled = Math.max(cpuScheduled, 100);
-		cpuScheduled = Math.max(cpuScheduled, availableCpu);
+		cpuScheduled = Math.min(cpuScheduled, 100);
+		cpuScheduled = Math.min(cpuScheduled, availableCpu);
 		
 		ArrayList<Integer> coresScheduled = new ArrayList<Integer>();
 		for (int i = 0; i < resourcesRequired.getCores().size(); ++i) {
 			coresScheduled.add((int)Math.floor(cpuScheduled / resourcesRequired.getCores().size()));
 		}
-		coresScheduled.set(0, cpuScheduled % resourcesRequired.getCores().size());
+		coresScheduled.set(0, coresScheduled.get(0) + cpuScheduled % resourcesRequired.getCores().size());
 		
 		vmAllocation.getVm().processWork(coresScheduled);
 		
 		availableCpu -= cpuScheduled;
 		
-		if (availableCpu == 0) {
+		if (availableCpu <= 0) {
 			this.setState(CpuSchedulerState.COMPLETE);
+			System.out.println(this.getHost().getId() + " CPUAvailable: " + availableCpu + " state: " + this.getState());
 		}
 		
 		

@@ -66,8 +66,9 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 3; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc()));
+			vmList.add(new VMAllocationRequest(createVMDesc(100)));
 		}
+		vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
@@ -75,12 +76,12 @@ public class DCSim2 implements SimulationUpdateController {
 		
 	}
 	
-	public static VMDescription createVMDesc() {
+	public static VMDescription createVMDesc(int workPerSecond) {
 		
 		//Build service
 		
 		//create workload (external)
-		StaticWorkload workload = new StaticWorkload(100);
+		StaticWorkload workload = new StaticWorkload(workPerSecond);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static

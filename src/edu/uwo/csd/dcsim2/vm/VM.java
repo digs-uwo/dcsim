@@ -48,19 +48,19 @@ public class VM extends SimulationEntity {
 		resourcesAvailable.setStorage(vmAllocation.getStorageAllocation().getStorageAlloc());
 		
 		//reset resources consumed
-		totalResourcesConsumed = new VirtualResources();
+		totalResourcesConsumed = new VirtualResources(vmDescription.getVCores());
 	}
 	
 	public void processWork(ArrayList<Integer> cpuAvailable) {
 		
-		logger.debug("VM #" + getId() + " processing work");
+		//logger.debug("VM #" + getId() + " processing work");
 		
 		//set available CPU (note that any leftover CPU does not carry forward, the opportunity to use it has passed... is this correct?)
 		resourcesAvailable.setCores(cpuAvailable);
 		
 		//instruct the application to process work with available resources
 		VirtualResources resourcesConsumed = application.processWork(resourcesAvailable);
-		totalResourcesConsumed = VirtualResources.add(totalResourcesConsumed, resourcesConsumed);	
+		totalResourcesConsumed = totalResourcesConsumed.add(resourcesConsumed);	
 	}
 
 	public void updateResourcesInUse() {
@@ -81,7 +81,7 @@ public class VM extends SimulationEntity {
 		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
 		 */
 		StringBuffer logInfo = new StringBuffer();
-		logInfo.append("VM Utilization - CPU[");
+		logInfo.append("VM #" + getId() + " Utilization - CPU[");
 		for (int i = 0; i < resourcesInUse.getCores().size(); ++i) {
 			if (i != 0)
 				logInfo.append(", ");

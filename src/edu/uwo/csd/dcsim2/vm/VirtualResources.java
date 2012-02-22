@@ -9,54 +9,127 @@ public class VirtualResources {
 	private int bandwidth = 0;
 	private long storage = 0;
 	
-	public static VirtualResources add(VirtualResources v1, VirtualResources v2) {
+	public VirtualResources add(VirtualResources v2) {
 		
-		if (v2.getCores().size() != v1.getCores().size()) {
-			throw new RuntimeException("Could not add VirtualResources, unequal core count (v1 = " + v1.getCores().size() + " cores, v2 = " + v2.getCores().size() + " cores).");
-		}
-		
-		VirtualResources sum = new VirtualResources(v1.getCores().size());
+		VirtualResources sum = new VirtualResources();
 		
 		/* 
 		 * CPU and Bandwidth values are summed
 		 */
-		for (int i = 0; i < v1.getCores().size(); ++i) {
-			sum.getCores().add(v1.getCores().get(i) + v2.getCores().get(i));
+		ArrayList<Integer> cores = new ArrayList<Integer>();
+		int remainingCpu = 0;
+		if (this.getCores().size() > v2.getCores().size()) {
+			//total cpu to be dispersed evenly to all cores
+			for (int core : v2.getCores()) {
+				remainingCpu += core;
+			}
+		} else {
+			for (int i = 0; i < this.getCores().size(); ++i) {
+				sum.getCores().add(this.getCores().get(i) + v2.getCores().get(i));
+			}
+			if (this.getCores().size() < v2.getCores().size()) {
+				//total remaining cpu to be dispersed evenly to all cores
+				for (int i = this.getCores().size(); i < v2.getCores().size(); ++i) {
+					remainingCpu += v2.getCores().get(i);
+				}
+			}
 		}
 		
-		sum.setBandwidth(v1.getBandwidth() + v2.getBandwidth());
+		//add remaining cpu to all cores evenly
+		if (remainingCpu > 0) {
+			int remainder = remainingCpu % cores.size();
+			for (int i = 0; i < cores.size(); ++i) {
+				if (i == 0) {
+					int amount = cores.get(i) + (int)Math.floor(remainingCpu / cores.size());
+					
+					//evenly distribute remainder from division among cores
+					if (remainder > 0) {
+						++amount;
+						--remainder;
+					}
+						
+					sum.getCores().add(amount);
+				} else {
+					sum.getCores().add(cores.get(i) + (int)Math.floor(remainingCpu / cores.size()));
+				}
+			}
+		} else {
+			for (int core : cores) {
+				sum.getCores().add(core);
+			}
+		}
+		
+		
+		sum.setBandwidth(this.getBandwidth() + v2.getBandwidth());
 		
 		/*
 		 * For memory and storage, take the max value
 		 */
-		sum.setMemory(Math.max(v1.getMemory(), v2.getMemory()));
-		sum.setStorage(Math.max(v1.getStorage(), v2.getStorage()));
+		sum.setMemory(Math.max(this.getMemory(), v2.getMemory()));
+		sum.setStorage(Math.max(this.getStorage(), v2.getStorage()));
 		
 		return sum;
 	}
-	public static VirtualResources subtract(VirtualResources v1, VirtualResources v2) {
-		
-		if (v2.getCores().size() != v1.getCores().size()) {
-			throw new RuntimeException("Could not subtract VirtualResources, unequal core count (v1 = " + v1.getCores().size() + " cores, v2 = " + v2.getCores().size() + " cores).");
-		}
-		
-		VirtualResources difference = new VirtualResources(v1.getCores().size());
+	
+	public VirtualResources subtract(VirtualResources v2) {
+			
+		VirtualResources difference = new VirtualResources();
 		
 		/* 
 		 * CPU and Bandwidth values are summed
 		 */
-		for (int i = 0; i < v1.getCores().size(); ++i) {
-			difference.getCores().add(v1.getCores().get(i) - v2.getCores().get(i));
+		
+		ArrayList<Integer> cores = new ArrayList<Integer>();
+		int remainingCpu = 0;
+		if (this.getCores().size() > v2.getCores().size()) {
+			//total cpu to be subtracted evenly from all cores
+			for (int core : v2.getCores()) {
+				remainingCpu += core;
+			}
+		} else {
+			for (int i = 0; i < this.getCores().size(); ++i) {
+				difference.getCores().add(this.getCores().get(i) - v2.getCores().get(i));
+			}
+			if (this.getCores().size() < v2.getCores().size()) {
+				//total remaining cpu to be subtracted evenly from all cores
+				for (int i = this.getCores().size(); i < v2.getCores().size(); ++i) {
+					remainingCpu += v2.getCores().get(i);
+				}
+			}
 		}
 		
-		difference.setBandwidth(v1.getBandwidth() - v2.getBandwidth());
+		//subtract remaining cpu from all cores evenly
+		if (remainingCpu > 0) {
+			int remainder = remainingCpu % cores.size();
+			for (int i = 0; i < cores.size(); ++i) {
+				if (i == 0) {
+					int amount = cores.get(i) - (int)Math.floor(remainingCpu / cores.size());
+					
+					//evenly distribute remainder from division among cores
+					if (remainder > 0) {
+						--amount;
+						--remainder;
+					}
+						
+					difference.getCores().add(amount);
+				} else {
+					difference.getCores().add(cores.get(i) - (int)Math.floor(remainingCpu / cores.size()));
+				}
+			}
+		} else {
+			for (int core : cores) {
+				difference.getCores().add(core);
+			}
+		}
+
+		difference.setBandwidth(this.getBandwidth() - v2.getBandwidth());
 		
 		/*
 		 * For memory and storage, take the max value
 		 * TODO is this correct? Can this even be defined?
 		 */
-		difference.setMemory(Math.max(v1.getMemory(), v2.getMemory()));
-		difference.setStorage(Math.max(v1.getStorage(), v2.getStorage()));
+		difference.setMemory(Math.max(this.getMemory(), v2.getMemory()));
+		difference.setStorage(Math.max(this.getStorage(), v2.getStorage()));
 		
 		return difference;
 	}
