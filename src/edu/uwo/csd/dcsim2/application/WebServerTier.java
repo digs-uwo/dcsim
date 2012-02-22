@@ -2,14 +2,17 @@ package edu.uwo.csd.dcsim2.application;
 
 public class WebServerTier extends ApplicationTier {
 
-	public WebServerTier(WorkConsumer workTarget) {
-		super(workTarget);
-		// TODO Auto-generated constructor stub
+	private int memory;
+	private long storage;
+	
+	public WebServerTier(int memory, long storage) {
+		this.memory = memory;
+		this.storage = storage;
 	}
-
+	
 	@Override
 	protected WebServerApplication instantiateApplication() {
-		return new WebServerApplication(this);
+		return new WebServerApplication(this, memory, storage);
 	}
 
 }

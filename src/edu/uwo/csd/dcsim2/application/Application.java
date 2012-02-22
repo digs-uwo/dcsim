@@ -8,30 +8,60 @@ public abstract class Application {
 	private ApplicationTier applicationTier;
 	
 	public Application(ApplicationTier applicationTier) {
-		resourcesRequired = new VirtualResources();
+		resourcesRequired = null;
 		this.applicationTier = applicationTier;
 	}
 	
 	public VirtualResources updateResourcesRequired() {
 		int incomingWork = applicationTier.retrieveWork(this);
 		if (incomingWork > 0) {
-			resourcesRequired = VirtualResources.add(resourcesRequired, convertWorkToResources(incomingWork));
+			if (resourcesRequired == null) {
+				resourcesRequired = calculateRequiredResources(incomingWork);
+			} else {
+				resourcesRequired = VirtualResources.add(resourcesRequired, calculateRequiredResources(incomingWork));
+			}
 		}
+		System.out.println("required resources cores: " + resourcesRequired.getCores().size());
 		return resourcesRequired;
 	}
 	
-	public void processWork(VirtualResources resourcesAvailable) {
-		int workComplete = convertResourcesToWork(resourcesAvailable);
-		applicationTier.getWorkTarget().addWork(workComplete);
+	public VirtualResources processWork(VirtualResources resourcesAvailable) {
 		
-		resourcesRequired = VirtualResources.subtract(resourcesRequired, resourcesAvailable);
+		CompletedWork completedWork = performWork(resourcesAvailable);
+		
+		applicationTier.getWorkTarget().addWork(completedWork.getWorkCompleted());
+		
+		resourcesRequired = VirtualResources.subtract(resourcesRequired, completedWork.getResourcesConsumed());
+		
+		//return consumed resources
+		return completedWork.resourcesConsumed;
 	}
 	
-	protected abstract VirtualResources convertWorkToResources(int work);
-	protected abstract int convertResourcesToWork(VirtualResources resources);
+	protected abstract VirtualResources calculateRequiredResources(int work);
+	protected abstract CompletedWork performWork(VirtualResources resourcesAvailable);
 	
 	public VirtualResources getResourcesRequired() {
 		return resourcesRequired;
+	}
+	
+	protected class CompletedWork {
+		
+		private int workCompleted;
+		private VirtualResources resourcesConsumed;
+		
+		public CompletedWork(int workCompleted, VirtualResources resourcesConsumed) {
+			this.workCompleted = workCompleted;
+			this.resourcesConsumed = resourcesConsumed;
+		}
+		
+		public int getWorkCompleted() {
+			return workCompleted;
+		}
+		
+		public VirtualResources getResourcesConsumed() {
+			return resourcesConsumed;
+		}
+		
 	}
 
 }

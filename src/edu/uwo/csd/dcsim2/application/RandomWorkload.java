@@ -9,7 +9,7 @@ public class RandomWorkload extends Workload {
 	}
 	
 	@Override
-	protected int retrievePendingWork(long lastUpdateTime) {
+	protected int retrievePendingWork() {
 		
 		//TODO 
 		

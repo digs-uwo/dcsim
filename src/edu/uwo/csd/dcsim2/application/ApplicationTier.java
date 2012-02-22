@@ -6,14 +6,9 @@ public abstract class ApplicationTier implements WorkConsumer {
 
 	private WorkConsumer workTarget;
 	private LoadBalancer loadBalancer;
-	private ArrayList<Application> applications;
+	private ArrayList<Application> applications = new ArrayList<Application>();
 	private int incomingWork = 0; //used in the case of no load balancer being present
 	
-	public ApplicationTier(WorkConsumer workTarget) {
-		this.workTarget = workTarget;
-		applications = new ArrayList<Application>();
-	}
-
 	public Application createApplication() {
 		Application newApp = instantiateApplication();
 		this.applications.add(newApp);
@@ -63,6 +58,10 @@ public abstract class ApplicationTier implements WorkConsumer {
 	
 	public WorkConsumer getWorkTarget() {
 		return workTarget;
+	}
+	
+	public void setWorkTarget(WorkConsumer workTarget) {
+		this.workTarget = workTarget;
 	}
 	
 	@Override

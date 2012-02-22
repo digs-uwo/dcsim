@@ -42,7 +42,13 @@ public class DCSim2 implements SimulationUpdateController {
 
 	@Override
 	public void updateSimulation(long simulationTime) {
-		// TODO Auto-generated method stub
+		//update workloads
+		Workload.updateAllWorkloads();
+		
+		//schedule cpu
+		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
+		
+		//finalize workloads (print logs, calculate stats)
 		
 	}
 	
@@ -77,7 +83,8 @@ public class DCSim2 implements SimulationUpdateController {
 		StaticWorkload workload = new StaticWorkload(100);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(workload);
+		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static
+		webServerTier.setWorkTarget(workload);
 		
 		//add a load balancer to the tier, if necessary
 		//webServerTier.setLoadBalancer(new EqualShareLoadBalancer());
@@ -89,7 +96,7 @@ public class DCSim2 implements SimulationUpdateController {
 		int vCores = 1; //requires 1 core
 		int vCoreCapacity = 1000; //1000 cpu shares
 		int memory = 8192; //8GB
-		int bandwidth = 16; //16MB
+		int bandwidth = 16384; //16MB = 16384KB
 		long storage = 102400; //100GB
 		VMDescription vmDescription = new VMDescription(vCores, vCoreCapacity, memory, bandwidth, storage, webServerTier);
 
@@ -102,7 +109,7 @@ public class DCSim2 implements SimulationUpdateController {
 		int cores = 2;
 		int coreCapacity = 1000;
 		int memory = 16384; //16384MB = 16GB
-		int bandwidth = 128; //128MB = 1Gb (gigabit)
+		int bandwidth = 131072; //131072KB = 1Gb (gigabit)
 		int storage = 1048576; //1048576MB = 1TB
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);

@@ -1,7 +1,8 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -10,7 +11,7 @@ public abstract class CpuScheduler {
 
 	private Host host;
 	private CpuSchedulerState state;
-	private Vector<Cpu> availableCpuCapacity;
+	private ArrayList<Cpu> availableCpuCapacity;
 	
 	public enum CpuSchedulerState {READY, COMPLETE;}
 	
@@ -21,7 +22,14 @@ public abstract class CpuScheduler {
 	
 	public void prepareScheduler() {
 		state = CpuSchedulerState.READY;
-		//TODO: calculate and set availableCpuCapacity
+		
+		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
+		
+		availableCpuCapacity = new ArrayList<Cpu>();
+		for (Cpu cpu : host.getCpus()) {
+			availableCpuCapacity.add(new Cpu(cpu.getCores(), (int)((cpu.getCoreCapacity() / 1000) * elapsedTime))); //core capacity in shares/second, elapsed time in ms
+		}
+		
 	}
 	
 	public abstract void beginScheduling();
@@ -31,11 +39,11 @@ public abstract class CpuScheduler {
 	public abstract void endScheduling();
 	public abstract void completeRemainingScheduling();
 	
-	protected Vector<Cpu> getAvailableCpuCapacity() {
+	protected ArrayList<Cpu> getAvailableCpuCapacity() {
 		return availableCpuCapacity;
 	}
 	
-	protected void setAvailableCpuCapacity(Vector<Cpu> availableCpuCapacity) {
+	protected void setAvailableCpuCapacity(ArrayList<Cpu> availableCpuCapacity) {
 		this.availableCpuCapacity = availableCpuCapacity; 
 	}
 	
@@ -43,7 +51,7 @@ public abstract class CpuScheduler {
 		return state;
 	}
 	
-	public void setCpuSchedulerState(CpuSchedulerState state) {
+	public void setState(CpuSchedulerState state) {
 		this.state = state;
 	}
 	

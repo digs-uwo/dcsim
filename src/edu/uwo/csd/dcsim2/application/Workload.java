@@ -2,10 +2,15 @@ package edu.uwo.csd.dcsim2.application;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
+import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class Workload extends SimulationEntity implements WorkConsumer {
 
+	private static Logger logger = Logger.getLogger(Workload.class);
+	
 	public static final int WORKLOAD_UPDATE_WORKLEVEL_EVENT = 1;
 	
 	private static ArrayList<Workload> workloads = new ArrayList<Workload>();
@@ -13,7 +18,6 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	private int totalWork = 0;
 	private int completedWork = 0;
 	private WorkConsumer workTarget;
-	private long lastUpdateTime = 0;
 	
 	public static void updateAllWorkloads() {
 		for (Workload workload : workloads) {
@@ -30,15 +34,15 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 		completedWork += work;
 	}
 
-	protected abstract int retrievePendingWork(long lastUpdateTime); 
+	protected abstract int retrievePendingWork(); 
 	
 	public void update() {
-		if (workTarget != null && lastUpdateTime < Simulation.getSimulation().getSimulationTime()) {
-			int pendingWork = retrievePendingWork(lastUpdateTime);
+		if (workTarget != null && Simulation.getSimulation().getLastUpdate() < Simulation.getSimulation().getSimulationTime()) {
+			int pendingWork = retrievePendingWork();
 			totalWork += pendingWork;
 			workTarget.addWork(pendingWork);
+			logger.debug("Workload has " + pendingWork + " work units pending");
 		}
-		lastUpdateTime = Simulation.getSimulation().getSimulationTime();
 	}
 	
 	/**

@@ -23,6 +23,7 @@ public class Simulation extends SimulationEntity {
 	
 	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
+	private long lastUpdate; //in milliseconds
 	private long duration;
 	private long eventSendCount = 0;
 	
@@ -35,6 +36,7 @@ public class Simulation extends SimulationEntity {
 	private Simulation() {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
+		lastUpdate = 0;
 		simulationUpdateController = null;
 		
 		/*
@@ -66,6 +68,7 @@ public class Simulation extends SimulationEntity {
 				
 				//check if simulationTime is advancing
 				if (simulationTime != e.getTime()) {
+					lastUpdate = simulationTime;
 					simulationTime = e.getTime();
 					
 					if (simulationUpdateController != null)
@@ -107,6 +110,10 @@ public class Simulation extends SimulationEntity {
 	
 	public long getDuration() {
 		return duration;
+	}
+	
+	public long getLastUpdate() {
+		return lastUpdate;
 	}
 	
 	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {

@@ -13,8 +13,8 @@ public class StaticWorkload extends Workload {
 	}
 
 	@Override
-	protected int retrievePendingWork(long lastUpdateTime) {
-		return workPerSecond * (int)((Simulation.getSimulation().getSimulationTime() - lastUpdateTime) / 1000);
+	protected int retrievePendingWork() {
+		return workPerSecond * (int)(Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate());
 	}
 
 	@Override
@@ -22,7 +22,5 @@ public class StaticWorkload extends Workload {
 		//do nothing, static workload never changes
 		return 0;
 	}
-
-	
 
 }

@@ -3,6 +3,9 @@ package edu.uwo.csd.dcsim2.host;
 import java.util.Vector;
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
+import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.BandwidthManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.CpuManager;
@@ -13,6 +16,8 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class Host extends SimulationEntity {
 
+	private static Logger logger = Logger.getLogger(Host.class);
+	
 	/**
 	 * Event types for events that Host receives
 	 */
@@ -28,7 +33,7 @@ public class Host extends SimulationEntity {
 	private static int nextId = 1;
 	
 	private int id;
-	private Vector<Cpu> cpus;
+	private ArrayList<Cpu> cpus;
 	private int memory;	
 	private int bandwidth;
 	private long storage;
@@ -39,7 +44,7 @@ public class Host extends SimulationEntity {
 	private StorageManager storageManager;
 	private CpuScheduler cpuScheduler;
 	
-	private Vector<VMAllocation> vmAllocations;
+	private ArrayList<VMAllocation> vmAllocations;
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
@@ -49,7 +54,7 @@ public class Host extends SimulationEntity {
 	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
-		cpus = new Vector<Cpu>();
+		cpus = new ArrayList<Cpu>();
 		for (int i = 0; i < nCpu; ++i) {
 			cpus.add(new Cpu(nCores, coreCapacity));
 		}
@@ -57,12 +62,12 @@ public class Host extends SimulationEntity {
 		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 	}
 	
-	public Host(Vector<Cpu> cpus, int memory, int bandwidth, long storage,
+	public Host(ArrayList<Cpu> cpus, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);		
 	}
 	
-	private void initializeHost(Vector<Cpu> cpus, int memory, int bandwidth, long storage,
+	private void initializeHost(ArrayList<Cpu> cpus, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
 		
 		this.id = nextId++;
@@ -86,7 +91,7 @@ public class Host extends SimulationEntity {
 		this.cpuScheduler = cpuScheduler;
 		cpuScheduler.setHost(this);
 		
-		vmAllocations = new Vector<VMAllocation>();
+		vmAllocations = new ArrayList<VMAllocation>();
 		
 		//set default state
 		state = HostState.ON;
@@ -141,8 +146,11 @@ public class Host extends SimulationEntity {
 		vmAllocations.add(newAllocation);
 		
 		//create a new VM in the allocation
-		newAllocation.setVm(newAllocation.getVMDescription().createVM());
+		VM newVm = newAllocation.getVMDescription().createVM();
+		newAllocation.setVm(newVm);
+		newVm.setVMAllocation(newAllocation);
 		
+		logger.info("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
 	}
 
 	
@@ -177,7 +185,6 @@ public class Host extends SimulationEntity {
 		
 		return vmAllocation;
 	}
-	
 	
 	/*
 	 * HOST STATE OPERATIONS
@@ -263,7 +270,7 @@ public class Host extends SimulationEntity {
 		return id;
 	}
 	
-	public Vector<Cpu> getCpus() {
+	public ArrayList<Cpu> getCpus() {
 		return cpus;
 	}
 	
@@ -327,7 +334,7 @@ public class Host extends SimulationEntity {
 		this.cpuScheduler = cpuScheduler;
 	}
 	
-	public Vector<VMAllocation> getVMAllocations() {
+	public ArrayList<VMAllocation> getVMAllocations() {
 		return vmAllocations;
 	}
 }

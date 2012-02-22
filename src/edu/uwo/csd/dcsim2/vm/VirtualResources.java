@@ -12,7 +12,7 @@ public class VirtualResources {
 	public static VirtualResources add(VirtualResources v1, VirtualResources v2) {
 		
 		if (v2.getCores().size() != v1.getCores().size()) {
-			//TODO throw exception
+			throw new RuntimeException("Could not add VirtualResources, unequal core count (v1 = " + v1.getCores().size() + " cores, v2 = " + v2.getCores().size() + " cores).");
 		}
 		
 		VirtualResources sum = new VirtualResources(v1.getCores().size());
@@ -37,7 +37,7 @@ public class VirtualResources {
 	public static VirtualResources subtract(VirtualResources v1, VirtualResources v2) {
 		
 		if (v2.getCores().size() != v1.getCores().size()) {
-			//TODO throw exception
+			throw new RuntimeException("Could not subtract VirtualResources, unequal core count (v1 = " + v1.getCores().size() + " cores, v2 = " + v2.getCores().size() + " cores).");
 		}
 		
 		VirtualResources difference = new VirtualResources(v1.getCores().size());
@@ -73,6 +73,21 @@ public class VirtualResources {
 	
 	public ArrayList<Integer> getCores() {
 		return cores;
+	}
+	
+	public void setCores(ArrayList<Integer> cores) {
+		if (cores.size() != this.cores.size()) {
+			//TODO throw runtime exception
+		}
+		this.cores = cores;
+	}
+	
+	public int getTotalCpu() {
+		int cpu = 0;
+		for (int core : cores) {
+			cpu += core;
+		}
+		return cpu;
 	}
 	
 	public int getMemory() {
