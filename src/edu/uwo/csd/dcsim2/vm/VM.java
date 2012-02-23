@@ -1,10 +1,7 @@
 package edu.uwo.csd.dcsim2.vm;
 
-import java.util.ArrayList;
-
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 

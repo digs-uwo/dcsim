@@ -25,8 +25,8 @@ public class VMAllocationRequest {
 		vmDescription = vmAllocation.getVMDescription();
 		
 		cpuAllocation = new CpuAllocation();
-		for (Integer core : vmAllocation.getCpuAllocation().getCoreCapacityAlloc()) {
-			cpuAllocation.getCoreCapacityAlloc().add(core);
+		for (Integer core : vmAllocation.getCpuAllocation().getCoreAlloc()) {
+			cpuAllocation.getCoreAlloc().add(core);
 		}
 		
 		memoryAllocation = new MemoryAllocation(vmAllocation.getMemoryAllocation().getMemoryAlloc());
@@ -38,8 +38,8 @@ public class VMAllocationRequest {
 		this.vmDescription =  vmDescription;
 		
 		cpuAllocation = new CpuAllocation();
-		for (int i = 0; i < vmDescription.getVCores(); ++i) {
-			cpuAllocation.getCoreCapacityAlloc().add(vmDescription.getVCoreCapacity());
+		for (int i = 0; i < vmDescription.getCores(); ++i) {
+			cpuAllocation.getCoreAlloc().add(vmDescription.getCoreCapacity());
 		}
 		
 		memoryAllocation = new MemoryAllocation(vmDescription.getMemory());

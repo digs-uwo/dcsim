@@ -94,12 +94,12 @@ public class DCSim2 implements SimulationUpdateController {
 		workload.setWorkTarget(webServerTier);
 		
 		//build VMDescription
-		int vCores = 1; //requires 1 core
-		int vCoreCapacity = 1000; //1000 cpu shares
+		int cores = 1; //requires 1 core
+		int coreCapacity = 1000; //1000 cpu shares
 		int memory = 8192; //8GB
 		int bandwidth = 16384; //16MB = 16384KB
 		long storage = 102400; //100GB
-		VMDescription vmDescription = new VMDescription(vCores, vCoreCapacity, memory, bandwidth, storage, webServerTier);
+		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);
 
 		return vmDescription;
 	}

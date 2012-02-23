@@ -1,21 +1,21 @@
 package edu.uwo.csd.dcsim2.vm;
 
-import java.util.Vector;
+import java.util.ArrayList;
 
 public class CpuAllocation {
 
-	private Vector<Integer> coreCapacityAlloc;
+	private ArrayList<Integer> coreAlloc;
 	
 	public CpuAllocation() {
-		coreCapacityAlloc = new Vector<Integer>();
+		coreAlloc = new ArrayList<Integer>();
 	}
 	
-	public CpuAllocation(Vector<Integer> coreCapacityAlloc) {
-		this.coreCapacityAlloc = coreCapacityAlloc;
+	public CpuAllocation(ArrayList<Integer> coreAlloc) {
+		this.coreAlloc = coreAlloc;
 	}
 	
-	public Vector<Integer> getCoreCapacityAlloc() {
-		return coreCapacityAlloc;
+	public ArrayList<Integer> getCoreAlloc() {
+		return coreAlloc;
 	}
 	
 }

@@ -14,7 +14,7 @@ public abstract class CpuManager extends ResourceManager {
 		int allocatedCPU = 0;
 		
 		for (CpuAllocation cpuAllocation : allocationMap.values()) {
-			for (Integer coreCapacity : cpuAllocation.getCoreCapacityAlloc()) {
+			for (Integer coreCapacity : cpuAllocation.getCoreAlloc()) {
 				allocatedCPU += coreCapacity;
 			}
 		}

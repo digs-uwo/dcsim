@@ -10,7 +10,7 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity
-		if (vmDescription.getVCores() * vmDescription.getVCoreCapacity() > getTotalCpu())
+		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > getTotalCpu())
 			return false;
 		
 		return true;
@@ -20,7 +20,7 @@ public class StaticCpuManager extends CpuManager {
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		int requiredCapacity = 0;
 		if (vmAllocationRequest.getCpuAllocation() != null) {
-			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreCapacityAlloc()) {
+			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
 				requiredCapacity += coreCapacity;
 			}
 		}
@@ -33,8 +33,8 @@ public class StaticCpuManager extends CpuManager {
 
 		if (hasCapacity(vmAllocationRequest)) {
 			CpuAllocation newAlloc = new CpuAllocation();
-			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreCapacityAlloc()) {
-				newAlloc.getCoreCapacityAlloc().add(coreCapacity);
+			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
+				newAlloc.getCoreAlloc().add(coreCapacity);
 			}
 			vmAllocation.setCpuAllocation(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);			
