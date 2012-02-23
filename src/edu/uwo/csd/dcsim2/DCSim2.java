@@ -121,7 +121,7 @@ public class DCSim2 implements SimulationUpdateController {
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),
-					new FixedAllocCpuScheduler());
+					new RoundRobinCpuScheduler());
 			hosts.add(host);
 		}
 		

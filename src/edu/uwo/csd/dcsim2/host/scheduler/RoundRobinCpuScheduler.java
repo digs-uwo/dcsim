@@ -1,17 +1,12 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
-import java.util.ArrayList;
-
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.vm.*;
-import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.host.*;
 
-public class FixedAllocCpuScheduler extends CpuScheduler {
+public class RoundRobinCpuScheduler extends CpuScheduler {
 
-	private static Logger logger = Logger.getLogger(FixedAllocCpuScheduler.class);
+	private static Logger logger = Logger.getLogger(RoundRobinCpuScheduler.class);
 	
 	@Override
 	public void beginScheduling() {
