@@ -19,7 +19,7 @@ public class WebServerApplication extends Application {
 		VirtualResources requiredResources = new VirtualResources();
 		
 		int requiredCpu = work; //1 work unit = 1 cpu share, TODO include app idle overhead
-		requiredResources.getCores().add(requiredCpu);
+		requiredResources.setCpu(requiredCpu);
 		
 		int requiredBandwidth = work * 15; //1 work unit = 15 kb bandwidth 
 		requiredResources.setBandwidth(requiredBandwidth);
@@ -36,7 +36,7 @@ public class WebServerApplication extends Application {
 		int cpuConsumed = 0;
 		int bandwidthConsumed = 0;
 		int workCompleted = 0;
-		int cpuRemaining = resourcesAvailable.getTotalCpu();
+		int cpuRemaining = resourcesAvailable.getCpu();
 		int bandwidthRemaining = resourcesAvailable.getBandwidth();
 		
 		while (cpuRemaining > 0 && bandwidthRemaining >= 15) {
@@ -48,7 +48,7 @@ public class WebServerApplication extends Application {
 		}
 		
 		VirtualResources resourcesConsumed = new VirtualResources();
-		resourcesConsumed.getCores().add(cpuConsumed);
+		resourcesConsumed.setCpu(cpuConsumed);
 		resourcesConsumed.setBandwidth(bandwidthConsumed);
 		resourcesConsumed.setMemory(resourcesAvailable.getMemory());
 		resourcesConsumed.setStorage(resourcesAvailable.getStorage());

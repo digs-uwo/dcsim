@@ -1,7 +1,5 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
-import java.util.ArrayList;
-
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.host.Host;
@@ -11,7 +9,7 @@ public abstract class CpuScheduler {
 
 	private Host host;
 	private CpuSchedulerState state;
-	private ArrayList<Cpu> availableCpuCapacity;
+	protected int availableCpu;
 	
 	public enum CpuSchedulerState {READY, COMPLETE;}
 	
@@ -25,9 +23,9 @@ public abstract class CpuScheduler {
 		
 		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
 		
-		availableCpuCapacity = new ArrayList<Cpu>();
+		availableCpu = 0;
 		for (Cpu cpu : host.getCpus()) {
-			availableCpuCapacity.add(new Cpu(cpu.getCores(), (int)((cpu.getCoreCapacity() / 1000) * elapsedTime))); //core capacity in shares/second, elapsed time in ms
+			availableCpu += cpu.getCores() * cpu.getCoreCapacity() * elapsedTime / 1000; //core capacity in shares/second, elapsed time in ms
 		}
 		
 	}
@@ -38,14 +36,6 @@ public abstract class CpuScheduler {
 	public abstract void endRound();
 	public abstract void endScheduling();
 	public abstract void completeRemainingScheduling();
-	
-	protected ArrayList<Cpu> getAvailableCpuCapacity() {
-		return availableCpuCapacity;
-	}
-	
-	protected void setAvailableCpuCapacity(ArrayList<Cpu> availableCpuCapacity) {
-		this.availableCpuCapacity = availableCpuCapacity; 
-	}
 	
 	public CpuSchedulerState getState() {
 		return state;

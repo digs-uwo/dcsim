@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class VirtualResources {
 	
-	private ArrayList<Integer> cores = new ArrayList<Integer>();
+	private int cpu = 0;
 	private int memory = 0;
 	private int bandwidth = 0;
 	private long storage = 0;
@@ -16,50 +16,7 @@ public class VirtualResources {
 		/* 
 		 * CPU and Bandwidth values are summed
 		 */
-		ArrayList<Integer> cores = new ArrayList<Integer>();
-		int remainingCpu = 0;
-		if (this.getCores().size() > v2.getCores().size()) {
-			//total cpu to be dispersed evenly to all cores
-			for (int core : v2.getCores()) {
-				remainingCpu += core;
-			}
-		} else {
-			for (int i = 0; i < this.getCores().size(); ++i) {
-				sum.getCores().add(this.getCores().get(i) + v2.getCores().get(i));
-			}
-			if (this.getCores().size() < v2.getCores().size()) {
-				//total remaining cpu to be dispersed evenly to all cores
-				for (int i = this.getCores().size(); i < v2.getCores().size(); ++i) {
-					remainingCpu += v2.getCores().get(i);
-				}
-			}
-		}
-		
-		//add remaining cpu to all cores evenly
-		if (remainingCpu > 0) {
-			int remainder = remainingCpu % cores.size();
-			for (int i = 0; i < cores.size(); ++i) {
-				if (i == 0) {
-					int amount = cores.get(i) + (int)Math.floor(remainingCpu / cores.size());
-					
-					//evenly distribute remainder from division among cores
-					if (remainder > 0) {
-						++amount;
-						--remainder;
-					}
-						
-					sum.getCores().add(amount);
-				} else {
-					sum.getCores().add(cores.get(i) + (int)Math.floor(remainingCpu / cores.size()));
-				}
-			}
-		} else {
-			for (int core : cores) {
-				sum.getCores().add(core);
-			}
-		}
-		
-		
+		sum.setCpu(this.getCpu() + v2.getCpu());
 		sum.setBandwidth(this.getBandwidth() + v2.getBandwidth());
 		
 		/*
@@ -78,50 +35,7 @@ public class VirtualResources {
 		/* 
 		 * CPU and Bandwidth values are summed
 		 */
-		
-		ArrayList<Integer> cores = new ArrayList<Integer>();
-		int remainingCpu = 0;
-		if (this.getCores().size() > v2.getCores().size()) {
-			//total cpu to be subtracted evenly from all cores
-			for (int core : v2.getCores()) {
-				remainingCpu += core;
-			}
-		} else {
-			for (int i = 0; i < this.getCores().size(); ++i) {
-				difference.getCores().add(this.getCores().get(i) - v2.getCores().get(i));
-			}
-			if (this.getCores().size() < v2.getCores().size()) {
-				//total remaining cpu to be subtracted evenly from all cores
-				for (int i = this.getCores().size(); i < v2.getCores().size(); ++i) {
-					remainingCpu += v2.getCores().get(i);
-				}
-			}
-		}
-		
-		//subtract remaining cpu from all cores evenly
-		if (remainingCpu > 0) {
-			int remainder = remainingCpu % cores.size();
-			for (int i = 0; i < cores.size(); ++i) {
-				if (i == 0) {
-					int amount = cores.get(i) - (int)Math.floor(remainingCpu / cores.size());
-					
-					//evenly distribute remainder from division among cores
-					if (remainder > 0) {
-						--amount;
-						--remainder;
-					}
-						
-					difference.getCores().add(amount);
-				} else {
-					difference.getCores().add(cores.get(i) - (int)Math.floor(remainingCpu / cores.size()));
-				}
-			}
-		} else {
-			for (int core : cores) {
-				difference.getCores().add(core);
-			}
-		}
-
+		difference.setCpu(this.getCpu() - v2.getCpu());
 		difference.setBandwidth(this.getBandwidth() - v2.getBandwidth());
 		
 		/*
@@ -138,29 +52,12 @@ public class VirtualResources {
 		
 	}
 	
-	public VirtualResources(int nCores) {
-		for (int i = 0; i < nCores; ++i) {
-			cores.add(0);
-		}
-	}
-	
-	public ArrayList<Integer> getCores() {
-		return cores;
-	}
-	
-	public void setCores(ArrayList<Integer> cores) {
-		if (cores.size() != this.cores.size()) {
-			//TODO throw runtime exception
-		}
-		this.cores = cores;
-	}
-	
-	public int getTotalCpu() {
-		int cpu = 0;
-		for (int core : cores) {
-			cpu += core;
-		}
+	public int getCpu() {
 		return cpu;
+	}
+	
+	public void setCpu(int cpu) {
+		this.cpu = cpu;
 	}
 	
 	public int getMemory() {

@@ -19,7 +19,7 @@ public class VM extends SimulationEntity {
 	private VirtualResources resourcesInUse;
 	
 	private VirtualResources resourcesAvailable;
-	private VirtualResources totalResourcesConsumed;
+	private VirtualResources resourcesConsumed;
 	
 	private Application application;
 	
@@ -30,13 +30,13 @@ public class VM extends SimulationEntity {
 		this.vmDescription = vmDescription;
 		this.application = application;
 	
-		this.resourcesInUse = new VirtualResources(vmDescription.getVCores());
+		this.resourcesInUse = new VirtualResources();
 		
 		vmAllocation = null;
 	}
 	
 	public void updateResourcesAvailable() {
-		resourcesAvailable = new VirtualResources(vmAllocation.getCpuAllocation().getCoreCapacityAlloc().size());
+		resourcesAvailable = new VirtualResources();
 		
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
@@ -48,19 +48,15 @@ public class VM extends SimulationEntity {
 		resourcesAvailable.setStorage(vmAllocation.getStorageAllocation().getStorageAlloc());
 		
 		//reset resources consumed
-		totalResourcesConsumed = new VirtualResources(vmDescription.getVCores());
+		resourcesConsumed = new VirtualResources();
 	}
 	
-	public void processWork(ArrayList<Integer> cpuAvailable) {
-		
-		//logger.debug("VM #" + getId() + " processing work");
-		
+	public void processWork(int cpuAvailable) {
 		//set available CPU (note that any leftover CPU does not carry forward, the opportunity to use it has passed... is this correct?)
-		resourcesAvailable.setCores(cpuAvailable);
+		resourcesAvailable.setCpu(cpuAvailable);
 		
 		//instruct the application to process work with available resources
-		VirtualResources resourcesConsumed = application.processWork(resourcesAvailable);
-		totalResourcesConsumed = totalResourcesConsumed.add(resourcesConsumed);	
+		resourcesConsumed = resourcesConsumed.add(application.processWork(resourcesAvailable));
 	}
 
 	public void updateResourcesInUse() {
@@ -68,28 +64,16 @@ public class VM extends SimulationEntity {
 		
 		long elapsedSeconds = (Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate()) / 1000;
 		
-		for (int core : totalResourcesConsumed.getCores()) {
-			resourcesInUse.getCores().add((int)(core / elapsedSeconds));
-		}
+		resourcesInUse.setCpu((int)(resourcesConsumed.getCpu() / elapsedSeconds));
+		resourcesInUse.setBandwidth((int)(resourcesConsumed.getBandwidth() / elapsedSeconds));
 		
-		resourcesInUse.setBandwidth((int)(totalResourcesConsumed.getBandwidth() / elapsedSeconds));
-		
-		resourcesInUse.setMemory(totalResourcesConsumed.getMemory());
-		resourcesInUse.setStorage(totalResourcesConsumed.getStorage());
+		resourcesInUse.setMemory(resourcesConsumed.getMemory());
+		resourcesInUse.setStorage(resourcesConsumed.getStorage());
 		
 		/*
 		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
 		 */
-		StringBuffer logInfo = new StringBuffer();
-		logInfo.append("VM #" + getId() + " Utilization - CPU[");
-		for (int i = 0; i < resourcesInUse.getCores().size(); ++i) {
-			if (i != 0)
-				logInfo.append(", ");
-			logInfo.append(resourcesInUse.getCores().get(i));
-		}
-		logInfo.append("] BW[" + resourcesInUse.getBandwidth() + "] MEM[" + resourcesInUse.getMemory() + "] STORAGE[" + resourcesInUse.getStorage() + "]");
-		
-		logger.info(logInfo);
+		logger.info("VM #" + getId() + " Utilization - CPU[" + resourcesInUse.getCpu() + "] BW[" + resourcesInUse.getBandwidth() + "] MEM[" + resourcesInUse.getMemory() + "] STORAGE[" + resourcesInUse.getStorage() + "]");
 	}
 	
 	public int getId() {
