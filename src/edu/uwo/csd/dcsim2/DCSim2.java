@@ -49,7 +49,7 @@ public class DCSim2 implements SimulationUpdateController {
 		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
 		
 		//finalize workloads (print logs, calculate stats)
-		
+		Workload.logAllWorkloads();
 	}
 	
 	public static void main(String args[]) {
@@ -66,11 +66,18 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 3; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc(100)));
+			vmList.add(new VMAllocationRequest(createVMDesc(1100)));
 		}
-		vmList.add(new VMAllocationRequest(createVMDesc(200)));
+		///vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
 		dc.getVMPlacementPolicy().submitVMs(vmList);
+		
+		EventSink eventSink = simulator.new EventSink();
+		for (int i = 1; i < 10; ++i) {
+			Simulation.getSimulation().sendEvent(
+					new Event(0, i * 50, eventSink, eventSink));
+			
+		}
 		
 		simulator.runSimulation(10000);
 		
@@ -128,6 +135,13 @@ public class DCSim2 implements SimulationUpdateController {
 		return hosts;
 	}
 	
+	public class EventSink extends SimulationEntity {
 
+		@Override
+		public void handleEvent(Event e) {
+			logger.info("SINK");
+		}
+		
+	}
 	
 }

@@ -49,6 +49,9 @@ public class VM extends SimulationEntity {
 	}
 	
 	public void processWork(int cpuAvailable) {
+		
+		logger.info("VM #" + getId() + " processing " + cpuAvailable);
+		
 		//set available CPU (note that any leftover CPU does not carry forward, the opportunity to use it has passed... is this correct?)
 		resourcesAvailable.setCpu(cpuAvailable);
 		
@@ -59,10 +62,10 @@ public class VM extends SimulationEntity {
 	public void updateResourcesInUse() {
 		resourcesInUse = new VirtualResources();
 		
-		long elapsedSeconds = (Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate()) / 1000;
+		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
 		
-		resourcesInUse.setCpu((int)(resourcesConsumed.getCpu() / elapsedSeconds));
-		resourcesInUse.setBandwidth((int)(resourcesConsumed.getBandwidth() / elapsedSeconds));
+		resourcesInUse.setCpu((int)(resourcesConsumed.getCpu() / (elapsedTime / 1000.0)));
+		resourcesInUse.setBandwidth((int)(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0)));
 		
 		resourcesInUse.setMemory(resourcesConsumed.getMemory());
 		resourcesInUse.setStorage(resourcesConsumed.getStorage());

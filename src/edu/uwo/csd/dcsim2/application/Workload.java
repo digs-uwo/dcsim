@@ -25,6 +25,12 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 		}
 	}
 	
+	public static void logAllWorkloads() {
+		for (Workload workload : workloads) {
+			workload.logCompleted();
+		}
+	}
+	
 	public Workload() {
 		workloads.add(this);
 	}
@@ -43,6 +49,10 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 			workTarget.addWork(pendingWork);
 			logger.debug("Workload has " + pendingWork + " work units pending");
 		}
+	}
+	
+	public void logCompleted() {
+		logger.info("Workload completed " + completedWork + " work units");
 	}
 	
 	/**
