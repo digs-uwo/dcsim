@@ -5,31 +5,31 @@ import java.util.*;
 public abstract class LoadBalancer {
 
 	ApplicationTier applicationTier;
-	Map<Application, Integer> applicationWorkPending;
-	int incomingWork;
+	Map<Application, Double> applicationWorkPending;
+	float incomingWork;
 	
 	public LoadBalancer() {
-		applicationWorkPending = new HashMap<Application, Integer>();
+		applicationWorkPending = new HashMap<Application, Double>();
 		incomingWork = 0;
 	}
 	
-	public void addWork(int work) {
+	public void addWork(double work) {
 		/**queue incoming work. Delay distributing it to applications until an application
 		requests work, in order to reduce calls to distributeWork()
 		*/
 		incomingWork += work;
 	}
 	
-	public abstract Map<Application, Integer> distributeWork(int work, Map<Application, Integer> applicationWorkPending);
+	public abstract Map<Application, Double> distributeWork(double work, Map<Application, Double> applicationWorkPending);
 	
-	public int retrieveWork(Application application) {
+	public double retrieveWork(Application application) {
 		//distribute any queued incoming work
 		if (incomingWork > 0) {
 			applicationWorkPending = distributeWork(incomingWork, applicationWorkPending);
 			incomingWork = 0;
 		}
 		
-		int out = applicationWorkPending.get(application);
+		double out = applicationWorkPending.get(application);
 		applicationWorkPending.remove(application);
 		return out;
 	}

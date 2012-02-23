@@ -39,7 +39,7 @@ public class VM extends SimulationEntity {
 		
 		//calculate bandwidth available over the period
 		long timeElapsed = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
-		resourcesAvailable.setBandwidth((int)(vmAllocation.getBandwidthAllocation().getBandwidthAlloc() * timeElapsed / 1000)); //bandwidth is in MB/s, time is in ms
+		resourcesAvailable.setBandwidth(vmAllocation.getBandwidthAllocation().getBandwidthAlloc() * (timeElapsed / 1000.0)); //bandwidth is in MB/s, time is in ms
 		
 		resourcesAvailable.setMemory(vmAllocation.getMemoryAllocation().getMemoryAlloc());
 		resourcesAvailable.setStorage(vmAllocation.getStorageAllocation().getStorageAlloc());
@@ -48,7 +48,7 @@ public class VM extends SimulationEntity {
 		resourcesConsumed = new VirtualResources();
 	}
 	
-	public void processWork(int cpuAvailable) {
+	public void processWork(double cpuAvailable) {
 		
 		logger.info("VM #" + getId() + " processing " + cpuAvailable);
 		
@@ -64,8 +64,8 @@ public class VM extends SimulationEntity {
 		
 		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
 		
-		resourcesInUse.setCpu((int)(resourcesConsumed.getCpu() / (elapsedTime / 1000.0)));
-		resourcesInUse.setBandwidth((int)(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0)));
+		resourcesInUse.setCpu(resourcesConsumed.getCpu() / (elapsedTime / 1000.0));
+		resourcesInUse.setBandwidth(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0));
 		
 		resourcesInUse.setMemory(resourcesConsumed.getMemory());
 		resourcesInUse.setStorage(resourcesConsumed.getStorage());

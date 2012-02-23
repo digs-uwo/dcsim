@@ -65,8 +65,8 @@ public class DCSim2 implements SimulationUpdateController {
 		simulator.addDatacentre(dc); //TODO why? is this necessary?
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < 3; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc(1100)));
+		for (int i = 0; i < 4; ++i) {
+			vmList.add(new VMAllocationRequest(createVMDesc(1000)));
 		}
 		///vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
@@ -75,7 +75,7 @@ public class DCSim2 implements SimulationUpdateController {
 		EventSink eventSink = simulator.new EventSink();
 		for (int i = 1; i < 10; ++i) {
 			Simulation.getSimulation().sendEvent(
-					new Event(0, i * 50, eventSink, eventSink));
+					new Event(0, i * 1, eventSink, eventSink));
 			
 		}
 		
@@ -102,8 +102,8 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		//build VMDescription
 		int cores = 1; //requires 1 core
-		int coreCapacity = 1000; //1000 cpu shares
-		int memory = 8192; //8GB
+		int coreCapacity = 500; //1000 cpu shares
+		int memory = 4096; //8192; //8GB
 		int bandwidth = 16384; //16MB = 16384KB
 		long storage = 102400; //100GB
 		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);

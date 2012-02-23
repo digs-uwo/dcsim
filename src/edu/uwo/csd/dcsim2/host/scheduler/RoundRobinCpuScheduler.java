@@ -23,7 +23,7 @@ public class RoundRobinCpuScheduler extends CpuScheduler {
 		
 		VirtualResources resourcesRequired = vmAllocation.getVm().getApplication().getResourcesRequired();
 		
-		int cpuScheduled = resourcesRequired.getCpu();
+		double cpuScheduled = resourcesRequired.getCpu();
 		
 		// if vm has no demand, return false
 		if (cpuScheduled == 0) {

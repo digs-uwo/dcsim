@@ -2,9 +2,9 @@ package edu.uwo.csd.dcsim2.vm;
 
 public class VirtualResources {
 	
-	private int cpu = 0;
+	private double cpu = 0;
 	private int memory = 0;
-	private int bandwidth = 0;
+	private double bandwidth = 0;
 	private long storage = 0;
 
 	public VirtualResources add(VirtualResources v2) {
@@ -46,11 +46,11 @@ public class VirtualResources {
 		return difference;
 	}
 	
-	public int getCpu() {
+	public double getCpu() {
 		return cpu;
 	}
 	
-	public void setCpu(int cpu) {
+	public void setCpu(double cpu) {
 		this.cpu = cpu;
 	}
 	
@@ -62,11 +62,11 @@ public class VirtualResources {
 		this.memory = memory;
 	}
 	
-	public int getBandwidth() {
+	public double getBandwidth() {
 		return bandwidth;
 	}
 	
-	public void setBandwidth(int bandwidth) {
+	public void setBandwidth(double bandwidth) {
 		this.bandwidth = bandwidth;
 	}
 	

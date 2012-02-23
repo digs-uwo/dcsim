@@ -7,7 +7,7 @@ public abstract class ApplicationTier implements WorkConsumer {
 	private WorkConsumer workTarget;
 	private LoadBalancer loadBalancer;
 	private ArrayList<Application> applications = new ArrayList<Application>();
-	private int incomingWork = 0; //used in the case of no load balancer being present
+	private double incomingWork = 0; //used in the case of no load balancer being present
 	
 	public Application createApplication() {
 		Application newApp = instantiateApplication();
@@ -33,11 +33,11 @@ public abstract class ApplicationTier implements WorkConsumer {
 		return height;
 	}
 	
-	public int retrieveWork(Application application) {
+	public double retrieveWork(Application application) {
 		if (loadBalancer != null) {
 			return loadBalancer.retrieveWork(application);
 		} else {
-			int work = incomingWork;
+			double work = incomingWork;
 			incomingWork = 0;
 			return work;
 		}
@@ -65,7 +65,7 @@ public abstract class ApplicationTier implements WorkConsumer {
 	}
 	
 	@Override
-	public void addWork(int work) {
+	public void addWork(double work) {
 		if (loadBalancer != null) {
 			loadBalancer.addWork(work);
 		} else {

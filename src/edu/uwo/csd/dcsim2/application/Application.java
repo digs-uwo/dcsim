@@ -13,7 +13,7 @@ public abstract class Application {
 	}
 	
 	public VirtualResources updateResourcesRequired() {
-		int incomingWork = applicationTier.retrieveWork(this);
+		double incomingWork = applicationTier.retrieveWork(this);
 		if (resourcesRequired == null)
 			resourcesRequired = new VirtualResources();
 		if (incomingWork > 0) {
@@ -35,7 +35,7 @@ public abstract class Application {
 		return completedWork.resourcesConsumed;
 	}
 	
-	protected abstract VirtualResources calculateRequiredResources(int work);
+	protected abstract VirtualResources calculateRequiredResources(double work);
 	protected abstract CompletedWork performWork(VirtualResources resourcesAvailable);
 	
 	public VirtualResources getResourcesRequired() {
@@ -44,15 +44,15 @@ public abstract class Application {
 	
 	protected class CompletedWork {
 		
-		private int workCompleted;
+		private double workCompleted;
 		private VirtualResources resourcesConsumed;
 		
-		public CompletedWork(int workCompleted, VirtualResources resourcesConsumed) {
+		public CompletedWork(double workCompleted, VirtualResources resourcesConsumed) {
 			this.workCompleted = workCompleted;
 			this.resourcesConsumed = resourcesConsumed;
 		}
 		
-		public int getWorkCompleted() {
+		public double getWorkCompleted() {
 			return workCompleted;
 		}
 		

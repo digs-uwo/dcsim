@@ -9,7 +9,7 @@ public abstract class CpuScheduler {
 
 	private Host host;
 	private CpuSchedulerState state;
-	protected int availableCpu;
+	protected double availableCpu;
 	
 	public enum CpuSchedulerState {READY, COMPLETE;}
 	
@@ -25,7 +25,7 @@ public abstract class CpuScheduler {
 		
 		availableCpu = 0;
 		for (Cpu cpu : host.getCpus()) {
-			availableCpu += cpu.getCores() * cpu.getCoreCapacity() * elapsedTime / 1000; //core capacity in shares/second, elapsed time in ms
+			availableCpu += cpu.getCores() * cpu.getCoreCapacity() * (elapsedTime / 1000.0); //core capacity in shares/second, elapsed time in ms
 		}
 		
 	}

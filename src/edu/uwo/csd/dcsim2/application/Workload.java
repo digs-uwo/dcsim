@@ -15,8 +15,8 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	
 	private static ArrayList<Workload> workloads = new ArrayList<Workload>();
 	
-	private int totalWork = 0;
-	private int completedWork = 0;
+	private double totalWork = 0;
+	private double completedWork = 0;
 	private WorkConsumer workTarget;
 	
 	public static void updateAllWorkloads() {
@@ -36,15 +36,15 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	}
 	
 	@Override
-	public void addWork(int work) {
+	public void addWork(double work) {
 		completedWork += work;
 	}
 
-	protected abstract int retrievePendingWork(); 
+	protected abstract double retrievePendingWork(); 
 	
 	public void update() {
 		if (workTarget != null && Simulation.getSimulation().getLastUpdate() < Simulation.getSimulation().getSimulationTime()) {
-			int pendingWork = retrievePendingWork();
+			double pendingWork = retrievePendingWork();
 			totalWork += pendingWork;
 			workTarget.addWork(pendingWork);
 			logger.debug("Workload has " + pendingWork + " work units pending");
@@ -62,11 +62,11 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	 */
 	protected abstract long updateWorkLevel();
 	
-	public int getTotalWork() {
+	public double getTotalWork() {
 		return totalWork;
 	}
 	
-	public int getCompletedWork() {
+	public double getCompletedWork() {
 		return completedWork;
 	}
 	

@@ -6,24 +6,16 @@ import java.util.Map;
 public class EqualShareLoadBalancer extends LoadBalancer {
 
 	@Override
-	public Map<Application, Integer> distributeWork(int work, Map<Application, Integer> applicationWorkPending) {
-		int workPerApp;
-		int remainder;
+	public Map<Application, Double> distributeWork(double work, Map<Application, Double> applicationWorkPending) {
+		double workPerApp;
 		ArrayList<Application> applications = this.getApplicationTier().getApplications();
 		
 		if (applications.size() > 0) {
-			workPerApp = (int)Math.floor(work / applications.size());
-			remainder = work - (workPerApp * applications.size());
+			workPerApp = work / applications.size();
 			
 			for (Application app : applications) {
-				int newWork = workPerApp;
-				
-				//TODO this is flawed: the first applications in the list will receive a few more units of work than the rest
-				if (remainder > 0) {
-					newWork += 1;
-					--remainder;
-				}
-				
+				double newWork = workPerApp;
+
 				if (applicationWorkPending.containsKey(app)) {
 					newWork += applicationWorkPending.get(app);
 				}
