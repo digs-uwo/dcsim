@@ -1,14 +1,12 @@
 package edu.uwo.csd.dcsim2.vm;
 
-import java.util.ArrayList;
-
 public class VirtualResources {
 	
 	private int cpu = 0;
 	private int memory = 0;
 	private int bandwidth = 0;
 	private long storage = 0;
-	
+
 	public VirtualResources add(VirtualResources v2) {
 		
 		VirtualResources sum = new VirtualResources();
@@ -46,10 +44,6 @@ public class VirtualResources {
 		difference.setStorage(Math.max(this.getStorage(), v2.getStorage()));
 		
 		return difference;
-	}
-	
-	public VirtualResources() {
-		
 	}
 	
 	public int getCpu() {

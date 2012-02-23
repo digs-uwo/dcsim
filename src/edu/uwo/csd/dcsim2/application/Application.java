@@ -14,12 +14,10 @@ public abstract class Application {
 	
 	public VirtualResources updateResourcesRequired() {
 		int incomingWork = applicationTier.retrieveWork(this);
+		if (resourcesRequired == null)
+			resourcesRequired = new VirtualResources();
 		if (incomingWork > 0) {
-			if (resourcesRequired == null) {
-				resourcesRequired = calculateRequiredResources(incomingWork);
-			} else {
-				resourcesRequired = resourcesRequired.add(calculateRequiredResources(incomingWork));
-			}
+			resourcesRequired = resourcesRequired.add(calculateRequiredResources(incomingWork));
 		}
 
 		return resourcesRequired;
