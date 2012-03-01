@@ -34,7 +34,7 @@ public class WebServerApplication extends Application {
 	}
 
 	@Override
-	protected CompletedWork performWork(VirtualResources resourcesAvailable) {
+	protected CompletedWork performWork(VirtualResources resourcesAvailable, double workRemaining) {
 		
 		double cpuWork, bwWork;
 		
@@ -46,6 +46,7 @@ public class WebServerApplication extends Application {
 		cpuWork = resourcesAvailable.getCpu() / CPU_PER_WORK;
 		bwWork = resourcesAvailable.getBandwidth() / BW_PER_WORK;
 		double workCompleted = Math.min(cpuWork, bwWork);
+		workCompleted = Math.min(workCompleted, workRemaining);
 		
 		//calculate cpu and bw consumption based on amount of work completed
 		double cpuConsumed = workCompleted * CPU_PER_WORK;
