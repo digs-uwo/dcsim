@@ -52,7 +52,7 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	}
 	
 	public void logCompleted() {
-		logger.info("Workload completed " + completedWork + " work units");
+		logger.info("Workload Total [" + completedWork + "/" + totalWork + "] work units");
 	}
 	
 	/**
