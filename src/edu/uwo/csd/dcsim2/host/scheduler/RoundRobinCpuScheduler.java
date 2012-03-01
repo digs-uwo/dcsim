@@ -21,21 +21,13 @@ public class RoundRobinCpuScheduler extends CpuScheduler {
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
 		
-		VirtualResources resourcesRequired = vmAllocation.getVm().getApplication().getResourcesRequired();
+		double cpuScheduled = Math.min(100, availableCpu);
+		double cpuConsumed = vmAllocation.getVm().processWork(cpuScheduled);
 		
-		double cpuScheduled = resourcesRequired.getCpu();
-		
-		// if vm has no demand, return false
-		if (cpuScheduled == 0) {
+		if (cpuConsumed == 0)
 			return false;
-		}
 		
-		cpuScheduled = Math.min(cpuScheduled, 100);
-		cpuScheduled = Math.min(cpuScheduled, availableCpu);
-		
-		vmAllocation.getVm().processWork(cpuScheduled);
-		
-		availableCpu -= cpuScheduled;
+		availableCpu -= cpuConsumed;
 		
 		if (availableCpu <= 0) {
 			this.setState(CpuSchedulerState.COMPLETE);

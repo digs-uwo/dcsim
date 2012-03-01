@@ -16,6 +16,7 @@ public class VM extends SimulationEntity {
 	private VirtualResources resourcesInUse;
 	
 	private VirtualResources resourcesAvailable;
+	private double maxCpuAvailable; //the maximum amount of CPU it is physically possible for this VM to use in the elapsed time interval
 	private VirtualResources resourcesConsumed;
 	
 	private Application application;
@@ -46,9 +47,15 @@ public class VM extends SimulationEntity {
 		
 		//reset resources consumed
 		resourcesConsumed = new VirtualResources();
+		
+		//calculate a cap on the maximum CPU this VM could physically use
+		maxCpuAvailable = vmDescription.getCores() * vmAllocation.getHost().getMaxCoreCapacity() * (timeElapsed / 1000.0);
 	}
 	
-	public void processWork(double cpuAvailable) {
+	public double processWork(double cpuAvailable) {
+		
+		//ensure that the VM does not use more CPU than is possible for it to use
+		cpuAvailable = Math.min(cpuAvailable, maxCpuAvailable);
 		
 		logger.info("VM #" + getId() + " processing " + cpuAvailable);
 		
@@ -56,7 +63,13 @@ public class VM extends SimulationEntity {
 		resourcesAvailable.setCpu(cpuAvailable);
 		
 		//instruct the application to process work with available resources
-		resourcesConsumed = resourcesConsumed.add(application.processWork(resourcesAvailable));
+		VirtualResources newResourcesConsumed = application.processWork(resourcesAvailable);
+		
+		resourcesConsumed = resourcesConsumed.add(newResourcesConsumed);
+		
+		maxCpuAvailable -= newResourcesConsumed.getCpu();
+		
+		return newResourcesConsumed.getCpu();
 	}
 
 	public void updateResourcesInUse() {

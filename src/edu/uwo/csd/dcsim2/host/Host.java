@@ -285,6 +285,16 @@ public class Host extends SimulationEntity {
 		return cpus;
 	}
 	
+	public int getMaxCoreCapacity() {
+		int max = 0;
+		for (Cpu cpu : cpus) {
+			if (cpu.getCoreCapacity() > max) {
+				max = cpu.getCoreCapacity();
+			}
+		}
+		return max;
+	}
+	
 	public int getMemory() {
 		return memory;
 	}
