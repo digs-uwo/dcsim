@@ -18,4 +18,12 @@ public class CpuAllocation {
 		return coreAlloc;
 	}
 	
+	public int getTotalAlloc() {
+		int total = 0;
+		for (Integer i : coreAlloc) {
+			total += i;
+		}
+		return total;
+	}
+	
 }

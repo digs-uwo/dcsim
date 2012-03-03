@@ -1,13 +1,9 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class RoundRobinCpuScheduler extends CpuScheduler {
 
-	private static Logger logger = Logger.getLogger(RoundRobinCpuScheduler.class);
-	
 	@Override
 	public void beginScheduling() {
 
@@ -40,12 +36,6 @@ public class RoundRobinCpuScheduler extends CpuScheduler {
 	@Override
 	public void endScheduling() {
 		
-		
-	}
-
-	@Override
-	public void completeRemainingScheduling() {
-		// TODO Auto-generated method stub
 		
 	}
 
