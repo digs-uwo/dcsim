@@ -10,8 +10,7 @@ public class MasterCpuScheduler {
 	private static MasterCpuScheduler masterCpuScheduler = new MasterCpuScheduler();
 	
 	private ArrayList<CpuScheduler> cpuSchedulers;
-	private long maxSchedulingCount = 0;
-	
+
 	public static MasterCpuScheduler getMasterCpuScheduler() {
 		return masterCpuScheduler;
 	}
@@ -68,12 +67,6 @@ public class MasterCpuScheduler {
 					if (vmAllocation.getHost().getCpuScheduler().getState() != CpuScheduler.CpuSchedulerState.COMPLETE) {
 						vmAllocation.getVm().getApplication().updateResourcesRequired();
 						notDone = notDone | vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation);
-						
-						//advance vmAllocation scheduling count
-						if (vmAllocation.getSchedulingCount() + 1 > maxSchedulingCount) {
-							maxSchedulingCount = vmAllocation.getSchedulingCount() + 1;
-						}
-						vmAllocation.setSchedulingCount(maxSchedulingCount);
 					}
 				}
 			}

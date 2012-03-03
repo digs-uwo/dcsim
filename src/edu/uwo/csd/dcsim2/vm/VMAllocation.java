@@ -11,13 +11,11 @@ public class VMAllocation {
 	private MemoryAllocation memoryAllocation;
 	private BandwidthAllocation bandwidthAllocation;
 	private StorageAllocation storageAllocation;
-	private long schedulingCount = 0; //maintains a count of the number of times this allocation has been scheduled to execute, for scheduling order purposes
 	
 	public VMAllocation(VMDescription vmDescription, Host host) {
 		this.vmDescription = vmDescription;
 		this.host = host;
 		vm = null;
-		schedulingCount = host.getMaxSchedulingCount();
 	}
 	
 	public void setVm(VM vm) {
@@ -67,16 +65,5 @@ public class VMAllocation {
 	public void setStorageAllocation(StorageAllocation storageAllocation) {
 		this.storageAllocation = storageAllocation;
 	}
-	
-	public long getSchedulingCount() {
-		return schedulingCount;
-	}
-	
-	public void setSchedulingCount(long schedulingCount) {
-		this.schedulingCount = schedulingCount;
-	}
-	
-	public void incrementSchedulingCount() {
-		++schedulingCount;
-	}
+
 }

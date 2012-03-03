@@ -184,17 +184,6 @@ public class Host extends SimulationEntity {
 		return vmAllocation;
 	}
 	
-	public long getMaxSchedulingCount() {
-		long max = 0;
-		
-		for (VMAllocation vmAllocation : vmAllocations) {
-			if (vmAllocation.getSchedulingCount() > max)
-				max = vmAllocation.getSchedulingCount();
-		}
-		
-		return max;
-	}
-	
 	/*
 	 * HOST STATE OPERATIONS
 	 */
