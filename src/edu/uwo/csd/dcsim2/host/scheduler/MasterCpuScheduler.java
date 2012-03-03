@@ -82,13 +82,13 @@ public class MasterCpuScheduler {
 			
 		} while (notDone);
 		
+		for (CpuScheduler cpuScheduler : cpuSchedulers) {
+			cpuScheduler.endScheduling();
+		}
+		
 		//update the resourcesInUse for each VM
 		for (VMAllocation vmAllocation : vmList) {
 			vmAllocation.getVm().completeScheduling();
-		}
-		
-		for (CpuScheduler cpuScheduler : cpuSchedulers) {
-			cpuScheduler.endScheduling();
 		}
 
 	}
