@@ -66,7 +66,7 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 4; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc(400)));
+			vmList.add(new VMAllocationRequest(createVMDesc(500)));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
@@ -128,7 +128,7 @@ public class DCSim2 implements SimulationUpdateController {
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),
-					new FixedAllocationCpuScheduler());
+					new FairShareCpuScheduler());
 			hosts.add(host);
 		}
 		
