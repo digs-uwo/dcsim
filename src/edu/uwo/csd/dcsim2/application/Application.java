@@ -17,6 +17,9 @@ public abstract class Application {
 		overhead = new VirtualResources(); //no overhead, by default
 	}
 	
+	/*
+	 * Called once at the beginning of scheduling
+	 */
 	public void beginScheduling() {
 		//calculate overhead for scheduling period
 		overheadRemaining = new VirtualResources();
@@ -28,6 +31,9 @@ public abstract class Application {
 		overheadRemaining.setStorage(overhead.getStorage());
 	}
 	
+	/*
+	 * Called continuously while scheduling, before each time the VM is run
+	 */
 	public VirtualResources updateResourcesRequired() {
 		double incomingWork = applicationTier.retrieveWork(this);
 		if (resourcesRequired == null)
@@ -38,6 +44,13 @@ public abstract class Application {
 		}
 
 		return resourcesRequired;
+	}
+	
+	/*
+	 * Called once at the end of scheduling
+	 */
+	public void completeScheduling() {
+		//TODO record resourcesRequired that were not met, and reset them
 	}
 	
 	public VirtualResources runApplication(VirtualResources resourcesAvailable) {

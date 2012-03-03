@@ -86,6 +86,8 @@ public class VM extends SimulationEntity {
 		resourcesInUse.setMemory(resourcesConsumed.getMemory());
 		resourcesInUse.setStorage(resourcesConsumed.getStorage());
 		
+		application.completeScheduling();
+		
 		/*
 		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
 		 */
