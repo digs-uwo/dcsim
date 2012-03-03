@@ -50,7 +50,12 @@ public abstract class Application {
 	 * Called once at the end of scheduling
 	 */
 	public void completeScheduling() {
-		//TODO record resourcesRequired that were not met, and reset them
+		//TODO record resourcesRequired not met
+		
+		//clear work remaining and resources required
+		workRemaining = 0;
+		resourcesRequired = null;
+		
 	}
 	
 	public VirtualResources runApplication(VirtualResources resourcesAvailable) {

@@ -31,7 +31,12 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	}
 	
 	public Workload() {
+		//add to global list of workloads
 		workloads.add(this);
+		
+		//schedule initial update event
+		Simulation.getSimulation().sendEvent(
+				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, 0, this, this));
 	}
 	
 	@Override

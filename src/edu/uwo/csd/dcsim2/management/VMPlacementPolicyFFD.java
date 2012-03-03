@@ -28,15 +28,10 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 
 	@Override
 	public boolean submitVMs(ArrayList<VMAllocationRequest> vmAllocationRequests) {
-		ArrayList<Host> sortedHosts = sortHostList();
-		
+
 		for (VMAllocationRequest request : vmAllocationRequests) {
-			Host target = findTargetHost(request, sortedHosts);
-			if (target != null) {
-				submitVM(request, target);
-			} else {
-				return false; //fail as soon as one vm cannot be allocated... is this correct?
-			}
+			if (!submitVM(request))
+				return false;
 		}
 		
 		return true;
