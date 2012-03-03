@@ -14,6 +14,10 @@ public class WebServerApplication extends Application {
 		super(applicationTier);
 		this.memory = memory;
 		this.storage = storage;
+		
+		VirtualResources overhead = new VirtualResources();
+		overhead.setCpu(100);
+		this.setOverhead(overhead);
 	}
 
 	@Override

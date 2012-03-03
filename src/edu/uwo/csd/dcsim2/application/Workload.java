@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class Workload extends SimulationEntity implements WorkConsumer {
@@ -38,6 +37,8 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	@Override
 	public void addWork(double work) {
 		completedWork += work;
+		
+		completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
 	}
 
 	protected abstract double retrievePendingWork(); 
@@ -45,7 +46,11 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	public void update() {
 		if (workTarget != null && Simulation.getSimulation().getLastUpdate() < Simulation.getSimulation().getSimulationTime()) {
 			double pendingWork = retrievePendingWork();
+			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
+			
 			totalWork += pendingWork;
+			totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
+			
 			workTarget.addWork(pendingWork);
 			logger.debug("Workload has " + pendingWork + " work units pending");
 		}

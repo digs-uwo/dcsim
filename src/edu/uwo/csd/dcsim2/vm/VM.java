@@ -33,13 +33,14 @@ public class VM extends SimulationEntity {
 		vmAllocation = null;
 	}
 	
-	public void updateResourcesAvailable() {
+	public void beginScheduling() {
 		resourcesAvailable = new VirtualResources();
+		
+		long timeElapsed = Simulation.getSimulation().getElapsedTime();
 		
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
 		//calculate bandwidth available over the period
-		long timeElapsed = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
 		resourcesAvailable.setBandwidth(vmAllocation.getBandwidthAllocation().getBandwidthAlloc() * (timeElapsed / 1000.0)); //bandwidth is in MB/s, time is in ms
 		
 		resourcesAvailable.setMemory(vmAllocation.getMemoryAllocation().getMemoryAlloc());
@@ -50,6 +51,8 @@ public class VM extends SimulationEntity {
 		
 		//calculate a cap on the maximum CPU this VM could physically use
 		maxCpuAvailable = vmDescription.getCores() * vmAllocation.getHost().getMaxCoreCapacity() * (timeElapsed / 1000.0);
+		
+		application.beginScheduling();
 	}
 	
 	public double processWork(double cpuAvailable) {
@@ -57,25 +60,25 @@ public class VM extends SimulationEntity {
 		//ensure that the VM does not use more CPU than is possible for it to use
 		cpuAvailable = Math.min(cpuAvailable, maxCpuAvailable);
 		
-		logger.info("VM #" + getId() + " processing " + cpuAvailable);
-		
 		//set available CPU (note that any leftover CPU does not carry forward, the opportunity to use it has passed... is this correct?)
 		resourcesAvailable.setCpu(cpuAvailable);
 		
 		//instruct the application to process work with available resources
-		VirtualResources newResourcesConsumed = application.processWork(resourcesAvailable);
+		VirtualResources newResourcesConsumed = application.runApplication(resourcesAvailable);
 		
 		resourcesConsumed = resourcesConsumed.add(newResourcesConsumed);
 		
 		maxCpuAvailable -= newResourcesConsumed.getCpu();
 		
+		logger.info("VM #" + getId() + " CPU[" + cpuAvailable + "," + newResourcesConsumed.getCpu() +  "]");
+		
 		return newResourcesConsumed.getCpu();
 	}
 
-	public void updateResourcesInUse() {
+	public void completeScheduling() {
 		resourcesInUse = new VirtualResources();
 		
-		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
+		long elapsedTime = Simulation.getSimulation().getElapsedTime();
 		
 		resourcesInUse.setCpu(resourcesConsumed.getCpu() / (elapsedTime / 1000.0));
 		resourcesInUse.setBandwidth(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0));

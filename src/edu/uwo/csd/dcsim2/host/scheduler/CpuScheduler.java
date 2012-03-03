@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
 import edu.uwo.csd.dcsim2.core.Simulation;
+import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -9,7 +10,7 @@ public abstract class CpuScheduler {
 
 	private Host host;
 	private CpuSchedulerState state;
-	protected double availableCpu;
+	private double availableCpu;
 	
 	public enum CpuSchedulerState {READY, COMPLETE;}
 	
@@ -26,6 +27,7 @@ public abstract class CpuScheduler {
 		availableCpu = 0;
 		for (Cpu cpu : host.getCpus()) {
 			availableCpu += cpu.getCores() * cpu.getCoreCapacity() * (elapsedTime / 1000.0); //core capacity in shares/second, elapsed time in ms
+			availableCpu = Utility.roundDouble(availableCpu); //round off precision errors
 		}
 		
 	}
@@ -36,6 +38,19 @@ public abstract class CpuScheduler {
 	public abstract void endRound();
 	public abstract void endScheduling();
 	public abstract void completeRemainingScheduling();
+	
+	protected double getAvailableCpu() {
+		return availableCpu;
+	}
+	
+	protected void consumeAvailableCpu(double cpuConsumed) {
+		availableCpu -= cpuConsumed;
+		availableCpu = Utility.roundDouble(availableCpu); //round off precision errors
+		
+		if (getAvailableCpu() <= 0) {
+			this.setState(CpuSchedulerState.COMPLETE);
+		}
+	}
 	
 	public CpuSchedulerState getState() {
 		return state;

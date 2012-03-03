@@ -12,6 +12,7 @@ public class RandomWorkload extends Workload {
 	protected double retrievePendingWork() {
 		
 		//TODO 
+		generateRandom(1);
 		
 		return 0;
 	}

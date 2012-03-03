@@ -1,7 +1,5 @@
 package edu.uwo.csd.dcsim2.host;
 
-import java.util.Vector;
-
 public class Cpu {
 	
 	int cores;

@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
-import java.util.Vector;
 
 public class Simulation extends SimulationEntity {
 	
@@ -84,7 +83,7 @@ public class Simulation extends SimulationEntity {
 				
 				e.getTarget().handleEvent(e);
 			} else {
-				//TODO: this is an error state, should report
+				throw new RuntimeException("Encountered event with time < current simulation time");
 			}
 		}
 	}
@@ -114,6 +113,10 @@ public class Simulation extends SimulationEntity {
 	
 	public long getLastUpdate() {
 		return lastUpdate;
+	}
+	
+	public long getElapsedTime() {
+		return simulationTime - lastUpdate;
 	}
 	
 	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {

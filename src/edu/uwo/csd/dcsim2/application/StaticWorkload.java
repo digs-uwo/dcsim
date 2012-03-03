@@ -4,9 +4,9 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 
 public class StaticWorkload extends Workload {
 
-	int workPerSecond;
+	double workPerSecond;
 	
-	public StaticWorkload(int workPerSecond) {
+	public StaticWorkload(double workPerSecond) {
 		super();
 		
 		this.workPerSecond = workPerSecond;

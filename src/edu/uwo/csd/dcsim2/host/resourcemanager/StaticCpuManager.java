@@ -1,8 +1,5 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.*;
-
-import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {

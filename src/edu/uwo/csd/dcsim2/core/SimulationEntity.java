@@ -1,7 +1,6 @@
 package edu.uwo.csd.dcsim2.core;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public abstract class SimulationEntity {
 

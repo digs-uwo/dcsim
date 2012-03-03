@@ -1,11 +1,9 @@
 package edu.uwo.csd.dcsim2.host;
 
-import java.util.Vector;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DCSim2;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.BandwidthManager;
 import edu.uwo.csd.dcsim2.host.resourcemanager.CpuManager;
