@@ -1,38 +1,8 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.*;
-
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticBandwidthManager extends BandwidthManager {
-
-	Map<VMAllocation, BandwidthAllocation> allocationMap;
-	VMAllocation privDomainAllocation;
-	
-	public StaticBandwidthManager() {
-		allocationMap = new HashMap<VMAllocation, BandwidthAllocation>();
-	}
-	
-	private int getTotalBandwidth() {
-		return getHost().getBandwidth();
-	}
-	
-	private int getAllocatedBandwidth() {
-		int bandwidth = 0;
-		
-		if (privDomainAllocation != null) {
-			bandwidth += privDomainAllocation.getBandwidthAllocation().getBandwidthAlloc();
-		}
-		
-		for (BandwidthAllocation allocation : allocationMap.values()) {
-			bandwidth += allocation.getBandwidthAlloc();
-		}
-		return bandwidth;
-	}
-	
-	public int getAvailableBandwidth() {
-		return getTotalBandwidth() - getAllocatedBandwidth();
-	}
 	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {

@@ -66,7 +66,7 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 4; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc(500, 400, 5000)));
+			vmList.add(new VMAllocationRequest(createVMDesc(900, 400, 5000)));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		

@@ -70,7 +70,7 @@ public class VM extends SimulationEntity {
 		
 		maxCpuAvailable -= newResourcesConsumed.getCpu();
 		
-		logger.info("VM #" + getId() + " CPU[" + cpuAvailable + "," + newResourcesConsumed.getCpu() +  "]");
+		//logger.info("VM #" + getId() + " CPU[" + cpuAvailable + "," + newResourcesConsumed.getCpu() +  "]");
 		
 		return newResourcesConsumed.getCpu();
 	}
@@ -91,7 +91,7 @@ public class VM extends SimulationEntity {
 		/*
 		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
 		 */
-		logger.info("VM #" + getId() + " Utilization - CPU[" + resourcesInUse.getCpu() + "] BW[" + resourcesInUse.getBandwidth() + "] MEM[" + resourcesInUse.getMemory() + "] STORAGE[" + resourcesInUse.getStorage() + "]");
+		//logger.info("VM #" + getId() + " Utilization - CPU[" + resourcesInUse.getCpu() + "] BW[" + resourcesInUse.getBandwidth() + "] MEM[" + resourcesInUse.getMemory() + "] STORAGE[" + resourcesInUse.getStorage() + "]");
 	}
 	
 	public int getId() {

@@ -1,39 +1,9 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.*;
-
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticMemoryManager extends MemoryManager {
 
-	Map<VMAllocation, MemoryAllocation> allocationMap;
-	VMAllocation privDomainAllocation;
-	
-	public StaticMemoryManager() {
-		allocationMap = new HashMap<VMAllocation, MemoryAllocation>();
-	}
-	
-	private int getAllocatedMemory() {
-		int memory = 0;
-		
-		if (privDomainAllocation != null) {
-			memory += privDomainAllocation.getMemoryAllocation().getMemoryAlloc();
-		}
-		
-		for (MemoryAllocation memAlloc : allocationMap.values()) {
-			memory += memAlloc.getMemoryAlloc();
-		}
-		return memory;
-	}
-	
-	private int getAvailableMemory() {
-		return getTotalMemory() - getAllocatedMemory();
-	}
-	
-	private int getTotalMemory() {
-		return getHost().getMemory();
-	}
-	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		return vmDescription.getMemory() <= getTotalMemory();
