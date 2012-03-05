@@ -37,6 +37,20 @@ public class StaticCpuManager extends CpuManager {
 			allocationMap.put(vmAllocation, newAlloc);			
 		}
 	}
+	
+	@Override
+	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest, VMAllocation privDomainAllocation) {
+		if (hasCapacity(vmAllocationRequest)) {
+			CpuAllocation newAlloc = new CpuAllocation();
+			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
+				newAlloc.getCoreAlloc().add(coreCapacity);
+			}
+			privDomainAllocation.setCpuAllocation(newAlloc);
+			setPrivDomainAllocation(privDomainAllocation);
+		} else {
+			throw new RuntimeException("Could not allocate privileged domain on Host #" + getHost().getId());
+		}
+	}
 
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
@@ -48,5 +62,7 @@ public class StaticCpuManager extends CpuManager {
 	public void updateAllocations() {
 		//do nothing, allocation is static
 	}
+
+
 
 }

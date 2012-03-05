@@ -9,19 +9,19 @@ public class VMDescription {
 	private int memory;	
 	private int bandwidth;
 	private long storage;
-	private ApplicationTier applicationTier;
+	private ApplicationFactory applicationFactory;
 	
-	public VMDescription(int cores, int coreCapacity, int memory, int bandwidth, long storage, ApplicationTier applicationTier) {
+	public VMDescription(int cores, int coreCapacity, int memory, int bandwidth, long storage, ApplicationFactory applicationFactory) {
 		this.cores = cores;
 		this.coreCapacity = coreCapacity;
 		this.memory = memory;
 		this.bandwidth = bandwidth;
 		this.storage = storage;
-		this.applicationTier = applicationTier;
+		this.applicationFactory = applicationFactory;
 	}
 	
 	public VM createVM() {
-		return new VM(this, applicationTier.createApplication());
+		return new VM(this, applicationFactory.createApplication());
 	}
 	
 	public int getCores() {
@@ -44,8 +44,8 @@ public class VMDescription {
 		return storage;
 	}
 	
-	public ApplicationTier getApplicationTier() {
-		return applicationTier;
+	public ApplicationFactory getApplicationFactory() {
+		return applicationFactory;
 	}
 	
 }

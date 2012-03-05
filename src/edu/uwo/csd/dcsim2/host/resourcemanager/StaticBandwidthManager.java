@@ -7,6 +7,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 public class StaticBandwidthManager extends BandwidthManager {
 
 	Map<VMAllocation, BandwidthAllocation> allocationMap;
+	VMAllocation privDomainAllocation;
 	
 	public StaticBandwidthManager() {
 		allocationMap = new HashMap<VMAllocation, BandwidthAllocation>();
@@ -18,6 +19,11 @@ public class StaticBandwidthManager extends BandwidthManager {
 	
 	private int getAllocatedBandwidth() {
 		int bandwidth = 0;
+		
+		if (privDomainAllocation != null) {
+			bandwidth += privDomainAllocation.getBandwidthAllocation().getBandwidthAlloc();
+		}
+		
 		for (BandwidthAllocation allocation : allocationMap.values()) {
 			bandwidth += allocation.getBandwidthAlloc();
 		}
@@ -60,5 +66,17 @@ public class StaticBandwidthManager extends BandwidthManager {
 	public void updateAllocations() {
 		//do nothing, allocation is static
 	}
+
+	@Override
+	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
+			VMAllocation privDomainAllocation) {
+		
+		if (hasCapacity(vmAllocationRequest)) {
+			BandwidthAllocation newAlloc = new BandwidthAllocation(vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc());
+			privDomainAllocation.setBandwidthAllocation(newAlloc);
+			this.privDomainAllocation = privDomainAllocation;
+		}
+	}
+
 
 }

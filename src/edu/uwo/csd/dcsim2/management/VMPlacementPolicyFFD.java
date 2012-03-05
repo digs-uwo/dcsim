@@ -68,7 +68,7 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 		ArrayList<Host> sorted = new ArrayList<Host>();
 		
 		sorted.addAll(datacentre.getHosts());
-		Collections.sort(sorted, new HostCpuUtilizationComparator());
+		Collections.sort(sorted, new HostCpuAllocationComparator());
 		Collections.reverse(sorted); //switch to decreasing order
 		return sorted;
 	}

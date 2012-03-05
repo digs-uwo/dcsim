@@ -4,17 +4,17 @@ import java.util.Comparator;
 
 import edu.uwo.csd.dcsim2.host.*;
 
-public class HostCpuUtilizationComparator implements Comparator<Host>  {
+public class HostCpuAllocationComparator implements Comparator<Host>  {
 
 	@Override
 	public int compare(Host arg0, Host arg1) {
-		double compare = arg0.getCpuManager().getCpuUtilization() - arg1.getCpuManager().getCpuUtilization(); 
+		double compare = arg0.getCpuManager().getCpuAllocation() - arg1.getCpuManager().getCpuAllocation(); 
 		if (compare < 0)
 			return -1;
 		else if (compare > 0)
 			return 1;
 		else {
-			if (arg0.getCpuManager().getCpuUtilization() == 0) {
+			if (arg0.getCpuManager().getCpuAllocation() == 0) {
 				//if both hosts have 0% utilization, order by whether the host is on, suspended, or off
 				int arg0State;
 				int arg1State;

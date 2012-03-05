@@ -28,7 +28,7 @@ public class VM extends SimulationEntity {
 		this.vmDescription = vmDescription;
 		this.application = application;
 	
-		this.resourcesInUse = new VirtualResources();
+		this.resourcesInUse = new VirtualResources(); //initialize resources in use TODO set memory and storage to base values
 		
 		vmAllocation = null;
 	}

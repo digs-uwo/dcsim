@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.application;
 
 import java.util.ArrayList;
 
-public abstract class ApplicationTier implements WorkConsumer {
+public abstract class ApplicationTier implements WorkConsumer, ApplicationFactory {
 
 	private WorkConsumer workTarget;
 	private LoadBalancer loadBalancer;

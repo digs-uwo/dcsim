@@ -18,6 +18,19 @@ public class VMAllocation {
 		vm = null;
 	}
 	
+	public VirtualResources getResourcesInUse() {
+		if (vm != null) {
+			return vm.getResourcesInUse();
+		} else {
+			return new VirtualResources(); //if no VM, return new VirtualResources indicating 0 resources in use
+		}
+	}
+	
+	public void attachVm(VM vm) {
+		this.vm = vm;
+		vm.setVMAllocation(this);
+	}
+	
 	public void setVm(VM vm) {
 		this.vm = vm;
 	}

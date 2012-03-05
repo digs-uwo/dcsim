@@ -9,7 +9,7 @@ public class VMAllocationSchedulingComparator implements Comparator<VMAllocation
 	@Override
 	public int compare(VMAllocation arg0, VMAllocation arg1) {
 		//descending order
-		return arg1.getVMDescription().getApplicationTier().getHeight() - arg0.getVMDescription().getApplicationTier().getHeight();			
+		return arg1.getVMDescription().getApplicationFactory().getHeight() - arg0.getVMDescription().getApplicationFactory().getHeight();			
 	}
 
 }

@@ -10,6 +10,13 @@ public class CpuAllocation {
 		coreAlloc = new ArrayList<Integer>();
 	}
 	
+	public CpuAllocation(int cores, int capacity) {
+		coreAlloc = new ArrayList<Integer>();
+		for (int i = 0; i < cores; ++i) {
+			coreAlloc.add(capacity);
+		}
+	}
+	
 	public CpuAllocation(ArrayList<Integer> coreAlloc) {
 		this.coreAlloc = coreAlloc;
 	}

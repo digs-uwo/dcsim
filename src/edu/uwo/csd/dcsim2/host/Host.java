@@ -4,11 +4,9 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
-import edu.uwo.csd.dcsim2.host.resourcemanager.BandwidthManager;
-import edu.uwo.csd.dcsim2.host.resourcemanager.CpuManager;
-import edu.uwo.csd.dcsim2.host.resourcemanager.MemoryManager;
-import edu.uwo.csd.dcsim2.host.resourcemanager.StorageManager;
+import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
 
@@ -43,6 +41,7 @@ public class Host extends SimulationEntity {
 	private CpuScheduler cpuScheduler;
 	
 	private ArrayList<VMAllocation> vmAllocations;
+	private VMAllocation privDomainAllocation;
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
@@ -74,22 +73,40 @@ public class Host extends SimulationEntity {
 		this.bandwidth = bandwidth;
 		this.storage = storage;
 		
-		this.cpuManager = cpuManager;
-		cpuManager.setHost(this);
-		
-		this.memoryManager = memoryManager;
-		memoryManager.setHost(this);
-		
-		this.bandwidthManager  = bandwidthManager;
-		bandwidthManager.setHost(this);
-		
-		this.storageManager = storageManager;
-		storageManager.setHost(this);
-		
-		this.cpuScheduler = cpuScheduler;
-		cpuScheduler.setHost(this);
-		
+		setCpuManager(cpuManager);
+		setMemoryManager(memoryManager);
+		setBandwidthManager(bandwidthManager);
+		setStorageManager(storageManager);
+		setCpuScheduler(cpuScheduler);
+				
 		vmAllocations = new ArrayList<VMAllocation>();
+		
+		/*
+		 * Create and allocate privileged domain
+		 */
+		
+		//description allows privileged domain to use any or all of the resources of the host
+		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getMaxCoreCapacity(), 0, bandwidth, 0, new VmmApplicationFactory());
+		
+		//create the allocation
+		privDomainAllocation = new VMAllocation(privDomainDescription, this);
+		
+		//create an initial allocation request TODO should this be in the individual managers?
+		VMAllocationRequest privRequest = new VMAllocationRequest(privDomainDescription,
+				new CpuAllocation(1, 200), //allocate 200 CPU TODO how should this be determined?
+				new MemoryAllocation(0),
+				new BandwidthAllocation(0), //TODO how should this be handled? do we increase the bandwidth allocation when there is a migration only?
+				new StorageAllocation(0));
+		
+		//request allocations from resource managers
+		cpuManager.allocatePrivDomain(privRequest, privDomainAllocation);
+		memoryManager.allocatePrivDomain(privRequest, privDomainAllocation);
+		bandwidthManager.allocatePrivDomain(privRequest, privDomainAllocation);
+		storageManager.allocatePrivDomain(privRequest, privDomainAllocation);
+		
+		privDomainAllocation.attachVm(privDomainDescription.createVM());
+		
+		
 		
 		//set default state
 		state = HostState.ON;
@@ -282,6 +299,14 @@ public class Host extends SimulationEntity {
 		return max;
 	}
 	
+	public int getCoreCount() {
+		int cores = 0;
+		for (Cpu cpu : cpus) {
+			cores += cpu.getCores();
+		}
+		return cores;
+	}
+	
 	public int getMemory() {
 		return memory;
 	}
@@ -308,6 +333,7 @@ public class Host extends SimulationEntity {
 	
 	public void setCpuManager(CpuManager cpuManager) {
 		this.cpuManager = cpuManager;
+		cpuManager.setHost(this);
 	}
 	
 	public MemoryManager getMemoryManager() {
@@ -316,6 +342,7 @@ public class Host extends SimulationEntity {
 	
 	public void setMemoryManager(MemoryManager memoryManager) {
 		this.memoryManager = memoryManager;
+		memoryManager.setHost(this);
 	}
 	
 	public BandwidthManager getBandwidthManager() {
@@ -324,6 +351,7 @@ public class Host extends SimulationEntity {
 	
 	public void setBandwidthManager(BandwidthManager bandwidthManager) {
 		this.bandwidthManager = bandwidthManager;
+		bandwidthManager.setHost(this);
 	}
 	
 	public StorageManager getStorageManager() {
@@ -332,6 +360,7 @@ public class Host extends SimulationEntity {
 	
 	public void setStorageManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
+		storageManager.setHost(this);
 	}
 	
 	public CpuScheduler getCpuScheduler() {
@@ -340,9 +369,14 @@ public class Host extends SimulationEntity {
 	
 	public void setCpuScheduler(CpuScheduler cpuScheduler) {
 		this.cpuScheduler = cpuScheduler;
+		cpuScheduler.setHost(this);
 	}
 	
 	public ArrayList<VMAllocation> getVMAllocations() {
 		return vmAllocations;
+	}
+	
+	public VMAllocation getPrivDomainAllocation() {
+		return privDomainAllocation;
 	}
 }

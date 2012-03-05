@@ -7,6 +7,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 public class StaticStorageManager extends StorageManager {
 
 	Map<VMAllocation, StorageAllocation> allocationMap;
+	VMAllocation privDomainAllocation;
 	
 	public StaticStorageManager() {
 		allocationMap = new HashMap<VMAllocation, StorageAllocation>();
@@ -18,6 +19,10 @@ public class StaticStorageManager extends StorageManager {
 	
 	public long getAllocatedStorage() {
 		long storage = 0;
+		
+		if (privDomainAllocation != null)
+			storage += privDomainAllocation.getStorageAllocation().getStorageAlloc();
+		
 		for (StorageAllocation alloc : allocationMap.values()) {
 			storage += alloc.getStorageAlloc();
 		}
@@ -58,6 +63,17 @@ public class StaticStorageManager extends StorageManager {
 	@Override
 	public void updateAllocations() {
 		//do nothing, allocation is static
+	}
+
+	@Override
+	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
+			VMAllocation privDomainAllocation) {
+		
+		if (hasCapacity(vmAllocationRequest)) {
+			StorageAllocation newAlloc = new StorageAllocation(vmAllocationRequest.getStorageAllocation().getStorageAlloc());
+			privDomainAllocation.setStorageAllocation(newAlloc);
+			this.privDomainAllocation = privDomainAllocation;
+		}
 	}
 
 	

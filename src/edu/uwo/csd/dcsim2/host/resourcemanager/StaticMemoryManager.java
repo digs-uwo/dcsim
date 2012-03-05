@@ -7,6 +7,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 public class StaticMemoryManager extends MemoryManager {
 
 	Map<VMAllocation, MemoryAllocation> allocationMap;
+	VMAllocation privDomainAllocation;
 	
 	public StaticMemoryManager() {
 		allocationMap = new HashMap<VMAllocation, MemoryAllocation>();
@@ -14,6 +15,11 @@ public class StaticMemoryManager extends MemoryManager {
 	
 	private int getAllocatedMemory() {
 		int memory = 0;
+		
+		if (privDomainAllocation != null) {
+			memory += privDomainAllocation.getMemoryAllocation().getMemoryAlloc();
+		}
+		
 		for (MemoryAllocation memAlloc : allocationMap.values()) {
 			memory += memAlloc.getMemoryAlloc();
 		}
@@ -60,6 +66,17 @@ public class StaticMemoryManager extends MemoryManager {
 	public void updateAllocations() {
 		//do nothing, allocation is static
 	}
+
+	@Override
+	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
+			VMAllocation privDomainAllocation) {
+		if (hasCapacity(vmAllocationRequest)) {
+			MemoryAllocation newAlloc = new MemoryAllocation(vmAllocationRequest.getMemoryAllocation().getMemoryAlloc());
+			privDomainAllocation.setMemoryAllocation(newAlloc);
+			this.privDomainAllocation = privDomainAllocation;
+		}
+	}
+
 	
 	
 }

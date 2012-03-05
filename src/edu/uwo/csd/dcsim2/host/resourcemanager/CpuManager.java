@@ -9,17 +9,22 @@ import edu.uwo.csd.dcsim2.vm.*;
 public abstract class CpuManager extends ResourceManager {
 
 	protected Map<VMAllocation, CpuAllocation> allocationMap = new HashMap<VMAllocation, CpuAllocation>();;
+	private VMAllocation privDomainAllocation;
 	
 	public int getAllocatedCpu() {
-		int allocatedCPU = 0;
+		int allocatedCpu = 0;
+		
+		if (privDomainAllocation != null) {
+			allocatedCpu += privDomainAllocation.getCpuAllocation().getTotalAlloc();
+		}
 		
 		for (CpuAllocation cpuAllocation : allocationMap.values()) {
 			for (Integer coreCapacity : cpuAllocation.getCoreAlloc()) {
-				allocatedCPU += coreCapacity;
+				allocatedCpu += coreCapacity;
 			}
 		}
 	
-		return allocatedCPU;
+		return allocatedCpu;
 	}
 	
 	public int getTotalCpu() {
@@ -34,8 +39,34 @@ public abstract class CpuManager extends ResourceManager {
 		return getTotalCpu() - getAllocatedCpu();
 	}
 	
+	public double getCpuInUse() {
+		double cpuInUse = 0;
+		
+		if (privDomainAllocation != null) {
+			cpuInUse += privDomainAllocation.getResourcesInUse().getCpu();
+		}
+		
+		for (VMAllocation allocation : allocationMap.keySet()) {
+			cpuInUse += allocation.getResourcesInUse().getCpu();
+		}
+		
+		return cpuInUse;
+	}
+	
 	public double getCpuUtilization() {
+		return getCpuInUse() / getTotalCpu();
+	}
+	
+	public double getCpuAllocation() {
 		return getAllocatedCpu() / getTotalCpu();
+	}
+	
+	public VMAllocation getPrivDomainAllocation() {
+		return privDomainAllocation;
+	}
+	
+	protected void setPrivDomainAllocation(VMAllocation privDomainAllocation) {
+		this.privDomainAllocation = privDomainAllocation;
 	}
 	
 }

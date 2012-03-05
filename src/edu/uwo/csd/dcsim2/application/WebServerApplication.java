@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.application;
 
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
-public class WebServerApplication extends Application {
+public class WebServerApplication extends InteractiveApplication {
 
 	private static final double CPU_PER_WORK = 1;
 	private static final double BW_PER_WORK = 15;

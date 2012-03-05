@@ -32,6 +32,7 @@ public abstract class CpuScheduler {
 		
 	}
 	
+	public abstract void schedulePrivDomain(VMAllocation privDomainAllocation);
 	public abstract void beginScheduling();
 	public abstract void beginRound();
 	public abstract boolean processVM(VMAllocation vmAllocation);

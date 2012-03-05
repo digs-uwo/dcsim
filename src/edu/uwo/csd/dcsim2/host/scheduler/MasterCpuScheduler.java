@@ -49,6 +49,9 @@ public class MasterCpuScheduler {
 			if (cpuScheduler.getHost().getState() == Host.HostState.ON) {
 				cpuScheduler.prepareScheduler();
 				cpuScheduler.beginScheduling();
+				
+				cpuScheduler.getHost().getPrivDomainAllocation().getVm().beginScheduling();
+				cpuScheduler.schedulePrivDomain(cpuScheduler.getHost().getPrivDomainAllocation());
 			}
 		}
 		
@@ -65,7 +68,6 @@ public class MasterCpuScheduler {
 				if (vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) { //ensure that a VM is instantiated within the allocation
 					//update the resources required by the VMs application
 					if (vmAllocation.getHost().getCpuScheduler().getState() != CpuScheduler.CpuSchedulerState.COMPLETE) {
-						vmAllocation.getVm().getApplication().updateResourcesRequired();
 						notDone = notDone | vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation);
 					}
 				}
@@ -80,6 +82,8 @@ public class MasterCpuScheduler {
 		for (CpuScheduler cpuScheduler : cpuSchedulers) {
 			if (cpuScheduler.getHost().getState() == Host.HostState.ON) {
 				cpuScheduler.endScheduling();
+				
+				cpuScheduler.getHost().getPrivDomainAllocation().getVm().completeScheduling();
 			}
 		}
 		

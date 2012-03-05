@@ -14,6 +14,14 @@ public class FairShareCpuScheduler extends CpuScheduler {
 			minShare = 1 / getHost().getVMAllocations().size(); //limit the smallest amount of allocation to be 1 cpu share divided by the number of VMs on the host
 		}
 	}
+	
+	@Override
+	public void schedulePrivDomain(VMAllocation privDomainAllocation) {
+		//schedule privileged domain as much CPU as it requires (takes priority over all other VMs)
+		double cpuConsumed = privDomainAllocation.getVm().processWork(getAvailableCpu()) ;
+		
+		consumeAvailableCpu(cpuConsumed);
+	}
 
 	@Override
 	public void beginRound() {
@@ -48,5 +56,7 @@ public class FairShareCpuScheduler extends CpuScheduler {
 		// TODO Auto-generated method stub
 		
 	}
+
+	
 
 }

@@ -15,11 +15,25 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 		cpuAllocations = new HashMap<VMAllocation, Double>();
 		
 		double cpuAllocated;
+		
+		//allocate privileged domain
+		cpuAllocated = getHost().getPrivDomainAllocation().getCpuAllocation().getTotalAlloc() * (Simulation.getSimulation().getElapsedTime() / 1000d);
+		cpuAllocated = Utility.roundDouble(cpuAllocated); //round off double precision problems
+		cpuAllocations.put(getHost().getPrivDomainAllocation(), cpuAllocated);
+		
+		//allocate other VMs
 		for (VMAllocation vmAllocation : getHost().getVMAllocations()) {
 			cpuAllocated = vmAllocation.getCpuAllocation().getTotalAlloc() * (Simulation.getSimulation().getElapsedTime() / 1000d);
 			cpuAllocated = Utility.roundDouble(cpuAllocated); //round off double precision problems
 			cpuAllocations.put(vmAllocation, cpuAllocated);
 		}
+	}
+	
+	@Override
+	public void schedulePrivDomain(VMAllocation privDomainAllocation) {
+		double cpuConsumed = privDomainAllocation.getVm().processWork(cpuAllocations.get(privDomainAllocation));
+
+		consumeAvailableCpu(cpuConsumed);
 	}
 
 	@Override
@@ -52,5 +66,7 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 	public void endScheduling() {
 
 	}
+
+
 
 }
