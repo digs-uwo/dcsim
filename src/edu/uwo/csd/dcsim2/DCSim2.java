@@ -60,13 +60,13 @@ public class DCSim2 implements SimulationUpdateController {
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		//create hosts
-		dc.addHosts(createHosts(2));
+		dc.addHosts(createHosts(1));
 		
 		simulator.addDatacentre(dc); //TODO why? is this necessary?
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < 4; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc(900, 400, 5000)));
+		for (int i = 0; i < 1; ++i) {
+			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/clarknet")));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
@@ -79,8 +79,36 @@ public class DCSim2 implements SimulationUpdateController {
 			
 		}
 		
-		simulator.runSimulation(10000);
+		simulator.runSimulation(86400);
 		
+	}
+	
+public static VMDescription createVMDescTrace(String fileName) {
+		
+		//Build service
+		
+		//create workload (external)
+		Workload workload = new TraceWorkload(fileName, 1000);
+		
+		//create single tier (web tier)
+		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static
+		webServerTier.setWorkTarget(workload);
+		
+		//add a load balancer to the tier, if necessary
+		//webServerTier.setLoadBalancer(new EqualShareLoadBalancer());
+		
+		//set the tier as the target for the external workload
+		workload.setWorkTarget(webServerTier);
+		
+		//build VMDescription
+		int cores = 1; //requires 1 core
+		int coreCapacity = 500; //1000 cpu shares
+		int memory = 4096; //8192; //8GB
+		int bandwidth = 16384; //16MB = 16384KB
+		long storage = 102400; //100GB
+		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);
+
+		return vmDescription;
 	}
 	
 	public static VMDescription createVMDesc(double firstWorkLevel, double secondWorkLevel, long switchTime) {
