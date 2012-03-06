@@ -61,7 +61,7 @@ public class Simulation extends SimulationEntity {
 		this.duration = duration;
 		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
 		
-		while (!eventQueue.isEmpty() && simulationTime <= duration) {
+		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			e = eventQueue.poll();
 			if (e.getTime() >= simulationTime) {
 				

@@ -16,7 +16,7 @@ public class TraceWorkload extends Workload {
 	
 	int currentPosition;
 	
-	public TraceWorkload(String fileName, double scaleFactor) {
+	public TraceWorkload(String fileName, double scaleFactor, long offset) {
 		this.scaleFactor = scaleFactor;
 		if (workloadTraces.containsKey(fileName)) {
 			workloadTrace = workloadTraces.get(fileName);
@@ -25,7 +25,7 @@ public class TraceWorkload extends Workload {
 			workloadTraces.put(fileName, workloadTrace);
 		}
 		
-		currentPosition = -1;  //TODO add offset here (calculate start array position and set to start - 1)
+		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
 	}
 	
 	@Override
@@ -92,6 +92,10 @@ public class TraceWorkload extends Workload {
 		
 		public ArrayList<Long> getTimes() {
 			return times;
+		}
+		
+		public long getLastTime() {
+			return times.get(times.size() -1 );
 		}
 		
 		public ArrayList<Double> getValues() {

@@ -60,35 +60,35 @@ public class DCSim2 implements SimulationUpdateController {
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		//create hosts
-		dc.addHosts(createHosts(1));
+		dc.addHosts(createHosts(3));
 		
 		simulator.addDatacentre(dc); //TODO why? is this necessary?
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < 1; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/clarknet")));
+		for (int i = 0; i < 5; ++i) {
+			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", (int)(Math.random() * 80000))));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-		EventSink eventSink = simulator.new EventSink();
-		for (int i = 1; i < 10; ++i) {
-			Simulation.getSimulation().sendEvent(
-					new Event(0, i * 1, eventSink, eventSink));
-			
-		}
+//		EventSink eventSink = simulator.new EventSink();
+//		for (int i = 1; i < 10; ++i) {
+//			Simulation.getSimulation().sendEvent(
+//					new Event(0, i * 1, eventSink, eventSink));
+//			
+//		}
 		
-		simulator.runSimulation(86400);
+		simulator.runSimulation(100);
 		
 	}
 	
-public static VMDescription createVMDescTrace(String fileName) {
+public static VMDescription createVMDescTrace(String fileName, long offset) {
 		
 		//Build service
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, 1000);
+		Workload workload = new TraceWorkload(fileName, 1000, offset);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static
