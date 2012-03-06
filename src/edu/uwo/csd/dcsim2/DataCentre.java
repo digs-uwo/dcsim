@@ -44,4 +44,10 @@ public class DataCentre extends SimulationEntity {
 		
 	}
 
+	public void logInfo() {
+		for (Host host : hosts) {
+			host.logInfo();
+		}
+	}
+	
 }

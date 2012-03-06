@@ -8,6 +8,7 @@ import org.apache.log4j.PropertyConfigurator;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
+import edu.uwo.csd.dcsim2.host.Host.HostState;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -48,6 +49,10 @@ public class DCSim2 implements SimulationUpdateController {
 		//schedule cpu
 		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
 		
+		for (DataCentre dc : datacentres) {
+			dc.logInfo();
+		}
+		
 		//finalize workloads (print logs, calculate stats)
 		Workload.logAllWorkloads();
 	}
@@ -61,6 +66,7 @@ public class DCSim2 implements SimulationUpdateController {
 		
 		//create hosts
 		dc.addHosts(createHosts(3));
+		//dc.getHosts().get(1).setState(HostState.OFF);
 		
 		simulator.addDatacentre(dc); //TODO why? is this necessary?
 		
@@ -70,16 +76,15 @@ public class DCSim2 implements SimulationUpdateController {
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
+		//submit VMs to hosts
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-//		EventSink eventSink = simulator.new EventSink();
-//		for (int i = 1; i < 10; ++i) {
-//			Simulation.getSimulation().sendEvent(
-//					new Event(0, i * 1, eventSink, eventSink));
-//			
-//		}
+		Migrator migrator = simulator.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
+				dc.getHosts().get(1),
+				dc.getHosts().get(0));
+		Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
 		
-		simulator.runSimulation(100);
+		simulator.runSimulation(1000);
 		
 	}
 	
@@ -163,11 +168,22 @@ public static VMDescription createVMDescTrace(String fileName, long offset) {
 		return hosts;
 	}
 	
-	public class EventSink extends SimulationEntity {
+	public class Migrator extends SimulationEntity {
 
+		VMAllocation vmAllocation;
+		Host source;
+		Host target;
+		
+		public Migrator(VMAllocation vmAllocation, Host source, Host target) {
+			this.vmAllocation = vmAllocation;
+			this.source = source;
+			this.target = target;
+		}
+		
 		@Override
 		public void handleEvent(Event e) {
-			logger.info("SINK");
+			VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vmAllocation); //create allocation request based on current allocation
+			target.sendMigrationEvent(vmAllocationRequest, vmAllocation.getVm(), source);
 		}
 		
 	}

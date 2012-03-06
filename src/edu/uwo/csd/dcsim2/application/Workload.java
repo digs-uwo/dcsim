@@ -57,12 +57,12 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 			totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
 			
 			workTarget.addWork(pendingWork);
-			logger.debug("Workload has " + pendingWork + " work units pending");
+			//logger.debug("Workload has " + pendingWork + " work units pending");
 		}
 	}
 	
 	public void logCompleted() {
-		logger.info("Workload Total [" + completedWork + "/" + totalWork + "] work units");
+		logger.info("Workload Total [" + Utility.roundDouble(completedWork, 2) + "/" + Utility.roundDouble(totalWork, 2) + "] work units");
 	}
 	
 	/**

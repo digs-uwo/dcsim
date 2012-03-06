@@ -8,15 +8,15 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class VmmApplication implements Application {
 
-	private ArrayList<VMAllocation> migratingVms = new ArrayList<VMAllocation>();
+	private ArrayList<VM> migratingVms = new ArrayList<VM>();
 	private VirtualResources resourcesRemaining;
 	
-	public void addMigratingVm(VMAllocation vmAllocation) {
-		migratingVms.add(vmAllocation);
+	public void addMigratingVm(VM vm) {
+		migratingVms.add(vm);
 	}
 	
-	public void removeMigratingVm(VMAllocation vmAllocation) {
-		migratingVms.remove(vmAllocation);
+	public void removeMigratingVm(VM vm) {
+		migratingVms.remove(vm);
 	}
 	
 	@Override
@@ -25,7 +25,7 @@ public class VmmApplication implements Application {
 		
 		double cpu = 0;
 		double bandwidth = 0;
-		for (VMAllocation migrating : migratingVms) {
+		for (VM migrating : migratingVms) {
 			
 			/*  Calculate CPU overhead as 10% of utilization over last 
 			 *  elapsed period for each migrating VM. Note, it may be
@@ -35,7 +35,7 @@ public class VmmApplication implements Application {
 			 *  the last elapsed period, so this should be sufficiently accurate
 			 *  (especially given that 10% is merely an estimation in any case).
 			 */
-			cpu += migrating.getVm().getResourcesInUse().getCpu() * 0.1;
+			cpu += migrating.getResourcesInUse().getCpu() * 0.1;
 			Utility.roundDouble(cpu); //round off double precision problems
 			
 			bandwidth += 100; //TODO: add proper overhead calculation
@@ -51,7 +51,7 @@ public class VmmApplication implements Application {
 	public void completeScheduling() {
 		//at this point, no resources should be remaining to run
 		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
-			throw new RuntimeException("VMM was underallocated");
+			throw new RuntimeException(Simulation.getSimulation().getSimulationTime() + " - VMM was underallocated");
 		}
 	}
 

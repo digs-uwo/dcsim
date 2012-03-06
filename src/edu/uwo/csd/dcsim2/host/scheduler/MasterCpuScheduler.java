@@ -42,7 +42,8 @@ public class MasterCpuScheduler {
 		
 		//calculate the resources each VM has available
 		for (VMAllocation vmAllocation : vmList) {
-			vmAllocation.getVm().beginScheduling();
+			if (vmAllocation.getVm() != null)
+				vmAllocation.getVm().beginScheduling();
 		}
 		
 		for (CpuScheduler cpuScheduler : cpuSchedulers) {
@@ -89,7 +90,8 @@ public class MasterCpuScheduler {
 		
 		//update the resourcesInUse for each VM
 		for (VMAllocation vmAllocation : vmList) {
-			vmAllocation.getVm().completeScheduling();
+			if (vmAllocation.getVm() != null)
+				vmAllocation.getVm().completeScheduling();
 		}
 
 	}

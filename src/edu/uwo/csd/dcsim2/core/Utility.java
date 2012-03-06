@@ -6,4 +6,8 @@ public class Utility {
 		return Math.round(d * 1000000d) / 1000000d;
 	}
 	
+	public static double roundDouble(double d, int places) {
+		return Math.round(d * (Math.pow(10, (double)places))) / (Math.pow(10, (double)places));
+	}
+	
 }

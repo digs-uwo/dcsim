@@ -26,6 +26,9 @@ public class Host extends SimulationEntity {
 	public static final int HOST_COMPLETE_SUSPEND_EVENT = 6;
 	public static final int HOST_COMPLETE_POWER_OFF_EVENT = 7;
 	
+	public static final int HOST_MIGRATE_EVENT = 8;
+	public static final int HOST_MIGRATE_COMPLETE_EVENT = 9;
+	
 	private static int nextId = 1;
 	
 	private int id;
@@ -40,8 +43,10 @@ public class Host extends SimulationEntity {
 	private StorageManager storageManager;
 	private CpuScheduler cpuScheduler;
 	
-	private ArrayList<VMAllocation> vmAllocations;
+	private ArrayList<VMAllocation> vmAllocations = new ArrayList<VMAllocation>();
 	private VMAllocation privDomainAllocation;
+	private ArrayList<VMAllocation> migratingIn = new ArrayList<VMAllocation>();
+	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
@@ -78,9 +83,7 @@ public class Host extends SimulationEntity {
 		setBandwidthManager(bandwidthManager);
 		setStorageManager(storageManager);
 		setCpuScheduler(cpuScheduler);
-				
-		vmAllocations = new ArrayList<VMAllocation>();
-		
+					
 		/*
 		 * Create and allocate privileged domain
 		 */
@@ -95,7 +98,7 @@ public class Host extends SimulationEntity {
 		VMAllocationRequest privRequest = new VMAllocationRequest(privDomainDescription,
 				new CpuAllocation(1, 200), //allocate 200 CPU TODO how should this be determined?
 				new MemoryAllocation(0),
-				new BandwidthAllocation(0), //TODO how should this be handled? do we increase the bandwidth allocation when there is a migration only?
+				new BandwidthAllocation(200), //TODO how should this be handled? do we increase the bandwidth allocation when there is a migration only?
 				new StorageAllocation(0));
 		
 		//request allocations from resource managers
@@ -106,8 +109,7 @@ public class Host extends SimulationEntity {
 		
 		privDomainAllocation.attachVm(privDomainDescription.createVM());
 		
-		
-		
+
 		//set default state
 		state = HostState.ON;
 	}
@@ -123,9 +125,14 @@ public class Host extends SimulationEntity {
 			return;
 		}
 		
+		VMAllocationRequest vmAllocationRequest;
+		VMAllocation vmAllocation;
+		VM vm;
+		Host source;
+		
 		switch (e.getType()) {
 			case Host.HOST_SUBMIT_VM_EVENT:
-				VMAllocationRequest vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
+				vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
 				submitVM(vmAllocationRequest);
 				break;
 			case Host.HOST_POWER_ON_EVENT:
@@ -145,6 +152,18 @@ public class Host extends SimulationEntity {
 				break;
 			case Host.HOST_COMPLETE_SUSPEND_EVENT:
 				completeSuspend();
+				break;
+			case Host.HOST_MIGRATE_EVENT:
+				vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
+				vm = (VM)e.getData().get("vm");
+				source = (Host)e.getData().get("source");
+				this.migrateIn(vmAllocationRequest, vm, source);
+				break;
+			case Host.HOST_MIGRATE_COMPLETE_EVENT:
+				vmAllocation = (VMAllocation)e.getData().get("vmAllocation");
+				vm = (VM)e.getData().get("vm");
+				source = (Host)e.getData().get("source");
+				this.completeMigrationIn(vmAllocation, vm, source);
 				break;
 			default:
 				//TODO throw exception
@@ -199,6 +218,128 @@ public class Host extends SimulationEntity {
 		storageManager.allocateResource(vmAllocationRequest, vmAllocation);
 		
 		return vmAllocation;
+	}
+	
+	public void deallocate(VMAllocation vmAllocation) {
+		cpuManager.deallocateResource(vmAllocation);
+		memoryManager.deallocateResource(vmAllocation);
+		bandwidthManager.deallocateResource(vmAllocation);
+		storageManager.deallocateResource(vmAllocation);
+		
+		vmAllocations.remove(vmAllocation);
+	}
+	
+	/*
+	 * MIGRATION
+	 */
+	
+	/**
+	 * A helper function which creates a migration event and send it to this host. To be called by another host
+	 * that wishes to migrate a VM to this host.
+	 * @param vmAllocationRequest
+	 * @param vm
+	 * @param source The host running the VM to be migrated. Note that this may be different than the Event source, since a third entity may trigger the migration.
+	 */
+	public void sendMigrationEvent(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
+		Event e = new Event(Host.HOST_MIGRATE_EVENT, 
+				Simulation.getSimulation().getSimulationTime(),
+				source, 
+				this);
+		e.getData().put("vmAllocationRequest", vmAllocationRequest);
+		e.getData().put("vm", vm);
+		e.getData().put("source", source);
+		Simulation.getSimulation().sendEvent(e);
+	}
+	
+	/**
+	 * Triggered when a migration event is received.
+	 * @param vmAllocationRequest
+	 * @param vm
+	 * @param source
+	 */
+	private void migrateIn(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
+		
+		//create new allocation & allocate it resources
+		VMAllocation newAllocation = allocate(vmAllocationRequest);
+		
+		//add the allocation to the Host list of allocations
+		vmAllocations.add(newAllocation);
+		
+		//add the allocation to migratingIn list
+		migratingIn.add(newAllocation);
+		
+		//add to VMM
+		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
+		vmm.addMigratingVm(vm);
+		
+		logger.info("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
+		
+		//inform the source host that the VM is migrating out
+		source.migrateOut(vm);
+		
+		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms)
+		long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)vm.getVMAllocation().getBandwidthAllocation().getBandwidthAlloc()) * 1000);
+		
+		//send migration completion message
+		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
+				Simulation.getSimulation().getSimulationTime() + timeToMigrate,
+				this, this);
+		e.getData().put("vmAllocation", newAllocation);
+		e.getData().put("vm", vm);
+		e.getData().put("source", source);
+		Simulation.getSimulation().sendEvent(e);
+	}
+	
+	public void migrateOut(VM vm) {
+		//get the allocation for this vm
+		VMAllocation vmAllocation = vm.getVMAllocation();
+		migratingOut.add(vmAllocation);
+		
+		//add to VMM
+		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
+		vmm.addMigratingVm(vm);
+		
+		logger.info("Host #" + this.getId() + " migrating out VM #" + vm.getId());
+	}
+	
+	/**
+	 * Triggers when a migration complete event is received, to complete a migration.
+	 * @param vmAllocation
+	 * @param vm
+	 * @param source
+	 */
+	private void completeMigrationIn(VMAllocation vmAllocation, VM vm, Host source) {
+		
+		//first, inform the source host the the VM has completed migrating out
+		source.completeMigrationOut(vm);
+		
+		//remove from migratingIn list
+		migratingIn.remove(vmAllocation);
+		
+		//remove from VMM
+		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
+		vmm.removeMigratingVm(vm);
+		
+		//attach VM to allocation
+		vmAllocation.setVm(vm);
+		vm.setVMAllocation(vmAllocation);
+		
+		logger.info("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
+	}
+	
+	public void completeMigrationOut(VM vm) {
+		//get the allocation for this vm
+		VMAllocation vmAllocation = vm.getVMAllocation();
+		migratingOut.remove(vmAllocation);
+		
+		//add to VMM
+		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
+		vmm.removeMigratingVm(vm);
+		
+		//deallocate the VM
+		deallocate(vmAllocation);
+		
+		logger.info("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
 	}
 	
 	/*
@@ -277,6 +418,28 @@ public class Host extends SimulationEntity {
 	
 	public void fail() {
 		state = HostState.FAILED;
+	}
+	
+	//LOGGING
+	
+	/*
+	 * Output Host data to the log
+	 */
+	public void logInfo() {
+		if (state == HostState.ON) {
+			logger.info("Host #" + getId() + 
+					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] ");
+			privDomainAllocation.getVm().logInfo();
+			for (VMAllocation vmAllocation : vmAllocations) {
+				if (vmAllocation.getVm() != null) {
+					vmAllocation.getVm().logInfo();
+				} else {
+					logger.info("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
+				}
+			}
+		} else {
+			logger.info("Host #" + getId() + " " + state);
+		}
 	}
 
 	//ACCESSOR & MUTATOR METHODS
@@ -378,5 +541,13 @@ public class Host extends SimulationEntity {
 	
 	public VMAllocation getPrivDomainAllocation() {
 		return privDomainAllocation;
+	}
+	
+	public ArrayList<VMAllocation> getMigratingIn() {
+		return migratingIn;
+	}
+	
+	public ArrayList<VMAllocation> getMigratingOut() {
+		return migratingOut;
 	}
 }

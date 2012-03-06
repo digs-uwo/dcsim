@@ -87,11 +87,16 @@ public class VM extends SimulationEntity {
 		resourcesInUse.setStorage(resourcesConsumed.getStorage());
 		
 		application.completeScheduling();
-		
+	}
+	
+	public void logInfo() {
 		/*
 		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
 		 */
-		//logger.info("VM #" + getId() + " Utilization - CPU[" + resourcesInUse.getCpu() + "] BW[" + resourcesInUse.getBandwidth() + "] MEM[" + resourcesInUse.getMemory() + "] STORAGE[" + resourcesInUse.getStorage() + "]");
+		logger.info("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + "/" + vmAllocation.getCpuAllocation().getTotalAlloc() + "] " + 
+				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + "] " + 
+				"MEM[" + resourcesInUse.getMemory() + "] " +
+				"STORAGE[" + resourcesInUse.getStorage() + "]");
 	}
 	
 	public int getId() {
