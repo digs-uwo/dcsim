@@ -94,18 +94,11 @@ public class Host extends SimulationEntity {
 		//create the allocation
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);
 		
-		//create an initial allocation request TODO should this be in the individual managers?
-		VMAllocationRequest privRequest = new VMAllocationRequest(privDomainDescription,
-				new CpuAllocation(1, 200), //allocate 200 CPU TODO how should this be determined?
-				new MemoryAllocation(0),
-				new BandwidthAllocation(200), //TODO how should this be handled? do we increase the bandwidth allocation when there is a migration only?
-				new StorageAllocation(0));
-		
-		//request allocations from resource managers
-		cpuManager.allocatePrivDomain(privRequest, privDomainAllocation);
-		memoryManager.allocatePrivDomain(privRequest, privDomainAllocation);
-		bandwidthManager.allocatePrivDomain(privRequest, privDomainAllocation);
-		storageManager.allocatePrivDomain(privRequest, privDomainAllocation);
+		//request allocations from resource managers. Each manager determines how much resource to allocate
+		cpuManager.allocatePrivDomain(privDomainAllocation);
+		memoryManager.allocatePrivDomain(privDomainAllocation);
+		bandwidthManager.allocatePrivDomain(privDomainAllocation);
+		storageManager.allocatePrivDomain(privDomainAllocation);
 		
 		privDomainAllocation.attachVm(privDomainDescription.createVM());
 		

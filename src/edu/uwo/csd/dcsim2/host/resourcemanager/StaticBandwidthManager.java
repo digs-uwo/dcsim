@@ -38,11 +38,10 @@ public class StaticBandwidthManager extends BandwidthManager {
 	}
 
 	@Override
-	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
-			VMAllocation privDomainAllocation) {
+	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 		
-		if (hasCapacity(vmAllocationRequest)) {
-			BandwidthAllocation newAlloc = new BandwidthAllocation(vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc());
+		if (getAvailableBandwidth() >= 200) {
+			BandwidthAllocation newAlloc = new BandwidthAllocation(200);
 			privDomainAllocation.setBandwidthAllocation(newAlloc);
 			this.privDomainAllocation = privDomainAllocation;
 		}

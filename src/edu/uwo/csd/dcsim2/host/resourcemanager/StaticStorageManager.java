@@ -37,14 +37,11 @@ public class StaticStorageManager extends StorageManager {
 	}
 
 	@Override
-	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
-			VMAllocation privDomainAllocation) {
+	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 		
-		if (hasCapacity(vmAllocationRequest)) {
-			StorageAllocation newAlloc = new StorageAllocation(vmAllocationRequest.getStorageAllocation().getStorageAlloc());
-			privDomainAllocation.setStorageAllocation(newAlloc);
-			this.privDomainAllocation = privDomainAllocation;
-		}
+		StorageAllocation newAlloc = new StorageAllocation(0); //currently allocating no storage
+		privDomainAllocation.setStorageAllocation(newAlloc);
+		this.privDomainAllocation = privDomainAllocation;
 	}
 
 	

@@ -39,12 +39,10 @@ public class StaticCpuManager extends CpuManager {
 	}
 	
 	@Override
-	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest, VMAllocation privDomainAllocation) {
-		if (hasCapacity(vmAllocationRequest)) {
-			CpuAllocation newAlloc = new CpuAllocation();
-			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
-				newAlloc.getCoreAlloc().add(coreCapacity);
-			}
+	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
+
+		if (getAvailableCpu() >= 200) {
+			CpuAllocation newAlloc = new CpuAllocation(1, 200);
 			privDomainAllocation.setCpuAllocation(newAlloc);
 			setPrivDomainAllocation(privDomainAllocation);
 		} else {

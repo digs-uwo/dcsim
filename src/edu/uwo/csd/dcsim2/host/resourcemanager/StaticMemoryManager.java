@@ -38,13 +38,9 @@ public class StaticMemoryManager extends MemoryManager {
 	}
 
 	@Override
-	public void allocatePrivDomain(VMAllocationRequest vmAllocationRequest,
-			VMAllocation privDomainAllocation) {
-		if (hasCapacity(vmAllocationRequest)) {
-			MemoryAllocation newAlloc = new MemoryAllocation(vmAllocationRequest.getMemoryAllocation().getMemoryAlloc());
-			privDomainAllocation.setMemoryAllocation(newAlloc);
-			this.privDomainAllocation = privDomainAllocation;
-		}
+	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
+		MemoryAllocation newAlloc = new MemoryAllocation(0); //currently allocating no memory
+		privDomainAllocation.setMemoryAllocation(newAlloc);
 	}
 
 	

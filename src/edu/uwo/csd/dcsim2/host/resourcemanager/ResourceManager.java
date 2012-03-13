@@ -33,5 +33,5 @@ public abstract class ResourceManager {
 	public abstract void allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation);
 	public abstract void deallocateResource(VMAllocation vmAllocation);
 	public abstract void updateAllocations();
-	public abstract void allocatePrivDomain(VMAllocationRequest vmAllocationRequest, VMAllocation privDomainAllocation);
+	public abstract void allocatePrivDomain(VMAllocation privDomainAllocation);
 }
