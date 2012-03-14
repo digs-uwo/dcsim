@@ -82,4 +82,28 @@ public class VmmApplication implements Application {
 		return resourcesConsumed;
 	}
 
+	@Override
+	public double getResourcesRequired() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getResourcesInUse() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getTotalResourcesRequired() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getTotalResourcesConsumed() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

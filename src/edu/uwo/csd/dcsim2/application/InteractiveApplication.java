@@ -119,16 +119,36 @@ public abstract class InteractiveApplication implements Application {
 	protected abstract VirtualResources calculateRequiredResources(double work);
 	protected abstract CompletedWork performWork(VirtualResources resourcesAvailable, double workRemaining);
 	
-	public VirtualResources getResourcesRequired() {
-		return resourcesRequired;
-	}
-	
 	public VirtualResources getOverhead() {
 		return overhead;
 	}
 	
 	public void setOverhead(VirtualResources overhead) {
 		this.overhead = overhead;
+	}
+	
+	@Override
+	public double getResourcesRequired() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getResourcesInUse() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getTotalResourcesRequired() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getTotalResourcesConsumed() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 	
 	protected class CompletedWork {
