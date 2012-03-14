@@ -9,6 +9,7 @@ import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
+import edu.uwo.csd.dcsim2.host.power.*;
 
 public class Host extends SimulationEntity {
 
@@ -34,7 +35,7 @@ public class Host extends SimulationEntity {
 	private int id;
 	private ArrayList<Cpu> cpus;
 	private int memory;	
-	private int bandwidth;
+	private int bandwidth; 
 	private long storage;
 	
 	private CpuManager cpuManager;
@@ -42,6 +43,7 @@ public class Host extends SimulationEntity {
 	private BandwidthManager bandwidthManager;
 	private StorageManager storageManager;
 	private CpuScheduler cpuScheduler;
+	private HostPowerModel powerModel;
 	
 	private ArrayList<VMAllocation> vmAllocations = new ArrayList<VMAllocation>();
 	private VMAllocation privDomainAllocation;
@@ -54,26 +56,19 @@ public class Host extends SimulationEntity {
 	private HostState state;
 	
 	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
+			CpuManager cpuManager, 
+			MemoryManager memoryManager, 
+			BandwidthManager bandwidthManager,
+			StorageManager storageManager, 
+			CpuScheduler cpuScheduler,
+			HostPowerModel powerModel) {
 		
 		cpus = new ArrayList<Cpu>();
 		for (int i = 0; i < nCpu; ++i) {
 			cpus.add(new Cpu(nCores, coreCapacity));
 		}
-		
-		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
-	}
-	
-	public Host(ArrayList<Cpu> cpus, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
-		initializeHost(cpus, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);		
-	}
-	
-	private void initializeHost(ArrayList<Cpu> cpus, int memory, int bandwidth, long storage,
-			CpuManager cpuManager, MemoryManager memoryManager, BandwidthManager bandwidthManager, StorageManager storageManager, CpuScheduler cpuScheduler) {
-		
+
 		this.id = nextId++;
-		this.cpus = cpus;
 		this.memory = memory;
 		this.bandwidth = bandwidth;
 		this.storage = storage;
@@ -83,6 +78,7 @@ public class Host extends SimulationEntity {
 		setBandwidthManager(bandwidthManager);
 		setStorageManager(storageManager);
 		setCpuScheduler(cpuScheduler);
+		setHostPowerModel(powerModel);
 					
 		/*
 		 * Create and allocate privileged domain
@@ -162,6 +158,18 @@ public class Host extends SimulationEntity {
 				throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getType());
 		}
 	}
+	
+	/*
+	 * Host info
+	 */
+	
+	public double getCurrentPowerConsumption() {
+		return powerModel.getPowerConsumption(this);
+	}
+	
+	/*
+	 * VM Allocation
+	 */
 	
 	public void submitVM(VMAllocationRequest vmAllocationRequest) {
 		
@@ -420,7 +428,8 @@ public class Host extends SimulationEntity {
 	public void logInfo() {
 		if (state == HostState.ON) {
 			logger.info("Host #" + getId() + 
-					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] ");
+					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
+					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");
 			privDomainAllocation.getVm().logInfo();
 			for (VMAllocation vmAllocation : vmAllocations) {
 				if (vmAllocation.getVm() != null) {
@@ -541,5 +550,13 @@ public class Host extends SimulationEntity {
 	
 	public ArrayList<VMAllocation> getMigratingOut() {
 		return migratingOut;
+	}
+	
+	public HostPowerModel getPowerModel() {
+		return powerModel;
+	}
+	
+	public void setHostPowerModel(HostPowerModel powerModel) {
+		this.powerModel = powerModel;
 	}
 }

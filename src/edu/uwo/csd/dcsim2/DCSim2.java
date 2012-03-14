@@ -8,7 +8,7 @@ import org.apache.log4j.PropertyConfigurator;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
-import edu.uwo.csd.dcsim2.host.Host.HostState;
+import edu.uwo.csd.dcsim2.host.power.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -161,7 +161,8 @@ public static VMDescription createVMDescTrace(String fileName, long offset) {
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),
-					new FairShareCpuScheduler());
+					new FairShareCpuScheduler(),
+					new LinearHostPowerModel(100, 250));
 			hosts.add(host);
 		}
 		
