@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.application;
+package edu.uwo.csd.dcsim2.application.workload;
 
 public class RandomWorkload extends Workload {
 

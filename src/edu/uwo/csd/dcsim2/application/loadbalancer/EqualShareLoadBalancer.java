@@ -1,7 +1,9 @@
-package edu.uwo.csd.dcsim2.application;
+package edu.uwo.csd.dcsim2.application.loadbalancer;
 
 import java.util.ArrayList;
 import java.util.Map;
+
+import edu.uwo.csd.dcsim2.application.Application;
 
 public class EqualShareLoadBalancer extends LoadBalancer {
 

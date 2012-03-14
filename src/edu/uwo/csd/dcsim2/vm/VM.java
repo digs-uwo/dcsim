@@ -13,16 +13,18 @@ public class VM extends SimulationEntity {
 	
 	private int id;
 	private VMDescription vmDescription;
-	private VirtualResources resourcesInUse;
-	
-	private VirtualResources resourcesAvailable;
-	private double maxCpuAvailable; //the maximum amount of CPU it is physically possible for this VM to use in the elapsed time interval
-	private VirtualResources resourcesConsumed;
-	
-	private Application application;
-	
+	private VirtualResources resourcesInUse; //current level of resource usage (not total used)
 	private VMAllocation vmAllocation;
 	
+	/*
+	 * Keep track of resources while calculating usage over the last time interval 
+	 */
+	private VirtualResources resourcesAvailable; //resources available to be consumed over this time interval
+	private double maxCpuAvailable; //the maximum amount of CPU it is physically possible for this VM to use in the elapsed time interval
+	private VirtualResources resourcesConsumed; //the resources consumed by the VM over the last time interval
+	
+	private Application application;
+
 	public VM(VMDescription vmDescription, Application application) {
 		this.id = nextId++;
 		this.vmDescription = vmDescription;

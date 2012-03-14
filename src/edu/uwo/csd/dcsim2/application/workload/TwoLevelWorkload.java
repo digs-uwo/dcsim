@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.application;
+package edu.uwo.csd.dcsim2.application.workload;
 
 import edu.uwo.csd.dcsim2.core.Simulation;
 

@@ -6,6 +6,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.application.*;
+import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
+import edu.uwo.csd.dcsim2.application.workload.TwoLevelWorkload;
+import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.power.*;

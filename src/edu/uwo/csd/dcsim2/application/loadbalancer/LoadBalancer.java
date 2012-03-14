@@ -1,6 +1,9 @@
-package edu.uwo.csd.dcsim2.application;
+package edu.uwo.csd.dcsim2.application.loadbalancer;
 
 import java.util.*;
+
+import edu.uwo.csd.dcsim2.application.Application;
+import edu.uwo.csd.dcsim2.application.ApplicationTier;
 
 public abstract class LoadBalancer {
 
