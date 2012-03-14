@@ -159,8 +159,7 @@ public class Host extends SimulationEntity {
 				this.completeMigrationIn(vmAllocation, vm, source);
 				break;
 			default:
-				//TODO throw exception
-				break;
+				throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getType());
 		}
 	}
 	
