@@ -85,11 +85,7 @@ public class TraceWorkload extends Workload {
 			}	
 			
 		}
-		
-		public String getFileName() {
-			return fileName;
-		}
-		
+				
 		public ArrayList<Long> getTimes() {
 			return times;
 		}

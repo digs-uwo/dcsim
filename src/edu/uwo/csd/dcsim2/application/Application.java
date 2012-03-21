@@ -16,9 +16,9 @@ public interface Application {
 	
 	public VirtualResources runApplication(VirtualResources resourcesAvailable);
 
-	public double getResourcesRequired();
-	public double getResourcesInUse();
-	public double getTotalResourcesRequired();
-	public double getTotalResourcesConsumed();
+	public VirtualResources getResourceDemand();
+	public VirtualResources getResourceInUse();
+	public VirtualResources getTotalResourceDemand();
+	public VirtualResources getTotalResourceUsed();
 	
 }

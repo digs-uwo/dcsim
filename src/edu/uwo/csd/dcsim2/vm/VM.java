@@ -99,6 +99,11 @@ public class VM extends SimulationEntity {
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + "] " + 
 				"MEM[" + resourcesInUse.getMemory() + "] " +
 				"STORAGE[" + resourcesInUse.getStorage() + "]");
+		
+		logger.info("	Application: CPU[" + Utility.roundDouble(application.getResourceInUse().getCpu(), 2) + "," + 
+				Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
+				"BW[" + Utility.roundDouble(application.getResourceInUse().getBandwidth(), 2) + ", " + 
+				Utility.roundDouble(application.getResourceDemand().getBandwidth(), 2) + "]");
 	}
 	
 	public int getId() {

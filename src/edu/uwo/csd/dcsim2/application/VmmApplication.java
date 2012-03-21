@@ -83,27 +83,28 @@ public class VmmApplication implements Application {
 	}
 
 	@Override
-	public double getResourcesRequired() {
-		// TODO Auto-generated method stub
-		return 0;
+	public VirtualResources getResourceDemand() {
+		//TODO implement correctly
+		return new VirtualResources();
 	}
 
 	@Override
-	public double getResourcesInUse() {
-		// TODO Auto-generated method stub
-		return 0;
+	public VirtualResources getResourceInUse() {
+		//TODO implement correctly
+		return new VirtualResources();
 	}
 
 	@Override
-	public double getTotalResourcesRequired() {
-		// TODO Auto-generated method stub
-		return 0;
+	public VirtualResources getTotalResourceDemand() {
+		//TODO implement correctly
+		return new VirtualResources();
 	}
 
 	@Override
-	public double getTotalResourcesConsumed() {
-		// TODO Auto-generated method stub
-		return 0;
+	public VirtualResources getTotalResourceUsed() {
+		//TODO implement correctly
+		return new VirtualResources();
 	}
+
 
 }
