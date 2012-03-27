@@ -51,9 +51,13 @@ public class Host extends SimulationEntity {
 	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
 	
 	//Simulation metrics
-	private long timeActive = 0;
-	private double utilizationSum = 0;
-	private double powerConsumed = 0;
+	private long timeActive = 0; //time this host has spent active (ON)
+	private double utilizationSum = 0; //used to calculate average utilization
+	private double powerConsumed = 0; //total power consumed by the host
+	
+	private static long globalTimeActive = 0; //Host time active for all hosts in the simulation
+	private static double globalUtilizationSum = 0; //used to calculate average utilization for all hosts
+	private static double globalPowerConsumed = 0; //total power consumed by all hosts
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
@@ -172,13 +176,7 @@ public class Host extends SimulationEntity {
 		return powerModel.getPowerConsumption(this);
 	}
 	
-	public void updateMetrics() {
-		if (state == HostState.ON) {
-			timeActive += Simulation.getSimulation().getElapsedTime();
-			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
-			powerConsumed += getCurrentPowerConsumption();
-		}
-	}
+
 	
 	/*
 	 * VM Allocation
@@ -455,6 +453,19 @@ public class Host extends SimulationEntity {
 			logger.info("Host #" + getId() + " " + state);
 		}
 	}
+	
+	public void updateMetrics() {
+		if (state == HostState.ON) {
+			timeActive += Simulation.getSimulation().getElapsedTime();
+			globalTimeActive += Simulation.getSimulation().getElapsedTime();
+			
+			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
+			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
+			
+			powerConsumed += getCurrentPowerConsumption();
+			globalPowerConsumed += getCurrentPowerConsumption(); 
+		}
+	}
 
 	//ACCESSOR & MUTATOR METHODS
 	
@@ -583,6 +594,22 @@ public class Host extends SimulationEntity {
 	
 	public double getAverageUtilization() {
 		return utilizationSum / timeActive;
+	}
+	
+	/*
+	 * Static accessor methods
+	 */
+	
+	public static long getGlobalTimeActive() {
+		return globalTimeActive;
+	}
+	
+	public static double getGlobalAverageUtilization() {
+		return globalUtilizationSum / globalTimeActive;
+	}
+	
+	public static double getGlobalPowerConsumed() {
+		return globalPowerConsumed;
 	}
 
 }
