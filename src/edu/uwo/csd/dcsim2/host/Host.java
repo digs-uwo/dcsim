@@ -199,7 +199,7 @@ public class Host extends SimulationEntity {
 		newAllocation.setVm(newVm);
 		newVm.setVMAllocation(newAllocation);
 		
-		logger.info("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
+		logger.debug("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
 	}
 
 	
@@ -287,7 +287,7 @@ public class Host extends SimulationEntity {
 		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
 		vmm.addMigratingVm(vm);
 		
-		logger.info("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
+		logger.debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
 		
 		//inform the source host that the VM is migrating out
 		source.migrateOut(vm);
@@ -314,7 +314,7 @@ public class Host extends SimulationEntity {
 		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
 		vmm.addMigratingVm(vm);
 		
-		logger.info("Host #" + this.getId() + " migrating out VM #" + vm.getId());
+		logger.debug("Host #" + this.getId() + " migrating out VM #" + vm.getId());
 	}
 	
 	/**
@@ -339,7 +339,7 @@ public class Host extends SimulationEntity {
 		vmAllocation.setVm(vm);
 		vm.setVMAllocation(vmAllocation);
 		
-		logger.info("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
+		logger.debug("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
 	}
 	
 	public void completeMigrationOut(VM vm) {
@@ -354,7 +354,7 @@ public class Host extends SimulationEntity {
 		//deallocate the VM
 		deallocate(vmAllocation);
 		
-		logger.info("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
+		logger.debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
 	}
 	
 	/*
@@ -442,11 +442,11 @@ public class Host extends SimulationEntity {
 	 */
 	public void logInfo() {
 		if (state == HostState.ON) {
-			logger.info("Host #" + getId() + 
+			logger.debug("Host #" + getId() + 
 					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
 					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
 		} else {
-			logger.info("Host #" + getId() + " " + state);
+			logger.debug("Host #" + getId() + " " + state);
 		}
 		
 		privDomainAllocation.getVm().logInfo();
@@ -454,7 +454,7 @@ public class Host extends SimulationEntity {
 			if (vmAllocation.getVm() != null) {
 				vmAllocation.getVm().logInfo();
 			} else {
-				logger.info("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
+				logger.debug("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
 			}
 		}
 	}

@@ -102,7 +102,7 @@ public class VM extends SimulationEntity {
 	}
 	
 	public void logInfo() {
-		logger.info("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
+		logger.debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
 				"/" + vmAllocation.getCpuAllocation().getTotalAlloc() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 

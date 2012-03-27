@@ -29,7 +29,7 @@ public class DCSim2 {
 		Simulation.getSimulation().setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
-		dc.addHosts(createHosts(4));
+		dc.addHosts(createHosts(3));
 		
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
@@ -42,13 +42,13 @@ public class DCSim2 {
 		//submit VMs to hosts
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-		dc.getHosts().get(2).setState(Host.HostState.OFF);
+		//dc.getHosts().get(2).setState(Host.HostState.OFF);
 		
-//		DCSim2 dcsim2 = new DCSim2();
-//		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
-//				dc.getHosts().get(1),
-//				dc.getHosts().get(0));
-		//Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
+		DCSim2 dcsim2 = new DCSim2();
+		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
+				dc.getHosts().get(1),
+				dc.getHosts().get(0));
+		Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
 		
 		Simulation.getSimulation().run(1000);
 		
