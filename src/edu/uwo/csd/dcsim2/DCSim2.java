@@ -17,62 +17,23 @@ import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.management.*;
 
-public class DCSim2 implements SimulationUpdateController {
+public class DCSim2 {
 
 	private static Logger logger = Logger.getLogger(DCSim2.class);
-	
-	private ArrayList<DataCentre> datacentres;
-	
-	public DCSim2() {
-		/*
-		 * Set up logging
-		 */
-		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
-		logger.info("Starting DCSim2");
-		
-		
-		Simulation.getSimulation().setSimulationUpdateController(this);
-		
-		datacentres = new ArrayList<DataCentre>();
-	}
 
-	public void addDatacentre(DataCentre dc) {
-		datacentres.add(dc);
-	}
-	
-	public void runSimulation(long duration) {
-		Simulation.getSimulation().run(duration);
-	}
-
-	@Override
-	public void updateSimulation(long simulationTime) {
-		//update workloads
-		Workload.updateAllWorkloads();
-		
-		//schedule cpu
-		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
-		
-		for (DataCentre dc : datacentres) {
-			dc.updateMetrics();
-			dc.logInfo();
-		}
-		
-		//finalize workloads (print logs, calculate stats)
-		Workload.logAllWorkloads();
-	}
-	
 	public static void main(String args[]) {
-		DCSim2 simulator = new DCSim2();
+
+		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
 		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
+
+		Simulation.getSimulation().setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
 		dc.addHosts(createHosts(3));
 		//dc.getHosts().get(1).setState(HostState.OFF);
-		
-		simulator.addDatacentre(dc); //TODO why? is this necessary?
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 5; ++i) {
@@ -83,16 +44,17 @@ public class DCSim2 implements SimulationUpdateController {
 		//submit VMs to hosts
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-		Migrator migrator = simulator.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
+		DCSim2 dcsim2 = new DCSim2();
+		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
 				dc.getHosts().get(1),
 				dc.getHosts().get(0));
 		Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
 		
-		simulator.runSimulation(1000);
+		Simulation.getSimulation().run(1000);
 		
 	}
 	
-public static VMDescription createVMDescTrace(String fileName, long offset) {
+	public static VMDescription createVMDescTrace(String fileName, long offset) {
 		
 		//Build service
 		

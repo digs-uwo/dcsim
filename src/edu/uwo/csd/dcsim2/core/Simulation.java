@@ -61,6 +61,9 @@ public class Simulation extends SimulationEntity {
 		this.duration = duration;
 		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
 		
+		if (simulationUpdateController != null)
+			simulationUpdateController.beginSimulation();
+		
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			e = eventQueue.poll();
 			if (e.getTime() >= simulationTime) {
@@ -86,6 +89,9 @@ public class Simulation extends SimulationEntity {
 				throw new RuntimeException("Encountered event with time < current simulation time");
 			}
 		}
+		
+		if (simulationUpdateController != null)
+			simulationUpdateController.completeSimulation(duration);
 	}
 	
 	public void sendEvent(Event event) {
@@ -125,6 +131,10 @@ public class Simulation extends SimulationEntity {
 	
 	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {
 		this.simulationUpdateController = simulationUpdateController;
+	}
+	
+	public SimulationUpdateController getSimulationUpdateController() {
+		return simulationUpdateController;
 	}
 	
 	/**
