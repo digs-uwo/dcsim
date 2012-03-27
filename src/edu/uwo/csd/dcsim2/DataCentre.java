@@ -4,12 +4,14 @@ import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
+import edu.uwo.csd.dcsim2.host.Host.HostState;
 import edu.uwo.csd.dcsim2.management.*;
 
 public class DataCentre extends SimulationEntity {
 
 	private ArrayList<Host> hosts;
 	VMPlacementPolicy vmPlacementPolicy;
+	
 	
 	public DataCentre(VMPlacementPolicy vmPlacementPolicy) {
 		hosts = new ArrayList<Host>();
@@ -47,6 +49,12 @@ public class DataCentre extends SimulationEntity {
 	public void logInfo() {
 		for (Host host : hosts) {
 			host.logInfo();
+		}
+	}
+	
+	public void updateMetrics() {
+		for (Host host : hosts) {
+			host.updateMetrics();
 		}
 	}
 	

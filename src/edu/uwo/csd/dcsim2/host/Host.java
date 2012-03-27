@@ -50,6 +50,11 @@ public class Host extends SimulationEntity {
 	private ArrayList<VMAllocation> migratingIn = new ArrayList<VMAllocation>();
 	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
 	
+	//Simulation metrics
+	private long timeActive = 0;
+	private double utilizationSum = 0;
+	private double powerConsumed = 0;
+	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	
@@ -165,6 +170,14 @@ public class Host extends SimulationEntity {
 	
 	public double getCurrentPowerConsumption() {
 		return powerModel.getPowerConsumption(this);
+	}
+	
+	public void updateMetrics() {
+		if (state == HostState.ON) {
+			timeActive += Simulation.getSimulation().getElapsedTime();
+			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
+			powerConsumed += getCurrentPowerConsumption();
+		}
 	}
 	
 	/*
@@ -559,4 +572,17 @@ public class Host extends SimulationEntity {
 	public void setHostPowerModel(HostPowerModel powerModel) {
 		this.powerModel = powerModel;
 	}
+	
+	public long getTimeActive() {
+		return timeActive;
+	}
+	
+	public double getPowerConsumed() {
+		return powerConsumed;
+	}
+	
+	public double getAverageUtilization() {
+		return utilizationSum / timeActive;
+	}
+
 }

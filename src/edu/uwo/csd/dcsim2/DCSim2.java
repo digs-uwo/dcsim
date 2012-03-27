@@ -53,6 +53,7 @@ public class DCSim2 implements SimulationUpdateController {
 		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
 		
 		for (DataCentre dc : datacentres) {
+			dc.updateMetrics();
 			dc.logInfo();
 		}
 		

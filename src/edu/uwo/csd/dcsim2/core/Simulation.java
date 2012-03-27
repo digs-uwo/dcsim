@@ -119,6 +119,10 @@ public class Simulation extends SimulationEntity {
 		return simulationTime - lastUpdate;
 	}
 	
+	public double getElapsedSeconds() {
+		return getElapsedTime() / 1000d;
+	}
+	
 	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {
 		this.simulationUpdateController = simulationUpdateController;
 	}
