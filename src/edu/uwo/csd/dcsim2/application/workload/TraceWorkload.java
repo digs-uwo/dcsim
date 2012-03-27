@@ -43,14 +43,11 @@ public class TraceWorkload extends Workload {
 	}
 	
 	private class WorkloadTrace {
-		private String fileName;
 		private ArrayList<Long> times;
 		private ArrayList<Double> values;
 		private Long stepSize;
 		
 		public WorkloadTrace(String fileName) {
-			this.fileName = fileName;
-			
 			times = new ArrayList<Long>();
 			values = new ArrayList<Double>();
 			

@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim2;
 
 import java.util.ArrayList;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.application.*;
@@ -19,8 +18,6 @@ import edu.uwo.csd.dcsim2.management.*;
 
 public class DCSim2 {
 
-	private static Logger logger = Logger.getLogger(DCSim2.class);
-
 	public static void main(String args[]) {
 
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
@@ -32,23 +29,26 @@ public class DCSim2 {
 		Simulation.getSimulation().setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
-		dc.addHosts(createHosts(3));
-		//dc.getHosts().get(1).setState(HostState.OFF);
+		dc.addHosts(createHosts(4));
+		
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < 5; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", (int)(Math.random() * 80000))));
+			//vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", (int)(Math.random() * 80000))));
+			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", 0)));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
 		//submit VMs to hosts
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-		DCSim2 dcsim2 = new DCSim2();
-		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
-				dc.getHosts().get(1),
-				dc.getHosts().get(0));
-		Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
+		dc.getHosts().get(2).setState(Host.HostState.OFF);
+		
+//		DCSim2 dcsim2 = new DCSim2();
+//		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
+//				dc.getHosts().get(1),
+//				dc.getHosts().get(0));
+		//Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
 		
 		Simulation.getSimulation().run(1000);
 		

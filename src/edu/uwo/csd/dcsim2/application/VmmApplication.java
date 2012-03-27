@@ -6,7 +6,7 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class VmmApplication implements Application {
+public class VmmApplication extends Application {
 
 	private ArrayList<VM> migratingVms = new ArrayList<VM>();
 	private VirtualResources resourcesRemaining;
@@ -106,5 +106,16 @@ public class VmmApplication implements Application {
 		return new VirtualResources();
 	}
 
+	@Override
+	public void updateMetrics() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateResourceDemand() {
+		// TODO Auto-generated method stub
+		
+	}	
 
 }

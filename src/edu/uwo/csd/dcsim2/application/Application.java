@@ -2,23 +2,40 @@ package edu.uwo.csd.dcsim2.application;
 
 import edu.uwo.csd.dcsim2.vm.*;
 
-public interface Application {
+public abstract class Application {
 
+	protected static VirtualResources globalResourceDemand = new VirtualResources();
+	protected static VirtualResources globalResourceUsed = new VirtualResources();
+	
 	/*
 	 * Called once at the beginning of scheduling
 	 */
-	public void beginScheduling();
+	public abstract void beginScheduling();
+	
+	public abstract void updateResourceDemand();
+	
+	public abstract VirtualResources runApplication(VirtualResources resourcesAvailable);
 	
 	/*
 	 * Called once at the end of scheduling
 	 */
-	public void completeScheduling();
+	public abstract void completeScheduling();
 	
-	public VirtualResources runApplication(VirtualResources resourcesAvailable);
+	
 
-	public VirtualResources getResourceDemand();
-	public VirtualResources getResourceInUse();
-	public VirtualResources getTotalResourceDemand();
-	public VirtualResources getTotalResourceUsed();
+	public abstract VirtualResources getResourceDemand();
+	public abstract VirtualResources getResourceInUse();
+	public abstract VirtualResources getTotalResourceDemand();
+	public abstract VirtualResources getTotalResourceUsed();
+	
+	public abstract void updateMetrics();
+	
+	public static VirtualResources getGlobalResourceDemand() {
+		return globalResourceDemand;
+	}
+	
+	public static VirtualResources getGlobalResourceUsed() {
+		return globalResourceUsed;
+	}
 	
 }

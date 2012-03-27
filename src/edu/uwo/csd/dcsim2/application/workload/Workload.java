@@ -25,6 +25,25 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 		}
 	}
 	
+	public static double getGlobalTotalWork() {
+		double totalWork = 0;
+		
+		for (Workload workload : workloads)
+			totalWork += workload.getTotalWork();
+		
+		return totalWork;
+	}
+	
+	public static double getGlobalCompletedWork() {
+		double completedWork = 0;
+		
+		for (Workload workload : workloads) {
+			completedWork += workload.getCompletedWork();
+		}
+		
+		return completedWork;
+	}
+	
 	public static void logAllWorkloads() {
 		for (Workload workload : workloads) {
 			workload.logCompleted();
@@ -63,7 +82,7 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	}
 	
 	public void logCompleted() {
-		logger.info("Workload Total [" + Utility.roundDouble(completedWork, 2) + "/" + Utility.roundDouble(totalWork, 2) + "] work units");
+		logger.debug("Workload Total [" + Utility.roundDouble(completedWork, 2) + "/" + Utility.roundDouble(totalWork, 2) + "] work units");
 	}
 	
 	/**

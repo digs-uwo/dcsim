@@ -59,6 +59,10 @@ public class Host extends SimulationEntity {
 	private static double globalUtilizationSum = 0; //used to calculate average utilization for all hosts
 	private static double globalPowerConsumed = 0; //total power consumed by all hosts
 	
+	private static long currentActiveHosts = 0;
+	private static long minActiveHosts = Long.MAX_VALUE;
+	private static long maxActiveHosts = 0;
+	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	
@@ -104,9 +108,9 @@ public class Host extends SimulationEntity {
 		memoryManager.allocatePrivDomain(privDomainAllocation);
 		bandwidthManager.allocatePrivDomain(privDomainAllocation);
 		storageManager.allocatePrivDomain(privDomainAllocation);
-		
-		privDomainAllocation.attachVm(privDomainDescription.createVM());
-		
+
+		PrivDomainVM privVM = new PrivDomainVM(privDomainDescription, privDomainDescription.getApplicationFactory().createApplication());
+		privDomainAllocation.attachVm(privVM);
 
 		//set default state
 		state = HostState.ON;
@@ -431,7 +435,7 @@ public class Host extends SimulationEntity {
 		state = HostState.FAILED;
 	}
 	
-	//LOGGING
+	//METRICS & LOGGING
 	
 	/*
 	 * Output Host data to the log
@@ -440,31 +444,49 @@ public class Host extends SimulationEntity {
 		if (state == HostState.ON) {
 			logger.info("Host #" + getId() + 
 					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
-					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");
-			privDomainAllocation.getVm().logInfo();
-			for (VMAllocation vmAllocation : vmAllocations) {
-				if (vmAllocation.getVm() != null) {
-					vmAllocation.getVm().logInfo();
-				} else {
-					logger.info("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
-				}
-			}
+					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
 		} else {
 			logger.info("Host #" + getId() + " " + state);
+		}
+		
+		privDomainAllocation.getVm().logInfo();
+		for (VMAllocation vmAllocation : vmAllocations) {
+			if (vmAllocation.getVm() != null) {
+				vmAllocation.getVm().logInfo();
+			} else {
+				logger.info("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
+			}
 		}
 	}
 	
 	public void updateMetrics() {
 		if (state == HostState.ON) {
+			++currentActiveHosts;
+			
 			timeActive += Simulation.getSimulation().getElapsedTime();
 			globalTimeActive += Simulation.getSimulation().getElapsedTime();
 			
 			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
 			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
 			
-			powerConsumed += getCurrentPowerConsumption();
-			globalPowerConsumed += getCurrentPowerConsumption(); 
+			powerConsumed += getCurrentPowerConsumption() * Simulation.getSimulation().getElapsedSeconds();
+			globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getSimulation().getElapsedSeconds(); 
 		}
+		
+		for (VMAllocation vmAllocation : vmAllocations) {
+			if (vmAllocation.getVm() != null)
+				vmAllocation.getVm().updateMetrics();
+		}
+	}
+	
+	public static void updateGlobalMetrics() {
+		if (currentActiveHosts < minActiveHosts) {
+			minActiveHosts = currentActiveHosts;
+		}
+		if (currentActiveHosts > maxActiveHosts) {
+			maxActiveHosts = currentActiveHosts;
+		}
+		currentActiveHosts = 0;
 	}
 
 	//ACCESSOR & MUTATOR METHODS
@@ -610,6 +632,14 @@ public class Host extends SimulationEntity {
 	
 	public static double getGlobalPowerConsumed() {
 		return globalPowerConsumed;
+	}
+	
+	public static long getMinActiveHosts() {
+		return minActiveHosts;
+	}
+	
+	public static long getMaxActiveHosts() {
+		return maxActiveHosts;
 	}
 
 }

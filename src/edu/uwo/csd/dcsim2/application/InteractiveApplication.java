@@ -6,7 +6,7 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
-public abstract class InteractiveApplication implements Application {
+public abstract class InteractiveApplication extends Application {
 
 	private static Logger logger = Logger.getLogger(Host.class);
 	
@@ -15,7 +15,7 @@ public abstract class InteractiveApplication implements Application {
 	protected VirtualResources resourceInUse;		//the current level of resource use  / second
 	protected VirtualResources totalResourceDemand;	//the total amount of resources required since the application started
 	protected VirtualResources totalResourceUsed;	//the total amount of resources used since the application started
-	
+
 	private double workRemaining = 0;
 	private ApplicationTier applicationTier;
 	private VirtualResources overhead; //the amount of overhead per second this application creates
@@ -53,29 +53,8 @@ public abstract class InteractiveApplication implements Application {
 		//application overhead is included in resourceDemand
 		resourceDemand = resourceDemand.add(overheadRemaining);
 	}
-	
-	/*
-	 * Called once at the end of scheduling
-	 */
-	public void completeScheduling() {
 
-		//add resource demand and use for this time interval to total values
-		totalResourceDemand = totalResourceDemand.add(resourceDemand);
-		totalResourceUsed = totalResourceUsed.add(resourceInUse);
-		
-		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
-		resourceDemand.setCpu(resourceDemand.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		resourceDemand.setBandwidth(resourceDemand.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		
-		resourceInUse.setCpu(resourceInUse.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		resourceInUse.setBandwidth(resourceInUse.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		
-		//clear work remaining (i.e. drop requests that could not be fulfilled)
-		workRemaining = 0;
-	}
-	
-	public VirtualResources runApplication(VirtualResources resourcesAvailable) {
-		
+	public void updateResourceDemand() {
 		//retrieve incoming work
 		double incomingWork = applicationTier.retrieveWork(this);
 		workRemaining += incomingWork;
@@ -84,7 +63,10 @@ public abstract class InteractiveApplication implements Application {
 		if (incomingWork > 0) {
 			resourceDemand = resourceDemand.add(calculateRequiredResources(incomingWork));
 		}
-		
+	}
+	
+	public VirtualResources runApplication(VirtualResources resourcesAvailable) {
+
 		VirtualResources resourcesConsumed = new VirtualResources();
 		
 		//first ensure that all remaining overhead for the elapsed period has been processed
@@ -140,6 +122,32 @@ public abstract class InteractiveApplication implements Application {
 		resourceInUse = resourceInUse.add(resourcesConsumed);
 		
 		return resourcesConsumed;
+	}
+	
+	/*
+	 * Called once at the end of scheduling
+	 */
+	public void completeScheduling() {
+
+		//add resource demand and use for this time interval to total values
+		totalResourceDemand = totalResourceDemand.add(resourceDemand);
+		totalResourceUsed = totalResourceUsed.add(resourceInUse);
+		
+		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
+		resourceDemand.setCpu(resourceDemand.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		resourceDemand.setBandwidth(resourceDemand.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		
+		resourceInUse.setCpu(resourceInUse.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		resourceInUse.setBandwidth(resourceInUse.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		
+		//clear work remaining (i.e. drop requests that could not be fulfilled)
+		workRemaining = 0;
+	}
+	
+	@Override
+	public void updateMetrics() {
+		globalResourceDemand = globalResourceDemand.add(resourceDemand);
+		globalResourceUsed = globalResourceUsed.add(resourceInUse);
 	}
 	
 	protected abstract VirtualResources calculateRequiredResources(double work);

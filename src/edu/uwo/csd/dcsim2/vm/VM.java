@@ -7,23 +7,23 @@ import edu.uwo.csd.dcsim2.application.*;
 
 public class VM extends SimulationEntity {
 
-	private static Logger logger = Logger.getLogger(VM.class);
+	static Logger logger = Logger.getLogger(VM.class);
 	
-	private static int nextId = 1;
+	static int nextId = 1;
 	
-	private int id;
-	private VMDescription vmDescription;
-	private VirtualResources resourcesInUse; //current level of resource usage (not total used)
-	private VMAllocation vmAllocation;
+	int id;
+	VMDescription vmDescription;
+	VirtualResources resourcesInUse; //current level of resource usage (not total used)
+	VMAllocation vmAllocation;
 	
 	/*
 	 * Keep track of resources while calculating usage over the last time interval 
 	 */
-	private VirtualResources resourcesAvailable; //resources available to be consumed over this time interval
-	private double maxCpuAvailable; //the maximum amount of CPU it is physically possible for this VM to use in the elapsed time interval
-	private VirtualResources resourcesConsumed; //the resources consumed by the VM over the last time interval
+	VirtualResources resourcesAvailable; //resources available to be consumed over this time interval
+	double maxCpuAvailable; //the maximum amount of CPU it is physically possible for this VM to use in the elapsed time interval
+	VirtualResources resourcesConsumed; //the resources consumed by the VM over the last time interval
 	
-	private Application application;
+	Application application;
 
 	public VM(VMDescription vmDescription, Application application) {
 		this.id = nextId++;
@@ -65,6 +65,9 @@ public class VM extends SimulationEntity {
 		//set available CPU (note that any leftover CPU does not carry forward, the opportunity to use it has passed... is this correct?)
 		resourcesAvailable.setCpu(cpuAvailable);
 		
+		//update the resource demand of the application
+		application.updateResourceDemand();
+		
 		//instruct the application to process work with available resources
 		VirtualResources newResourcesConsumed = application.runApplication(resourcesAvailable);
 		
@@ -88,22 +91,27 @@ public class VM extends SimulationEntity {
 		resourcesInUse.setMemory(resourcesConsumed.getMemory());
 		resourcesInUse.setStorage(resourcesConsumed.getStorage());
 		
+		//update the resource demand of the application
+		application.updateResourceDemand();
+		
 		application.completeScheduling();
 	}
 	
+	public void updateMetrics() {
+		application.updateMetrics();
+	}
+	
 	public void logInfo() {
-		/*
-		 * Log VM usage information... should this be moved somewhere else? Should we log allocation alongside utilization?
-		 */
-		logger.info("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + "/" + vmAllocation.getCpuAllocation().getTotalAlloc() + "] " + 
-				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + "] " + 
-				"MEM[" + resourcesInUse.getMemory() + "] " +
-				"STORAGE[" + resourcesInUse.getStorage() + "]");
-		
-		logger.info("	Application: CPU[" + Utility.roundDouble(application.getResourceInUse().getCpu(), 2) + "," + 
-				Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
-				"BW[" + Utility.roundDouble(application.getResourceInUse().getBandwidth(), 2) + ", " + 
-				Utility.roundDouble(application.getResourceDemand().getBandwidth(), 2) + "]");
+		logger.info("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
+				"/" + vmAllocation.getCpuAllocation().getTotalAlloc() + 
+				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
+				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 
+				"/" + vmAllocation.getBandwidthAllocation().getBandwidthAlloc() + 
+				"/" + Utility.roundDouble(application.getResourceDemand().getBandwidth(), 2) + "] " + 
+				"MEM[" + resourcesInUse.getMemory() + 
+				"/" + vmAllocation.getMemoryAllocation().getMemoryAlloc() + "] " +
+				"STORAGE[" + resourcesInUse.getStorage() + 
+				"/" + vmAllocation.getStorageAllocation().getStorageAlloc() + "]");
 	}
 	
 	public int getId() {

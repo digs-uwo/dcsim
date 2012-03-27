@@ -25,7 +25,7 @@ public class WebServerApplication extends InteractiveApplication {
 		
 		VirtualResources requiredResources = new VirtualResources();
 		
-		double requiredCpu = work * CPU_PER_WORK; //TODO include app idle overhead
+		double requiredCpu = work * CPU_PER_WORK;
 		requiredResources.setCpu(requiredCpu);
 		
 		double requiredBandwidth = work * BW_PER_WORK; 
@@ -41,7 +41,7 @@ public class WebServerApplication extends InteractiveApplication {
 	protected CompletedWork performWork(VirtualResources resourcesAvailable, double workRemaining) {
 		
 		double cpuWork, bwWork;
-		
+
 		/* 
 		 * total work completed depends on CPU and BW. Calculate the
 		 * amount of work possible for each assuming the other is infinite,
@@ -64,7 +64,6 @@ public class WebServerApplication extends InteractiveApplication {
 		
 		return new CompletedWork(workCompleted, resourcesConsumed);
 	}
-
 
 
 }
