@@ -50,7 +50,12 @@ public class Host extends SimulationEntity {
 	private ArrayList<VMAllocation> migratingIn = new ArrayList<VMAllocation>();
 	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
 	
-	//Simulation metrics
+	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
+	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
+	
+	/*
+	 * Simulation metrics
+	 */
 	private long timeActive = 0; //time this host has spent active (ON)
 	private double utilizationSum = 0; //used to calculate average utilization
 	private double powerConsumed = 0; //total power consumed by the host
@@ -62,9 +67,6 @@ public class Host extends SimulationEntity {
 	private static long currentActiveHosts = 0;
 	private static long minActiveHosts = Long.MAX_VALUE;
 	private static long maxActiveHosts = 0;
-	
-	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
-	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	
 	private HostState state;
 	
