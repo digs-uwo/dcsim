@@ -19,6 +19,9 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	private double completedWork = 0;
 	private WorkConsumer workTarget;
 	
+	private double currentIncomingWork = 0;
+	private double currentCompletedWork = 0;
+	
 	public static void updateAllWorkloads() {
 		for (Workload workload : workloads) {
 			workload.update();
@@ -55,34 +58,41 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 		workloads.add(this);
 		
 		//schedule initial update event
-		Simulation.getSimulation().sendEvent(
+		Simulation.getInstance().sendEvent(
 				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, 0, this, this));
 	}
 	
 	@Override
 	public void addWork(double work) {
-		completedWork += work;
-		
-		completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
+		if (Simulation.getInstance().isRecordingMetrics()) {
+			completedWork += work;
+			completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
+		}
+		currentCompletedWork += work;
+		currentCompletedWork = Utility.roundDouble(currentCompletedWork); //correct for precision errors by rounding
 	}
 
 	protected abstract double retrievePendingWork(); 
 	
 	public void update() {
-		if (workTarget != null && Simulation.getSimulation().getLastUpdate() < Simulation.getSimulation().getSimulationTime()) {
+		if (workTarget != null && Simulation.getInstance().getLastUpdate() < Simulation.getInstance().getSimulationTime()) {
 			double pendingWork = retrievePendingWork();
 			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
 			
-			totalWork += pendingWork;
-			totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
+			currentIncomingWork = pendingWork;
+			currentCompletedWork = 0;
+			
+			if (Simulation.getInstance().isRecordingMetrics()) {
+				totalWork += pendingWork;
+				totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
+			}
 			
 			workTarget.addWork(pendingWork);
-			//logger.debug("Workload has " + pendingWork + " work units pending");
 		}
 	}
 	
 	public void logCompleted() {
-		logger.debug("Workload Total [" + Utility.roundDouble(completedWork, 2) + "/" + Utility.roundDouble(totalWork, 2) + "] work units");
+		logger.debug("Workload Total [" + Utility.roundDouble(currentCompletedWork, 2) + "/" + Utility.roundDouble(currentIncomingWork, 2) + "] work units");
 	}
 	
 	/**
@@ -112,8 +122,8 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	public void handleEvent(Event e) {
 		if (e.getType() == Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT) {
 			long nextEventTime = updateWorkLevel();
-			if (nextEventTime > Simulation.getSimulation().getSimulationTime()) {
-				Simulation.getSimulation().sendEvent(
+			if (nextEventTime > Simulation.getInstance().getSimulationTime()) {
+				Simulation.getInstance().sendEvent(
 						new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, nextEventTime, this, this));
 			}
 		}

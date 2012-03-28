@@ -30,7 +30,7 @@ public class TraceWorkload extends Workload {
 	
 	@Override
 	protected double retrievePendingWork() {
-		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate()) / 1000.0);
+		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate()) / 1000.0);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class TraceWorkload extends Workload {
 		if (currentPosition >= workloadTrace.getTimes().size())
 			currentPosition = 0;
 		
-		return Simulation.getSimulation().getSimulationTime() + workloadTrace.getStepSize();
+		return Simulation.getInstance().getSimulationTime() + workloadTrace.getStepSize();
 	}
 	
 	private class WorkloadTrace {

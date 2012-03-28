@@ -52,9 +52,9 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 	private void sendVM(VMAllocationRequest vmAllocationRequest, Host host) {
 		
 		if (host.getState() != Host.HostState.ON && host.getState() != Host.HostState.POWERING_ON) {
-			Simulation.getSimulation().sendEvent(
+			Simulation.getInstance().sendEvent(
 					new Event(Host.HOST_POWER_ON_EVENT,
-							Simulation.getSimulation().getSimulationTime(),
+							Simulation.getInstance().getSimulationTime(),
 							this,
 							host)
 					);

@@ -22,7 +22,7 @@ public abstract class CpuScheduler {
 	public void prepareScheduler() {
 		state = CpuSchedulerState.READY;
 		
-		long elapsedTime = Simulation.getSimulation().getSimulationTime() - Simulation.getSimulation().getLastUpdate();
+		long elapsedTime = Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate();
 		
 		availableCpu = 0;
 		for (Cpu cpu : host.getCpus()) {

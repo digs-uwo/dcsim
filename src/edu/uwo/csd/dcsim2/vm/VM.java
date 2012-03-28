@@ -38,7 +38,7 @@ public class VM extends SimulationEntity {
 	public void beginScheduling() {
 		resourcesAvailable = new VirtualResources();
 		
-		long timeElapsed = Simulation.getSimulation().getElapsedTime();
+		long timeElapsed = Simulation.getInstance().getElapsedTime();
 		
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
@@ -83,7 +83,7 @@ public class VM extends SimulationEntity {
 	public void completeScheduling() {
 		resourcesInUse = new VirtualResources();
 		
-		long elapsedTime = Simulation.getSimulation().getElapsedTime();
+		long elapsedTime = Simulation.getInstance().getElapsedTime();
 		
 		resourcesInUse.setCpu(resourcesConsumed.getCpu() / (elapsedTime / 1000.0));
 		resourcesInUse.setBandwidth(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0));

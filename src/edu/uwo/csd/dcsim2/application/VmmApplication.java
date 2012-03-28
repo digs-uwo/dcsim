@@ -21,7 +21,7 @@ public class VmmApplication extends Application {
 	
 	@Override
 	public void beginScheduling() {
-		long elapsedTime = Simulation.getSimulation().getElapsedTime();
+		long elapsedTime = Simulation.getInstance().getElapsedTime();
 		
 		double cpu = 0;
 		double bandwidth = 0;
@@ -51,7 +51,7 @@ public class VmmApplication extends Application {
 	public void completeScheduling() {
 		//at this point, no resources should be remaining to run
 		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
-			throw new RuntimeException(Simulation.getSimulation().getSimulationTime() + " - VMM was underallocated");
+			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated");
 		}
 	}
 

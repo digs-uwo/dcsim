@@ -26,7 +26,7 @@ public abstract class UpdatingSimulationEntity extends SimulationEntity {
 	 * Update entity processing to bring it up to current time.
 	 */
 	public void updateEntity() {
-		if (Simulation.getSimulation().getSimulationTime() > lastUpdate) { //don't update the same entity twice
+		if (Simulation.getInstance().getSimulationTime() > lastUpdate) { //don't update the same entity twice
 			
 			//ensure dependencies are updated first
 			for (UpdatingSimulationEntity d : dependencies) {
@@ -35,7 +35,7 @@ public abstract class UpdatingSimulationEntity extends SimulationEntity {
 			
 			update();
 			
-			lastUpdate = Simulation.getSimulation().getSimulationTime();
+			lastUpdate = Simulation.getInstance().getSimulationTime();
 		}
 	}
 	

@@ -9,6 +9,8 @@ import java.util.PriorityQueue;
 public class Simulation extends SimulationEntity {
 	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
+	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
+	
 	
 	private static Logger logger = Logger.getLogger(Simulation.class);
 	
@@ -24,11 +26,13 @@ public class Simulation extends SimulationEntity {
 	private long simulationTime; //in milliseconds
 	private long lastUpdate; //in milliseconds
 	private long duration;
+	private long metricRecordStart;
+	private boolean recordingMetrics;
 	private long eventSendCount = 0;
 	
 	private SimulationUpdateController simulationUpdateController;
 		
-	public static Simulation getSimulation() {
+	public static Simulation getInstance() {
 		return simulation;
 	}
 	
@@ -55,11 +59,23 @@ public class Simulation extends SimulationEntity {
 	}
 	
 	public void run(long duration) {
+		run(duration, 0);
+	}
+	
+	public void run(long duration, long metricRecordStart) {
 		Event e;
 		
 		//configure simulation duration
 		this.duration = duration;
 		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
+		
+		if (metricRecordStart > 0) {
+			recordingMetrics = false;
+			this.metricRecordStart = metricRecordStart;
+			sendEvent(new Event(Simulation.SIMULATION_RECORD_METRICS_EVENT, metricRecordStart, this, this));
+		} else {
+			recordingMetrics = true;
+		}
 		
 		if (simulationUpdateController != null)
 			simulationUpdateController.beginSimulation();
@@ -104,8 +120,14 @@ public class Simulation extends SimulationEntity {
 		switch (e.getType()) {
 			case Simulation.SIMULATION_TERMINATE_EVENT:
 				//Do nothing. This ensures that the simulation is fully up-to-date upon termination.
-				logger.info("Terminating Simulation");
+				logger.debug("Terminating Simulation");
 				break;
+			case Simulation.SIMULATION_RECORD_METRICS_EVENT:
+				logger.debug("Metric recording started");
+				recordingMetrics = true;
+				break;
+			default:
+				throw new RuntimeException("Simulation received unknown event type");
 		}
 	}
 	
@@ -115,6 +137,14 @@ public class Simulation extends SimulationEntity {
 	
 	public long getDuration() {
 		return duration;
+	}
+	
+	public long getMetricRecordStart() {
+		return metricRecordStart;
+	}
+	
+	public long getRecordingDuration() {
+		return duration - metricRecordStart;
 	}
 	
 	public long getLastUpdate() {
@@ -135,6 +165,10 @@ public class Simulation extends SimulationEntity {
 	
 	public SimulationUpdateController getSimulationUpdateController() {
 		return simulationUpdateController;
+	}
+	
+	public boolean isRecordingMetrics() {
+		return recordingMetrics;
 	}
 	
 	/**

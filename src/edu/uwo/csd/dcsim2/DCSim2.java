@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.application.*;
-import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim2.application.workload.TwoLevelWorkload;
-import edu.uwo.csd.dcsim2.application.workload.Workload;
+import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.power.*;
@@ -26,16 +24,16 @@ public class DCSim2 {
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 
-		Simulation.getSimulation().setSimulationUpdateController(new DCSimUpdateController(dc));
+		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
 		dc.addHosts(createHosts(3));
 		
-		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < 5; ++i) {
+		for (int i = 0; i < 4; ++i) {
 			//vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", (int)(Math.random() * 80000))));
-			vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", 0)));
+			//vmList.add(new VMAllocationRequest(createVMDescTrace("traces/epa", 0)));
+			vmList.add(new VMAllocationRequest(createVMDesc(250)));
 		}
 		//vmList.add(new VMAllocationRequest(createVMDesc(200)));
 		
@@ -48,9 +46,9 @@ public class DCSim2 {
 		Migrator migrator = dcsim2.new Migrator(dc.getHosts().get(1).getVMAllocations().get(0),
 				dc.getHosts().get(1),
 				dc.getHosts().get(0));
-		Simulation.getSimulation().sendEvent(new Event(1, 450, migrator, migrator));
+		Simulation.getInstance().sendEvent(new Event(1, 450, migrator, migrator));
 		
-		Simulation.getSimulation().run(1000);
+		Simulation.getInstance().run(1000, 100);
 		
 	}
 	
@@ -82,12 +80,12 @@ public class DCSim2 {
 		return vmDescription;
 	}
 	
-	public static VMDescription createVMDesc(double firstWorkLevel, double secondWorkLevel, long switchTime) {
+	public static VMDescription createVMDesc(double workLevel) {
 		
 		//Build service
 		
 		//create workload (external)
-		Workload workload = new TwoLevelWorkload(firstWorkLevel, secondWorkLevel, switchTime);
+		Workload workload = new StaticWorkload(workLevel);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static

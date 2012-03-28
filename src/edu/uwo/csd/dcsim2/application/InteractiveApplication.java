@@ -10,11 +10,15 @@ public abstract class InteractiveApplication extends Application {
 
 	private static Logger logger = Logger.getLogger(Host.class);
 	
-	//variable to keep track of resource demand and consumption
-	protected VirtualResources resourceDemand;		//the current level of resource demand / second
-	protected VirtualResources resourceInUse;		//the current level of resource use  / second
-	protected VirtualResources totalResourceDemand;	//the total amount of resources required since the application started
-	protected VirtualResources totalResourceUsed;	//the total amount of resources used since the application started
+	//variables to keep track of resource demand and consumption
+	VirtualResources resourceDemand;		//the current level of resource demand / second
+	VirtualResources resourceInUse;			//the current level of resource use  / second
+	
+	VirtualResources resourcesDemanded; 	//the amount of resources demanded in the last period
+	VirtualResources resourcesUsed;			//the amount of resources used in the last period
+	
+	VirtualResources totalResourceDemand;	//the total amount of resources required since the application started
+	VirtualResources totalResourceUsed;		//the total amount of resources used since the application started
 
 	private double workRemaining = 0;
 	private ApplicationTier applicationTier;
@@ -26,6 +30,8 @@ public abstract class InteractiveApplication extends Application {
 		//initialize resource demand/consumption values
 		resourceDemand = new VirtualResources();
 		resourceInUse = new VirtualResources();
+		resourcesDemanded = new VirtualResources();
+		resourcesUsed = new VirtualResources();
 		totalResourceDemand = new VirtualResources();
 		totalResourceUsed = new VirtualResources();
 		
@@ -38,20 +44,20 @@ public abstract class InteractiveApplication extends Application {
 	 */
 	public void beginScheduling() {
 		//reset the resource demand and consumption values for the current interval
-		resourceDemand = new VirtualResources();
-		resourceInUse = new VirtualResources();
+		resourcesDemanded = new VirtualResources();
+		resourcesUsed = new VirtualResources();
 		
 		//calculate overhead for scheduling period
 		overheadRemaining = new VirtualResources();
 		
-		long elapsedTime = Simulation.getSimulation().getElapsedTime();
+		long elapsedTime = Simulation.getInstance().getElapsedTime();
 		overheadRemaining.setCpu(overhead.getCpu() * (elapsedTime / 1000.0));
 		overheadRemaining.setBandwidth(overhead.getBandwidth() * (elapsedTime / 1000.0));
 		overheadRemaining.setMemory(overhead.getMemory());
 		overheadRemaining.setStorage(overhead.getStorage());
 		
 		//application overhead is included in resourceDemand
-		resourceDemand = resourceDemand.add(overheadRemaining);
+		resourcesDemanded = resourcesDemanded.add(overheadRemaining);
 	}
 
 	public void updateResourceDemand() {
@@ -61,7 +67,7 @@ public abstract class InteractiveApplication extends Application {
 		
 		//if there is incoming work, calculate the resources required to perform it and add it to resourceDemand
 		if (incomingWork > 0) {
-			resourceDemand = resourceDemand.add(calculateRequiredResources(incomingWork));
+			resourcesDemanded = resourcesDemanded.add(calculateRequiredResources(incomingWork));
 		}
 	}
 	
@@ -119,26 +125,28 @@ public abstract class InteractiveApplication extends Application {
 		resourcesConsumed = resourcesConsumed.add(completedWork.resourcesConsumed);
 		
 		//add resourcesConsumed to resourcesInUse, which is keeping track of all resources used during this time interval
-		resourceInUse = resourceInUse.add(resourcesConsumed);
+		resourcesUsed = resourcesUsed.add(resourcesConsumed);
 		
 		return resourcesConsumed;
 	}
-	
+
 	/*
 	 * Called once at the end of scheduling
 	 */
 	public void completeScheduling() {
 
-		//add resource demand and use for this time interval to total values
-		totalResourceDemand = totalResourceDemand.add(resourceDemand);
-		totalResourceUsed = totalResourceUsed.add(resourceInUse);
-		
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
-		resourceDemand.setCpu(resourceDemand.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		resourceDemand.setBandwidth(resourceDemand.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		resourceDemand = new VirtualResources();
+		resourceDemand.setCpu(resourcesDemanded.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setMemory(resourcesDemanded.getMemory());
+		resourceDemand.setStorage(resourcesDemanded.getStorage());
 		
-		resourceInUse.setCpu(resourceInUse.getCpu() / (Simulation.getSimulation().getElapsedTime() / 1000d));
-		resourceInUse.setBandwidth(resourceInUse.getBandwidth() / (Simulation.getSimulation().getElapsedTime() / 1000d));
+		resourceInUse = new VirtualResources();
+		resourceInUse.setCpu(resourcesUsed.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setMemory(resourcesUsed.getMemory());
+		resourceInUse.setStorage(resourcesUsed.getStorage());
 		
 		//clear work remaining (i.e. drop requests that could not be fulfilled)
 		workRemaining = 0;
@@ -146,10 +154,14 @@ public abstract class InteractiveApplication extends Application {
 	
 	@Override
 	public void updateMetrics() {
-		globalResourceDemand = globalResourceDemand.add(resourceDemand);
-		globalResourceUsed = globalResourceUsed.add(resourceInUse);
+		//add resource demand and use for this time interval to total values
+		totalResourceDemand = totalResourceDemand.add(resourcesDemanded);
+		totalResourceUsed = totalResourceUsed.add(resourcesUsed);
+		
+		globalResourceDemand = globalResourceDemand.add(resourcesDemanded);
+		globalResourceUsed = globalResourceUsed.add(resourcesUsed);
 	}
-	
+
 	protected abstract VirtualResources calculateRequiredResources(double work);
 	protected abstract CompletedWork performWork(VirtualResources resourcesAvailable, double workRemaining);
 	

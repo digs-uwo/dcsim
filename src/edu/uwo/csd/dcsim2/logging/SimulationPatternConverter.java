@@ -14,7 +14,7 @@ public class SimulationPatternConverter extends PatternConverter {
 	
 	@Override
     protected String convert(LoggingEvent evt) { 
-        return Long.toString((Simulation.getSimulation().getSimulationTime())); 
+        return Long.toString((Simulation.getInstance().getSimulationTime())); 
     } 
 	
 }

@@ -259,13 +259,13 @@ public class Host extends SimulationEntity {
 	 */
 	public void sendMigrationEvent(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
 		Event e = new Event(Host.HOST_MIGRATE_EVENT, 
-				Simulation.getSimulation().getSimulationTime(),
+				Simulation.getInstance().getSimulationTime(),
 				source, 
 				this);
 		e.getData().put("vmAllocationRequest", vmAllocationRequest);
 		e.getData().put("vm", vm);
 		e.getData().put("source", source);
-		Simulation.getSimulation().sendEvent(e);
+		Simulation.getInstance().sendEvent(e);
 	}
 	
 	/**
@@ -299,12 +299,12 @@ public class Host extends SimulationEntity {
 		
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
-				Simulation.getSimulation().getSimulationTime() + timeToMigrate,
+				Simulation.getInstance().getSimulationTime() + timeToMigrate,
 				this, this);
 		e.getData().put("vmAllocation", newAllocation);
 		e.getData().put("vm", vm);
 		e.getData().put("source", source);
-		Simulation.getSimulation().sendEvent(e);
+		Simulation.getInstance().sendEvent(e);
 	}
 	
 	public void migrateOut(VM vm) {
@@ -366,10 +366,10 @@ public class Host extends SimulationEntity {
 	public void suspend() {
 		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
-			long delay = Long.parseLong(Simulation.getSimulation().getProperty("hostSuspendDelay"));
-			Simulation.getSimulation().sendEvent(
+			long delay = Long.parseLong(Simulation.getInstance().getProperty("hostSuspendDelay"));
+			Simulation.getInstance().sendEvent(
 					new Event(Host.HOST_COMPLETE_SUSPEND_EVENT,
-							Simulation.getSimulation().getSimulationTime() + delay,
+							Simulation.getInstance().getSimulationTime() + delay,
 							this, this));
 		}
 	}
@@ -377,10 +377,10 @@ public class Host extends SimulationEntity {
 	public void powerOff() {
 		if (state != HostState.OFF && state != HostState.POWERING_OFF) {
 			state = HostState.POWERING_OFF;
-			long delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOffDelay"));
-			Simulation.getSimulation().sendEvent(
+			long delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
+			Simulation.getInstance().sendEvent(
 					new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
-							Simulation.getSimulation().getSimulationTime() + delay,
+							Simulation.getInstance().getSimulationTime() + delay,
 							this, this));
 		}
 	}
@@ -391,27 +391,27 @@ public class Host extends SimulationEntity {
 			long delay = 0;
 			switch (state) {
 				case SUSPENDED:
-					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 				case OFF:
-					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case FAILED:					
-					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromFailedDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromFailedDelay"));
 					break;
 				case POWERING_OFF:
-					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOffOffDelay"));
-					delay += Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffOffDelay"));
+					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case SUSPENDING:
-					delay = Long.parseLong(Simulation.getSimulation().getProperty("hostSuspendDelay"));
-					delay += Long.parseLong(Simulation.getSimulation().getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostSuspendDelay"));
+					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 			}
 
-			Simulation.getSimulation().sendEvent(
+			Simulation.getInstance().sendEvent(
 				new Event(Host.HOST_COMPLETE_POWER_ON_EVENT,
-						Simulation.getSimulation().getSimulationTime() + delay,
+						Simulation.getInstance().getSimulationTime() + delay,
 						this, this));
 		}
 	}
@@ -465,14 +465,14 @@ public class Host extends SimulationEntity {
 		if (state == HostState.ON) {
 			++currentActiveHosts;
 			
-			timeActive += Simulation.getSimulation().getElapsedTime();
-			globalTimeActive += Simulation.getSimulation().getElapsedTime();
+			timeActive += Simulation.getInstance().getElapsedTime();
+			globalTimeActive += Simulation.getInstance().getElapsedTime();
 			
-			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
-			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getSimulation().getElapsedTime();
+			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
+			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
 			
-			powerConsumed += getCurrentPowerConsumption() * Simulation.getSimulation().getElapsedSeconds();
-			globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getSimulation().getElapsedSeconds(); 
+			powerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
+			globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds(); 
 		}
 		
 		for (VMAllocation vmAllocation : vmAllocations) {

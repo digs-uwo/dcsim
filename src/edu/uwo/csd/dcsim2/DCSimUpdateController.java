@@ -15,7 +15,9 @@ public class DCSimUpdateController implements SimulationUpdateController {
 
 	private static Logger logger = Logger.getLogger(DCSimUpdateController.class);
 	
-	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();;
+	public static final int DCSIM_UPDATE_CONTROLLER_RECORD_METRICS = 1;
+	
+	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
 	
 	public DCSimUpdateController(DataCentre dc) {
 		addDatacentre(dc);
@@ -39,11 +41,13 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
 		
 		for (DataCentre dc : datacentres) {
-			dc.updateMetrics();
+			if (Simulation.getInstance().isRecordingMetrics())
+				dc.updateMetrics();
 			dc.logInfo();
 		}
 		
-		Host.updateGlobalMetrics();
+		if (Simulation.getInstance().isRecordingMetrics())
+			Host.updateGlobalMetrics();
 		
 		//finalize workloads (print logs, calculate stats)
 		Workload.logAllWorkloads();
@@ -56,7 +60,7 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		logger.info("Total Power [" + (Host.getGlobalPowerConsumed() / 3600000d) + "kWh]");
 		logger.info("Average CPU Utilization [" + Host.getGlobalAverageUtilization() + "]");
 		logger.info("Host-Hours [" + (Host.getGlobalTimeActive() / 36000d) + "]");
-		logger.info("Average Hosts [" + ((double)Host.getGlobalTimeActive() / (double)Simulation.getSimulation().getDuration()) + "]");
+		logger.info("Average Hosts [" + ((double)Host.getGlobalTimeActive() / (double)Simulation.getInstance().getRecordingDuration()) + "]");
 		logger.info("Min Hosts [" + Host.getMinActiveHosts() + "]");
 		logger.info("Max Hosts [" + Host.getMaxActiveHosts() + "]");
 		
