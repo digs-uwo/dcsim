@@ -60,7 +60,7 @@ public class DCSim2 {
 		Workload workload = new TraceWorkload(fileName, 1000, offset);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static
+		WebServerTier webServerTier = new WebServerTier(1024, 1024, 1, 1, 100); //1GB RAM, 1GB Storage, static
 		webServerTier.setWorkTarget(workload);
 		
 		//add a load balancer to the tier, if necessary
@@ -88,7 +88,7 @@ public class DCSim2 {
 		Workload workload = new StaticWorkload(workLevel);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(1024, 1024); //1GB RAM, 1GB Storage, static
+		WebServerTier webServerTier = new WebServerTier(1024, 1024, 1, 1, 100); //1GB RAM, 1GB Storage, static
 		webServerTier.setWorkTarget(workload);
 		
 		//add a load balancer to the tier, if necessary

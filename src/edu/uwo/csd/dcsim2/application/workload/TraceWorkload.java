@@ -58,12 +58,12 @@ public class TraceWorkload extends Workload {
 				
 				//read first line, which should contain the step size
 				line = input.readLine();
-				stepSize = Long.parseLong(line);
+				stepSize = Long.parseLong(line) * 1000; //file is in seconds, simulation runs in ms
 				
 				int seperator;
 				while ((line = input.readLine()) != null) {
 					seperator = line.indexOf(',');
-					times.add(Long.parseLong(line.substring(0, seperator).trim()));
+					times.add(Long.parseLong(line.substring(0, seperator).trim()) * 1000); //file is in seconds, simulation runs in ms
 					values.add(Double.parseDouble(line.substring(seperator + 1).trim()));
 				}
 				

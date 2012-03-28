@@ -23,7 +23,7 @@ public class VmmApplication extends Application {
 	public void beginScheduling() {
 		long elapsedTime = Simulation.getInstance().getElapsedTime();
 		
-		double cpu = 0;
+		double cpu = 300;
 		double bandwidth = 0;
 		for (VM migrating : migratingVms) {
 			

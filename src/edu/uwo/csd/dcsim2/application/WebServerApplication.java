@@ -4,19 +4,20 @@ import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
 public class WebServerApplication extends InteractiveApplication {
 
-	private static final double CPU_PER_WORK = 1;
-	private static final double BW_PER_WORK = 15;
-	
+	private double cpuPerWork;
+	private double bwPerWork;
 	private int memory;
 	private long storage;
 	
-	public WebServerApplication(ApplicationTier applicationTier, int memory, long storage) {
+	public WebServerApplication(ApplicationTier applicationTier, int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
 		super(applicationTier);
 		this.memory = memory;
 		this.storage = storage;
+		this.cpuPerWork = cpuPerWork;
+		this.bwPerWork = bwPerWork;
 		
 		VirtualResources overhead = new VirtualResources();
-		overhead.setCpu(100);
+		overhead.setCpu(cpuOverhead);
 		this.setOverhead(overhead);
 	}
 
@@ -25,10 +26,10 @@ public class WebServerApplication extends InteractiveApplication {
 		
 		VirtualResources requiredResources = new VirtualResources();
 		
-		double requiredCpu = work * CPU_PER_WORK;
+		double requiredCpu = work * cpuPerWork;
 		requiredResources.setCpu(requiredCpu);
 		
-		double requiredBandwidth = work * BW_PER_WORK; 
+		double requiredBandwidth = work * bwPerWork; 
 		requiredResources.setBandwidth(requiredBandwidth);
 		
 		requiredResources.setMemory(memory);
@@ -47,14 +48,14 @@ public class WebServerApplication extends InteractiveApplication {
 		 * amount of work possible for each assuming the other is infinite,
 		 * and the minimum of the two is the amount of work completed
 		 */
-		cpuWork = resourcesAvailable.getCpu() / CPU_PER_WORK;
-		bwWork = resourcesAvailable.getBandwidth() / BW_PER_WORK;
+		cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
+		bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
 		double workCompleted = Math.min(cpuWork, bwWork);
 		workCompleted = Math.min(workCompleted, workRemaining);
 		
 		//calculate cpu and bw consumption based on amount of work completed
-		double cpuConsumed = workCompleted * CPU_PER_WORK;
-		double bandwidthConsumed = workCompleted * BW_PER_WORK;
+		double cpuConsumed = workCompleted * cpuPerWork;
+		double bandwidthConsumed = workCompleted * bwPerWork;
 		
 		VirtualResources resourcesConsumed = new VirtualResources();
 		resourcesConsumed.setCpu(cpuConsumed);

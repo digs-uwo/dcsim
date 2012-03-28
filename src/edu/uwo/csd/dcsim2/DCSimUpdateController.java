@@ -8,6 +8,7 @@ import edu.uwo.csd.dcsim2.application.Application;
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationUpdateController;
+import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
 
@@ -59,18 +60,18 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		
 		logger.info("Total Power [" + (Host.getGlobalPowerConsumed() / 3600000d) + "kWh]");
 		logger.info("Average CPU Utilization [" + Host.getGlobalAverageUtilization() + "]");
-		logger.info("Host-Hours [" + (Host.getGlobalTimeActive() / 36000d) + "]");
+		logger.info("Host-Hours [" + (Host.getGlobalTimeActive() / 3600000d) + "]");
 		logger.info("Average Hosts [" + ((double)Host.getGlobalTimeActive() / (double)Simulation.getInstance().getRecordingDuration()) + "]");
 		logger.info("Min Hosts [" + Host.getMinActiveHosts() + "]");
 		logger.info("Max Hosts [" + Host.getMaxActiveHosts() + "]");
 		
 		double underProvision;
 		underProvision = (Application.getGlobalResourceDemand().getCpu() - Application.getGlobalResourceUsed().getCpu()) / Application.getGlobalResourceDemand().getCpu();
-		logger.info("CPU Underprovision [" + (underProvision * 100) + "%]");
+		logger.info("CPU Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
 		underProvision = (Application.getGlobalResourceDemand().getBandwidth() - Application.getGlobalResourceUsed().getBandwidth()) / Application.getGlobalResourceDemand().getBandwidth();
-		logger.info("BW Underprovision [" + (underProvision * 100) + "%]");
+		logger.info("BW Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
 		
-		logger.info("Total Work [" + Workload.getGlobalCompletedWork() + "/" + Workload.getGlobalTotalWork() + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
+		logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
 	}
 
 }

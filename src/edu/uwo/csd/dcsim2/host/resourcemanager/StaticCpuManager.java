@@ -20,6 +20,8 @@ public class StaticCpuManager extends CpuManager {
 			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
 				requiredCapacity += coreCapacity;
 			}
+		} else {
+			throw new RuntimeException("CPU hasCapacity request did not include a requested cpu allocation");
 		}
 		
 		return requiredCapacity <= getAvailableCpu();
@@ -34,15 +36,15 @@ public class StaticCpuManager extends CpuManager {
 				newAlloc.getCoreAlloc().add(coreCapacity);
 			}
 			vmAllocation.setCpuAllocation(newAlloc);
-			allocationMap.put(vmAllocation, newAlloc);			
+			allocationMap.put(vmAllocation, newAlloc);
 		}
 	}
 	
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 
-		if (getAvailableCpu() >= 200) {
-			CpuAllocation newAlloc = new CpuAllocation(1, 200);
+		if (getAvailableCpu() >= 500) { //500 allows for 300 for the VMM and 200 for 2 migrations
+			CpuAllocation newAlloc = new CpuAllocation(1, 500);
 			privDomainAllocation.setCpuAllocation(newAlloc);
 			setPrivDomainAllocation(privDomainAllocation);
 		} else {
