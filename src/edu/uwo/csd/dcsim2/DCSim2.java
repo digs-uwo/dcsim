@@ -48,7 +48,7 @@ public class DCSim2 {
 				dc.getHosts().get(0));
 		Simulation.getInstance().sendEvent(new Event(1, 450, migrator, migrator));
 		
-		Simulation.getInstance().run(1000, 100);
+		Simulation.getInstance().run(1000, 0);
 		
 	}
 	

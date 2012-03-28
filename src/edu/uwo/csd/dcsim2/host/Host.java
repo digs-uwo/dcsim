@@ -34,9 +34,9 @@ public class Host extends SimulationEntity {
 	
 	private int id;
 	private ArrayList<Cpu> cpus;
-	private int memory;	
-	private int bandwidth; 
-	private long storage;
+	private int memory;	//in MB
+	private int bandwidth; //in KB
+	private long storage; //in MB
 	
 	private CpuManager cpuManager;
 	private MemoryManager memoryManager;
