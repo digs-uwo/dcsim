@@ -12,6 +12,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(VMPlacementPolicyFFD.class);
 	
 	@Override
@@ -76,7 +77,13 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 	private Host findTargetHost(VMAllocationRequest vmAllocationRequest, ArrayList<Host> sortedHosts) {
 
 		for (Host host : sortedHosts) {
-			if (host.hasCapacity(vmAllocationRequest)) {
+			/* check allocations individually in order to override the CPU Manager's hasCapacity method to
+			 * for the CPU Manager to NOT oversubscribe the initial vm placement
+			 */
+			if (host.getMemoryManager().hasCapacity(vmAllocationRequest)
+					&& host.getBandwidthManager().hasCapacity(vmAllocationRequest)
+					&& host.getStorageManager().hasCapacity(vmAllocationRequest)
+					&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpuAllocation().getTotalAlloc()) {
 				return host;
 			}
 		}

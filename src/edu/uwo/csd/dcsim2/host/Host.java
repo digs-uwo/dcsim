@@ -445,7 +445,7 @@ public class Host extends SimulationEntity {
 	public void logInfo() {
 		if (state == HostState.ON) {
 			logger.debug("Host #" + getId() + 
-					" CPU[" + (int)Math.round(cpuManager.getPhysicalCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalPhysicalCpu() + "] " +
+					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
 					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
 		} else {
 			logger.debug("Host #" + getId() + " " + state);

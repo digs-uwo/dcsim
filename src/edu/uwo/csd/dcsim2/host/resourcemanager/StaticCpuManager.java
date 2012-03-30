@@ -17,7 +17,7 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity
-		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > this.getTotalPhysicalCpu())
+		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > this.getTotalCpu())
 			return false;
 		
 		return true;
@@ -25,14 +25,7 @@ public class StaticCpuManager extends CpuManager {
 
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		int requiredCapacity = 0;
-		if (vmAllocationRequest.getCpuAllocation() != null) {
-			requiredCapacity = vmAllocationRequest.getCpuAllocation().getTotalAlloc();
-		} else {
-			throw new RuntimeException("CPU hasCapacity request did not include a requested cpu allocation");
-		}
-		
-		return requiredCapacity <= this.getAvailableAllocation();
+		return vmAllocationRequest.getCpuAllocation().getTotalAlloc() <= this.getAvailableAllocation();
 	}
 
 	@Override
@@ -70,12 +63,5 @@ public class StaticCpuManager extends CpuManager {
 	public void updateAllocations() {
 		//do nothing, allocation is static
 	}
-
-	@Override
-	public int getTotalAllocationSize() {
-		return (int)Math.round(this.getTotalPhysicalCpu() * oversubscribeFactor);
-	}
-
-
 
 }

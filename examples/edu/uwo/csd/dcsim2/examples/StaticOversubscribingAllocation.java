@@ -91,7 +91,7 @@ public class StaticOversubscribingAllocation {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticCpuManager(2),
+					new StaticCpuManager(),
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),

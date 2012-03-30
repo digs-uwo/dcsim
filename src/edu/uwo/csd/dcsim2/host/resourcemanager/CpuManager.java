@@ -19,7 +19,7 @@ public abstract class CpuManager extends ResourceManager {
 	 * Get the total physical CPU capacity of the host (total capacity of all CPUs and cores)
 	 * @return
 	 */
-	public int getTotalPhysicalCpu() {
+	public int getTotalCpu() {
 		int totalCpu = 0;
 		for (Cpu cpu : getHost().getCpus()) {
 			totalCpu += cpu.getCores() * cpu.getCoreCapacity();
@@ -28,10 +28,10 @@ public abstract class CpuManager extends ResourceManager {
 	}
 	
 	/**
-	 * Get the amount of physical CPU capacity in use (actively being used, not allocated)
+	 * Get the amount of physical CPU capacity in use (real usage, not allocation)
 	 * @return
 	 */
-	public double getPhysicalCpuInUse() {
+	public double getCpuInUse() {
 		double cpuInUse = 0;
 		
 		if (privDomainAllocation != null) {
@@ -46,23 +46,24 @@ public abstract class CpuManager extends ResourceManager {
 	}
 	
 	/**
-	 * Get the fraction of physical CPU capacity that is current in use (actively being used, not allocated)
+	 * Get the fraction of physical CPU capacity that is current in use (real usage, not allocation)
 	 * @return
 	 */
 	public double getCpuUtilization() {
-		return getPhysicalCpuInUse() / getTotalPhysicalCpu();
+		return getCpuInUse() / getTotalCpu();
+	}
+	
+	/**
+	 * Get the amount of CPU not be used (real usage, not allocation)
+	 * @return
+	 */
+	public double getUnusedCpu() {
+		return getTotalCpu() - getCpuUtilization();
 	}
 	
 	/*
-	 * CPU Allocation related methods
+	 * CPU Allocation methods
 	 */
-	
-	/**
-	 * Get the total size of the allocation space of the CPU. This may be larger than the physical capacity
-	 * of the CPU to allow for oversubscription.
-	 * @return
-	 */
-	public abstract int getTotalAllocationSize();
 	
 	/**
 	 * Get the total amount of CPU that has been allocated. This value may be larger than the physical CPU
@@ -90,17 +91,9 @@ public abstract class CpuManager extends ResourceManager {
 	 * @return
 	 */
 	public int getAvailableAllocation() {
-		return getTotalAllocationSize() - getAllocatedCpu();
+		return getTotalCpu() - getAllocatedCpu();
 	}
-	
-	/**
-	 * Get the fraction of the allocation space that has been allocated
-	 * @return
-	 */
-	public double getCpuAllocation() {
-		return getAllocatedCpu() / getTotalAllocationSize();
-	}
-	
+		
 	public VMAllocation getPrivDomainAllocation() {
 		return privDomainAllocation;
 	}
