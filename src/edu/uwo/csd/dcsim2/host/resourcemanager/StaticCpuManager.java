@@ -4,10 +4,20 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
 	
+	double oversubscribeFactor = 1;
+	
+	public StaticCpuManager() {
+		super();
+	}
+	
+	public StaticCpuManager(double oversubscribeFactor) {
+		this.oversubscribeFactor = oversubscribeFactor;
+	}
+	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity
-		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > getTotalCpu())
+		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > this.getTotalPhysicalCpu())
 			return false;
 		
 		return true;
@@ -17,14 +27,12 @@ public class StaticCpuManager extends CpuManager {
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		int requiredCapacity = 0;
 		if (vmAllocationRequest.getCpuAllocation() != null) {
-			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
-				requiredCapacity += coreCapacity;
-			}
+			requiredCapacity = vmAllocationRequest.getCpuAllocation().getTotalAlloc();
 		} else {
 			throw new RuntimeException("CPU hasCapacity request did not include a requested cpu allocation");
 		}
 		
-		return requiredCapacity <= getAvailableCpu();
+		return requiredCapacity <= this.getAvailableAllocation();
 	}
 
 	@Override
@@ -43,7 +51,7 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 
-		if (getAvailableCpu() >= 500) { //500 allows for 300 for the VMM and 200 for 2 migrations
+		if (this.getAvailableAllocation() >= 500) { //500 allows for 300 for the VMM and 200 for 2 migrations
 			CpuAllocation newAlloc = new CpuAllocation(1, 500);
 			privDomainAllocation.setCpuAllocation(newAlloc);
 			setPrivDomainAllocation(privDomainAllocation);
@@ -61,6 +69,11 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public void updateAllocations() {
 		//do nothing, allocation is static
+	}
+
+	@Override
+	public int getTotalAllocationSize() {
+		return (int)Math.round(this.getTotalPhysicalCpu() * oversubscribeFactor);
 	}
 
 

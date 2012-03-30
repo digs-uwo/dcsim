@@ -4,18 +4,24 @@ import java.util.Comparator;
 
 import edu.uwo.csd.dcsim2.host.*;
 
+/**
+ * Ranks hosts by the amount of available cpu allocation. This is in cpu capacity units, not as a percentage,
+ * to accommodate heterogeneous hosts.
+ * @author michael
+ *
+ */
 public class HostCpuAllocationComparator implements Comparator<Host>  {
 
 	@Override
 	public int compare(Host arg0, Host arg1) {
-		double compare = arg0.getCpuManager().getCpuAllocation() - arg1.getCpuManager().getCpuAllocation(); 
+		double compare = arg0.getCpuManager().getAllocatedCpu() - arg1.getCpuManager().getAllocatedCpu(); 
 		if (compare < 0)
 			return -1;
 		else if (compare > 0)
 			return 1;
 		else {
-			if (arg0.getCpuManager().getCpuAllocation() == 0) {
-				//if both hosts have 0% utilization, order by whether the host is on, suspended, or off
+			if (arg0.getVMAllocations().size() == 0) {
+				//if both hosts have no VMs, order by whether the host is on, suspended, or off
 				int arg0State;
 				int arg1State;
 				

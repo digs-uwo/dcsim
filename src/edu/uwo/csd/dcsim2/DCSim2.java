@@ -14,6 +14,11 @@ import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.management.*;
 
+/**
+ * The future home of the simulation front end
+ * @author michael
+ *
+ */
 public class DCSim2 {
 
 	public static void main(String args[]) {

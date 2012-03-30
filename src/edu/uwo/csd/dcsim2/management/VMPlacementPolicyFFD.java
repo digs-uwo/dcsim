@@ -60,7 +60,7 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 					);
 		}
 		
-		logger.debug("Submitted VM to Host #" + host.getId());
+		//logger.debug("Submitted VM to Host #" + host.getId());
 		host.submitVM(vmAllocationRequest);
 	}
 
