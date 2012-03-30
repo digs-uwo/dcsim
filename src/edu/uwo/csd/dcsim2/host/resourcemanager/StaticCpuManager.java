@@ -4,16 +4,6 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
 	
-	double oversubscribeFactor = 1;
-	
-	public StaticCpuManager() {
-		super();
-	}
-	
-	public StaticCpuManager(double oversubscribeFactor) {
-		this.oversubscribeFactor = oversubscribeFactor;
-	}
-	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity

@@ -33,7 +33,7 @@ public class StaticOversubscribingAllocation {
 		logger.info(StaticOversubscribingAllocation.class.toString());
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
@@ -58,7 +58,7 @@ public class StaticOversubscribingAllocation {
 		}
 		Collections.shuffle(vmList);
 //		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-//		for (int i = 0; i < 8; ++i) {
+//		for (int i = 0; i < 12; ++i) {
 //			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", (int)(Math.random() * 200000000))));
 //		}
 		
@@ -91,7 +91,7 @@ public class StaticOversubscribingAllocation {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticCpuManager(),
+					new StaticOversubscribingCpuManager(),
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),
