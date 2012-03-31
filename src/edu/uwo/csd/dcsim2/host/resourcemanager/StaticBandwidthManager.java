@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
+import java.util.ArrayList;
+
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticBandwidthManager extends BandwidthManager {
@@ -13,17 +15,32 @@ public class StaticBandwidthManager extends BandwidthManager {
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		return vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc() <= getAvailableBandwidth();
 	}
+	
+	@Override
+	public boolean hasCapacity(
+			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+		
+		int totalAlloc = 0;
+		
+		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
+			totalAlloc += allocationRequest.getBandwidthAllocation().getBandwidthAlloc();
+		
+		return totalAlloc <= getAvailableBandwidth();
+	}
 
 	@Override
-	public void allocateResource(VMAllocationRequest vmAllocationRequest,
+	public boolean allocateResource(VMAllocationRequest vmAllocationRequest,
 			VMAllocation vmAllocation) {
 		
 		if (hasCapacity(vmAllocationRequest)) {
 			BandwidthAllocation newAlloc = new BandwidthAllocation(vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc());
 			vmAllocation.setBandwidthAllocation(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
+			
+			return true;
 		}
 		
+		return false;
 	}
 
 	@Override
@@ -46,6 +63,8 @@ public class StaticBandwidthManager extends BandwidthManager {
 			this.privDomainAllocation = privDomainAllocation;
 		}
 	}
+
+
 
 
 }

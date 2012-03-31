@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
+import java.util.ArrayList;
+
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
@@ -19,7 +21,19 @@ public class StaticCpuManager extends CpuManager {
 	}
 
 	@Override
-	public void allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation) {
+	public boolean hasCapacity(
+			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+		
+		double totalAlloc = 0;
+		
+		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
+			totalAlloc += allocationRequest.getCpuAllocation().getTotalAlloc();
+		
+		return totalAlloc <= this.getAvailableAllocation();
+	}
+	
+	@Override
+	public boolean allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation) {
 
 		if (hasCapacity(vmAllocationRequest)) {
 			CpuAllocation newAlloc = new CpuAllocation();
@@ -28,7 +42,11 @@ public class StaticCpuManager extends CpuManager {
 			}
 			vmAllocation.setCpuAllocation(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
+			
+			return true;
 		}
+		
+		return false;
 	}
 	
 	@Override
@@ -53,5 +71,7 @@ public class StaticCpuManager extends CpuManager {
 	public void updateAllocations() {
 		//do nothing, allocation is static
 	}
+
+	
 
 }

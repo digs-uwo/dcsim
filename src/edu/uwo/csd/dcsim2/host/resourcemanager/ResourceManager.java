@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
+import java.util.ArrayList;
+
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.*;
 
@@ -30,7 +32,14 @@ public abstract class ResourceManager {
 	 */
 	public abstract boolean hasCapacity(VMAllocationRequest vmAllocationRequest);
 	
-	public abstract void allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation);
+	/**
+	 * Determine if the Host has enough remaining capacity to host a set of VMs
+	 * @param vmAllocationRequests
+	 * @return
+	 */
+	public abstract boolean hasCapacity(ArrayList<VMAllocationRequest> vmAllocationRequests);
+	
+	public abstract boolean allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation);
 	public abstract void deallocateResource(VMAllocation vmAllocation);
 	public abstract void updateAllocations();
 	public abstract void allocatePrivDomain(VMAllocation privDomainAllocation);

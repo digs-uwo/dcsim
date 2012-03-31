@@ -43,6 +43,8 @@ public class VM extends SimulationEntity {
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
 		//calculate bandwidth available over the period
+		if (vmAllocation.getBandwidthAllocation() == null)
+			throw new RuntimeException("bandwidth allocation is null on VM#" +  this.getId() + " ");
 		resourcesAvailable.setBandwidth(vmAllocation.getBandwidthAllocation().getBandwidthAlloc() * (timeElapsed / 1000.0)); //bandwidth is in MB/s, time is in ms
 		
 		resourcesAvailable.setMemory(vmAllocation.getMemoryAllocation().getMemoryAlloc());

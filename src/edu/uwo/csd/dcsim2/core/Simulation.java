@@ -2,6 +2,8 @@ package edu.uwo.csd.dcsim2.core;
 
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim2.host.Host;
+
 import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
@@ -82,6 +84,7 @@ public class Simulation extends SimulationEntity {
 		
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			e = eventQueue.poll();
+				
 			if (e.getTime() >= simulationTime) {
 				
 				//check if simulationTime is advancing

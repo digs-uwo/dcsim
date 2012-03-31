@@ -10,7 +10,9 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationUpdateController;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
+import edu.uwo.csd.dcsim2.host.scheduler.FairShareCpuScheduler;
 import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
+import edu.uwo.csd.dcsim2.management.VMRelocationPolicy;
 
 public class DCSimUpdateController implements SimulationUpdateController {
 
@@ -51,7 +53,7 @@ public class DCSimUpdateController implements SimulationUpdateController {
 			Host.updateGlobalMetrics();
 		
 		//finalize workloads (print logs, calculate stats)
-		Workload.logAllWorkloads();
+		//Workload.logAllWorkloads();
 	}
 
 	@Override
@@ -68,8 +70,12 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		double underProvision;
 		underProvision = (Application.getGlobalResourceDemand().getCpu() - Application.getGlobalResourceUsed().getCpu()) / Application.getGlobalResourceDemand().getCpu();
 		logger.info("CPU Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
-		underProvision = (Application.getGlobalResourceDemand().getBandwidth() - Application.getGlobalResourceUsed().getBandwidth()) / Application.getGlobalResourceDemand().getBandwidth();
-		logger.info("BW Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
+//		underProvision = (Application.getGlobalResourceDemand().getBandwidth() - Application.getGlobalResourceUsed().getBandwidth()) / Application.getGlobalResourceDemand().getBandwidth();
+//		logger.info("BW Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
+		
+		logger.info("VMRelocationPolicy migrations: " + VMRelocationPolicy.getMigrationCount());
+		
+		logger.info("ProcessVM Count: " + FairShareCpuScheduler.count);
 		
 		logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
 	}

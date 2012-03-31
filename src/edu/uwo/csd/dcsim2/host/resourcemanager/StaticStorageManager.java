@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
+import java.util.ArrayList;
+
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticStorageManager extends StorageManager {
@@ -13,16 +15,32 @@ public class StaticStorageManager extends StorageManager {
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		return vmAllocationRequest.getStorageAllocation().getStorageAlloc() <= getAvailableStorage();
 	}
+	
+	@Override
+	public boolean hasCapacity(
+			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+
+		long totalAlloc = 0;
+		
+		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
+			totalAlloc += allocationRequest.getStorageAllocation().getStorageAlloc();
+
+		return totalAlloc <= getAvailableStorage();
+	}
 
 	@Override
-	public void allocateResource(VMAllocationRequest vmAllocationRequest,
+	public boolean allocateResource(VMAllocationRequest vmAllocationRequest,
 			VMAllocation vmAllocation) {
 		
 		if (hasCapacity(vmAllocationRequest)) {
 			StorageAllocation newAlloc = new StorageAllocation(vmAllocationRequest.getStorageAllocation().getStorageAlloc());
 			vmAllocation.setStorageAllocation(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
+			
+			return true;
 		}
+		
+		return false;
 	}
 
 	@Override
@@ -43,6 +61,8 @@ public class StaticStorageManager extends StorageManager {
 		privDomainAllocation.setStorageAllocation(newAlloc);
 		this.privDomainAllocation = privDomainAllocation;
 	}
+
+
 
 	
 	

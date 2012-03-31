@@ -52,6 +52,7 @@ public class Host extends SimulationEntity {
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
+	private boolean powerOffAfterMigrations = false;
 	
 	/*
 	 * Simulation metrics
@@ -124,7 +125,7 @@ public class Host extends SimulationEntity {
 		/**if the Host is in the process of powering on, queue any received events. This effectively
 		 * simulates the event sender retrying until the host has powered on, in a simplified fashion.
 		 */
-		if (state == Host.HostState.POWERING_ON) {
+		if (state == Host.HostState.POWERING_ON && e.getType() != HOST_COMPLETE_POWER_ON_EVENT) {
 			powerOnEventQueue.add(e);
 			return;
 		}
@@ -190,8 +191,14 @@ public class Host extends SimulationEntity {
 	
 	public void submitVM(VMAllocationRequest vmAllocationRequest) {
 		
+		VMAllocation newAllocation;
+		
 		//create new allocation & allocate it resources
-		VMAllocation newAllocation = allocate(vmAllocationRequest);
+		try {
+			newAllocation = allocate(vmAllocationRequest);
+		} catch (AllocationFailedException e) {
+			throw new RuntimeException("Could not allocate submitted VM", e);
+		}
 		
 		//add the allocation to the Host list of allocations
 		vmAllocations.add(newAllocation);
@@ -219,20 +226,31 @@ public class Host extends SimulationEntity {
 				storageManager.hasCapacity(vmAllocationRequest);
 	}
 	
-	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) {
+	public boolean hasCapacity(ArrayList<VMAllocationRequest> vmAllocationRequests) {
+		return cpuManager.hasCapacity(vmAllocationRequests) &&
+				memoryManager.hasCapacity(vmAllocationRequests) &&
+				bandwidthManager.hasCapacity(vmAllocationRequests) &&
+				storageManager.hasCapacity(vmAllocationRequests);
+	}
+	
+	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) throws AllocationFailedException {
 		VMAllocation vmAllocation = new VMAllocation(vmAllocationRequest.getVMDescription(), this);
 		
 		//allocate CPU
-		cpuManager.allocateResource(vmAllocationRequest, vmAllocation);
+		if (!cpuManager.allocateResource(vmAllocationRequest, vmAllocation))
+			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on CPU");
 		
 		//allocate memory
-		memoryManager.allocateResource(vmAllocationRequest, vmAllocation);
+		if (!memoryManager.allocateResource(vmAllocationRequest, vmAllocation))
+			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on memory");
 		
 		//allocate bandwidth
-		bandwidthManager.allocateResource(vmAllocationRequest, vmAllocation);
+		if (!bandwidthManager.allocateResource(vmAllocationRequest, vmAllocation))
+			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on bandwidth");
 		
 		//allocate storage
-		storageManager.allocateResource(vmAllocationRequest, vmAllocation);
+		if (!storageManager.allocateResource(vmAllocationRequest, vmAllocation))
+			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on storage");
 		
 		return vmAllocation;
 	}
@@ -277,7 +295,13 @@ public class Host extends SimulationEntity {
 	private void migrateIn(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
 		
 		//create new allocation & allocate it resources
-		VMAllocation newAllocation = allocate(vmAllocationRequest);
+		
+		VMAllocation newAllocation;
+		try {
+			newAllocation = allocate(vmAllocationRequest);
+		} catch (AllocationFailedException e) {
+			throw new RuntimeException("Allocation failed for migrating in VM #" + vm.getId(), e);
+		}
 		
 		//add the allocation to the Host list of allocations
 		vmAllocations.add(newAllocation);
@@ -355,8 +379,11 @@ public class Host extends SimulationEntity {
 		
 		//deallocate the VM
 		deallocate(vmAllocation);
-		
+				
 		logger.debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
+		
+		if (powerOffAfterMigrations)
+			powerOff();
 	}
 	
 	/*
@@ -376,12 +403,19 @@ public class Host extends SimulationEntity {
 	
 	public void powerOff() {
 		if (state != HostState.OFF && state != HostState.POWERING_OFF) {
-			state = HostState.POWERING_OFF;
-			long delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
-			Simulation.getInstance().sendEvent(
-					new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
-							Simulation.getInstance().getSimulationTime() + delay,
-							this, this));
+			
+			if (migratingOut.size() != 0) {
+				//if migrations are in progress, power off after they are complete
+				powerOffAfterMigrations = true;
+			} else {
+				state = HostState.POWERING_OFF;
+				long delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
+				Simulation.getInstance().sendEvent(
+						new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
+								Simulation.getInstance().getSimulationTime() + delay,
+								this, this));
+				powerOffAfterMigrations = false;
+			}
 		}
 	}
 	
@@ -417,6 +451,7 @@ public class Host extends SimulationEntity {
 	}
 	
 	private void completePowerOn() {
+		
 		if (state != HostState.ON) {
 			state = HostState.ON;
 			for (Event e : powerOnEventQueue) {

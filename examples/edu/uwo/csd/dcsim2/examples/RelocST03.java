@@ -33,7 +33,7 @@ public class RelocST03 {
 		logger.info(RelocST03.class.toString());
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
@@ -43,17 +43,18 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
+		int nVM = 75;
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < 75; ++i) {
+		for (int i = 0; i < nVM; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", (int)(Math.random() * 200000000))));
 		}
-		for (int i = 0; i < 75; ++i) {
+		for (int i = 0; i < nVM; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", (int)(Math.random() * 40000000))));
 		}
-		for (int i = 0; i < 75; ++i) {
+		for (int i = 0; i < nVM; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", (int)(Math.random() * 15000000))));
 		}
-		for (int i = 0; i < 75; ++i) {
+		for (int i = 0; i < nVM; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", (int)(Math.random() * 15000000))));
 		}
 		Collections.shuffle(vmList);
@@ -69,14 +70,15 @@ public class RelocST03 {
 		}
 		
 		//create the VM relocation policy
-		//VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicy(dc, 300000);
+		//VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 300000, 0.5, 0.85);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
 		
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
-		Simulation.getInstance().run(86400000, 0);
+		Simulation.getInstance().run(864000000, 0);
+		//Simulation.getInstance().run(6000000, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
@@ -89,7 +91,7 @@ public class RelocST03 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticCpuManager(),
+					new StaticOversubscribingCpuManager(),
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(),
 					new StaticStorageManager(),

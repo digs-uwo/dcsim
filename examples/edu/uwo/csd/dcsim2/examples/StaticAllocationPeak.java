@@ -72,8 +72,8 @@ public class StaticAllocationPeak {
 		logger.info("Start time: " + startTime + "ms");
 		
 		//run the simulation
-		Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
-		//Simulation.getInstance().run(864000000, 0);
+		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
+		Simulation.getInstance().run(864000000, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");

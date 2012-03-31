@@ -8,6 +8,8 @@ public class FairShareCpuScheduler extends CpuScheduler {
 	private double roundCpuShare = 0;
 	private double minShare;
 	
+	public static int count = 0;
+	
 	@Override
 	public void beginScheduling() {
 		if (getHost().getVMAllocations().size() > 0) {
@@ -34,7 +36,7 @@ public class FairShareCpuScheduler extends CpuScheduler {
 
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
-
+		++count;
 		double cpuConsumed = vmAllocation.getVm().processWork(roundCpuShare);
 		
 		if (cpuConsumed == 0)
