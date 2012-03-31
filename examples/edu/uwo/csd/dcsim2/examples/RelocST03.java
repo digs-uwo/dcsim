@@ -23,7 +23,7 @@ public class RelocST03 {
 	
 	private static Logger logger = Logger.getLogger(RelocST03.class);
 	
-	private static int nHosts = 100;
+	private static int nHosts = 1008;
 	
 	public static void main(String args[]) {
 		
@@ -70,7 +70,7 @@ public class RelocST03 {
 		}
 		
 		//create the VM relocation policy
-		//VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 300000, 0.5, 0.85);
+		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 300000, 0.5, 0.85);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
@@ -78,7 +78,7 @@ public class RelocST03 {
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
 		Simulation.getInstance().run(864000000, 0);
-		//Simulation.getInstance().run(6000000, 0);
+		//Simulation.getInstance().run(100000, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");

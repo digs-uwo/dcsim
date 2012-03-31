@@ -7,13 +7,14 @@ public class FairShareCpuScheduler extends CpuScheduler {
 
 	private double roundCpuShare = 0;
 	private double minShare;
-	
-	public static int count = 0;
+	private int nVms; //keeps track of the number of VMs that still have work to execute
 	
 	@Override
 	public void beginScheduling() {
-		if (getHost().getVMAllocations().size() > 0) {
-			minShare = 1 / getHost().getVMAllocations().size(); //limit the smallest amount of allocation to be 1 cpu share divided by the number of VMs on the host
+		nVms = getHost().getVMAllocations().size();
+		
+		if (nVms > 0) {
+			minShare = 1 / nVms; //limit the smallest amount of allocation to be 1 cpu share divided by the number of VMs on the host
 		}
 	}
 	
@@ -27,20 +28,22 @@ public class FairShareCpuScheduler extends CpuScheduler {
 
 	@Override
 	public void beginRound() {
-		//if round share drops below the minimum share, stop dividing it... otherwise, it may divide infinitely and never complete scheduling
-		if (roundCpuShare >= minShare || roundCpuShare == 0) {
-			roundCpuShare = getAvailableCpu() / getHost().getVMAllocations().size();
-			roundCpuShare = Utility.roundDouble(roundCpuShare); //round off double precision problems
-		}
+		roundCpuShare = getAvailableCpu() / nVms; //divide the remaining cpu by the number of VMs still executing
+		roundCpuShare = Utility.roundDouble(roundCpuShare); //round off double precision problems
+		if (roundCpuShare < minShare)
+			roundCpuShare = minShare;
+		
 	}
 
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
-		++count;
+		
 		double cpuConsumed = vmAllocation.getVm().processWork(roundCpuShare);
 		
-		if (cpuConsumed == 0)
+		if (cpuConsumed == 0) {
+			--nVms; //once a VM does not execute any work, it will no longer have any work for this interval, due to the order in which dependent VMs are scheduled by the master scheduler
 			return false;
+		}
 		
 		consumeAvailableCpu(cpuConsumed);
 
