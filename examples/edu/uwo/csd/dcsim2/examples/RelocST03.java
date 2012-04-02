@@ -91,9 +91,9 @@ public class RelocST03 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticOversubscribingCpuManager(),
+					new StaticOversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
 					new StaticMemoryManager(),
-					new StaticBandwidthManager(),
+					new StaticBandwidthManager(200),
 					new StaticStorageManager(),
 					new FairShareCpuScheduler());
 			

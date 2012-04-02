@@ -6,6 +6,12 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticBandwidthManager extends BandwidthManager {
 	
+	int privDomainAlloc;
+	
+	public StaticBandwidthManager(int privDomainAlloc) {
+		this.privDomainAlloc = privDomainAlloc;
+	}
+	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		return vmDescription.getBandwidth() <= getTotalBandwidth();
@@ -57,8 +63,8 @@ public class StaticBandwidthManager extends BandwidthManager {
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 		
-		if (getAvailableBandwidth() >= 200) {
-			BandwidthAllocation newAlloc = new BandwidthAllocation(200);
+		if (getAvailableBandwidth() >= privDomainAlloc) {
+			BandwidthAllocation newAlloc = new BandwidthAllocation(privDomainAlloc);
 			privDomainAllocation.setBandwidthAllocation(newAlloc);
 			this.privDomainAllocation = privDomainAllocation;
 		}

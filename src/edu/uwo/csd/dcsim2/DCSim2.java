@@ -126,9 +126,9 @@ public class DCSim2 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new Host(cpus, cores, coreCapacity, memory, bandwidth, storage,
-					new StaticCpuManager(),
+					new StaticCpuManager(500),
 					new StaticMemoryManager(),
-					new StaticBandwidthManager(),
+					new StaticBandwidthManager(200),
 					new StaticStorageManager(),
 					new FairShareCpuScheduler(),
 					new LinearHostPowerModel(100, 250));

@@ -11,6 +11,10 @@ import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
  */
 public class StaticOversubscribingCpuManager extends StaticCpuManager {
 
+	public StaticOversubscribingCpuManager(int privDomainAlloc) {
+		super(privDomainAlloc);
+	}
+	
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		return true;

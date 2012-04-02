@@ -75,7 +75,8 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		
 		logger.info("VMRelocationPolicy migrations: " + VMRelocationPolicy.getMigrationCount());
 		
-		logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
+		//logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
+		logger.info("Total Work Missed [" + Utility.roundDouble((1 - (Workload.getGlobalCompletedWork() / Workload.getGlobalTotalWork())) * 100, 3) + "%]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
 	}
 
 }

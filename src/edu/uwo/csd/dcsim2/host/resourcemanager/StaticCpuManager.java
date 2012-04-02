@@ -6,6 +6,12 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticCpuManager extends CpuManager {
 	
+	int privDomainAlloc;
+	
+	public StaticCpuManager(int privDomainAlloc) {
+		this.privDomainAlloc = privDomainAlloc;
+	}
+	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity
@@ -52,8 +58,8 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 
-		if (this.getAvailableAllocation() >= 500) { //500 allows for 300 for the VMM and 200 for 2 migrations
-			CpuAllocation newAlloc = new CpuAllocation(1, 500);
+		if (this.getAvailableAllocation() >= privDomainAlloc) {
+			CpuAllocation newAlloc = new CpuAllocation(1, privDomainAlloc);
 			privDomainAllocation.setCpuAllocation(newAlloc);
 			setPrivDomainAllocation(privDomainAllocation);
 		} else {
