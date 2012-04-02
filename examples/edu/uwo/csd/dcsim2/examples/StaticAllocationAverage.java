@@ -1,39 +1,39 @@
 package edu.uwo.csd.dcsim2.examples;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.*;
-import edu.uwo.csd.dcsim2.application.*;
-import edu.uwo.csd.dcsim2.application.workload.*;
+import edu.uwo.csd.dcsim2.DCSimUpdateController;
+import edu.uwo.csd.dcsim2.DataCentre;
+import edu.uwo.csd.dcsim2.application.WebServerTier;
+import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
+import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.model.*;
-import edu.uwo.csd.dcsim2.host.power.*;
+import edu.uwo.csd.dcsim2.host.power.LinearHostPowerModel;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
-import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
+public class StaticAllocationAverage {
 
-public class RelocST03 {
+	private static Logger logger = Logger.getLogger(StaticAllocationAverage.class);
 	
-	private static Logger logger = Logger.getLogger(RelocST03.class);
-	
-	private static int nHosts = 14;
+	private static int nHosts = 100;
 	
 	public static void main(String args[]) {
 		
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
 		
 		
-		logger.info(RelocST03.class.toString());
+		logger.info(StaticAllocationAverage.class.toString());
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
@@ -43,33 +43,17 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 10;
-//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 3000, (int)(Math.random() * 200000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 3000, (int)(Math.random() * 40000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 3000, (int)(Math.random() * 15000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 3000, (int)(Math.random() * 15000000))));
-//		}
-//		Collections.shuffle(vmList);
-		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		for (int i = 0; i < nVM; ++i) {
+		for (int i = 0; i < 75; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 1164, (int)(Math.random() * 200000000))));
 		}
-		for (int i = 0; i < nVM; ++i) {
+		for (int i = 0; i < 75; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Math.random() * 40000000))));
 		}
-		for (int i = 0; i < nVM; ++i) {
+		for (int i = 0; i < 75; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Math.random() * 15000000))));
 		}
-		for (int i = 0; i < nVM; ++i) {
+		for (int i = 0; i < 75; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Math.random() * 15000000))));
 		}
 		Collections.shuffle(vmList);
@@ -84,16 +68,13 @@ public class RelocST03 {
 			}
 		}
 		
-		//create the VM relocation policy
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85);
-		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
 		
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
 		Simulation.getInstance().run(864000000, 0);
-		//Simulation.getInstance().run(100000, 0);
+		//Simulation.getInstance().run(100, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
@@ -106,11 +87,11 @@ public class RelocST03 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticOversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
+					new StaticCpuManager(1500), //to mimic original DCSim experiment: (100 VMM overhead + 400 reserved for 2 migrations) * 3 to scale up to larger hosts
 					new StaticMemoryManager(),
-					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
+					new StaticBandwidthManager(200),
 					new StaticStorageManager(),
-					new FairShareCpuScheduler());
+					new FixedAllocationCpuScheduler());
 			
 			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments
 			
@@ -135,7 +116,7 @@ public class RelocST03 {
 		//build VMDescription
 		int cores = 1; //requires 1 core
 		int memory = 1024;
-		int bandwidth = 16384; //16MB = 16384KB
+		int bandwidth = 1; //16384; //16MB = 16384KB
 		long storage = 1024; //1GB
 		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);
 

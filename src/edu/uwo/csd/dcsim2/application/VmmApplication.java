@@ -51,7 +51,7 @@ public class VmmApplication extends Application {
 	public void completeScheduling() {
 		//at this point, no resources should be remaining to run
 		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
-			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "]");
+			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
 		}
 	}
 

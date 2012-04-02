@@ -42,6 +42,9 @@ public class MockHost {
 		vmmCpuInUse = host.getPrivDomainAllocation().getVm().getResourcesInUse().getCpu();
 		vmmCpuAlloc = host.getPrivDomainAllocation().getCpuAllocation().getTotalAlloc();
 		
+		incomingMigrationCount = host.getMigratingIn().size();
+		outgoingMigrationCount = host.getMigratingOut().size();
+		
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
 				vms.add(new MockVM(vmAllocation.getVm()));
