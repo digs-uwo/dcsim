@@ -13,7 +13,7 @@ public class StaticStorageManager extends StorageManager {
 
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getStorageAllocation().getStorageAlloc() <= getAvailableStorage();
+		return vmAllocationRequest.getStorage() <= getAvailableStorage();
 	}
 	
 	@Override
@@ -23,7 +23,7 @@ public class StaticStorageManager extends StorageManager {
 		long totalAlloc = 0;
 		
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
-			totalAlloc += allocationRequest.getStorageAllocation().getStorageAlloc();
+			totalAlloc += allocationRequest.getStorage();
 
 		return totalAlloc <= getAvailableStorage();
 	}
@@ -33,8 +33,8 @@ public class StaticStorageManager extends StorageManager {
 			VMAllocation vmAllocation) {
 		
 		if (hasCapacity(vmAllocationRequest)) {
-			StorageAllocation newAlloc = new StorageAllocation(vmAllocationRequest.getStorageAllocation().getStorageAlloc());
-			vmAllocation.setStorageAllocation(newAlloc);
+			long newAlloc = vmAllocationRequest.getStorage();
+			vmAllocation.setStorage(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
@@ -45,7 +45,7 @@ public class StaticStorageManager extends StorageManager {
 
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
-		vmAllocation.setStorageAllocation(null);
+		vmAllocation.setStorage(0);
 		allocationMap.remove(vmAllocation);
 	}
 
@@ -56,9 +56,7 @@ public class StaticStorageManager extends StorageManager {
 
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
-		
-		StorageAllocation newAlloc = new StorageAllocation(0); //currently allocating no storage
-		privDomainAllocation.setStorageAllocation(newAlloc);
+		privDomainAllocation.setStorage(0); //currently allocating no storage
 		this.privDomainAllocation = privDomainAllocation;
 	}
 

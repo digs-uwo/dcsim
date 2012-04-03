@@ -17,13 +17,13 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 		double cpuAllocated;
 		
 		//allocate privileged domain
-		cpuAllocated = getHost().getPrivDomainAllocation().getCpuAllocation().getTotalAlloc() * (Simulation.getInstance().getElapsedTime() / 1000d);
+		cpuAllocated = getHost().getPrivDomainAllocation().getCpu() * (Simulation.getInstance().getElapsedTime() / 1000d);
 		cpuAllocated = Utility.roundDouble(cpuAllocated); //round off double precision problems
 		cpuAllocations.put(getHost().getPrivDomainAllocation(), cpuAllocated);
 		
 		//allocate other VMs
 		for (VMAllocation vmAllocation : getHost().getVMAllocations()) {
-			cpuAllocated = vmAllocation.getCpuAllocation().getTotalAlloc() * (Simulation.getInstance().getElapsedTime() / 1000d);
+			cpuAllocated = vmAllocation.getCpu() * (Simulation.getInstance().getElapsedTime() / 1000d);
 			cpuAllocated = Utility.roundDouble(cpuAllocated); //round off double precision problems
 			cpuAllocations.put(vmAllocation, cpuAllocated);
 		}

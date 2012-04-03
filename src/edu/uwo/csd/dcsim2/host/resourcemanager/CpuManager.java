@@ -3,12 +3,11 @@ package edu.uwo.csd.dcsim2.host.resourcemanager;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class CpuManager extends ResourceManager {
 
-	protected Map<VMAllocation, CpuAllocation> allocationMap = new HashMap<VMAllocation, CpuAllocation>();
+	protected Map<VMAllocation, Integer> allocationMap = new HashMap<VMAllocation, Integer>();
 	private VMAllocation privDomainAllocation;
 	
 	/*
@@ -20,11 +19,7 @@ public abstract class CpuManager extends ResourceManager {
 	 * @return
 	 */
 	public int getTotalCpu() {
-		int totalCpu = 0;
-		for (Cpu cpu : getHost().getCpus()) {
-			totalCpu += cpu.getCores() * cpu.getCoreCapacity();
-		}
-		return totalCpu;
+		return getHost().getTotalCpu();
 	}
 	
 	/**
@@ -74,13 +69,11 @@ public abstract class CpuManager extends ResourceManager {
 		int allocatedCpu = 0;
 		
 		if (privDomainAllocation != null) {
-			allocatedCpu += privDomainAllocation.getCpuAllocation().getTotalAlloc();
+			allocatedCpu += privDomainAllocation.getCpu();
 		}
 		
-		for (CpuAllocation cpuAllocation : allocationMap.values()) {
-			for (Integer coreCapacity : cpuAllocation.getCoreAlloc()) {
-				allocatedCpu += coreCapacity;
-			}
+		for (Integer cpuAllocation : allocationMap.values()) {
+			allocatedCpu += cpuAllocation;
 		}
 	
 		return allocatedCpu;

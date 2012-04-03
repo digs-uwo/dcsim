@@ -3,12 +3,11 @@ package edu.uwo.csd.dcsim2.host.resourcemanager;
 import java.util.HashMap;
 import java.util.Map;
 
-import edu.uwo.csd.dcsim2.vm.StorageAllocation;
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
 public abstract class StorageManager extends ResourceManager {
 
-	Map<VMAllocation, StorageAllocation> allocationMap = new HashMap<VMAllocation, StorageAllocation>();
+	Map<VMAllocation, Long> allocationMap = new HashMap<VMAllocation, Long>();
 	VMAllocation privDomainAllocation;
 
 	public long getTotalStorage() {
@@ -19,10 +18,10 @@ public abstract class StorageManager extends ResourceManager {
 		long storage = 0;
 		
 		if (privDomainAllocation != null)
-			storage += privDomainAllocation.getStorageAllocation().getStorageAlloc();
+			storage += privDomainAllocation.getStorage();
 		
-		for (StorageAllocation alloc : allocationMap.values()) {
-			storage += alloc.getStorageAlloc();
+		for (Long alloc : allocationMap.values()) {
+			storage += alloc;
 		}
 		return storage;
 	}

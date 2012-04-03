@@ -319,7 +319,7 @@ public class Host extends SimulationEntity {
 		source.migrateOut(vm);
 		
 		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms), using privileged domain bandwidth TODO is this correct?
-		long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)privDomainAllocation.getBandwidthAllocation().getBandwidthAlloc()) * 1000);
+		long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)privDomainAllocation.getBandwidth()) * 1000);
 		
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
@@ -491,7 +491,7 @@ public class Host extends SimulationEntity {
 			if (vmAllocation.getVm() != null) {
 				vmAllocation.getVm().logInfo();
 			} else {
-				logger.debug("Empty Allocation CPU[" + vmAllocation.getCpuAllocation().getTotalAlloc() + "]");
+				logger.debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
 			}
 		}
 	}
@@ -552,6 +552,13 @@ public class Host extends SimulationEntity {
 			cores += cpu.getCores();
 		}
 		return cores;
+	}
+	
+	public int getTotalCpu() {
+		int total = 0;
+		for (Cpu cpu : cpus)
+			total += cpu.getCoreCapacity() * cpu.getCores();
+		return total;
 	}
 	
 	public int getMemory() {

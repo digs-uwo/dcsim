@@ -7,10 +7,10 @@ public class VMAllocation {
 	private VM vm;
 	private VMDescription vmDescription;
 	private Host host;
-	private CpuAllocation cpuAllocation;
-	private MemoryAllocation memoryAllocation;
-	private BandwidthAllocation bandwidthAllocation;
-	private StorageAllocation storageAllocation;
+	private int cpu;
+	private int memory;
+	private int bandwidth;
+	private long storage;
 	
 	public VMAllocation(VMDescription vmDescription, Host host) {
 		this.vmDescription = vmDescription;
@@ -47,36 +47,36 @@ public class VMAllocation {
 		return vmDescription;
 	}
 	
-	public CpuAllocation getCpuAllocation() {
-		return cpuAllocation;
+	public int getCpu() {
+		return cpu;
 	}
 	
-	public void setCpuAllocation(CpuAllocation cpuAllocation) {
-		this.cpuAllocation = cpuAllocation;
+	public void setCpu(int cpu) {
+		this.cpu = cpu;
 	}
 	
-	public MemoryAllocation getMemoryAllocation() {
-		return memoryAllocation;
+	public int getMemory() {
+		return memory;
 	}
 	
-	public void setMemoryAllocation(MemoryAllocation memoryAllocation) {
-		this.memoryAllocation = memoryAllocation;
+	public void setMemory(int memory) {
+		this.memory = memory;
 	}
 	
-	public BandwidthAllocation getBandwidthAllocation() {
-		return bandwidthAllocation;
+	public int getBandwidth() {
+		return bandwidth;
 	}
 	
-	public void setBandwidthAllocation(BandwidthAllocation bandwidthAllocation) {
-		this.bandwidthAllocation = bandwidthAllocation;
+	public void setBandwidth(int bandwidth) {
+		this.bandwidth = bandwidth;
 	}
 	
-	public StorageAllocation getStorageAllocation() {
-		return storageAllocation;
+	public long getStorage() {
+		return storage;
 	}
 	
-	public void setStorageAllocation(StorageAllocation storageAllocation) {
-		this.storageAllocation = storageAllocation;
+	public void setStorage(long storage) {
+		this.storage = storage;
 	}
 
 }

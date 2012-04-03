@@ -19,7 +19,7 @@ public class StaticBandwidthManager extends BandwidthManager {
 
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc() <= getAvailableBandwidth();
+		return vmAllocationRequest.getBandwidth() <= getAvailableBandwidth();
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public class StaticBandwidthManager extends BandwidthManager {
 		int totalAlloc = 0;
 		
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
-			totalAlloc += allocationRequest.getBandwidthAllocation().getBandwidthAlloc();
+			totalAlloc += allocationRequest.getBandwidth();
 		
 		return totalAlloc <= getAvailableBandwidth();
 	}
@@ -39,8 +39,8 @@ public class StaticBandwidthManager extends BandwidthManager {
 			VMAllocation vmAllocation) {
 		
 		if (hasCapacity(vmAllocationRequest)) {
-			BandwidthAllocation newAlloc = new BandwidthAllocation(vmAllocationRequest.getBandwidthAllocation().getBandwidthAlloc());
-			vmAllocation.setBandwidthAllocation(newAlloc);
+			int newAlloc = vmAllocationRequest.getBandwidth();
+			vmAllocation.setBandwidth(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
@@ -51,7 +51,7 @@ public class StaticBandwidthManager extends BandwidthManager {
 
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
-		vmAllocation.setBandwidthAllocation(null);
+		vmAllocation.setBandwidth(0);
 		allocationMap.remove(vmAllocation);
 	}
 
@@ -64,8 +64,7 @@ public class StaticBandwidthManager extends BandwidthManager {
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 		
 		if (getAvailableBandwidth() >= privDomainAlloc) {
-			BandwidthAllocation newAlloc = new BandwidthAllocation(privDomainAlloc);
-			privDomainAllocation.setBandwidthAllocation(newAlloc);
+			privDomainAllocation.setBandwidth(privDomainAlloc);
 			this.privDomainAllocation = privDomainAllocation;
 		}
 	}

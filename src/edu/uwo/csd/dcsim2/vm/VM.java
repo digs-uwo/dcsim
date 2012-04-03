@@ -43,12 +43,10 @@ public class VM extends SimulationEntity {
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
 		//calculate bandwidth available over the period
-		if (vmAllocation.getBandwidthAllocation() == null)
-			throw new RuntimeException("bandwidth allocation is null on VM#" +  this.getId() + " ");
-		resourcesAvailable.setBandwidth(vmAllocation.getBandwidthAllocation().getBandwidthAlloc() * (timeElapsed / 1000.0)); //bandwidth is in MB/s, time is in ms
+		resourcesAvailable.setBandwidth(vmAllocation.getBandwidth() * (timeElapsed / 1000.0)); //bandwidth is in MB/s, time is in ms
 		
-		resourcesAvailable.setMemory(vmAllocation.getMemoryAllocation().getMemoryAlloc());
-		resourcesAvailable.setStorage(vmAllocation.getStorageAllocation().getStorageAlloc());
+		resourcesAvailable.setMemory(vmAllocation.getMemory());
+		resourcesAvailable.setStorage(vmAllocation.getStorage());
 		
 		//reset resources consumed
 		resourcesConsumed = new VirtualResources();
@@ -105,15 +103,15 @@ public class VM extends SimulationEntity {
 	
 	public void logInfo() {
 		logger.debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
-				"/" + vmAllocation.getCpuAllocation().getTotalAlloc() + 
+				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 
-				"/" + vmAllocation.getBandwidthAllocation().getBandwidthAlloc() + 
+				"/" + vmAllocation.getBandwidth() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getBandwidth(), 2) + "] " + 
 				"MEM[" + resourcesInUse.getMemory() + 
-				"/" + vmAllocation.getMemoryAllocation().getMemoryAlloc() + "] " +
+				"/" + vmAllocation.getMemory() + "] " +
 				"STORAGE[" + resourcesInUse.getStorage() + 
-				"/" + vmAllocation.getStorageAllocation().getStorageAlloc() + "]");
+				"/" + vmAllocation.getStorage() + "]");
 	}
 	
 	public int getId() {

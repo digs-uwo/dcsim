@@ -83,7 +83,7 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 			if (host.getMemoryManager().hasCapacity(vmAllocationRequest)
 					&& host.getBandwidthManager().hasCapacity(vmAllocationRequest)
 					&& host.getStorageManager().hasCapacity(vmAllocationRequest)
-					&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpuAllocation().getTotalAlloc()) {
+					&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpu()) {
 				return host;
 			}
 		}

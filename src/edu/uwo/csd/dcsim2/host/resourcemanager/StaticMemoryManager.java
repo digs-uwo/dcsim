@@ -13,7 +13,7 @@ public class StaticMemoryManager extends MemoryManager {
 
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getMemoryAllocation().getMemoryAlloc() <= getAvailableMemory();
+		return vmAllocationRequest.getMemory() <= getAvailableMemory();
 	}
 	
 	@Override
@@ -23,7 +23,7 @@ public class StaticMemoryManager extends MemoryManager {
 		int totalAlloc = 0;
 		
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
-			totalAlloc += allocationRequest.getMemoryAllocation().getMemoryAlloc();
+			totalAlloc += allocationRequest.getMemory();
 
 		return totalAlloc <= getAvailableMemory();
 	}
@@ -33,8 +33,8 @@ public class StaticMemoryManager extends MemoryManager {
 			VMAllocation vmAllocation) {
 
 		if (hasCapacity(vmAllocationRequest)) {
-			MemoryAllocation newAlloc = new MemoryAllocation(vmAllocationRequest.getMemoryAllocation().getMemoryAlloc());
-			vmAllocation.setMemoryAllocation(newAlloc);
+			int newAlloc = vmAllocationRequest.getMemory();
+			vmAllocation.setMemory(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
@@ -45,7 +45,7 @@ public class StaticMemoryManager extends MemoryManager {
 
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
-		vmAllocation.setMemoryAllocation(null);
+		vmAllocation.setMemory(0);
 		allocationMap.remove(vmAllocation);
 	}
 
@@ -56,8 +56,7 @@ public class StaticMemoryManager extends MemoryManager {
 
 	@Override
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
-		MemoryAllocation newAlloc = new MemoryAllocation(0); //currently allocating no memory
-		privDomainAllocation.setMemoryAllocation(newAlloc);
+		privDomainAllocation.setMemory(0); //currently allocating no memory
 	}
 
 	

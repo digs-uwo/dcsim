@@ -23,7 +23,7 @@ public class StaticCpuManager extends CpuManager {
 
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getCpuAllocation().getTotalAlloc() <= this.getAvailableAllocation();
+		return vmAllocationRequest.getCpu() <= this.getAvailableAllocation();
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class StaticCpuManager extends CpuManager {
 		double totalAlloc = 0;
 		
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
-			totalAlloc += allocationRequest.getCpuAllocation().getTotalAlloc();
+			totalAlloc += allocationRequest.getCpu();
 		
 		return totalAlloc <= this.getAvailableAllocation();
 	}
@@ -42,11 +42,8 @@ public class StaticCpuManager extends CpuManager {
 	public boolean allocateResource(VMAllocationRequest vmAllocationRequest, VMAllocation vmAllocation) {
 
 		if (hasCapacity(vmAllocationRequest)) {
-			CpuAllocation newAlloc = new CpuAllocation();
-			for (Integer coreCapacity : vmAllocationRequest.getCpuAllocation().getCoreAlloc()) {
-				newAlloc.getCoreAlloc().add(coreCapacity);
-			}
-			vmAllocation.setCpuAllocation(newAlloc);
+			int newAlloc = vmAllocationRequest.getCpu();
+			vmAllocation.setCpu(newAlloc);
 			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
@@ -59,8 +56,7 @@ public class StaticCpuManager extends CpuManager {
 	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
 
 		if (this.getAvailableAllocation() >= privDomainAlloc) {
-			CpuAllocation newAlloc = new CpuAllocation(1, privDomainAlloc);
-			privDomainAllocation.setCpuAllocation(newAlloc);
+			privDomainAllocation.setCpu(privDomainAlloc);
 			setPrivDomainAllocation(privDomainAllocation);
 		} else {
 			throw new RuntimeException("Could not allocate privileged domain on Host #" + getHost().getId());
@@ -69,7 +65,7 @@ public class StaticCpuManager extends CpuManager {
 
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
-		vmAllocation.setCpuAllocation(null);
+		vmAllocation.setCpu(0);
 		allocationMap.remove(vmAllocation);
 	}
 

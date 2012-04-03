@@ -11,7 +11,7 @@ public class MockVM {
 	public MockVM(VM vm) {
 		this.vm = vm;
 		cpuInUse = vm.getResourcesInUse().getCpu();
-		cpuAlloc = vm.getVMAllocation().getCpuAllocation().getTotalAlloc();
+		cpuAlloc = vm.getVMAllocation().getCpu();
 	}
 	
 	public double getCpuInUse() {

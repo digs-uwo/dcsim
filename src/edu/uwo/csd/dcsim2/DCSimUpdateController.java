@@ -10,8 +10,7 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationUpdateController;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.host.scheduler.FairShareCpuScheduler;
-import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
+import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.management.VMRelocationPolicy;
 
 public class DCSimUpdateController implements SimulationUpdateController {

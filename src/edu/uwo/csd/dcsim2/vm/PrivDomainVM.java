@@ -13,15 +13,15 @@ public class PrivDomainVM extends VM {
 	@Override
 	public void logInfo() {
 		logger.debug("PRIV  CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
-				"/" + vmAllocation.getCpuAllocation().getTotalAlloc() + 
+				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 
-				"/" + vmAllocation.getBandwidthAllocation().getBandwidthAlloc() + 
+				"/" + vmAllocation.getBandwidth() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getBandwidth(), 2) + "] " + 
 				"MEM[" + resourcesInUse.getMemory() + 
-				"/" + vmAllocation.getMemoryAllocation().getMemoryAlloc() + "] " +
+				"/" + vmAllocation.getMemory() + "] " +
 				"STORAGE[" + resourcesInUse.getStorage() + 
-				"/" + vmAllocation.getStorageAllocation().getStorageAlloc() + "]");
+				"/" + vmAllocation.getStorage() + "]");
 	}
 	
 }

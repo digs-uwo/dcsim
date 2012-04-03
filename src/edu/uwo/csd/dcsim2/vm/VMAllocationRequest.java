@@ -3,68 +3,60 @@ package edu.uwo.csd.dcsim2.vm;
 public class VMAllocationRequest {
 
 	private VMDescription vmDescription;
-	private CpuAllocation cpuAllocation;
-	private MemoryAllocation memoryAllocation;
-	private BandwidthAllocation bandwidthAllocation;
-	private StorageAllocation storageAllocation;
+	private int cpu;
+	private int memory;
+	private int bandwidth;
+	private long storage;
 
 	public VMAllocationRequest(VMDescription vmDescription,
-			CpuAllocation cpuAllocation, 
-			MemoryAllocation memoryAllocation, 
-			BandwidthAllocation bandwidthAllocation, 
-			StorageAllocation storageAllocation) {
+			int cpu, 
+			int memory, 
+			int bandwidth, 
+			long storage) {
 		
 		this.vmDescription = vmDescription;
-		this.cpuAllocation = cpuAllocation;
-		this.memoryAllocation = memoryAllocation;
-		this.bandwidthAllocation = bandwidthAllocation;
-		this.storageAllocation = storageAllocation;
+		this.cpu = cpu;
+		this.memory = memory;
+		this.bandwidth = bandwidth;
+		this.storage = storage;
 	}
 	
 	public VMAllocationRequest(VMAllocation vmAllocation) {
 		vmDescription = vmAllocation.getVMDescription();
 		
-		cpuAllocation = new CpuAllocation();
-		for (Integer core : vmAllocation.getCpuAllocation().getCoreAlloc()) {
-			cpuAllocation.getCoreAlloc().add(core);
-		}
-		
-		memoryAllocation = new MemoryAllocation(vmAllocation.getMemoryAllocation().getMemoryAlloc());
-		bandwidthAllocation = new BandwidthAllocation(vmAllocation.getBandwidthAllocation().getBandwidthAlloc());
-		storageAllocation = new StorageAllocation(vmAllocation.getStorageAllocation().getStorageAlloc());	
+		cpu = vmAllocation.getCpu();
+		memory = vmAllocation.getMemory();
+		bandwidth = vmAllocation.getBandwidth();
+		storage = vmAllocation.getStorage();	
 	}
 	
 	public VMAllocationRequest(VMDescription vmDescription) {
 		this.vmDescription =  vmDescription;
 		
-		cpuAllocation = new CpuAllocation();
-		for (int i = 0; i < vmDescription.getCores(); ++i) {
-			cpuAllocation.getCoreAlloc().add(vmDescription.getCoreCapacity());
-		}
-		
-		memoryAllocation = new MemoryAllocation(vmDescription.getMemory());
-		bandwidthAllocation = new BandwidthAllocation(vmDescription.getBandwidth());
-		storageAllocation = new StorageAllocation(vmDescription.getStorage());
+		cpu = vmDescription.getCores() * vmDescription.getCoreCapacity();
+		memory = vmDescription.getMemory();
+		bandwidth = vmDescription.getBandwidth();
+		storage = vmDescription.getStorage();
 	}
 	
 	public VMDescription getVMDescription() {
 		return vmDescription;
 	}
 
-	public CpuAllocation getCpuAllocation() {
-		return cpuAllocation;
+	public int getCpu() {
+		return cpu;
 	}
 	
-	public MemoryAllocation getMemoryAllocation() {
-		return memoryAllocation;
+	public int getMemory() {
+		return memory;
 	}
 	
-	public BandwidthAllocation getBandwidthAllocation() {
-		return bandwidthAllocation;
+	public int getBandwidth() {
+		return bandwidth;
 	}
 	
-	public StorageAllocation getStorageAllocation() {
-		return storageAllocation;
+	public long getStorage() {
+		return storage;
 	}
 	
 }

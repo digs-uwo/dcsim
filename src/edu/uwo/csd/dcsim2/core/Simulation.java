@@ -2,8 +2,6 @@ package edu.uwo.csd.dcsim2.core;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.host.Host;
-
 import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
