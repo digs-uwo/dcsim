@@ -13,7 +13,7 @@ public class ProLiantDL380G5QuadCoreHost extends Host {
 	private static int memory = 8192; //8GB
 	private static int bandwidth = 131072 * 2; //1 Gb + 1Gb for management TODO poor assumption!
 	private static long storage = 36864; //36GB
-	private static HostPowerModel powerModel = new SPECHostPowerModel(172, 177, 182, 187, 195, 205, 218, 229, 242, 252, 258);
+	private static HostPowerModel powerModel = new SPECHostPowerModel(0, 172, 177, 182, 187, 195, 205, 218, 229, 242, 252, 258);
 	
 	public ProLiantDL380G5QuadCoreHost(CpuManager cpuManager,
 			MemoryManager memoryManager,

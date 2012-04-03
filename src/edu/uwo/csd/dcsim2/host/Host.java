@@ -505,10 +505,11 @@ public class Host extends SimulationEntity {
 			
 			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
 			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
-			
-			powerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
-			globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds(); 
+
 		}
+		
+		powerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
+		globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null)

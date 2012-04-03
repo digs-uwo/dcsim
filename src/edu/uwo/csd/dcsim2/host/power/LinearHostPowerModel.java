@@ -14,7 +14,10 @@ public class LinearHostPowerModel implements HostPowerModel {
 	
 	@Override
 	public double getPowerConsumption(Host host) {
-		return idlePower + ((maxPower - idlePower) * host.getCpuManager().getCpuUtilization());
+		if (host.getState() == Host.HostState.ON)
+			return idlePower + ((maxPower - idlePower) * host.getCpuManager().getCpuUtilization());
+		else
+			return 0;
 	}
 	
 }
