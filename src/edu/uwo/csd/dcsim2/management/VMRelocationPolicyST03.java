@@ -133,6 +133,7 @@ public class VMRelocationPolicyST03 extends VMRelocationPolicy {
 		
 		//sort partiallyUtilized in increasing order by CPU utilization
 		Collections.sort(partiallyUtilized, new HostCpuUtilizationComparator());
+		//Collections.reverse(partiallyUtilized);
 		
 		//sort empty by power state (on, off, suspended)
 		Collections.sort(empty, new HostPowerStateComparator());

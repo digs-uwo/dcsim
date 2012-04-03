@@ -23,7 +23,7 @@ public class RelocST03 {
 	
 	private static Logger logger = Logger.getLogger(RelocST03.class);
 	
-	private static int nHosts = 14;
+	private static int nHosts = 100;
 	
 	public static void main(String args[]) {
 		
@@ -43,7 +43,7 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 10;
+		int nVM = 75;
 //		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 //		for (int i = 0; i < nVM; ++i) {
 //			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 3000, (int)(Math.random() * 200000000))));
@@ -93,7 +93,7 @@ public class RelocST03 {
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
 		Simulation.getInstance().run(864000000, 0);
-		//Simulation.getInstance().run(100000, 0);
+		//Simulation.getInstance().run(700000, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
@@ -106,7 +106,7 @@ public class RelocST03 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
-					new StaticOversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
+					new StaticOversubscribingCpuManager(1500), //300 VMM overhead + 200 migration reserve
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
 					new StaticStorageManager(),

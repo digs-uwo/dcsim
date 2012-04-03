@@ -41,7 +41,7 @@ public class VmmApplication extends Application {
 			bandwidth += 100; //TODO: add proper overhead calculation
 		}
 		//TODO calculate memory and storage usage
-		
+			
 		resourcesRemaining = new VirtualResources();
 		resourcesRemaining.setCpu(cpu * (elapsedTime / 1000d));
 		resourcesRemaining.setBandwidth(bandwidth * (elapsedTime / 1000d));

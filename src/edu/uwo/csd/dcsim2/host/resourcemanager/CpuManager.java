@@ -8,7 +8,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class CpuManager extends ResourceManager {
 
-	protected Map<VMAllocation, CpuAllocation> allocationMap = new HashMap<VMAllocation, CpuAllocation>();;
+	protected Map<VMAllocation, CpuAllocation> allocationMap = new HashMap<VMAllocation, CpuAllocation>();
 	private VMAllocation privDomainAllocation;
 	
 	/*
