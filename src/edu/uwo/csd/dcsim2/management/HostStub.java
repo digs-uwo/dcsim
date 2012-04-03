@@ -5,39 +5,32 @@ import java.util.ArrayList;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class MockHost {
+public class HostStub {
 
 	public enum State {ON, SUSPENDED, OFF}
 	
 	private Host host;
-	private State state;
 	private double vmmCpuInUse;
 	private double vmmCpuAlloc;
 	private double emptyVMAllocCpu = 0;
-	private ArrayList<MockVM> vms = new ArrayList<MockVM>();
-	private ArrayList<MockVM> incomingVMs = new ArrayList<MockVM>();
+	
+	private ArrayList<VmStub> vms = new ArrayList<VmStub>();
+	private ArrayList<VmStub> incomingVMs = new ArrayList<VmStub>();
+	
 	private int incomingMigrationCount = 0;
 	private int outgoingMigrationCount = 0;
 	
-	public static ArrayList<MockHost> createMockHostList(ArrayList<Host> hosts) {
-		ArrayList<MockHost> mockHosts = new ArrayList<MockHost>();
+	public static ArrayList<HostStub> createMockHostList(ArrayList<Host> hosts) {
+		ArrayList<HostStub> mockHosts = new ArrayList<HostStub>();
 		
 		for (Host host : hosts)
-			mockHosts.add(new MockHost(host));
+			mockHosts.add(new HostStub(host));
 		
 		return mockHosts;
 	}
 	
-	public MockHost(Host host) {
+	public HostStub(Host host) {
 		this.host = host;
-		
-		if (host.getState() == Host.HostState.ON || host.getState() == Host.HostState.POWERING_ON) {
-			state = State.ON;
-		} else if (host.getState() == Host.HostState.SUSPENDED || host.getState() == Host.HostState.SUSPENDING) {
-			state = State.SUSPENDED;
-		} else {
-			state = State.OFF; 
-		}
 		
 		vmmCpuInUse = host.getPrivDomainAllocation().getVm().getResourcesInUse().getCpu();
 		vmmCpuAlloc = host.getPrivDomainAllocation().getCpu();
@@ -47,7 +40,7 @@ public class MockHost {
 		
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
-				vms.add(new MockVM(vmAllocation.getVm()));
+				vms.add(new VmStub(vmAllocation.getVm()));
 			} else {
 				emptyVMAllocCpu += vmAllocation.getCpu();
 			}
@@ -60,16 +53,22 @@ public class MockHost {
 	}
 	
 	public State getState() {
-		return state;
+		if (host.getState() == Host.HostState.ON || host.getState() == Host.HostState.POWERING_ON) {
+			return State.ON;
+		} else if (host.getState() == Host.HostState.SUSPENDED || host.getState() == Host.HostState.SUSPENDING) {
+			return State.SUSPENDED;
+		} else {
+			return State.OFF; 
+		}
 	}
 	
-	public ArrayList<MockVM> getVms() {
+	public ArrayList<VmStub> getVms() {
 		return vms;
 	}
 	
 	public double getCpuInUse() {
 		double cpuInUse = vmmCpuInUse;
-		for (MockVM vm : vms) {
+		for (VmStub vm : vms) {
 			cpuInUse += vm.getCpuInUse();
 		}
 		return cpuInUse;
@@ -77,7 +76,7 @@ public class MockHost {
 	
 	public double getCpuAllocated() {
 		double cpuAlloc = vmmCpuAlloc + emptyVMAllocCpu;
-		for (MockVM vm : vms) {
+		for (VmStub vm : vms) {
 			cpuAlloc += vm.getCpuAlloc();
 		}
 		return cpuAlloc;
@@ -115,11 +114,11 @@ public class MockHost {
 		this.outgoingMigrationCount = outgoingMigrationCount;
 	}
 	
-	public ArrayList<MockVM> getIncomingVMs() {
+	public ArrayList<VmStub> getIncomingVMs() {
 		return incomingVMs;
 	}
 	
-	public void migrate(MockVM vm, MockHost target) {
+	public void migrate(VmStub vm, HostStub target) {
 		++outgoingMigrationCount;
 		
 		target.setIncomingMigrationCount(target.getIncomingMigrationCount() + 1);
@@ -128,11 +127,20 @@ public class MockHost {
 		target.getIncomingVMs().add(vm);
 	}
 	
-	public boolean hasCapacity(MockVM vm) {
+	/**
+	 * Checks with the real Host's CPUManager for capacity to add the VM, along with any other VMs previously
+	 * indicated as migrating in. It DOES NOT take into account freeing resources from migrating out VMs, for
+	 * a purpose: If migrations are triggered simultaneously, the load of a migrating out VM will still be present
+	 * when incoming VMs begin migration. This could be changed provided there is a mechanism for specifying a
+	 * sequence of migrations.
+	 * @param vm
+	 * @return
+	 */
+	public boolean hasCapacity(VmStub vm) {
 		//assemble a list of all VMs to be migrated
 		ArrayList<VMAllocationRequest> vmAllocationRequests = new ArrayList<VMAllocationRequest>();
 		
-		for (MockVM incomingVM : incomingVMs) {
+		for (VmStub incomingVM : incomingVMs) {
 			vmAllocationRequests.add(new VMAllocationRequest(incomingVM.getVM().getVMAllocation()));
 		}
 		
@@ -140,6 +148,14 @@ public class MockHost {
 		vmAllocationRequests.add(new VMAllocationRequest(vm.getVM().getVMAllocation()));
 		
 		return host.hasCapacity(vmAllocationRequests);
+	}
+	
+	public double getCpuInUse(VmStub vm) {
+		return getCpuInUse() + vm.getCpuInUse();
+	}
+	
+	public double getCpuAllocated(VmStub vm) {
+		return getCpuAllocated() + vm.getCpuAlloc();
 	}
 	
 }

@@ -319,7 +319,10 @@ public class Host extends SimulationEntity {
 		source.migrateOut(vm);
 		
 		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms), using privileged domain bandwidth TODO is this correct?
-		long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)privDomainAllocation.getBandwidth()) * 1000);
+		//long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)privDomainAllocation.getBandwidth()) * 1000);
+		//current using 1/4 of management bandwidth for migration, to allow up to 4 migrations at once. TODO the must be a better way!!
+		long timeToMigrate = (long)Math.ceil(((double)vm.getResourcesInUse().getMemory() / (double)privDomainAllocation.getBandwidth() / 4) * 1000);
+		
 		
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,

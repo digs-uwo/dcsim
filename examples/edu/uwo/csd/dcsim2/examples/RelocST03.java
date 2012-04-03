@@ -34,6 +34,7 @@ public class RelocST03 {
 		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
+		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
@@ -85,7 +86,7 @@ public class RelocST03 {
 		}
 		
 		//create the VM relocation policy
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85);
+		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85, 0.85);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
@@ -93,7 +94,6 @@ public class RelocST03 {
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
 		Simulation.getInstance().run(864000000, 0);
-		//Simulation.getInstance().run(700000, 0);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
