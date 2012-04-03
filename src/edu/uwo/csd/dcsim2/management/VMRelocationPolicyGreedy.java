@@ -58,9 +58,6 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 		//iterate through source hosts
 		boolean found;
 		for (HostStub source : sources) {
-			//sort VMs in descending order by CPU utilization
-			Collections.sort(source.getVms(), new VmStubCpuUtilizationComparator());
-			Collections.reverse(source.getVms());
 			
 			found = false;
 			ArrayList<VmStub> vmList = orderSourceVms(source.getVms());
