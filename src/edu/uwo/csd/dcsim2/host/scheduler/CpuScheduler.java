@@ -24,12 +24,8 @@ public abstract class CpuScheduler {
 		
 		long elapsedTime = Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate();
 		
-		availableCpu = 0;
-		for (Cpu cpu : host.getCpus()) {
-			availableCpu += cpu.getCores() * cpu.getCoreCapacity() * (elapsedTime / 1000.0); //core capacity in shares/second, elapsed time in ms
-			availableCpu = Utility.roundDouble(availableCpu); //round off precision errors
-		}
-		
+		availableCpu = host.getTotalCpu() * (elapsedTime / 1000.0); //cpu in shares/second, elapsed time in ms
+
 	}
 	
 	public abstract void schedulePrivDomain(VMAllocation privDomainAllocation);
@@ -50,6 +46,8 @@ public abstract class CpuScheduler {
 		if (getAvailableCpu() <= 0) {
 			this.setState(CpuSchedulerState.COMPLETE);
 		}
+		if (getAvailableCpu() < 0)
+			throw new RuntimeException("CPU Scheduler on Host #" + getHost().getId() + " used more CPU than available (sim time: " + Simulation.getInstance().getSimulationTime() + ")");
 	}
 	
 	public CpuSchedulerState getState() {

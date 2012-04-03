@@ -56,6 +56,7 @@ public class MasterCpuScheduler {
 			}
 		}
 		
+		HashSet<VMAllocation> completedVms = new HashSet<VMAllocation>();
 		boolean notDone = true;
 		do {
 			notDone = false;
@@ -66,9 +67,13 @@ public class MasterCpuScheduler {
 			
 			//execute VMs
 			for (VMAllocation vmAllocation : vmList) {
-				if (vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) { //ensure that a VM is instantiated within the allocation					
+				if (!completedVms.contains(vmAllocation) && vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) { //ensure that a VM is instantiated within the allocation					
 					if (vmAllocation.getHost().getCpuScheduler().getState() != CpuScheduler.CpuSchedulerState.COMPLETE) {
-						notDone = notDone | vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation);
+						if (vmAllocation.getHost().getCpuScheduler().processVM(vmAllocation)) {
+							notDone = true;
+						} else {
+							completedVms.add(vmAllocation);
+						}
 					}
 				}
 			}

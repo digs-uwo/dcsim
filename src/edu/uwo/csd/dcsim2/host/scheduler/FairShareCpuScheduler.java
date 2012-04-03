@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
@@ -32,13 +33,14 @@ public class FairShareCpuScheduler extends CpuScheduler {
 		roundCpuShare = Utility.roundDouble(roundCpuShare); //round off double precision problems
 		if (roundCpuShare < minShare)
 			roundCpuShare = minShare;
-		
 	}
 
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
 		
-		double cpuConsumed = vmAllocation.getVm().processWork(roundCpuShare);
+		double cpuAvail = Math.min(roundCpuShare, getAvailableCpu()); //overcome rounding errors that allow sightly more CPU to be used than available
+		
+		double cpuConsumed = vmAllocation.getVm().processWork(cpuAvail);
 		
 		if (cpuConsumed == 0) {
 			--nVms; //once a VM does not execute any work, it will no longer have any work for this interval, due to the order in which dependent VMs are scheduled by the master scheduler
@@ -53,7 +55,6 @@ public class FairShareCpuScheduler extends CpuScheduler {
 	@Override
 	public void endRound() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
