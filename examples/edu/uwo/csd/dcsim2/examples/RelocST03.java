@@ -23,13 +23,12 @@ public class RelocST03 {
 	
 	private static Logger logger = Logger.getLogger(RelocST03.class);
 	
-	private static int nHosts = 100;
+	private static int nHosts = 10;
 	
 	public static void main(String args[]) {
 		
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
-		
-		
+
 		logger.info(RelocST03.class.toString());
 		
 		//Set random seed to repeat run
@@ -47,7 +46,7 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 75;
+		int nVM = 6;
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
@@ -75,15 +74,16 @@ public class RelocST03 {
 		}
 		
 		//create the VM relocation policy
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.90, 0.85);
-		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 0.5, 0.85);
+		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85, 0.85);
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 0.5, 0.85);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
 		
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
-		Simulation.getInstance().run(864000000, 0);
+		//Simulation.getInstance().run(864000000, 0); //10 days
+		Simulation.getInstance().run(86400000, 0); //1 day
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
@@ -116,7 +116,7 @@ public class RelocST03 {
 		Workload workload = new TraceWorkload(fileName, 2700, offset); //scale of 2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(256, 0, 1, 0, 300); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
+		WebServerTier webServerTier = new WebServerTier(1024, 0, 1, 0, 300); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
 		webServerTier.setWorkTarget(workload);
 		
 		//set the tier as the target for the external workload

@@ -60,8 +60,9 @@ public class WebServerApplication extends InteractiveApplication {
 		VirtualResources resourcesConsumed = new VirtualResources();
 		resourcesConsumed.setCpu(cpuConsumed);
 		resourcesConsumed.setBandwidth(bandwidthConsumed);
-		resourcesConsumed.setMemory(resourcesAvailable.getMemory());
-		resourcesConsumed.setStorage(resourcesAvailable.getStorage());
+		
+		resourcesConsumed.setMemory(memory);
+		resourcesConsumed.setStorage(storage);
 		
 		return new CompletedWork(workCompleted, resourcesConsumed);
 	}
