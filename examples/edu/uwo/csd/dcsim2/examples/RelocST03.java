@@ -32,6 +32,9 @@ public class RelocST03 {
 		
 		logger.info(RelocST03.class.toString());
 		
+		//Set random seed to repeat run
+		//Utility.setRandomSeed(-7376048803729825830l);
+		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
@@ -45,35 +48,21 @@ public class RelocST03 {
 		
 		//create VMs
 		int nVM = 75;
-//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 3000, (int)(Math.random() * 200000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 3000, (int)(Math.random() * 40000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 3000, (int)(Math.random() * 15000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 3000, (int)(Math.random() * 15000000))));
-//		}
-//		Collections.shuffle(vmList);
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 1164, (int)(Math.random() * 200000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 1164, (int)(Utility.getRandom().nextDouble() * 200000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Math.random() * 40000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Utility.getRandom().nextDouble() * 40000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Math.random() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Utility.getRandom().nextDouble() * 15000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Math.random() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Utility.getRandom().nextDouble() * 15000000))));
 		}
-		Collections.shuffle(vmList);
+		Collections.shuffle(vmList, Utility.getRandom());
 		
 		//submit VMs
 		dc.getVMPlacementPolicy().submitVMs(vmList);

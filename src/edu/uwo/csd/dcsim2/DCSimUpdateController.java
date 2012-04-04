@@ -84,6 +84,8 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		logger.info("Simulation Time: " + simTime + simUnits);
 		logger.info("Recorded Time: " + recordedTime + simUnits);
 		
+		logger.info("Random Seed: " + Utility.getRandomSeed());
+		
 		logger.info("Total Power [" + Utility.roundDouble((Host.getGlobalPowerConsumed() / 3600000d), 3) + "kWh]");
 		logger.info("Average CPU Utilization [" + Utility.roundDouble((Host.getGlobalAverageUtilization() * 100), 3) + "]");
 		logger.info("Host-Hours [" + Utility.roundDouble((Host.getGlobalTimeActive() / 3600000d), 3) + "]");
