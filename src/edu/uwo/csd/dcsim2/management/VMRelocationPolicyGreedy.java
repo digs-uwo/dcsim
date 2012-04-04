@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 
 public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
@@ -25,6 +26,11 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 	
 	@Override
 	public void execute() {
+		
+		//don't run relocation at time 0
+		if (Simulation.getInstance().getSimulationTime() == 0)
+			return;
+		
 		ArrayList<Host> hostList = dc.getHosts();
 		
 		//Categorize hosts

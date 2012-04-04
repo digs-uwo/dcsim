@@ -75,7 +75,8 @@ public class RelocST03 {
 		
 		//create the VM relocation policy
 		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85, 0.85);
-		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 0.5, 0.85);
+		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 0.5, 0.85); //every 2.4 hours
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 0.5, 0.85); //every day
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import edu.uwo.csd.dcsim2.DataCentre;
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 
 public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
@@ -20,6 +21,11 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 
 	@Override
 	public void execute() {
+		
+		//don't run consolidation at time 0
+		if (Simulation.getInstance().getSimulationTime() == 0)
+			return;
+		
 		ArrayList<Host> hostList = dc.getHosts();
 		
 		//Categorize hosts
@@ -61,7 +67,8 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 				for (VmStub vm : vmList) {
 					
 					for (HostStub target : targets) {
-						 if (!usedSources.contains(target) &&	//make sure the target hasn't been used as a source
+						 if (source != target &&
+								 !usedSources.contains(target) &&	//make sure the target hasn't been used as a source
 								 target.hasCapacity(vm) &&														//target has capacity
 								 ((target.getCpuInUse(vm)) / target.getTotalCpu()) <= upperThreshold &&	//target will still not be stressed
 								 target.getHost().isCapable(vm.getVM().getVMDescription())) {				//target is capable
