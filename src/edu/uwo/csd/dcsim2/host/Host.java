@@ -460,6 +460,7 @@ public class Host extends SimulationEntity {
 			for (Event e : powerOnEventQueue) {
 				handleEvent(e);
 			}
+			powerOnEventQueue.clear();
 		}
 	}
 	
