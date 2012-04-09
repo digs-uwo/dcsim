@@ -34,6 +34,8 @@ public class DCSimUpdateController implements SimulationUpdateController {
 	@Override
 	public void beginSimulation() {
 		logger.info("Starting DCSim2");
+		
+		logger.info("Random Seed: " + Utility.getRandomSeed());
 	}
 	
 	@Override
@@ -83,8 +85,6 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		}
 		logger.info("Simulation Time: " + simTime + simUnits);
 		logger.info("Recorded Time: " + recordedTime + simUnits);
-		
-		logger.info("Random Seed: " + Utility.getRandomSeed());
 		
 		logger.info("Total Power [" + Utility.roundDouble((Host.getGlobalPowerConsumed() / 3600000d), 3) + "kWh]");
 		logger.info("Average CPU Utilization [" + Utility.roundDouble((Host.getGlobalAverageUtilization() * 100), 3) + "]");
