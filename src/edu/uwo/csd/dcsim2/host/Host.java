@@ -294,6 +294,11 @@ public class Host extends SimulationEntity {
 	 */
 	private void migrateIn(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
 		
+		//verify source
+		if (vm.getVMAllocation().getHost() != source)
+			throw new RuntimeException("Migration failed: Source (host #" + source.getId() + ") does not match VM location (host #" + 
+					vm.getVMAllocation().getHost().getId() + ").");
+		
 		//create new allocation & allocate it resources
 		
 		VMAllocation newAllocation;
