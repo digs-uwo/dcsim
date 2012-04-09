@@ -23,7 +23,7 @@ public class RelocST03 {
 	
 	private static Logger logger = Logger.getLogger(RelocST03.class);
 	
-	private static int nHosts = 10;
+	private static int nHosts = 100;
 	
 	public static void main(String args[]) {
 		
@@ -32,11 +32,11 @@ public class RelocST03 {
 		logger.info(RelocST03.class.toString());
 		
 		//Set random seed to repeat run
-		//Utility.setRandomSeed(-7376048803729825830l);
+		Utility.setRandomSeed(-5686511292745023682l);
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
-		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
+		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
@@ -46,7 +46,7 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 6;
+		int nVM = 75;
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
@@ -75,7 +75,8 @@ public class RelocST03 {
 		
 		//create the VM relocation policy
 		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 0.5, 0.85, 0.85);
-		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 0.5, 0.85); //every 2.4 hours
+		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 605000, 0.5, 0.85); //every 20 minutes
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 0.5, 0.85); //every 2.4 hours
 		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 0.5, 0.85); //every day
 		
 		long startTime = System.currentTimeMillis();
@@ -83,8 +84,8 @@ public class RelocST03 {
 		
 		//run the simulation
 		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
-		//Simulation.getInstance().run(864000000, 0); //10 days
-		Simulation.getInstance().run(86400000, 0); //1 day
+		Simulation.getInstance().run(864000000, 0); //10 days
+		//Simulation.getInstance().run(86400000, 0); //1 day
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");

@@ -23,7 +23,7 @@ public class StaticAllocationAverage {
 
 	private static Logger logger = Logger.getLogger(StaticAllocationAverage.class);
 	
-	private static int nHosts = 100;
+	private static int nHosts = 50;
 	
 	public static void main(String args[]) {
 		
@@ -91,7 +91,7 @@ public class StaticAllocationAverage {
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(200),
 					new StaticStorageManager(),
-					new FixedAllocationCpuScheduler());
+					new FairShareCpuScheduler());
 			
 			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments
 			

@@ -296,7 +296,8 @@ public class Host extends SimulationEntity {
 		
 		//verify source
 		if (vm.getVMAllocation().getHost() != source)
-			throw new RuntimeException("Migration failed: Source (host #" + source.getId() + ") does not match VM location (host #" + 
+			throw new RuntimeException("Migration failed: Source (host #" + source.getId() + ") does not match VM (#" + 
+					vm.getId() + ") location (host #" + 
 					vm.getVMAllocation().getHost().getId() + ").");
 		
 		//create new allocation & allocate it resources
@@ -305,7 +306,8 @@ public class Host extends SimulationEntity {
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
-			throw new RuntimeException("Allocation failed for migrating in VM #" + vm.getId(), e);
+			throw new RuntimeException("Allocation failed on Host # " + this.getId() + 
+					" for migrating in VM #" + vm.getId(), e);
 		}
 		
 		//add the allocation to the Host list of allocations

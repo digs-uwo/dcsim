@@ -82,7 +82,7 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 							 break;
 						 }
 					}
-					if (found) break;
+					//if (found) break;
 					
 				}
 			}
