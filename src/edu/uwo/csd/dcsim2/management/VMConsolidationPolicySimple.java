@@ -47,17 +47,24 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		Collections.sort(underUtilized, new HostStubVmCountComparator(new HostStubCpuUtilizationComparator()));
 		
 		ArrayList<HostStub> sources = underUtilized;
-		ArrayList<HostStub> targets = orderTargetHosts(partiallyUtilized, underUtilized);
+		
+		ArrayList<HostStub> targets = new ArrayList<HostStub>(partiallyUtilized.size() + underUtilized.size());
+		
+		targets.addAll(partiallyUtilized);
+		targets.addAll(underUtilized);
+		
+		targets = orderTargetHosts(targets);
+		
 		HashSet<HostStub> usedSources = new HashSet<HostStub>();
 		HashSet<HostStub> usedTargets = new HashSet<HostStub>();
 		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
 		
 		//iterate through source hosts
-		boolean found;
+		int migsAllowed;
 		for (HostStub source : sources) {
 			if (!usedTargets.contains(source)) { //make sure the source hasn't been used as a target
 			
-				found = false;
+				migsAllowed = 2;
 				ArrayList<VmStub> vmList = orderSourceVms(source.getVms());
 				
 				for (VmStub vm : vmList) {
@@ -72,15 +79,16 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 							 source.migrate(vm, target);
 							 migrations.add(new MigrationAction(source, target, vm));
 							 
-							 found = true;
+							 --migsAllowed;
 							 usedTargets.add(target);
 							 usedSources.add(source);
 							 break;
 						 }
 					}
-					if (found) break;
-					
+					if (migsAllowed == 0) break;
 				}
+				
+				targets = orderTargetHosts(targets);
 			}
 		}
 		
@@ -96,11 +104,8 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		return sources;
 	}
 	
-	protected ArrayList<HostStub> orderTargetHosts(ArrayList<HostStub> partiallyUtilized, ArrayList<HostStub> underUtilized) {
-		ArrayList<HostStub> targets = new ArrayList<HostStub>(partiallyUtilized.size() + underUtilized.size());
+	protected ArrayList<HostStub> orderTargetHosts(ArrayList<HostStub> targets) {
 		
-		targets.addAll(partiallyUtilized);
-		targets.addAll(underUtilized);
 		Collections.sort(targets, new HostStubCpuUtilizationComparator());
 		Collections.reverse(targets);
 		

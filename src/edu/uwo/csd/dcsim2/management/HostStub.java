@@ -13,6 +13,7 @@ public class HostStub {
 	private double vmmCpuInUse;
 	private double vmmCpuAlloc;
 	private double emptyVMAllocCpu = 0;
+	private double outgoingVMCpuUse = 0;
 	
 	private ArrayList<VmStub> vms = new ArrayList<VmStub>();
 	private ArrayList<VmStub> incomingVMs = new ArrayList<VmStub>();
@@ -40,8 +41,11 @@ public class HostStub {
 		
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
-				if (!host.getMigratingOut().contains(vmAllocation))
+				if (!host.getMigratingOut().contains(vmAllocation)) {
 					vms.add(new VmStub(vmAllocation.getVm()));
+				} else {
+					outgoingVMCpuUse += vmAllocation.getVm().getResourcesInUse().getCpu();
+				}
 			} else {
 				emptyVMAllocCpu += vmAllocation.getCpu();
 			}
@@ -68,7 +72,7 @@ public class HostStub {
 	}
 	
 	public double getCpuInUse() {
-		double cpuInUse = vmmCpuInUse;
+		double cpuInUse = vmmCpuInUse + outgoingVMCpuUse;
 		for (VmStub vm : vms) {
 			cpuInUse += vm.getCpuInUse();
 		}
