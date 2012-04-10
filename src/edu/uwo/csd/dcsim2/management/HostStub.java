@@ -40,7 +40,8 @@ public class HostStub {
 		
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
-				vms.add(new VmStub(vmAllocation.getVm()));
+				if (!host.getMigratingOut().contains(vmAllocation))
+					vms.add(new VmStub(vmAllocation.getVm()));
 			} else {
 				emptyVMAllocCpu += vmAllocation.getCpu();
 			}

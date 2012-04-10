@@ -8,7 +8,8 @@ public abstract class VMRelocationPolicy extends ManagementPolicy {
 	DataCentre dc;
 	long interval;
 		
-	public VMRelocationPolicy(DataCentre dc, long interval) {
+	public VMRelocationPolicy(DataCentre dc, long interval, long firstEvent) {
+		super(firstEvent);
 		this.dc = dc;
 		this.interval = interval;
 	}

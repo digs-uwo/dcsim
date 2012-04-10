@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim2.host.resourcemanager;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class CpuManager extends ResourceManager {
@@ -45,7 +46,7 @@ public abstract class CpuManager extends ResourceManager {
 	 * @return
 	 */
 	public double getCpuUtilization() {
-		return getCpuInUse() / getTotalCpu();
+		return Utility.roundDouble(getCpuInUse() / getTotalCpu());
 	}
 	
 	/**

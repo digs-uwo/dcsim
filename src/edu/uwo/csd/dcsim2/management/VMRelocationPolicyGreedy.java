@@ -13,8 +13,8 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 	double upperThreshold;
 	double targetUtilization;
 	
-	public VMRelocationPolicyGreedy(DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(dc, interval);
+	public VMRelocationPolicyGreedy(DataCentre dc, long interval, long firstEvent, double lowerThreshold, double upperThreshold, double targetUtilization) {
+		super(dc, interval, firstEvent);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
@@ -26,10 +26,6 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 	
 	@Override
 	public void execute() {
-		
-		//don't run relocation at time 0
-		if (Simulation.getInstance().getSimulationTime() == 0)
-			return;
 		
 		ArrayList<Host> hostList = dc.getHosts();
 		

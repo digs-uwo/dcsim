@@ -9,7 +9,8 @@ public abstract class VMConsolidationPolicy extends ManagementPolicy {
 	DataCentre dc;
 	long interval;
 	
-	public VMConsolidationPolicy(DataCentre dc, long interval) {
+	public VMConsolidationPolicy(DataCentre dc, long interval, long firstEvent) {
+		super(firstEvent);
 		this.dc = dc;
 		this.interval = interval;
 	}

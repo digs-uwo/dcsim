@@ -13,19 +13,15 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 	double lowerThreshold;
 	double upperThreshold;
 	
-	public VMConsolidationPolicySimple(DataCentre dc, long interval, double lowerThreshold, double upperThreshold) {
-		super(dc, interval);
+	public VMConsolidationPolicySimple(DataCentre dc, long interval, long firstEvent, double lowerThreshold, double upperThreshold) {
+		super(dc, interval, firstEvent);
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 	}
 
 	@Override
 	public void execute() {
-		
-		//don't run consolidation at time 0
-		if (Simulation.getInstance().getSimulationTime() == 0)
-			return;
-		
+	
 		ArrayList<Host> hostList = dc.getHosts();
 		
 		//Categorize hosts

@@ -344,6 +344,10 @@ public class Host extends SimulationEntity {
 	public void migrateOut(VM vm) {
 		//get the allocation for this vm
 		VMAllocation vmAllocation = vm.getVMAllocation();
+		
+		if (migratingOut.contains(vmAllocation))
+			throw new RuntimeException("Migrate out failed: VM #" + vm.getId() + " is already migrating out of Host #" + getId() + ".");
+		
 		migratingOut.add(vmAllocation);
 		
 		//add to VMM
@@ -489,6 +493,10 @@ public class Host extends SimulationEntity {
 	 * Output Host data to the log
 	 */
 	public void logInfo() {
+
+		if (getCpuManager().getCpuUtilization() > 1)
+			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
+		
 		if (state == HostState.ON) {
 			logger.debug("Host #" + getId() + 
 					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
@@ -508,6 +516,10 @@ public class Host extends SimulationEntity {
 	}
 	
 	public void updateMetrics() {
+		
+		if (getCpuManager().getCpuUtilization() > 1)
+			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
+		
 		if (state == HostState.ON) {
 			++currentActiveHosts;
 			
