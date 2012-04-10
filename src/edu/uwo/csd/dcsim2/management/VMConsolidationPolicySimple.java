@@ -44,7 +44,7 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		}
 		
 		//sort underutilized
-		Collections.sort(underUtilized, new HostStubVmCountComparator());
+		Collections.sort(underUtilized, new HostStubVmCountComparator(new HostStubCpuUtilizationComparator()));
 		
 		ArrayList<HostStub> sources = underUtilized;
 		ArrayList<HostStub> targets = orderTargetHosts(partiallyUtilized, underUtilized);
@@ -78,7 +78,7 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 							 break;
 						 }
 					}
-					//if (found) break;
+					if (found) break;
 					
 				}
 			}
