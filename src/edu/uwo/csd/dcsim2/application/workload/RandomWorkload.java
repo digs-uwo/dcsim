@@ -1,39 +1,28 @@
 package edu.uwo.csd.dcsim2.application.workload;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
+import edu.uwo.csd.dcsim2.core.Utility;
+
 public class RandomWorkload extends Workload {
 
-	long lastUpdate = 0;
+	long stepSize;
+	double scaleFactor;
 	
-	public RandomWorkload(int mean, int stepSize, int changeInterval) {
-		super();		
+	public RandomWorkload(double scaleFactor, long stepSize) {
+		super();	
+		
+		this.stepSize = 0;
+		this.scaleFactor = scaleFactor;
 	}
 	
 	@Override
 	protected double retrievePendingWork() {
-		
-		//TODO 
-		generateRandom(1);
-		
-		return 0;
-	}
-
-	private int generateRandom(int mean) {			
-		double L = Math.exp(-mean);
-		double p = 1.0;
-		int k = 0;
-		
-		do {
-			k++;
-			p *= Math.random();
-		} while (p > L);
-		
-		return k - 1;
+		return (int)Math.round(Utility.getRandom().nextDouble() * scaleFactor);
 	}
 
 	@Override
 	protected long updateWorkLevel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return Simulation.getInstance().getSimulationTime() + stepSize;
 	}
 		
 	
