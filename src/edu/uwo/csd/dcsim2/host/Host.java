@@ -79,6 +79,26 @@ public class Host extends SimulationEntity {
 			CpuScheduler cpuScheduler,
 			HostPowerModel powerModel) {
 		
+		this(nCpu, nCores, coreCapacity, memory, bandwidth, storage,
+			cpuManager, 
+			memoryManager, 
+			bandwidthManager,
+			storageManager, 
+			cpuScheduler,
+			powerModel,
+			new VmmApplicationFactory());
+		
+	}
+	
+	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+			CpuManager cpuManager, 
+			MemoryManager memoryManager, 
+			BandwidthManager bandwidthManager,
+			StorageManager storageManager, 
+			CpuScheduler cpuScheduler,
+			HostPowerModel powerModel,
+			ApplicationFactory vmmApplicationFactory) {
+		
 		cpus = new ArrayList<Cpu>();
 		for (int i = 0; i < nCpu; ++i) {
 			cpus.add(new Cpu(nCores, coreCapacity));
@@ -101,7 +121,7 @@ public class Host extends SimulationEntity {
 		 */
 		
 		//description allows privileged domain to use any or all of the resources of the host
-		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getMaxCoreCapacity(), 0, bandwidth, 0, new VmmApplicationFactory());
+		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getMaxCoreCapacity(), 0, bandwidth, 0, vmmApplicationFactory);
 		
 		//create the allocation
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);

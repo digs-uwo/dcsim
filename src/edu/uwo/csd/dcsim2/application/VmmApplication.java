@@ -11,6 +11,10 @@ public class VmmApplication extends Application {
 	private ArrayList<VM> migratingVms = new ArrayList<VM>();
 	private VirtualResources resourcesRemaining;
 	
+	protected double cpuOverhead = 300;
+	protected double bandwidthOverhead = 0;
+	
+	
 	public void addMigratingVm(VM vm) {
 		migratingVms.add(vm);
 	}
@@ -19,12 +23,20 @@ public class VmmApplication extends Application {
 		migratingVms.remove(vm);
 	}
 	
+	protected double getMigrationCpu(VM migratingVm) {
+		return migratingVm.getResourcesInUse().getCpu() * 0.1;
+	}
+	
+	protected double getMigrationBandwidth(VM migratingVm) {
+		return 100;
+	}
+	
 	@Override
 	public void beginScheduling() {
 		long elapsedTime = Simulation.getInstance().getElapsedTime();
 		
-		double cpu = 300;
-		double bandwidth = 0;
+		double cpu = cpuOverhead;
+		double bandwidth = bandwidthOverhead;
 		for (VM migrating : migratingVms) {
 			
 			/*  Calculate CPU overhead as 10% of utilization over last 
@@ -35,10 +47,10 @@ public class VmmApplication extends Application {
 			 *  the last elapsed period, so this should be sufficiently accurate
 			 *  (especially given that 10% is merely an estimation in any case).
 			 */
-			cpu += migrating.getResourcesInUse().getCpu() * 0.1;
+			cpu += getMigrationCpu(migrating);
 			Utility.roundDouble(cpu); //round off double precision problems
 			
-			bandwidth += 100; //TODO: add proper overhead calculation
+			bandwidth += getMigrationBandwidth(migrating); //TODO: add proper overhead calculation
 		}
 		//TODO calculate memory and storage usage
 			
