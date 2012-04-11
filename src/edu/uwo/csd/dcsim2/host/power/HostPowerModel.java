@@ -12,4 +12,6 @@ public interface HostPowerModel {
 	 */
 	public double getPowerConsumption(Host host);
 	
+	public double getPowerConsumption(double cpu);
+	
 }

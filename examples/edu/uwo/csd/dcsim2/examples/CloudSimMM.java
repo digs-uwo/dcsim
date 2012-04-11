@@ -32,11 +32,11 @@ public class CloudSimMM {
 		logger.info(CloudSimMM.class.toString());
 		
 		//Set random seed to repeat run
-		//Utility.setRandomSeed(-5937747979384659521l);
+		Utility.setRandomSeed(8314174893186720729l);
 		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
-		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
+		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));

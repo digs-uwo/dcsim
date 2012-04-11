@@ -26,12 +26,36 @@ public abstract class VMPlacementPolicy extends SimulationEntity {
 	
 	public abstract boolean submitVM(VMAllocationRequest vmAllocationRequest);
 	public abstract boolean submitVMs(ArrayList<VMAllocationRequest> vmAllocationRequests);	
-	public abstract boolean submitVM(VMAllocationRequest vmAllocationRequest, Host host);
 	
 	@Override
 	public void handleEvent(Event e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public boolean submitVM(VMAllocationRequest vmAllocationRequest, Host host) {
+
+		if (host.hasCapacity(vmAllocationRequest)) {
+			sendVM(vmAllocationRequest, host);
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	protected void sendVM(VMAllocationRequest vmAllocationRequest, Host host) {
+		
+		if (host.getState() != Host.HostState.ON && host.getState() != Host.HostState.POWERING_ON) {
+			Simulation.getInstance().sendEvent(
+					new Event(Host.HOST_POWER_ON_EVENT,
+							Simulation.getInstance().getSimulationTime(),
+							this,
+							host)
+					);
+		}
+		
+		host.submitVM(vmAllocationRequest);
 	}
 
 }

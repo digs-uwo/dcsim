@@ -45,17 +45,22 @@ public class SPECHostPowerModel implements HostPowerModel {
 				host.getState() == Host.HostState.POWERING_ON ||
 				host.getState() == Host.HostState.SUSPENDING) {
 			double cpuUtilization = host.getCpuManager().getCpuUtilization();
-			
-			//calculate power level above and below current utilization. Calculate both independently to handle special cases (i.e. 100%)
-			int lower = (int)Math.floor(cpuUtilization / 10);
-			int upper = (int)Math.ceil(cpuUtilization / 10); 
-			
-			return powerLevels[lower] + ((powerLevels[upper] - powerLevels[lower]) * ((cpuUtilization % 10) / 10));
+
+			return getPowerConsumption(cpuUtilization);
 		} else if (host.getState() == Host.HostState.SUSPENDED) {
 			return suspended;
 		} else {
 			return 0;
 		}
+	}
+
+	@Override
+	public double getPowerConsumption(double cpu) {
+		//calculate power level above and below current utilization. Calculate both independently to handle special cases (i.e. 100%)
+		int lower = (int)Math.floor(cpu / 10);
+		int upper = (int)Math.ceil(cpu / 10); 
+		
+		return powerLevels[lower] + ((powerLevels[upper] - powerLevels[lower]) * ((cpu % 10) / 10));
 	}
 
 }

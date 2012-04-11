@@ -19,5 +19,10 @@ public class LinearHostPowerModel implements HostPowerModel {
 		else
 			return 0;
 	}
+
+	@Override
+	public double getPowerConsumption(double cpu) {
+		return idlePower + ((maxPower - idlePower) * cpu);
+	}
 	
 }

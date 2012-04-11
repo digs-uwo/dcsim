@@ -46,7 +46,7 @@ public class RelocST03 {
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 75;
+		int nVM = 150;
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
@@ -55,12 +55,12 @@ public class RelocST03 {
 		for (int i = 0; i < nVM; ++i) {
 			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Utility.getRandom().nextDouble() * 40000000))));
 		}
-		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Utility.getRandom().nextDouble() * 15000000))));
-		}
-		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Utility.getRandom().nextDouble() * 15000000))));
-		}
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Utility.getRandom().nextDouble() * 15000000))));
+//		}
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Utility.getRandom().nextDouble() * 15000000))));
+//		}
 		Collections.shuffle(vmList, Utility.getRandom());
 		
 		//submit VMs
