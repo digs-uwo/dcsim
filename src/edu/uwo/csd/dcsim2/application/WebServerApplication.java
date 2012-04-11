@@ -48,8 +48,16 @@ public class WebServerApplication extends InteractiveApplication {
 		 * amount of work possible for each assuming the other is infinite,
 		 * and the minimum of the two is the amount of work completed
 		 */
-		cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
-		bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
+		if (cpuPerWork != 0)
+			cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
+		else
+			cpuWork = Double.MAX_VALUE;
+		
+		if (bwPerWork != 0)
+			bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
+		else
+			bwWork = Double.MAX_VALUE;
+		
 		double workCompleted = Math.min(cpuWork, bwWork);
 		workCompleted = Math.min(workCompleted, workRemaining);
 		

@@ -103,7 +103,7 @@ public class Simulation extends SimulationEntity {
 				
 				e.getTarget().handleEvent(e);
 			} else {
-				throw new RuntimeException("Encountered event with time < current simulation time");
+				throw new RuntimeException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
 			}
 		}
 		
