@@ -3,15 +3,7 @@ package edu.uwo.csd.dcsim2.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.DataCentre;
-import edu.uwo.csd.dcsim2.core.Event;
-import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.host.*;
-import edu.uwo.csd.dcsim2.host.comparator.HostCpuUtilizationComparator;
-import edu.uwo.csd.dcsim2.host.comparator.HostPowerStateComparator;
-import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 

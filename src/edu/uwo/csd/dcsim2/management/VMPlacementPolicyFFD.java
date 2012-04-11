@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.comparator.*;
 import edu.uwo.csd.dcsim2.vm.*;

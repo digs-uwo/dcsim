@@ -74,8 +74,10 @@ public class RelocST03 {
 		}
 		
 		//create the VM relocation policy
+		@SuppressWarnings("unused")
 		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
 		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
+		@SuppressWarnings("unused")
 		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
 		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 86400001, 0.5, 0.85); //every day
 		

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import edu.uwo.csd.dcsim2.DataCentre;
-import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 
 public class VMConsolidationPolicySimple extends VMConsolidationPolicy {

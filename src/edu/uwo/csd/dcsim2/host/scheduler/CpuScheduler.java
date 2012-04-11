@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim2.host.scheduler;
 
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
-import edu.uwo.csd.dcsim2.host.Cpu;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.*;
 
