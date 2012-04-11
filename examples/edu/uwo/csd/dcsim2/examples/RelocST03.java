@@ -32,7 +32,7 @@ public class RelocST03 {
 		logger.info(RelocST03.class.toString());
 		
 		//Set random seed to repeat run
-		Utility.setRandomSeed(-5686511292745023682l);
+		//Utility.setRandomSeed(2145730755378205824l);
 		
 		//create datacentre
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
