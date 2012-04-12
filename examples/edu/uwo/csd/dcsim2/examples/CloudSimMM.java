@@ -32,7 +32,7 @@ public class CloudSimMM {
 		logger.info(CloudSimMM.class.toString());
 		
 		//Set random seed to repeat run
-		Utility.setRandomSeed(8314174893186720729l);
+		//Utility.setRandomSeed(8314174893186720729l);
 		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
@@ -69,11 +69,14 @@ public class CloudSimMM {
 		}
 		
 		//create the VM relocation policy
-		@SuppressWarnings("unused")
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 300000, 300000, 0.4, 0.80, 0.80);
+//		@SuppressWarnings("unused")
+//		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 300000, 300000, 0.4, 0.80, 0.80);
+//		
+//		@SuppressWarnings("unused")
+//		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 300000, 300001, 0.4, 0.80); //every 10 minutes
 		
 		@SuppressWarnings("unused")
-		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 300000, 300001, 0.4, 0.80); //every 10 minutes
+		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 300000, 300000, 0.4, 0.8);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");

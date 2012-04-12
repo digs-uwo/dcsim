@@ -5,9 +5,23 @@ import edu.uwo.csd.dcsim2.vm.*;
 public class VmStub {
 
 	private VM vm;
+	private HostStub host;
 	
 	public VmStub(VM vm) {
 		this.vm = vm;
+	}
+	
+	public VmStub(VM vm, HostStub host) {
+		this(vm);
+		this.host = host;
+	}
+	
+	public HostStub getHost() {
+		return host;
+	}
+	
+	public void setHost(HostStub host) {
+		this.host = host;
 	}
 	
 	public double getCpuInUse() {

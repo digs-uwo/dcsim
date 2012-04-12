@@ -77,8 +77,11 @@ public class VMPlacementPolicyMBFD extends VMPlacementPolicy {
 			cpu += vmAllocation.getCpu();
 		}
 		
+		double powerBefore = host.getPowerModel().getPowerConsumption(cpu);
 		cpu += vmAllocationRequest.getCpu();
-		return host.getPowerModel().getPowerConsumption(cpu);		
+		double powerAfter = host.getPowerModel().getPowerConsumption(cpu);
+		
+		return powerAfter - powerBefore;		
 	}
 
 }

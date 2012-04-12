@@ -21,7 +21,7 @@ public class HostStub {
 	private int incomingMigrationCount = 0;
 	private int outgoingMigrationCount = 0;
 	
-	public static ArrayList<HostStub> createMockHostList(ArrayList<Host> hosts) {
+	public static ArrayList<HostStub> createHostStubList(ArrayList<Host> hosts) {
 		ArrayList<HostStub> mockHosts = new ArrayList<HostStub>();
 		
 		for (Host host : hosts)
@@ -42,7 +42,7 @@ public class HostStub {
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
 				if (!host.getMigratingOut().contains(vmAllocation)) {
-					vms.add(new VmStub(vmAllocation.getVm()));
+					vms.add(new VmStub(vmAllocation.getVm(), this));
 				} else {
 					outgoingVMCpuUse += vmAllocation.getVm().getResourcesInUse().getCpu();
 				}
@@ -129,6 +129,7 @@ public class HostStub {
 		target.setIncomingMigrationCount(target.getIncomingMigrationCount() + 1);
 		vms.remove(vm);
 		target.getVms().add(vm);
+		vm.setHost(target);
 		target.getIncomingVMs().add(vm);
 	}
 	
