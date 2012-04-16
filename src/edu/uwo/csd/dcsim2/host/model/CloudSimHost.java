@@ -10,11 +10,12 @@ public class CloudSimHost extends Host {
 
 	private static HostPowerModel powerModel = new LinearHostPowerModel(175, 250);
 	
-	public CloudSimHost(int coreCapacity) {		
-		super(1, 1, coreCapacity, 8192, 131072, 1048576, 
+	public CloudSimHost(int coreCapacity) {	
+		//16GB RAM, 10Gb/s network (* 2 to assume separate network for migration), 1TB storage
+		super(1, 1, coreCapacity, 16384, 1310720*2, 1048576, 
 				new StaticOversubscribingCpuManager(0),
 				new StaticMemoryManager(), 
-				new StaticBandwidthManager(131072), 
+				new StaticBandwidthManager(1310720), 
 				new StaticStorageManager(), 
 				new FairShareCpuScheduler(),
 				powerModel,

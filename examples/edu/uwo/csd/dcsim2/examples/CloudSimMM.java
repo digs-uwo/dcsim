@@ -10,6 +10,7 @@ import edu.uwo.csd.dcsim2.DCSimUpdateController;
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.application.WebServerTier;
 import edu.uwo.csd.dcsim2.application.workload.RandomWorkload;
+import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
@@ -23,7 +24,7 @@ public class CloudSimMM {
 	
 	private static Logger logger = Logger.getLogger(CloudSimMM.class);
 	
-	private static int nHosts = 100;
+	private static int nHosts = 1500;
 	
 	public static void main(String args[]) {
 		
@@ -35,26 +36,47 @@ public class CloudSimMM {
 		//Utility.setRandomSeed(8314174893186720729l);
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
-		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD();
+		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
 		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
-		ArrayList<Host> hostList = createHosts(nHosts);
+		ArrayList<Host> hostList = CloudSimHelper.createHosts(nHosts);
 		dc.addHosts(hostList);
 		
 		//create VMs
-		int nVM = 290;
+//		int nVM = 290;
+//		
+//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
+//		int vmSize[] = {250, 500, 750, 1000};
+//		for (int i = 0; i < nVM; ++i) {
+//			int vmType = i / (int) Math.ceil((double) nVM / 4);
+//			
+//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createVMDesc(vmSize[vmType])));
+//		}
+//		Collections.shuffle(vmList, Utility.getRandom()); //should this be done?
 		
-		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-		int vmSize[] = {250, 500, 750, 1000};
-		for (int i = 0; i < nVM; ++i) {
-			int vmType = i / (int) Math.ceil((double) nVM / 4);
-			
-			vmList.add(new VMAllocationRequest(createVMDesc(vmSize[vmType])));
-		}
+		//create VMs
+//		int nVM = 25;
+//		
+//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/clarknet", 250, (int)(Utility.getRandom().nextDouble() * 200000000))));
+//		}
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/epa", 1000, (int)(Utility.getRandom().nextDouble() * 40000000))));
+//		}
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/google_cores_job_type_0", 750, (int)(Utility.getRandom().nextDouble() * 15000000))));
+//		}
+//		for (int i = 0; i < nVM; ++i) {
+//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/google_cores_job_type_1", 500, (int)(Utility.getRandom().nextDouble() * 15000000))));
+//		}
+//		Collections.shuffle(vmList, Utility.getRandom());
+		
+		ArrayList<VMAllocationRequest> vmList = CloudSimHelper.createPlanetLabVMs("traces/planetlab/20110303", 500);
 		Collections.shuffle(vmList, Utility.getRandom()); //should this be done?
 		
 		//submit VMs
@@ -76,7 +98,7 @@ public class CloudSimMM {
 //		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 300000, 300001, 0.4, 0.80); //every 10 minutes
 		
 		@SuppressWarnings("unused")
-		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 300000, 300000, 0.4, 0.8);
+		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 60000, 60000, 0.45, 0.81);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
@@ -90,43 +112,5 @@ public class CloudSimMM {
 		
 	}
 	
-	public static ArrayList<Host> createHosts(int nHosts) {
-		
-		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
-		
-		int hostSize[] = {1000, 2000, 3000};
-		for (int i = 0; i < nHosts; ++i) {
-			
-			int hostType = i % 3;
-			
-			Host host = new CloudSimHost(hostSize[hostType]);
-			
-			hosts.add(host);
-		}
-		
-		return hosts;
-	}
-	
-	public static VMDescription createVMDesc(int coreCapacity) {
-		
-		//create workload (random)
-		Workload workload = new RandomWorkload(coreCapacity, 300000);
-		
-		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(128, 1024, 1, 0, 0); //128MB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
-		webServerTier.setWorkTarget(workload);
-		
-		//set the tier as the target for the external workload
-		workload.setWorkTarget(webServerTier);
-		
-		//build VMDescription
-		int cores = 1; //requires 1 core
-		int memory = 1024;
-		int bandwidth = 0; //16MB = 16384KB
-		long storage = 1024; //1GB
-		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);
-
-		return vmDescription;
-	}
 	
 }
