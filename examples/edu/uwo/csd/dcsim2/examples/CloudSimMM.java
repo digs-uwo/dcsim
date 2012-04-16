@@ -36,7 +36,6 @@ public class CloudSimMM {
 		//Utility.setRandomSeed(8314174893186720729l);
 		
 		//create datacentre
-		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD();
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
@@ -45,37 +44,7 @@ public class CloudSimMM {
 		//create hosts
 		ArrayList<Host> hostList = CloudSimHelper.createHosts(nHosts);
 		dc.addHosts(hostList);
-		
-		//create VMs
-//		int nVM = 290;
-//		
-//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-//		int vmSize[] = {250, 500, 750, 1000};
-//		for (int i = 0; i < nVM; ++i) {
-//			int vmType = i / (int) Math.ceil((double) nVM / 4);
-//			
-//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createVMDesc(vmSize[vmType])));
-//		}
-//		Collections.shuffle(vmList, Utility.getRandom()); //should this be done?
-		
-		//create VMs
-//		int nVM = 25;
-//		
-//		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/clarknet", 250, (int)(Utility.getRandom().nextDouble() * 200000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/epa", 1000, (int)(Utility.getRandom().nextDouble() * 40000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/google_cores_job_type_0", 750, (int)(Utility.getRandom().nextDouble() * 15000000))));
-//		}
-//		for (int i = 0; i < nVM; ++i) {
-//			vmList.add(new VMAllocationRequest(CloudSimExampleHelper.createTraceVMDesc("traces/google_cores_job_type_1", 500, (int)(Utility.getRandom().nextDouble() * 15000000))));
-//		}
-//		Collections.shuffle(vmList, Utility.getRandom());
-		
+	
 		ArrayList<VMAllocationRequest> vmList = CloudSimHelper.createPlanetLabVMs("traces/planetlab/20110303", 500);
 		Collections.shuffle(vmList, Utility.getRandom()); //should this be done?
 		
