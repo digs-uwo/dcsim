@@ -50,9 +50,8 @@ public abstract class InteractiveApplication extends Application {
 		//calculate overhead for scheduling period
 		overheadRemaining = new VirtualResources();
 		
-		long elapsedTime = Simulation.getInstance().getElapsedTime();
-		overheadRemaining.setCpu(overhead.getCpu() * (elapsedTime / 1000.0));
-		overheadRemaining.setBandwidth(overhead.getBandwidth() * (elapsedTime / 1000.0));
+		overheadRemaining.setCpu(overhead.getCpu() * Simulation.getInstance().getElapsedSeconds());
+		overheadRemaining.setBandwidth(overhead.getBandwidth() * Simulation.getInstance().getElapsedSeconds());
 		overheadRemaining.setMemory(overhead.getMemory());
 		overheadRemaining.setStorage(overhead.getStorage());
 		
