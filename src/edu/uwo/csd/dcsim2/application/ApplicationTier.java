@@ -13,9 +13,25 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 	
 	public Application createApplication() {
 		Application newApp = instantiateApplication();
-		this.applications.add(newApp);
+		startApplication(newApp);
 		
 		return newApp;
+	}
+	
+	public void startApplication(Application application) {
+		if (!applications.contains(application)) {
+			applications.add(application);
+		} else {
+			throw new RuntimeException("Attempted to start an application that was already started");
+		}
+	}
+	
+	public void stopApplication(Application application) {
+		if(applications.contains(application)) {
+			this.applications.remove(application);
+		} else {
+			throw new RuntimeException("Attempted to stop an application that was not part of the tier");
+		}
 	}
 	
 	public void removeApplication(Application application) {

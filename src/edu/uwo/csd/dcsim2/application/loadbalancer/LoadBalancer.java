@@ -27,10 +27,12 @@ public abstract class LoadBalancer {
 	
 	public double retrieveWork(Application application) {
 		//distribute any queued incoming work
-		if (incomingWork > 0) {
-			applicationWorkPending = distributeWork(incomingWork, applicationWorkPending);
-			incomingWork = 0;
-		}
+		
+		applicationWorkPending = distributeWork(incomingWork, applicationWorkPending);
+		incomingWork = 0;
+		
+		if (!applicationWorkPending.containsKey(application))
+			throw new RuntimeException("Application not found in load balancer pending work");
 		
 		double out = applicationWorkPending.get(application);
 		applicationWorkPending.remove(application);

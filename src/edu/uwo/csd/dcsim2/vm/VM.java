@@ -97,6 +97,14 @@ public class VM extends SimulationEntity {
 		application.completeScheduling();
 	}
 	
+	public void startApplication() {
+		vmDescription.getApplicationFactory().startApplication(application);
+	}
+	
+	public void stopApplication() {
+		vmDescription.getApplicationFactory().stopApplication(application);
+	}
+	
 	public void updateMetrics() {
 		application.updateMetrics();
 	}
