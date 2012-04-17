@@ -38,10 +38,8 @@ public class BasicReplication {
 		//create hosts
 		ArrayList<Host> hostList = createHosts(2);
 		dc.addHosts(hostList);
-		
-		VMDescription vmDescription = createVMDesc("traces/clarknet", 0);
-		
-		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vmDescription);
+
+		VMAllocationRequest vmAllocationRequest = createServiceVmList().get(0);
 		
 		vmPlacementPolicy.submitVM(vmAllocationRequest, hostList.get(0));
 		
@@ -63,29 +61,21 @@ public class BasicReplication {
 		
 	}
 	
-	public static VMDescription createVMDesc(String fileName, long offset) {
+	public static ArrayList<VMAllocationRequest> createServiceVmList() {
 		
 		//create workload (external)
-		//Workload workload = new TraceWorkload(fileName, 2700 * 2, offset); //scale of (2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost) * 2
 		Workload workload = new StaticWorkload(2000);
 		
-		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(1024, 0, 1, 0, 300); //1GB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
-		webServerTier.setLoadBalancer(new EqualShareLoadBalancer());
-		webServerTier.setWorkTarget(workload);
-		
-		//set the tier as the target for the external workload
-		workload.setWorkTarget(webServerTier);
-		
-		//build VMDescription
 		int cores = 1; //requires 1 core
 		int coreCapacity = 3000;
 		int memory = 1024;
 		int bandwidth = 16384; //16MB = 16384KB
 		long storage = 1024; //1GB
-		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, webServerTier);
+		
+		SingleTierWebService webService = new SingleTierWebService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300);
 
-		return vmDescription;
+		return webService.createInitialVmRequests();
+
 	}
 	
 	public static ArrayList<Host> createHosts(int nHosts) {
