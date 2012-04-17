@@ -12,4 +12,14 @@ public class VmmApplicationFactory implements ApplicationFactory {
 		return Integer.MAX_VALUE;
 	}
 
+	@Override
+	public void startApplication(Application application) {
+		//nothing to do
+	}
+
+	@Override
+	public void stopApplication(Application application) {
+		//nothing to do
+	}
+
 }

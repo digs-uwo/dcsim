@@ -6,6 +6,19 @@ public abstract class Application {
 
 	protected static VirtualResources globalResourceDemand = new VirtualResources();
 	protected static VirtualResources globalResourceUsed = new VirtualResources();
+
+	protected VM vm;
+	
+	public Application() {
+	}
+	
+	public VM getVM() {
+		return vm;
+	}
+	
+	public void setVM(VM vm) {
+		this.vm = vm;
+	}
 	
 	/*
 	 * Called once at the beginning of scheduling
