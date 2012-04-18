@@ -209,6 +209,12 @@ public class Simulation extends SimulationEntity {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
 	
+	public boolean hasProperty(String name) {
+		if (System.getProperty(name) != null || properties.getProperty(name) != null)
+			return true;
+		return false;
+	}
+	
 	/**
 	 * Retrieve an application property from the configuration file or command line options. If a
 	 * property is specified in both, then the command line overrides the properties file.
@@ -216,11 +222,17 @@ public class Simulation extends SimulationEntity {
 	 * @return The value of the property.
 	 */
 	public String getProperty(String name) {
+		String prop = null;
 		if (System.getProperty(name) != null) {
-			return System.getProperty(name);
+			prop = System.getProperty(name);
 		} else {
-			return properties.getProperty(name);
+			prop = properties.getProperty(name);
 		}
+		
+		if (prop == null)
+			throw new RuntimeException("Simulation property '" + name + "' not found");
+		
+		return prop;
 	}
 
 	

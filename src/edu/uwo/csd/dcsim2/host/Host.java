@@ -457,7 +457,7 @@ public class Host extends SimulationEntity {
 	
 	public void powerOn() {
 		if (state != HostState.ON && state != HostState.POWERING_ON) {
-			state = HostState.POWERING_ON;
+			
 			long delay = 0;
 			switch (state) {
 				case SUSPENDED:
@@ -470,7 +470,7 @@ public class Host extends SimulationEntity {
 					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromFailedDelay"));
 					break;
 				case POWERING_OFF:
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffOffDelay"));
+					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
 					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case SUSPENDING:
@@ -478,11 +478,13 @@ public class Host extends SimulationEntity {
 					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 			}
-
+			
 			Simulation.getInstance().sendEvent(
 				new Event(Host.HOST_COMPLETE_POWER_ON_EVENT,
 						Simulation.getInstance().getSimulationTime() + delay,
 						this, this));
+			
+			state = HostState.POWERING_ON;
 		}
 	}
 	

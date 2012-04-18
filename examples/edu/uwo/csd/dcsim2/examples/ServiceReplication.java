@@ -29,7 +29,7 @@ public class ServiceReplication {
 		logger.info(ServiceReplication.class.toString());
 		
 		//Set random seed to repeat run
-		//Utility.setRandomSeed(-5468321996339219281l);
+		Utility.setRandomSeed(-5468321996339219281l);
 		
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
