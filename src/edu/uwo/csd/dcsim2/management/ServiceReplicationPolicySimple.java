@@ -57,7 +57,7 @@ public class ServiceReplicationPolicySimple extends ManagementPolicy {
 					for (Application application : tier.getApplications()) {
 						int hostVmCount = application.getVM().getVMAllocation().getHost().getVMAllocations().size(); 
 						if(hostVmCount < nVms &&
-								!application.getVM().getVMAllocation().getHost().getMigratingOut().contains(application.getVM())) {
+								!application.getVM().getVMAllocation().getHost().getMigratingOut().contains(application.getVM().getVMAllocation())) {
 							nVms = hostVmCount;
 							targetVm = application.getVM();
 						}

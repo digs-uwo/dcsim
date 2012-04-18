@@ -29,7 +29,7 @@ public class ServiceReplication {
 		logger.info(ServiceReplication.class.toString());
 		
 		//Set random seed to repeat run
-		Utility.setRandomSeed(-5468321996339219281l);
+		Utility.setRandomSeed(-2250887070548558400l);
 		
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
@@ -68,12 +68,12 @@ public class ServiceReplication {
 		}
 		
 		//create the VM relocation policy
-//		@SuppressWarnings("unused")
-//		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
-//		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
-//		@SuppressWarnings("unused")
-//		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
-//		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 86400001, 0.5, 0.85); //every day
+		@SuppressWarnings("unused")
+		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
+		@SuppressWarnings("unused")
+		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 86400001, 0.5, 0.85); //every day
 		
 		VMPlacementPolicy replicationPlacementPolicy = new VMPlacementPolicyFFD();
 		replicationPlacementPolicy.setDataCentre(dc);

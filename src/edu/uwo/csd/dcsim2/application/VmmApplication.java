@@ -128,6 +128,31 @@ public class VmmApplication extends Application {
 	public void updateResourceDemand() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	/*
+	 * SLA Methods
+	 * All return 0, as the VMM has no SLA
+	 */
+	
+	@Override
+	public double getSLAViolation() {
+		return 0;
+	}
+
+	@Override
+	public double getTotalSLAViolation() {
+		return 0;
+	}
+
+	@Override
+	public double getSLAViolatedWork() {
+		return 0;
+	}
+
+	@Override
+	public double getTotalSLAViolatedWork() {
+		return 0;
 	}	
 
 }

@@ -123,6 +123,10 @@ public class VM extends SimulationEntity {
 				"/" + vmAllocation.getStorage() + "]");
 	}
 	
+	public boolean isMigrating() {
+		return vmAllocation.getHost().getMigratingOut().contains(this.getVMAllocation());
+	}
+	
 	public int getId() {
 		return id;
 	}

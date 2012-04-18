@@ -352,7 +352,7 @@ public class Host extends SimulationEntity {
 			throw new RuntimeException("Privileged Domain has no bandwidth available for migration");
 		
 		long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesInUse().getMemory() * 1024) / ((double)privDomainAllocation.getBandwidth())) * 1000);
-		
+
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
 				Simulation.getInstance().getSimulationTime() + timeToMigrate,

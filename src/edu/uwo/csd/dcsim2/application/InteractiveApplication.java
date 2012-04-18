@@ -25,6 +25,11 @@ public abstract class InteractiveApplication extends Application {
 	private VirtualResources overhead; //the amount of overhead per second this application creates
 	private VirtualResources overheadRemaining; //the amount of overhead accumulated over the elapsed period that remains to be processed
 	
+	private double incomingWork = 0;
+	private double totalIncomingWork = 0;
+	private double slaViolatedWork = 0;
+	private double totalSlaViolatedWork = 0;
+	
 	public InteractiveApplication(ApplicationTier applicationTier) {
 		
 		//initialize resource demand/consumption values
@@ -57,12 +62,17 @@ public abstract class InteractiveApplication extends Application {
 		
 		//application overhead is included in resourceDemand
 		resourcesDemanded = resourcesDemanded.add(overheadRemaining);
+		
+		//set up sla metrics
+		incomingWork = 0;
+		slaViolatedWork = 0;
 	}
 
 	public void updateResourceDemand() {
 		//retrieve incoming work
 		double incomingWork = applicationTier.retrieveWork(this);
 		workRemaining += incomingWork;
+		this.incomingWork += incomingWork;
 		
 		//if there is incoming work, calculate the resources required to perform it and add it to resourceDemand
 		if (incomingWork > 0) {
@@ -147,6 +157,13 @@ public abstract class InteractiveApplication extends Application {
 		resourceInUse.setMemory(resourcesUsed.getMemory());
 		resourceInUse.setStorage(resourcesUsed.getStorage());
 		
+		slaViolatedWork = workRemaining;
+		if (vm.isMigrating())
+			slaViolatedWork += slaViolatedWork * Double.parseDouble(Simulation.getInstance().getProperty("vmMigrationSLAPenalty"));
+		
+		totalIncomingWork += incomingWork;
+		totalSlaViolatedWork += slaViolatedWork;
+		
 		//clear work remaining (i.e. drop requests that could not be fulfilled)
 		workRemaining = 0;
 	}
@@ -159,6 +176,9 @@ public abstract class InteractiveApplication extends Application {
 		
 		globalResourceDemand = globalResourceDemand.add(resourcesDemanded);
 		globalResourceUsed = globalResourceUsed.add(resourcesUsed);
+		
+		globalIncomingWork += incomingWork;
+		globalSlaViolatedWork += slaViolatedWork;
 	}
 
 	protected abstract VirtualResources calculateRequiredResources(double work);
@@ -190,6 +210,26 @@ public abstract class InteractiveApplication extends Application {
 	@Override
 	public VirtualResources getTotalResourceUsed() {
 		return totalResourceUsed;
+	}
+	
+	@Override
+	public double getSLAViolation() {
+		return slaViolatedWork / incomingWork;
+	}
+
+	@Override
+	public double getTotalSLAViolation() {
+		return totalSlaViolatedWork / totalIncomingWork;
+	}
+
+	@Override
+	public double getSLAViolatedWork() {
+		return slaViolatedWork;
+	}
+
+	@Override
+	public double getTotalSLAViolatedWork() {
+		return totalSlaViolatedWork;
 	}
 	
 	protected class CompletedWork {
