@@ -57,8 +57,8 @@ public class SPECHostPowerModel implements HostPowerModel {
 	@Override
 	public double getPowerConsumption(double cpu) {
 		//calculate power level above and below current utilization. Calculate both independently to handle special cases (i.e. 100%)
-		int lower = (int)Math.floor(cpu / 10);
-		int upper = (int)Math.ceil(cpu / 10); 
+		int lower = (int)Math.floor((cpu * 100) / 10);
+		int upper = (int)Math.ceil((cpu * 100) / 10); 
 		
 		return powerLevels[lower] + ((powerLevels[upper] - powerLevels[lower]) * ((cpu % 10) / 10));
 	}

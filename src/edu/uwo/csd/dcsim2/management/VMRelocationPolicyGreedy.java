@@ -7,7 +7,7 @@ import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
-import edu.uwo.csd.dcsim2.management.stub.HostStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
 
 public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
@@ -52,7 +52,7 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 		}
 				
 		//sort stressed list
-		Collections.sort(stressed, new HostStubCpuUtilizationComparator());
+		Collections.sort(stressed, new HostStubCpuInUseComparator());
 		Collections.reverse(stressed);
 		
 		//create source and target lists

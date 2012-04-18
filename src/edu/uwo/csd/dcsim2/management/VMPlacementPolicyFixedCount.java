@@ -55,7 +55,7 @@ public class VMPlacementPolicyFixedCount extends VMPlacementPolicy {
 	private Host findTargetHost(VMAllocationRequest vmAllocationRequest, ArrayList<Host> sortedHosts) {
 
 		for (Host host : sortedHosts) {
-			if (host.getVMAllocations().size() < vmsPerHost && host.hasCapacity(vmAllocationRequest)) {
+			if (host.getVMAllocations().size() < vmsPerHost && host.hasCapacity(vmAllocationRequest) && host.isCapable(vmAllocationRequest.getVMDescription())) {
 				return host;
 			}
 		}

@@ -8,7 +8,7 @@ import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
-import edu.uwo.csd.dcsim2.management.stub.VmStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.VmStubCpuInUseComparator;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMAllocationPolicyMM extends VMRelocationPolicy {
@@ -32,7 +32,7 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 		
 		for (HostStub host : hostList) {
 			ArrayList<VmStub> vmList = new ArrayList<VmStub>(host.getVms());
-			Collections.sort(vmList, new VmStubCpuUtilizationComparator());
+			Collections.sort(vmList, new VmStubCpuInUseComparator());
 			Collections.reverse(vmList);
 			
 			double hUtil = host.getCpuInUse();
@@ -77,7 +77,7 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 		
 		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
 		
-		Collections.sort(vmList, new VmStubCpuUtilizationComparator());
+		Collections.sort(vmList, new VmStubCpuInUseComparator());
 		Collections.reverse(vmList);
 		
 		for (VmStub vm : vmList) {
@@ -109,8 +109,8 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 	}
 	
 	double estimatePower(HostStub host, VmStub vm) {
-		double powerBefore = host.getHost().getPowerModel().getPowerConsumption(host.getCpuInUse());
-		double powerAfter = host.getHost().getPowerModel().getPowerConsumption(host.getCpuInUse(vm));
+		double powerBefore = host.getHost().getPowerModel().getPowerConsumption(host.getCpuUtilization());
+		double powerAfter = host.getHost().getPowerModel().getPowerConsumption(host.getCpuUtilization(vm));
 		return powerAfter - powerBefore;
 	}
 

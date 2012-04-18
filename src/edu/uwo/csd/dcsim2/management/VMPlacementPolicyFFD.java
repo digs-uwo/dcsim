@@ -30,8 +30,9 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 	public boolean submitVMs(ArrayList<VMAllocationRequest> vmAllocationRequests) {
 
 		for (VMAllocationRequest request : vmAllocationRequests) {
-			if (!submitVM(request))
+			if (!submitVM(request)) {
 				return false;
+			}
 		}
 		
 		return true;
@@ -41,8 +42,10 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 		ArrayList<Host> sorted = new ArrayList<Host>();
 		
 		sorted.addAll(datacentre.getHosts());
+		
+		//orders by available allocation in increasing order (least available first) 
 		Collections.sort(sorted, new HostCpuAllocationComparator());
-		Collections.reverse(sorted); //switch to decreasing order
+		
 		return sorted;
 	}
 	
@@ -52,7 +55,8 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 			/* check allocations individually in order to override the CPU Manager's hasCapacity method to
 			 * for the CPU Manager to NOT oversubscribe the initial vm placement
 			 */
-			if (host.getMemoryManager().hasCapacity(vmAllocationRequest)
+			if (host.isCapable(vmAllocationRequest.getVMDescription())
+					&& host.getMemoryManager().hasCapacity(vmAllocationRequest)
 					&& host.getBandwidthManager().hasCapacity(vmAllocationRequest)
 					&& host.getStorageManager().hasCapacity(vmAllocationRequest)
 					&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpu()) {

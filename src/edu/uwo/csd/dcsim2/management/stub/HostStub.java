@@ -103,6 +103,10 @@ public class HostStub {
 		return getCpuInUse() / getTotalCpu();
 	}
 	
+	public double getCpuUtilization(VmStub vm) {
+		return getCpuInUse(vm) / getTotalCpu();
+	}
+	
 	public int getIncomingMigrationCount() {
 		return incomingMigrationCount;
 	}

@@ -54,9 +54,12 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 		
 		//build relocation target list
 		ArrayList<HostStub> targets = new ArrayList<HostStub>();
-		Collections.sort(partiallyUtilized, new HostStubCpuUtilizationComparator());
-		Collections.sort(underUtilized, new HostStubCpuUtilizationComparator());
-		Collections.reverse(underUtilized);
+		Collections.sort(partiallyUtilized, new HostStubCpuUnusedComparator());
+		Collections.reverse(partiallyUtilized);
+		
+		Collections.sort(underUtilized, new HostStubCpuUnusedComparator());
+		
+		
 		Collections.sort(empty, new HostStubPowerStateComparator());
 		Collections.reverse(empty);
 		
@@ -66,7 +69,7 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 		
 		//sort stressed list in decreasing order by CPU utilization
 		ArrayList<HostStub> sources = stressed;
-		Collections.sort(sources, new HostStubCpuUtilizationComparator());
+		Collections.sort(sources, new HostStubCpuInUseComparator());
 		Collections.reverse(sources);
 		
 		//keep track of hosts used as migration targets to avoid using them as consolidation sources later
@@ -77,7 +80,7 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 			
 			//sort VM list
 			ArrayList<VmStub> vmList = new ArrayList<VmStub>(source.getVms());
-			Collections.sort(vmList, new VmStubCpuUtilizationComparator());
+			Collections.sort(vmList, new VmStubCpuInUseComparator());
 			
 			boolean found = false;
 			for (VmStub vm : vmList) {
@@ -102,7 +105,7 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 		
 		//now perform consolidation
 		sources = underUtilized;
-		Collections.sort(sources, new HostStubCpuUtilizationComparator());
+		Collections.sort(sources, new HostStubCpuInUseComparator());
 		
 		//keep track of sources that have already been used as a source
 		ArrayList<HostStub> usedSources = new ArrayList<HostStub>();

@@ -5,10 +5,10 @@ import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
-import edu.uwo.csd.dcsim2.management.stub.HostStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim2.management.stub.HostStubPowerStateComparator;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
-import edu.uwo.csd.dcsim2.management.stub.VmStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.VmStubCpuInUseComparator;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 
@@ -18,7 +18,7 @@ public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 	
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {
 		ArrayList<VmStub> sorted = new ArrayList<VmStub>(sourceVms);
-		Collections.sort(sorted, new VmStubCpuUtilizationComparator());
+		Collections.sort(sorted, new VmStubCpuInUseComparator());
 		Collections.reverse(sorted);
 		return sorted;
 	}
@@ -27,11 +27,11 @@ public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 		ArrayList<HostStub> targets = new ArrayList<HostStub>();
 		
 		//sort underutilized in descending order by CPU utilization
-		Collections.sort(underUtilized, new HostStubCpuUtilizationComparator());
+		Collections.sort(underUtilized, new HostStubCpuInUseComparator());
 		Collections.reverse(underUtilized);
 		
 		//sort partiallyUtilized in increasing order by CPU utilization
-		Collections.sort(partiallyUtilized, new HostStubCpuUtilizationComparator());
+		Collections.sort(partiallyUtilized, new HostStubCpuInUseComparator());
 		//Collections.reverse(partiallyUtilized);
 		
 		//sort empty by power state (on, off, suspended)

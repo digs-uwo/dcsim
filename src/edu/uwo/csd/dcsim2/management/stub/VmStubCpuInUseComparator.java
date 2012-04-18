@@ -3,7 +3,7 @@ package edu.uwo.csd.dcsim2.management.stub;
 import java.util.Comparator;
 
 
-public class VmStubCpuUtilizationComparator implements Comparator<VmStub> {
+public class VmStubCpuInUseComparator implements Comparator<VmStub> {
 
 	@Override
 	public int compare(VmStub o1, VmStub o2) {

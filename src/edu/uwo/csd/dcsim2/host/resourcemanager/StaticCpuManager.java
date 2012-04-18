@@ -15,9 +15,11 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
 		//check cores and core capacity
-		if (vmDescription.getCores() * vmDescription.getCoreCapacity() > this.getTotalCpu())
+		if (vmDescription.getCores() > this.getHost().getCoreCount())
 			return false;
-		
+		if (vmDescription.getCoreCapacity() > this.getHost().getMaxCoreCapacity())
+			return false;
+				
 		return true;
 	}
 

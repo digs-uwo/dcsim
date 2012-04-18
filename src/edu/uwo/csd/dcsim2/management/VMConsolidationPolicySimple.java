@@ -8,10 +8,10 @@ import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
-import edu.uwo.csd.dcsim2.management.stub.HostStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim2.management.stub.HostStubVmCountComparator;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
-import edu.uwo.csd.dcsim2.management.stub.VmStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.VmStubCpuInUseComparator;
 
 public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 
@@ -49,7 +49,7 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		}
 		
 		//sort underutilized
-		Collections.sort(underUtilized, new HostStubVmCountComparator(new HostStubCpuUtilizationComparator()));
+		Collections.sort(underUtilized, new HostStubVmCountComparator(new HostStubCpuInUseComparator()));
 		
 		ArrayList<HostStub> sources = underUtilized;
 		
@@ -105,13 +105,13 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 	
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {
 		ArrayList<VmStub> sources = new ArrayList<VmStub>(sourceVms);
-		Collections.sort(sources, new VmStubCpuUtilizationComparator());
+		Collections.sort(sources, new VmStubCpuInUseComparator());
 		return sources;
 	}
 	
 	protected ArrayList<HostStub> orderTargetHosts(ArrayList<HostStub> targets) {
 		
-		Collections.sort(targets, new HostStubCpuUtilizationComparator());
+		Collections.sort(targets, new HostStubCpuInUseComparator());
 		Collections.reverse(targets);
 		
 		return targets;

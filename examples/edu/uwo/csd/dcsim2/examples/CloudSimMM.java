@@ -66,8 +66,12 @@ public class CloudSimMM {
 //		@SuppressWarnings("unused")
 //		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 300000, 300001, 0.4, 0.80); //every 10 minutes
 		
+		//create the VM relocation policy
 		@SuppressWarnings("unused")
-		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 60000, 60000, 0.45, 0.81);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 600000, 600000, 0.5, 0.85, 0.85);
+		
+//		@SuppressWarnings("unused")
+//		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 60000, 60000, 0.45, 0.81);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
