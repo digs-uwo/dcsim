@@ -7,10 +7,8 @@ import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
-import edu.uwo.csd.dcsim2.application.loadbalancer.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
-import edu.uwo.csd.dcsim2.examples.BasicReplication.Replicator;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
