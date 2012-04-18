@@ -24,6 +24,10 @@ public class VMDescription {
 		return new VM(this, applicationFactory.createApplication());
 	}
 	
+	public int getCpu() {
+		return cores * coreCapacity;
+	}
+	
 	public int getCores() {
 		return cores;
 	}

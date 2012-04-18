@@ -541,6 +541,10 @@ public class Host extends SimulationEntity {
 		
 		if (getCpuManager().getCpuUtilization() > 1)
 			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
+	
+		if (getCpuManager().getCpuUtilization() < 0)
+			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));	
+		
 		
 		if (state == HostState.ON) {
 			++currentActiveHosts;

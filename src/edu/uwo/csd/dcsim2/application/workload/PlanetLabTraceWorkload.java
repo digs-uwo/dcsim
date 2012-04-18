@@ -21,6 +21,10 @@ public class PlanetLabTraceWorkload extends Workload {
 	}
 	
 	public PlanetLabTraceWorkload(String fileName, double scaleFactor, long offset, long stepSize) {
+		
+		if (scaleFactor <= 0)
+			throw new RuntimeException("Invalid scaleFactor (must be postive): " + scaleFactor);
+		
 		this.scaleFactor = scaleFactor;
 		if (workloadTraces.containsKey(fileName)) {
 			workloadTrace = workloadTraces.get(fileName);

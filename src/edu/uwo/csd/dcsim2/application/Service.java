@@ -53,6 +53,14 @@ public class Service {
 			this.maxSize = maxSize;
 		}
 		
+		public ArrayList<Application> getApplications() {
+			return applicationTier.getApplications();
+		}
+		
+		public VMDescription getVMDescription() {
+			return vmDescription;
+		}
+		
 		public ApplicationTier getApplicationTier() {
 			return applicationTier;
 		}

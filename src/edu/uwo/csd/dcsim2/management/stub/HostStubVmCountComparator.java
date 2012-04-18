@@ -1,6 +1,7 @@
-package edu.uwo.csd.dcsim2.management;
+package edu.uwo.csd.dcsim2.management.stub;
 
 import java.util.Comparator;
+
 
 public class HostStubVmCountComparator implements Comparator<HostStub> {
 

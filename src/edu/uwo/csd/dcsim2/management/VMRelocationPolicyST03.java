@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
+import edu.uwo.csd.dcsim2.management.stub.HostStub;
+import edu.uwo.csd.dcsim2.management.stub.HostStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.HostStubPowerStateComparator;
+import edu.uwo.csd.dcsim2.management.stub.VmStub;
+import edu.uwo.csd.dcsim2.management.stub.VmStubCpuUtilizationComparator;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 

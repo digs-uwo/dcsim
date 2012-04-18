@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.management;
+package edu.uwo.csd.dcsim2.management.stub;
 
 import edu.uwo.csd.dcsim2.vm.*;
 

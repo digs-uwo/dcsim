@@ -6,6 +6,12 @@ import java.util.HashSet;
 
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.host.Host;
+import edu.uwo.csd.dcsim2.management.action.MigrationAction;
+import edu.uwo.csd.dcsim2.management.stub.HostStub;
+import edu.uwo.csd.dcsim2.management.stub.HostStubCpuUtilizationComparator;
+import edu.uwo.csd.dcsim2.management.stub.HostStubVmCountComparator;
+import edu.uwo.csd.dcsim2.management.stub.VmStub;
+import edu.uwo.csd.dcsim2.management.stub.VmStubCpuUtilizationComparator;
 
 public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 
@@ -93,7 +99,7 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		
 		//trigger migrations
 		for (MigrationAction migration : migrations) {
-			migration.executeMigration(this);
+			migration.execute(this);
 		}
 	}
 	

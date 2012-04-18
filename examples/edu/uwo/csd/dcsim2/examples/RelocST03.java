@@ -66,7 +66,7 @@ public class RelocST03 {
 		//submit VMs
 		dc.getVMPlacementPolicy().submitVMs(vmList);
 		
-		//since this is a static run, turn off hosts with no VMs
+		//turn off hosts with no VMs
 		for (Host host : hostList) {
 			if (host.getVMAllocations().size() == 0) {
 				host.setState(Host.HostState.OFF);

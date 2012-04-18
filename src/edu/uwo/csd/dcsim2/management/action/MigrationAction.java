@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.management;
+package edu.uwo.csd.dcsim2.management.action;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -8,9 +8,11 @@ import edu.uwo.csd.dcsim2.core.Event;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEntity;
 import edu.uwo.csd.dcsim2.host.Host;
+import edu.uwo.csd.dcsim2.management.stub.HostStub;
+import edu.uwo.csd.dcsim2.management.stub.VmStub;
 import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
 
-public class MigrationAction {
+public class MigrationAction implements ManagementAction {
 	
 	private static Logger logger = Logger.getLogger(MigrationAction.class);
 	
@@ -54,7 +56,7 @@ public class MigrationAction {
 	 * Perform this VM migration
 	 * @param triggeringEntity The SimulationEntity (VMRelocationPolicy, VMConsolidiationPolicy, etc.) that is triggering this migration
 	 */
-	public void executeMigration(SimulationEntity triggeringEntity) {
+	public void execute(SimulationEntity triggeringEntity) {
 		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVM().getVMAllocation()); //create allocation request based on current allocation
 		
 		if (target.getHost().getState() != Host.HostState.ON && target.getHost().getState() != Host.HostState.POWERING_ON) {

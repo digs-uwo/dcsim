@@ -12,7 +12,7 @@ import edu.uwo.csd.dcsim2.core.SimulationUpdateController;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
-import edu.uwo.csd.dcsim2.management.MigrationAction;
+import edu.uwo.csd.dcsim2.management.action.*;
 
 public class DCSimUpdateController implements SimulationUpdateController {
 
@@ -100,6 +100,14 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		
 		for (SimulationEntity simEntity : MigrationAction.getMigrationCount().keySet()) {
 			logger.info(simEntity.getClass().getSimpleName() + " migrations: " + MigrationAction.getMigrationCount().get(simEntity));
+		}
+		
+		for (SimulationEntity simEntity : ReplicateAction.getReplicateCount().keySet()) {
+			logger.info(simEntity.getClass().getSimpleName() + " replications: " + ReplicateAction.getReplicateCount().get(simEntity));
+		}
+		
+		for (SimulationEntity simEntity : ShutdownVmAction.getShutdownCount().keySet()) {
+			logger.info(simEntity.getClass().getSimpleName() + " shutdown vm: " + ShutdownVmAction.getShutdownCount().get(simEntity));
 		}
 		
 		//logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
