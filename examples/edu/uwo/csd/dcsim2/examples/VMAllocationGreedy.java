@@ -19,9 +19,9 @@ import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
 
-public class RelocST03 {
+public class VMAllocationGreedy {
 	
-	private static Logger logger = Logger.getLogger(RelocST03.class);
+	private static Logger logger = Logger.getLogger(VMAllocationGreedy.class);
 	
 	private static int nHosts = 100;
 	
@@ -29,13 +29,12 @@ public class RelocST03 {
 		
 		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
 
-		logger.info(RelocST03.class.toString());
+		logger.info(VMAllocationGreedy.class.toString());
 		
 		//Set random seed to repeat run
-		Utility.setRandomSeed(1546554024939817112l);
+		Utility.setRandomSeed(5853461767660410541l);
 		
 		//create datacentre
-		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
@@ -50,16 +49,16 @@ public class RelocST03 {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 1164, (int)(Utility.getRandom().nextDouble() * 200000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 3000, (int)(Utility.getRandom().nextDouble() * 200000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Utility.getRandom().nextDouble() * 40000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 3000, (int)(Utility.getRandom().nextDouble() * 40000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Utility.getRandom().nextDouble() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 3000, (int)(Utility.getRandom().nextDouble() * 15000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Utility.getRandom().nextDouble() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 3000, (int)(Utility.getRandom().nextDouble() * 15000000))));
 		}
 		Collections.shuffle(vmList, Utility.getRandom());
 		
@@ -75,11 +74,7 @@ public class RelocST03 {
 		
 		//create the VM relocation policy
 		@SuppressWarnings("unused")
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
-		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
-		@SuppressWarnings("unused")
-		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
-		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 86400001, 0.5, 0.85); //every day
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 600000, 600000, 0.5, 0.85, 0.85);
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
@@ -105,8 +100,6 @@ public class RelocST03 {
 					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
 					new StaticStorageManager(),
 					new FairShareCpuScheduler());
-			
-			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments
 			
 			hosts.add(host);
 		}
