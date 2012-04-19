@@ -34,9 +34,20 @@ public class SVMHelper {
 	public static final int N_VMS = 400;
 	
 	public static final int CPU_OVERHEAD = 200;
-	public static final int[] VM_SIZES = {1000, 2000, 3000};
-	public static final String[] TRACES = {"traces/clarknet", "traces/epa","traces/google_cores_job_type_0", "traces/google_cores_job_type_1"};	
-	public static final long[] OFFSET_MAX = {200000000, 40000000, 15000000, 15000000};
+	public static final int[] VM_SIZES = {1500, 3000, 3000};
+	public static final int[] VM_CORES = {1, 1, 2};
+	public static final int[] VM_RAM = {512, 1024, 1024};
+	
+	public static final int N_TRACES = 5; //NOTE WE ARE ONLY USING THE HTTP TRACES
+	public static final String[] TRACES = {"traces/clarknet", 
+		"traces/epa",
+		"traces/sdsc",
+		"traces/google_cores_job_type_0", 
+		"traces/google_cores_job_type_1",
+		"traces/google_cores_job_type_2",
+		"traces/google_cores_job_type_3"};	
+	public static final long[] OFFSET_MAX = {200000000, 40000000, 40000000, 15000000, 15000000, 15000000, 15000000};
+	public static final double[] TRACE_AVG = {0.32, 0.25, 0.32, 0.72, 0.74, 0.77, 0.83};
 	
 	private static Logger logger = Logger.getLogger(SVMHelper.class);
 	
@@ -64,9 +75,9 @@ public class SVMHelper {
 			CpuScheduler cpuScheduler = new FairShareCpuScheduler();
 			
 			if (i % 2 == 1) {
-				host = new ProLiantDL380G5QuadCoreHost(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = new ProLiantDL360G5E5450Host(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 			} else {
-				host = new ProLiantDL380G6EightCoreHost(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = new ProLiantDL160G5E5420Host(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 			}
 			
 			hosts.add(host);
@@ -75,17 +86,28 @@ public class SVMHelper {
 		return hosts;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createVmList() {
+	public static ArrayList<VMAllocationRequest> createVmList(boolean allocAvg) {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
 		
 		for (int i = 0; i < N_VMS; ++i) {
-			String trace = TRACES[i % 4];
-			int size = VM_SIZES[i % 3];
-			long offset = (int)(Utility.getRandom().nextDouble() * OFFSET_MAX[i % 4]);
+			String trace = TRACES[i % N_TRACES];
+			long offset = (int)(Utility.getRandom().nextDouble() * OFFSET_MAX[i % N_TRACES]);
 			
-			Service service = createService(trace, offset, size);
-			vmList.addAll(service.createInitialVmRequests());
+			int size = VM_SIZES[i % 3];
+			int cores = VM_CORES[i % 3];
+			int memory = VM_RAM[i % 3];
+			
+			Service service = createService(trace, offset, size, cores, memory);
+			
+			//vmList.addAll(service.createInitialVmRequests());
+			
+			VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
+			
+			if (allocAvg)
+				vmAllocationRequest.setCpu((int)Math.round(TRACE_AVG[i % N_TRACES] * (size - CPU_OVERHEAD) + CPU_OVERHEAD));
+			
+			vmList.add(vmAllocationRequest);
 		}
 		
 		Collections.shuffle(vmList, Utility.getRandom());
@@ -94,16 +116,11 @@ public class SVMHelper {
 	}
 	
 
-	private static Service createService(String fileName, long offset, int size) {
+	private static Service createService(String fileName, long offset, int coreCapacity, int cores, int memory) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, size - CPU_OVERHEAD, offset); //scale to n replicas
+		Workload workload = new TraceWorkload(fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
 		
-		int cores = 1; //requires 1 core
-		int coreCapacity = size;
-//		int memory = 1024;
-//		int bandwidth = 16384; //16MB = 16384KB
-		int memory = 128;
 		int bandwidth = 4096; //16MB = 16384KB
 		long storage = 1024; //1GB
 		

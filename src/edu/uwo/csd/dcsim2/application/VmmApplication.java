@@ -38,7 +38,7 @@ public class VmmApplication extends Application {
 	}
 	
 	protected double getMigrationBandwidth(VM migratingVm) {
-		return 100;
+		return 100; //TODO: add proper overhead calculation
 	}
 	
 	@Override
@@ -64,7 +64,7 @@ public class VmmApplication extends Application {
 			cpu += getMigrationCpu(migrating);
 			Utility.roundDouble(cpu); //round off double precision problems
 			
-			bandwidth += getMigrationBandwidth(migrating); //TODO: add proper overhead calculation
+			bandwidth += getMigrationBandwidth(migrating); 
 		}
 		//TODO calculate memory and storage usage
 			

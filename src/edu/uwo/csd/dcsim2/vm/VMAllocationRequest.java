@@ -59,4 +59,20 @@ public class VMAllocationRequest {
 		return storage;
 	}
 	
+	public void setCpu(int cpu) {
+		this.cpu = cpu;
+	}
+	
+	public void setMemory(int memory) {
+		this.memory = memory;
+	}
+	
+	public void setBandwidth(int bandwidth) {
+		this.bandwidth = bandwidth;
+	}
+	
+	public void setStorage(long storage) {
+		this.storage = storage;
+	}
+	
 }
