@@ -20,12 +20,12 @@ public class DynamicManagement {
 		logger.info(DynamicManagement.class.toString());
 		
 		//Set random seed to repeat run
-		Utility.setRandomSeed(6225674672952014821l);
+		//Utility.setRandomSeed(6225674672952014821l);
 		
 		DataCentre dc = SVMHelper.createDataCentre();
 		
-		//ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList();
-		ArrayList<VMAllocationRequest> vmList = SVMHelper.createPlanetLabVmList("traces/planetlab/20110303");
+		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList();
+		//ArrayList<VMAllocationRequest> vmList = SVMHelper.createPlanetLabVmList("traces/planetlab/20110303");
 		
 		SVMHelper.placeVms(vmList, dc);
 		

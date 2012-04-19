@@ -30,8 +30,8 @@ import edu.uwo.csd.dcsim2.vm.*;
  */
 public class SVMHelper {
 
-	public static final int N_HOSTS = 200;
-	public static final int N_VMS = 200;
+	public static final int N_HOSTS = 20;
+	public static final int N_VMS = 20;
 	
 	public static final int CPU_OVERHEAD = 200;
 	public static final int[] VM_SIZES = {1000, 2000, 3000};

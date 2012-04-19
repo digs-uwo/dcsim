@@ -554,11 +554,11 @@ public class Host extends SimulationEntity {
 			logger.debug("Host #" + getId() + 
 					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
 					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
+			privDomainAllocation.getVm().logInfo();
 		} else {
 			logger.debug("Host #" + getId() + " " + state);
 		}
 		
-		privDomainAllocation.getVm().logInfo();
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null) {
 				vmAllocation.getVm().logInfo();

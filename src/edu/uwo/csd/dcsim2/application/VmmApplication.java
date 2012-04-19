@@ -14,6 +14,16 @@ public class VmmApplication extends Application {
 	protected double cpuOverhead = 300;
 	protected double bandwidthOverhead = 0;
 	
+	//variables to keep track of resource demand and consumption
+	VirtualResources resourceDemand = new VirtualResources();		//the current level of resource demand / second
+	VirtualResources resourceInUse = new VirtualResources();			//the current level of resource use  / second
+	
+	VirtualResources resourcesDemanded = new VirtualResources(); 	//the amount of resources demanded in the last period
+	VirtualResources resourcesUsed = new VirtualResources();			//the amount of resources used in the last period
+	
+	VirtualResources totalResourceDemand = new VirtualResources();	//the total amount of resources required since the application started
+	VirtualResources totalResourceUsed = new VirtualResources();		//the total amount of resources used since the application started
+	
 	
 	public void addMigratingVm(VM vm) {
 		migratingVms.add(vm);
@@ -34,6 +44,10 @@ public class VmmApplication extends Application {
 	@Override
 	public void beginScheduling() {
 		long elapsedTime = Simulation.getInstance().getElapsedTime();
+		
+		//reset the resource demand and consumption values for the current interval
+		resourcesDemanded = new VirtualResources();
+		resourcesUsed = new VirtualResources();
 		
 		double cpu = cpuOverhead;
 		double bandwidth = bandwidthOverhead;
@@ -57,14 +71,13 @@ public class VmmApplication extends Application {
 		resourcesRemaining = new VirtualResources();
 		resourcesRemaining.setCpu(cpu * (elapsedTime / 1000d));
 		resourcesRemaining.setBandwidth(bandwidth * (elapsedTime / 1000d));
+		
+		resourcesDemanded = resourcesDemanded.add(resourcesRemaining);
 	}
-
+	
 	@Override
-	public void completeScheduling() {
-		//at this point, no resources should be remaining to run
-		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
-			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
-		}
+	public void updateResourceDemand() {
+		//nothing to do
 	}
 
 	@Override
@@ -91,43 +104,62 @@ public class VmmApplication extends Application {
 		
 		//TODO handle memory and storage
 		
+		//add resourcesConsumed to resourcesInUse, which is keeping track of all resources used during this time interval
+		resourcesUsed = resourcesUsed.add(resourcesConsumed);
+		
 		return resourcesConsumed;
 	}
+	
+	@Override
+	public void completeScheduling() {
+		//at this point, no resources should be remaining to run
+		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
+			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
+		}
+		
+		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
+		resourceDemand = new VirtualResources();
+		resourceDemand.setCpu(resourcesDemanded.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setMemory(resourcesDemanded.getMemory());
+		resourceDemand.setStorage(resourcesDemanded.getStorage());
+		
+		resourceInUse = new VirtualResources();
+		resourceInUse.setCpu(resourcesUsed.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setMemory(resourcesUsed.getMemory());
+		resourceInUse.setStorage(resourcesUsed.getStorage());
+		
+	}
+	
+	@Override
+	public void updateMetrics() {
+		//add resource demand and use for this time interval to total values
+		totalResourceDemand = totalResourceDemand.add(resourcesDemanded);
+		totalResourceUsed = totalResourceUsed.add(resourcesUsed);
+		
+		//note that we do NOT add VMM demand and use to the global metrics, as we are only interested in demand from client VMs
+	}
+
 
 	@Override
 	public VirtualResources getResourceDemand() {
-		//TODO implement correctly
-		return new VirtualResources();
+		return resourceDemand;
 	}
 
 	@Override
 	public VirtualResources getResourceInUse() {
-		//TODO implement correctly
-		return new VirtualResources();
+		return resourceInUse;
 	}
 
 	@Override
 	public VirtualResources getTotalResourceDemand() {
-		//TODO implement correctly
-		return new VirtualResources();
+		return totalResourceDemand;
 	}
 
 	@Override
 	public VirtualResources getTotalResourceUsed() {
-		//TODO implement correctly
-		return new VirtualResources();
-	}
-
-	@Override
-	public void updateMetrics() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void updateResourceDemand() {
-		// TODO Auto-generated method stub
-		
+		return totalResourceUsed;
 	}
 
 	/*
