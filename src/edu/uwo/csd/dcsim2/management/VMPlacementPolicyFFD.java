@@ -43,8 +43,12 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 		
 		sorted.addAll(datacentre.getHosts());
 		
-		//orders by available allocation in increasing order (least available first) 
+		/* 
+		 * order by cpu allocated in decreasing order to choose hosts that are
+		 * already hosting the most CPU load
+		 */
 		Collections.sort(sorted, new HostCpuAllocationComparator());
+		Collections.reverse(sorted);
 		
 		return sorted;
 	}
