@@ -553,6 +553,9 @@ public class Host extends SimulationEntity {
 		if (state == HostState.ON) {
 			logger.debug("Host #" + getId() + 
 					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
+					" BW[" + bandwidthManager.getAllocatedBandwidth() + "/" + bandwidthManager.getTotalBandwidth() + "] " +
+					" MEM[" + memoryManager.getAllocatedMemory() + "/" + memoryManager.getTotalMemory() + "] " +
+					" STORAGE[" + storageManager.getAllocatedStorage() + "/" + storageManager.getTotalStorage() + "] " +
 					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
 			privDomainAllocation.getVm().logInfo();
 		} else {

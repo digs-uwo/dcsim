@@ -158,8 +158,9 @@ public abstract class InteractiveApplication extends Application {
 		resourceInUse.setStorage(resourcesUsed.getStorage());
 		
 		slaViolatedWork = workRemaining;
-		if (vm.isMigrating())
-			slaViolatedWork += slaViolatedWork * Double.parseDouble(Simulation.getInstance().getProperty("vmMigrationSLAPenalty"));
+		if (vm.isMigrating()) {
+			slaViolatedWork += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getInstance().getProperty("vmMigrationSLAPenalty"));
+		}
 		
 		totalIncomingWork += incomingWork;
 		totalSlaViolatedWork += slaViolatedWork;

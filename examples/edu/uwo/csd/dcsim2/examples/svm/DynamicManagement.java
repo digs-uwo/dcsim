@@ -20,7 +20,7 @@ public class DynamicManagement {
 		logger.info(DynamicManagement.class.toString());
 		
 		//Set random seed to repeat run
-		//Utility.setRandomSeed(6225674672952014821l);
+		Utility.setRandomSeed(6225674672952014821l);
 		
 		DataCentre dc = SVMHelper.createDataCentre();
 		
@@ -30,18 +30,19 @@ public class DynamicManagement {
 		SVMHelper.placeVms(vmList, dc);
 		
 		//create the VM relocation policy
-		@SuppressWarnings("unused")
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 600000, 600000, 0.5, 0.85, 0.85);
-		
 //		@SuppressWarnings("unused")
-//		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 600000, 600000, 0.45, 0.81);
+//		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 600000, 600000, 0.5, 0.85, 0.85);
+		
+		@SuppressWarnings("unused")
+		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 600000, 600000, 0.45, 0.81);
 		
 //		@SuppressWarnings("unused")
 //		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
 //		@SuppressWarnings("unused")
 //		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 14400000, 14400001, 0.5, 0.85);
 		
-		SVMHelper.runSimulation(864000, 0);
+		SVMHelper.runSimulation(864000000, 0);
+		//SVMHelper.runSimulation(1, 0);
 		
 	}
 	

@@ -107,6 +107,10 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 		sources = underUtilized;
 		Collections.sort(sources, new HostStubCpuInUseComparator());
 		
+		targets.clear();
+		targets.addAll(partiallyUtilized);
+		targets.addAll(underUtilized);
+		
 		//keep track of sources that have already been used as a source
 		ArrayList<HostStub> usedSources = new ArrayList<HostStub>();
 		
