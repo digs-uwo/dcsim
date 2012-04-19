@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim2.host;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
@@ -49,6 +50,7 @@ public class Host extends SimulationEntity {
 	private VMAllocation privDomainAllocation;
 	private ArrayList<VMAllocation> migratingIn = new ArrayList<VMAllocation>();
 	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
+	private HashSet<VMAllocation> pendingOutgoingMigrations = new HashSet<VMAllocation>();
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
@@ -147,6 +149,13 @@ public class Host extends SimulationEntity {
 		 */
 		if (state == Host.HostState.POWERING_ON && e.getType() != HOST_COMPLETE_POWER_ON_EVENT) {
 			powerOnEventQueue.add(e);
+			
+			if (e.getType() == Host.HOST_MIGRATE_EVENT) {
+				Host source = (Host)e.getData().get("source");
+				VM vm = (VM)e.getData().get("vm");
+				source.markVmForMigration(vm);
+			}
+			
 			return;
 		}
 		
@@ -289,7 +298,7 @@ public class Host extends SimulationEntity {
 	 */
 	
 	/**
-	 * A helper function which creates a migration event and send it to this host. To be called by another host
+	 * A helper function which creates a migration event and send it to this host. To be called by another host or management entity
 	 * that wishes to migrate a VM to this host.
 	 * @param vmAllocationRequest
 	 * @param vm
@@ -304,6 +313,22 @@ public class Host extends SimulationEntity {
 		e.getData().put("vm", vm);
 		e.getData().put("source", source);
 		Simulation.getInstance().sendEvent(e);
+	}
+	
+	public void markVmForMigration(VM vm) {
+		if (!vmAllocations.contains(vm.getVMAllocation()))
+				throw new RuntimeException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
+						" but it resides on Host #" + vm.getVMAllocation().getHost().getId());
+		
+		pendingOutgoingMigrations.add(vm.getVMAllocation());
+	}
+	
+	public boolean isMigrating(VM vm) {
+		return migratingOut.contains(vm.getVMAllocation());
+	}
+	
+	public boolean isPendingMigration(VM vm) {
+		return pendingOutgoingMigrations.contains(vm.getVMAllocation());
 	}
 	
 	/**
@@ -338,16 +363,15 @@ public class Host extends SimulationEntity {
 		
 		//add to VMM
 		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
-		vmm.addMigratingVm(vm);
-		
-		logger.debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
+		vmm.addMigratingVm(vm);	
 		
 		//inform the source host that the VM is migrating out
 		source.migrateOut(vm);
 		
+		logger.debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
+		
 		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms), using privileged domain bandwidth TODO is this correct?
 		//long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesInUse().getMemory() * 1024) / (double)privDomainAllocation.getBandwidth()) * 1000);
-		//current using 1/4 of management bandwidth for migration, to allow up to 4 migrations at once. TODO the must be a better way!!
 		if (privDomainAllocation.getBandwidth() == 0)
 			throw new RuntimeException("Privileged Domain has no bandwidth available for migration");
 		
@@ -371,6 +395,9 @@ public class Host extends SimulationEntity {
 			throw new RuntimeException("Migrate out failed: VM #" + vm.getId() + " is already migrating out of Host #" + getId() + ".");
 		
 		migratingOut.add(vmAllocation);
+		
+		if (isPendingMigration(vm))
+			pendingOutgoingMigrations.remove(vm);
 		
 		//add to VMM
 		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
@@ -402,6 +429,7 @@ public class Host extends SimulationEntity {
 		vm.setVMAllocation(vmAllocation);
 		
 		logger.debug("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
+		
 	}
 	
 	public void completeMigrationOut(VM vm) {
@@ -418,8 +446,9 @@ public class Host extends SimulationEntity {
 				
 		logger.debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
 		
-		if (powerOffAfterMigrations)
+		if (powerOffAfterMigrations && migratingOut.isEmpty() && pendingOutgoingMigrations.isEmpty())
 			powerOff();
+
 	}
 	
 	/*

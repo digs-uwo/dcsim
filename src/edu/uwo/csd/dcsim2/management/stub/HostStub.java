@@ -41,7 +41,7 @@ public class HostStub {
 		
 		for (VMAllocation vmAllocation : host.getVMAllocations()) {
 			if (vmAllocation.getVm() != null) {
-				if (!host.getMigratingOut().contains(vmAllocation)) {
+				if (!host.isMigrating(vmAllocation.getVm()) && !host.isPendingMigration(vmAllocation.getVm())) {
 					vms.add(new VmStub(vmAllocation.getVm(), this));
 				} else {
 					outgoingVMCpuUse += vmAllocation.getVm().getResourcesInUse().getCpu();

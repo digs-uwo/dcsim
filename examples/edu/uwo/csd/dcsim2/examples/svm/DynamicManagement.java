@@ -41,7 +41,7 @@ public class DynamicManagement {
 //		@SuppressWarnings("unused")
 //		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 14400000, 14400001, 0.5, 0.85);
 		
-		SVMHelper.runSimulation(864000000, 0);
+		SVMHelper.runSimulation(864000, 0);
 		
 	}
 	
