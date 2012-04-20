@@ -20,7 +20,11 @@ public class StaticPeak {
 		logger.info(StaticPeak.class.toString());
 		
 		//Set random seed to repeat run
-		//Utility.setRandomSeed(6225674672952014821l);
+		//Utility.setRandomSeed(1088501048448116498l);
+		//Utility.setRandomSeed(3081198553457496232l);
+		//Utility.setRandomSeed(-2485691440833440205l);
+		//Utility.setRandomSeed(2074739686644571611l);
+		Utility.setRandomSeed(-1519296228623429147l);
 		
 		DataCentre dc = SVMHelper.createDataCentre();
 		

@@ -11,7 +11,7 @@ public class ProLiantDL360G5E5450Host extends Host {
 	private static int nCores = 4;
 	private static int coreCapacity = 3000;
 	private static int memory = 16384; //16GB
-	private static int bandwidth = 131072 * 2; //1 Gb + 1Gb for management TODO poor assumption!
+	private static int bandwidth = 1310720; // 10Gb/s
 	private static long storage = 36864; //36GB
 	private static HostPowerModel powerModel = new SPECHostPowerModel(10, 180, 190, 200, 210, 221, 234, 247, 258, 270, 281, 288);
 	

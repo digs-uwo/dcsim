@@ -30,15 +30,16 @@ import edu.uwo.csd.dcsim2.vm.*;
  */
 public class SVMHelper {
 
-	public static final int N_HOSTS = 200;
-	public static final int N_VMS = 400;
+	public static final int N_HOSTS = 200; //200
+	public static final int N_VMS = 400; //400
 	
 	public static final int CPU_OVERHEAD = 200;
-	public static final int[] VM_SIZES = {1500, 3000, 3000};
-	public static final int[] VM_CORES = {1, 1, 2};
-	public static final int[] VM_RAM = {512, 1024, 1024};
+	public static final int[] VM_SIZES = {1500, 2500, 3000, 3000};
+	public static final int[] VM_CORES = {1, 1, 1, 2};
+	public static final int[] VM_RAM = {512, 1024, 1024, 1024};
+	public static final int N_VM_SIZES = 4;
 	
-	public static final int N_TRACES = 5; //NOTE WE ARE ONLY USING THE HTTP TRACES
+	public static final int N_TRACES = 5; 
 	public static final String[] TRACES = {"traces/clarknet", 
 		"traces/epa",
 		"traces/sdsc",
@@ -94,9 +95,9 @@ public class SVMHelper {
 			String trace = TRACES[i % N_TRACES];
 			long offset = (int)(Utility.getRandom().nextDouble() * OFFSET_MAX[i % N_TRACES]);
 			
-			int size = VM_SIZES[i % 3];
-			int cores = VM_CORES[i % 3];
-			int memory = VM_RAM[i % 3];
+			int size = VM_SIZES[i % N_VM_SIZES];
+			int cores = VM_CORES[i % N_VM_SIZES];
+			int memory = VM_RAM[i % N_VM_SIZES];
 			
 			Service service = createService(trace, offset, size, cores, memory);
 			
@@ -121,7 +122,7 @@ public class SVMHelper {
 		//create workload (external)
 		Workload workload = new TraceWorkload(fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
 		
-		int bandwidth = 4096; //16MB = 16384KB
+		int bandwidth = 12800; //100 Mb/s
 		long storage = 1024; //1GB
 		
 		SingleTierWebService webService = new SingleTierWebService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, CPU_OVERHEAD);
@@ -144,14 +145,12 @@ public class SVMHelper {
 	}
 	
 	public static void runSimulation(long duration, long recordStart) {
-		long startTime = System.currentTimeMillis();
-		logger.info("Start time: " + startTime + "ms");
+		
 		
 		//run the simulation
 		Simulation.getInstance().run(duration, recordStart);
 		
-		long endTime = System.currentTimeMillis();
-		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
+		
 	}
 	
 	
