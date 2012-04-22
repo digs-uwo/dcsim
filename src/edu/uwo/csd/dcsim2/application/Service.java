@@ -33,10 +33,10 @@ public class Service {
 	
 	public class ServiceTier {
 		
-		ApplicationTier applicationTier;
-		VMDescription vmDescription;
-		int minSize;
-		int maxSize;
+		private ApplicationTier applicationTier;
+		private VMDescription vmDescription;
+		private int minSize;
+		private int maxSize;
 		
 		public ServiceTier(ApplicationTier applicationTier, VMDescription vmDescription) {
 			this(applicationTier, vmDescription, 1, Integer.MAX_VALUE);
@@ -72,5 +72,14 @@ public class Service {
 		public int getMaxSize() {
 			return maxSize;
 		}
+		
+		public void setMinSize(int minSize) {
+			this.minSize = minSize;
+		}
+		
+		public void setMaxSize(int maxSize) {
+			this.maxSize = maxSize;
+		}
+		
 	}
 }

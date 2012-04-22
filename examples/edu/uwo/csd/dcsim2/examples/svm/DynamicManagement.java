@@ -27,7 +27,7 @@ public class DynamicManagement {
 		//Utility.setRandomSeed(3081198553457496232l);
 		//Utility.setRandomSeed(-2485691440833440205l);
 		//Utility.setRandomSeed(2074739686644571611l);
-		//Utility.setRandomSeed(-1519296228623429147l);
+		Utility.setRandomSeed(-1519296228623429147l);
 		
 		DataCentre dc = SVMHelper.createDataCentre();
 		

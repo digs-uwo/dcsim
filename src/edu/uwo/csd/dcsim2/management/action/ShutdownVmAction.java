@@ -45,7 +45,8 @@ public class ShutdownVmAction implements ManagementAction {
 		host.deallocate(vmAllocation);
 		vm.stopApplication();
 		
-		incrementShutdownCount(triggeringEntity);
+		if (Simulation.getInstance().isRecordingMetrics())
+			incrementShutdownCount(triggeringEntity);
 		
 		//if the host will no longer contain any VMs, instruct it to shut down
 		if (host.getVMAllocations().size() == 0) {
