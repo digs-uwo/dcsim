@@ -7,12 +7,12 @@ public class Event {
 
 	private int type;
 	private long time;
-	private SimulationEventListener source;
+	private Object source;
 	private SimulationEventListener target;
 	private Map<String, Object> data;
 	private long sendOrder;
 	
-	public Event(int type, long time, SimulationEventListener source, SimulationEventListener target) {
+	public Event(int type, long time, Object source, SimulationEventListener target) {
 		this.type = type;
 		this.time = time;
 		this.source = source;
@@ -28,7 +28,7 @@ public class Event {
 		return time;
 	}
 	
-	public SimulationEventListener getSource() {
+	public Object getSource() {
 		return source;
 	}
 	
