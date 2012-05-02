@@ -4,6 +4,6 @@ import edu.uwo.csd.dcsim2.core.*;
 
 public interface ManagementAction {
 
-	public void execute(Simulation simulation, SimulationEntity triggeringEntity);
+	public void execute(Simulation simulation, SimulationEventListener triggeringEntity);
 	
 }

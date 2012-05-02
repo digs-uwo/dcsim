@@ -6,7 +6,7 @@ import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.management.*;
 
-public class DataCentre extends SimulationEntity {
+public class DataCentre implements SimulationEventListener {
 
 	private ArrayList<Host> hosts;
 	VMPlacementPolicy vmPlacementPolicy;

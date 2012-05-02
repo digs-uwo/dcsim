@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.core.Event;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.SimulationEntity;
+import edu.uwo.csd.dcsim2.core.SimulationEventListener;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
@@ -16,13 +16,13 @@ public class MigrationAction implements ManagementAction {
 	
 	private static Logger logger = Logger.getLogger(MigrationAction.class);
 	
-	private static Map<SimulationEntity, Integer> migrationCount = new HashMap<SimulationEntity, Integer>();
+	private static Map<SimulationEventListener, Integer> migrationCount = new HashMap<SimulationEventListener, Integer>();
 
 	private HostStub source;
 	private HostStub target;
 	private VmStub vm;
 	
-	private static void incrementMigrationCount(SimulationEntity triggeringEntity) {
+	private static void incrementMigrationCount(SimulationEventListener triggeringEntity) {
 		int count = 0;
 		if (migrationCount.containsKey(triggeringEntity)) {
 			count = migrationCount.get(triggeringEntity);
@@ -30,7 +30,7 @@ public class MigrationAction implements ManagementAction {
 		migrationCount.put(triggeringEntity, count + 1);
 	}
 	
-	public static Map<SimulationEntity, Integer> getMigrationCount() {
+	public static Map<SimulationEventListener, Integer> getMigrationCount() {
 		return migrationCount;
 	}
 	
@@ -56,7 +56,7 @@ public class MigrationAction implements ManagementAction {
 	 * Perform this VM migration
 	 * @param triggeringEntity The SimulationEntity (VMRelocationPolicy, VMConsolidiationPolicy, etc.) that is triggering this migration
 	 */
-	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEventListener triggeringEntity) {
 		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVM().getVMAllocation()); //create allocation request based on current allocation
 		
 		if (target.getHost().getState() != Host.HostState.ON && target.getHost().getState() != Host.HostState.POWERING_ON) {

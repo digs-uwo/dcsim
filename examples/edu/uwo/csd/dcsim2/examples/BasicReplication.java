@@ -99,7 +99,7 @@ public class BasicReplication {
 		return hosts;
 	}
 	
-	public class Replicator extends SimulationEntity {
+	public class Replicator extends SimulationEventListener {
 
 		Host sourceHost;
 		Host targetHost;

@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import edu.uwo.csd.dcsim2.application.WorkConsumer;
 import edu.uwo.csd.dcsim2.core.*;
 
-public abstract class Workload extends SimulationEntity implements WorkConsumer {
+public abstract class Workload implements SimulationEventListener, WorkConsumer {
 
 	private static Logger logger = Logger.getLogger(Workload.class);
 	

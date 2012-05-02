@@ -10,11 +10,11 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class ShutdownVmAction implements ManagementAction {
 
-	private static Map<SimulationEntity, Integer> shutdownCount = new HashMap<SimulationEntity, Integer>();
+	private static Map<SimulationEventListener, Integer> shutdownCount = new HashMap<SimulationEventListener, Integer>();
 	
 	private VM vm;
 	
-	private static void incrementShutdownCount(SimulationEntity triggeringEntity) {
+	private static void incrementShutdownCount(SimulationEventListener triggeringEntity) {
 		int count = 0;
 		if (shutdownCount.containsKey(triggeringEntity)) {
 			count = shutdownCount.get(triggeringEntity);
@@ -22,7 +22,7 @@ public class ShutdownVmAction implements ManagementAction {
 		shutdownCount.put(triggeringEntity, count + 1);
 	}
 
-	public static Map<SimulationEntity, Integer> getShutdownCount() {
+	public static Map<SimulationEventListener, Integer> getShutdownCount() {
 		return shutdownCount;
 	}
 
@@ -34,7 +34,7 @@ public class ShutdownVmAction implements ManagementAction {
 		return vm;
 	}
 		
-	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEventListener triggeringEntity) {
 		
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		Host host = vmAllocation.getHost();

@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import edu.uwo.csd.dcsim2.application.Application;
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.SimulationEntity;
+import edu.uwo.csd.dcsim2.core.SimulationEventListener;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
@@ -20,11 +20,7 @@ public class DataCentreSimulation extends Simulation {
 	private static Logger logger = Logger.getLogger(DataCentreSimulation.class);
 	
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
-	
-	public DataCentreSimulation() {
 
-	}
-	
 	public void addDatacentre(DataCentre dc) {
 		datacentres.add(dc);
 	}
@@ -59,7 +55,7 @@ public class DataCentreSimulation extends Simulation {
 
 	@Override
 	public void completeSimulation(long duration) {
-	logger.info("DCSim2 Simulation Complete");
+		logger.info("DCSim2 Simulation Complete");
 		
 		double simTime = this.getDuration();
 		double recordedTime = this.getRecordingDuration();
@@ -97,15 +93,15 @@ public class DataCentreSimulation extends Simulation {
 //		underProvision = (Application.getGlobalResourceDemand().getBandwidth() - Application.getGlobalResourceUsed().getBandwidth()) / Application.getGlobalResourceDemand().getBandwidth();
 //		logger.info("BW Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
 		
-		for (SimulationEntity simEntity : MigrationAction.getMigrationCount().keySet()) {
+		for (SimulationEventListener simEntity : MigrationAction.getMigrationCount().keySet()) {
 			logger.info(simEntity.getClass().getSimpleName() + " migrations: " + MigrationAction.getMigrationCount().get(simEntity));
 		}
 		
-		for (SimulationEntity simEntity : ReplicateAction.getReplicateCount().keySet()) {
+		for (SimulationEventListener simEntity : ReplicateAction.getReplicateCount().keySet()) {
 			logger.info(simEntity.getClass().getSimpleName() + " replications: " + ReplicateAction.getReplicateCount().get(simEntity));
 		}
 		
-		for (SimulationEntity simEntity : ShutdownVmAction.getShutdownCount().keySet()) {
+		for (SimulationEventListener simEntity : ShutdownVmAction.getShutdownCount().keySet()) {
 			logger.info(simEntity.getClass().getSimpleName() + " shutdown vm: " + ShutdownVmAction.getShutdownCount().get(simEntity));
 		}
 		

@@ -9,12 +9,12 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class ReplicateAction implements ManagementAction {
 
-	private static Map<SimulationEntity, Integer> replicateCount = new HashMap<SimulationEntity, Integer>();
+	private static Map<SimulationEventListener, Integer> replicateCount = new HashMap<SimulationEventListener, Integer>();
 	
 	private VMDescription vmDescription;
 	private VMPlacementPolicy vmPlacementPolicy;
 	
-	private static void incrementReplicateCount(SimulationEntity triggeringEntity) {
+	private static void incrementReplicateCount(SimulationEventListener triggeringEntity) {
 		int count = 0;
 		if (replicateCount.containsKey(triggeringEntity)) {
 			count = replicateCount.get(triggeringEntity);
@@ -22,7 +22,7 @@ public class ReplicateAction implements ManagementAction {
 		replicateCount.put(triggeringEntity, count + 1);
 	}
 
-	public static Map<SimulationEntity, Integer> getReplicateCount() {
+	public static Map<SimulationEventListener, Integer> getReplicateCount() {
 		return replicateCount;
 	}
 
@@ -39,7 +39,7 @@ public class ReplicateAction implements ManagementAction {
 		return vmPlacementPolicy;
 	}
 	
-	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEventListener triggeringEntity) {
 		VMAllocationRequest request = new VMAllocationRequest(vmDescription);
 		vmPlacementPolicy.submitVM(request);
 		

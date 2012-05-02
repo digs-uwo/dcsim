@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
 
-public abstract class Simulation extends SimulationEntity {
+public abstract class Simulation implements SimulationEventListener {
 	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
@@ -49,11 +49,11 @@ public abstract class Simulation extends SimulationEntity {
 		
 	}
 	
-	public void run(long duration) {
+	public final void run(long duration) {
 		run(duration, 0);
 	}
 	
-	public void run(long duration, long metricRecordStart) {
+	public final void run(long duration, long metricRecordStart) {
 		Event e;
 		
 		//configure simulation duration
@@ -96,13 +96,13 @@ public abstract class Simulation extends SimulationEntity {
 	public abstract void updateSimulation(long simulationTime);
 	public abstract void completeSimulation(long duration);
 	
-	public void sendEvent(Event event) {
+	public final void sendEvent(Event event) {
 		event.setSendOrder(++eventSendCount);
 		eventQueue.add(event);
 	}
 	
 	@Override
-	public void handleEvent(Event e) {
+	public final void handleEvent(Event e) {
 		switch (e.getType()) {
 			case Simulation.SIMULATION_TERMINATE_EVENT:
 				//Do nothing. This ensures that the simulation is fully up-to-date upon termination.
@@ -117,35 +117,35 @@ public abstract class Simulation extends SimulationEntity {
 		}
 	}
 	
-	public long getSimulationTime() {
+	public final long getSimulationTime() {
 		return simulationTime;
 	}
 	
-	public long getDuration() {
+	public final long getDuration() {
 		return duration;
 	}
 	
-	public long getMetricRecordStart() {
+	public final long getMetricRecordStart() {
 		return metricRecordStart;
 	}
 	
-	public long getRecordingDuration() {
+	public final long getRecordingDuration() {
 		return duration - metricRecordStart;
 	}
 	
-	public long getLastUpdate() {
+	public final long getLastUpdate() {
 		return lastUpdate;
 	}
 	
-	public long getElapsedTime() {
+	public final long getElapsedTime() {
 		return simulationTime - lastUpdate;
 	}
 	
-	public double getElapsedSeconds() {
+	public final double getElapsedSeconds() {
 		return getElapsedTime() / 1000d;
 	}
 	
-	public boolean isRecordingMetrics() {
+	public final boolean isRecordingMetrics() {
 		return recordingMetrics;
 	}
 	
@@ -186,7 +186,7 @@ public abstract class Simulation extends SimulationEntity {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
 	
-	public boolean hasProperty(String name) {
+	public final boolean hasProperty(String name) {
 		if (System.getProperty(name) != null || properties.getProperty(name) != null)
 			return true;
 		return false;
@@ -198,7 +198,7 @@ public abstract class Simulation extends SimulationEntity {
 	 * @param name Name of property.
 	 * @return The value of the property.
 	 */
-	public String getProperty(String name) {
+	public final String getProperty(String name) {
 		String prop = null;
 		if (System.getProperty(name) != null) {
 			prop = System.getProperty(name);

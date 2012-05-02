@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 
-public class VM extends SimulationEntity {
+public class VM implements SimulationEventListener {
 
 	static Logger logger = Logger.getLogger(VM.class);
 	

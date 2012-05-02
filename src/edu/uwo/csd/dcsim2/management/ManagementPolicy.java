@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.management;
 
 import edu.uwo.csd.dcsim2.core.*;
 
-public abstract class ManagementPolicy extends SimulationEntity {
+public abstract class ManagementPolicy implements SimulationEventListener {
 
 	public static final int MANAGEMENT_POLICY_EXECUTE_EVENT = 1;
 	

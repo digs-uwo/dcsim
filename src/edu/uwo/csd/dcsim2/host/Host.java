@@ -12,7 +12,7 @@ import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.power.*;
 
-public class Host extends SimulationEntity {
+public class Host implements SimulationEventListener {
 
 	private static Logger logger = Logger.getLogger(Host.class);
 	

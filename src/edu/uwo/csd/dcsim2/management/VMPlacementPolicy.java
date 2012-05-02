@@ -7,7 +7,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.core.*;
 
-public abstract class VMPlacementPolicy extends SimulationEntity {
+public abstract class VMPlacementPolicy implements SimulationEventListener {
 	
 	Simulation simulation;
 	DataCentre datacentre;
