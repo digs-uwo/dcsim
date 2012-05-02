@@ -92,13 +92,6 @@ public class Simulation extends SimulationEntity {
 					
 					if (simulationUpdateController != null)
 						simulationUpdateController.updateSimulation(simulationTime);
-					
-					//update simulation entities
-					for (SimulationEntity entity : SimulationEntity.getSimulationEntities()) {
-						if (entity instanceof UpdatingSimulationEntity) {
-							((UpdatingSimulationEntity)entity).updateEntity();
-						}
-					}
 				}
 				
 				e.getTarget().handleEvent(e);
