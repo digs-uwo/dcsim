@@ -2,6 +2,8 @@ package edu.uwo.csd.dcsim2.core;
 
 import org.apache.log4j.Logger;
 
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
@@ -27,6 +29,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private long metricRecordStart;
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
+	private Map<String, Metric> metrics = new HashMap<String, Metric>();
 	
 	public Simulation() {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
@@ -114,6 +117,22 @@ public abstract class Simulation implements SimulationEventListener {
 				break;
 			default:
 				throw new RuntimeException("Simulation received unknown event type");
+		}
+	}
+	
+	public boolean hasMetric(String name) {
+		return metrics.containsKey(name);
+	}
+	
+	public Metric getMetric(String name) {
+		return metrics.get(name);
+	}
+	
+	public void addMetric(Metric metric) {
+		if (!metrics.containsKey(metric)) {
+			metrics.put(metric.getName(), metric);
+		} else {
+			throw new RuntimeException("Metric " + metric.getName() + " already exists in simulation. Cannot add multiple copies of the same metric to the same simulation.");
 		}
 	}
 	
