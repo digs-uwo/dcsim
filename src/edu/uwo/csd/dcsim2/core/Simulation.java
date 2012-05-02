@@ -6,7 +6,7 @@ import java.util.Properties;
 import java.io.*;
 import java.util.PriorityQueue;
 
-public class Simulation extends SimulationEntity {
+public abstract class Simulation extends SimulationEntity {
 	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
@@ -19,9 +19,7 @@ public class Simulation extends SimulationEntity {
 	private static String CONFIG_DIRECTORY = "/config";
 	
 	private Properties properties;
-	
-	private static Simulation simulation = new Simulation(); //initialize singleton
-	
+		
 	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
 	private long lastUpdate; //in milliseconds
@@ -30,17 +28,10 @@ public class Simulation extends SimulationEntity {
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
 	
-	private SimulationUpdateController simulationUpdateController;
-		
-	public static Simulation getInstance() {
-		return simulation;
-	}
-	
-	private Simulation() {
+	public Simulation() {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
 		lastUpdate = 0;
-		simulationUpdateController = null;
 		
 		/*
 		 * Load configuration properties from file
@@ -77,8 +68,7 @@ public class Simulation extends SimulationEntity {
 			recordingMetrics = true;
 		}
 		
-		if (simulationUpdateController != null)
-			simulationUpdateController.beginSimulation();
+		beginSimulation();
 		
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			e = eventQueue.poll();
@@ -90,8 +80,7 @@ public class Simulation extends SimulationEntity {
 					lastUpdate = simulationTime;
 					simulationTime = e.getTime();
 					
-					if (simulationUpdateController != null)
-						simulationUpdateController.updateSimulation(simulationTime);
+					updateSimulation(simulationTime);
 				}
 				
 				e.getTarget().handleEvent(e);
@@ -100,9 +89,12 @@ public class Simulation extends SimulationEntity {
 			}
 		}
 		
-		if (simulationUpdateController != null)
-			simulationUpdateController.completeSimulation(duration);
+		completeSimulation(duration);
 	}
+	
+	public abstract void beginSimulation();
+	public abstract void updateSimulation(long simulationTime);
+	public abstract void completeSimulation(long duration);
 	
 	public void sendEvent(Event event) {
 		event.setSendOrder(++eventSendCount);
@@ -151,14 +143,6 @@ public class Simulation extends SimulationEntity {
 	
 	public double getElapsedSeconds() {
 		return getElapsedTime() / 1000d;
-	}
-	
-	public void setSimulationUpdateController(SimulationUpdateController simulationUpdateController) {
-		this.simulationUpdateController = simulationUpdateController;
-	}
-	
-	public SimulationUpdateController getSimulationUpdateController() {
-		return simulationUpdateController;
 	}
 	
 	public boolean isRecordingMetrics() {

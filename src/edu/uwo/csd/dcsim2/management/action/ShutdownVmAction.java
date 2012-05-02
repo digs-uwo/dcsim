@@ -34,7 +34,7 @@ public class ShutdownVmAction implements ManagementAction {
 		return vm;
 	}
 		
-	public void execute(SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
 		
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		Host host = vmAllocation.getHost();
@@ -45,14 +45,14 @@ public class ShutdownVmAction implements ManagementAction {
 		host.deallocate(vmAllocation);
 		vm.stopApplication();
 		
-		if (Simulation.getInstance().isRecordingMetrics())
+		if (simulation.isRecordingMetrics())
 			incrementShutdownCount(triggeringEntity);
 		
 		//if the host will no longer contain any VMs, instruct it to shut down
 		if (host.getVMAllocations().size() == 0) {
-			Simulation.getInstance().sendEvent(
+			simulation.sendEvent(
 					new Event(Host.HOST_POWER_OFF_EVENT,
-							Simulation.getInstance().getSimulationTime(),
+							simulation.getSimulationTime(),
 							triggeringEntity,
 							host)
 					);

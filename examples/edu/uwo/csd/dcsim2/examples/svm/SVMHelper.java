@@ -6,7 +6,6 @@ import java.util.Collections;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DCSimUpdateController;
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.application.Service;
 import edu.uwo.csd.dcsim2.application.SingleTierWebService;
@@ -52,19 +51,17 @@ public class SVMHelper {
 	
 	private static Logger logger = Logger.getLogger(SVMHelper.class);
 	
-	public static DataCentre createDataCentre() {
+	public static DataCentre createDataCentre(Simulation simulation) {
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation); //new VMPlacementPolicyFixedCount(7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
-		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
-		
-		dc.addHosts(createHosts());
+		dc.addHosts(createHosts(simulation));
 		
 		return dc;
 	}
 
-	private static ArrayList<Host> createHosts() {
+	private static ArrayList<Host> createHosts(Simulation simulation) {
 		ArrayList<Host> hosts = new ArrayList<Host>();
 		
 		for (int i = 0; i < N_HOSTS; ++i) {
@@ -73,12 +70,12 @@ public class SVMHelper {
 			MemoryManager memoryManager = new StaticMemoryManager();
 			BandwidthManager bandwidthManager = new StaticBandwidthManager(131072); //assumes separate 1GB link for migration
 			StorageManager storageManager = new StaticStorageManager();
-			CpuScheduler cpuScheduler = new FairShareCpuScheduler();
+			CpuScheduler cpuScheduler = new FairShareCpuScheduler(simulation);
 			
 			if (i % 2 == 1) {
-				host = new ProLiantDL360G5E5450Host(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = new ProLiantDL360G5E5450Host(simulation, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 			} else {
-				host = new ProLiantDL160G5E5420Host(cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = new ProLiantDL160G5E5420Host(simulation, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
 			}
 			
 			hosts.add(host);
@@ -87,7 +84,7 @@ public class SVMHelper {
 		return hosts;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createVmList(boolean allocAvg) {
+	public static ArrayList<VMAllocationRequest> createVmList(Simulation simulation, boolean allocAvg) {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
 		
@@ -99,7 +96,7 @@ public class SVMHelper {
 			int cores = VM_CORES[i % N_VM_SIZES];
 			int memory = VM_RAM[i % N_VM_SIZES];
 			
-			Service service = createService(trace, offset, size, cores, memory);
+			Service service = createService(simulation, trace, offset, size, cores, memory);
 			
 			//vmList.addAll(service.createInitialVmRequests());
 			
@@ -117,10 +114,10 @@ public class SVMHelper {
 	}
 	
 
-	private static Service createService(String fileName, long offset, int coreCapacity, int cores, int memory) {
+	private static Service createService(Simulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
+		Workload workload = new TraceWorkload(simulation, fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
 		
 		int bandwidth = 12800; //100 Mb/s
 		long storage = 1024; //1GB
@@ -144,17 +141,7 @@ public class SVMHelper {
 		}
 	}
 	
-	public static void runSimulation(long duration, long recordStart) {
-		
-		
-		//run the simulation
-		Simulation.getInstance().run(duration, recordStart);
-		
-		
-	}
-	
-	
-	public static ArrayList<VMAllocationRequest> createPlanetLabVmList(String tracePath) {
+	public static ArrayList<VMAllocationRequest> createPlanetLabVmList(Simulation simulation, String tracePath) {
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
 		
 		File inputFolder = new File(tracePath);
@@ -167,7 +154,7 @@ public class SVMHelper {
 			
 			int vmType = i % 3;
 			
-			Workload workload = new PlanetLabTraceWorkload(files[i].getAbsolutePath(), VM_SIZES[vmType], 0);
+			Workload workload = new PlanetLabTraceWorkload(simulation, files[i].getAbsolutePath(), VM_SIZES[vmType], 0);
 			
 			//build VMDescription
 			int cores = 1; //requires 1 core

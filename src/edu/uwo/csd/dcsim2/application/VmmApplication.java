@@ -24,6 +24,9 @@ public class VmmApplication extends Application {
 	VirtualResources totalResourceDemand = new VirtualResources();	//the total amount of resources required since the application started
 	VirtualResources totalResourceUsed = new VirtualResources();		//the total amount of resources used since the application started
 	
+	public VmmApplication(Simulation simulation) {
+		super(simulation);
+	}
 	
 	public void addMigratingVm(VM vm) {
 		migratingVms.add(vm);
@@ -43,7 +46,7 @@ public class VmmApplication extends Application {
 	
 	@Override
 	public void beginScheduling() {
-		long elapsedTime = Simulation.getInstance().getElapsedTime();
+		long elapsedTime = simulation.getElapsedTime();
 		
 		//reset the resource demand and consumption values for the current interval
 		resourcesDemanded = new VirtualResources();
@@ -114,19 +117,19 @@ public class VmmApplication extends Application {
 	public void completeScheduling() {
 		//at this point, no resources should be remaining to run
 		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
-			throw new RuntimeException(Simulation.getInstance().getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
+			throw new RuntimeException(simulation.getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
 		}
 		
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
 		resourceDemand = new VirtualResources();
-		resourceDemand.setCpu(resourcesDemanded.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
-		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setCpu(resourcesDemanded.getCpu() / (simulation.getElapsedSeconds()));
+		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (simulation.getElapsedSeconds()));
 		resourceDemand.setMemory(resourcesDemanded.getMemory());
 		resourceDemand.setStorage(resourcesDemanded.getStorage());
 		
 		resourceInUse = new VirtualResources();
-		resourceInUse.setCpu(resourcesUsed.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
-		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setCpu(resourcesUsed.getCpu() / (simulation.getElapsedSeconds()));
+		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (simulation.getElapsedSeconds()));
 		resourceInUse.setMemory(resourcesUsed.getMemory());
 		resourceInUse.setStorage(resourcesUsed.getStorage());
 		

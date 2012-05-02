@@ -30,7 +30,8 @@ public abstract class InteractiveApplication extends Application {
 	private double slaViolatedWork = 0;
 	private double totalSlaViolatedWork = 0;
 	
-	public InteractiveApplication(ApplicationTier applicationTier) {
+	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier) {
+		super(simulation);
 		
 		//initialize resource demand/consumption values
 		resourceDemand = new VirtualResources();
@@ -55,8 +56,8 @@ public abstract class InteractiveApplication extends Application {
 		//calculate overhead for scheduling period
 		overheadRemaining = new VirtualResources();
 		
-		overheadRemaining.setCpu(overhead.getCpu() * Simulation.getInstance().getElapsedSeconds());
-		overheadRemaining.setBandwidth(overhead.getBandwidth() * Simulation.getInstance().getElapsedSeconds());
+		overheadRemaining.setCpu(overhead.getCpu() * simulation.getElapsedSeconds());
+		overheadRemaining.setBandwidth(overhead.getBandwidth() * simulation.getElapsedSeconds());
 		overheadRemaining.setMemory(overhead.getMemory());
 		overheadRemaining.setStorage(overhead.getStorage());
 		
@@ -146,20 +147,20 @@ public abstract class InteractiveApplication extends Application {
 
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
 		resourceDemand = new VirtualResources();
-		resourceDemand.setCpu(resourcesDemanded.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
-		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceDemand.setCpu(resourcesDemanded.getCpu() / (simulation.getElapsedSeconds()));
+		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (simulation.getElapsedSeconds()));
 		resourceDemand.setMemory(resourcesDemanded.getMemory());
 		resourceDemand.setStorage(resourcesDemanded.getStorage());
 		
 		resourceInUse = new VirtualResources();
-		resourceInUse.setCpu(resourcesUsed.getCpu() / (Simulation.getInstance().getElapsedSeconds()));
-		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (Simulation.getInstance().getElapsedSeconds()));
+		resourceInUse.setCpu(resourcesUsed.getCpu() / (simulation.getElapsedSeconds()));
+		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (simulation.getElapsedSeconds()));
 		resourceInUse.setMemory(resourcesUsed.getMemory());
 		resourceInUse.setStorage(resourcesUsed.getStorage());
 		
 		slaViolatedWork = workRemaining;
 		if (vm.isMigrating()) {
-			slaViolatedWork += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getInstance().getProperty("vmMigrationSLAPenalty"));
+			slaViolatedWork += (incomingWork - workRemaining) * Double.parseDouble(simulation.getProperty("vmMigrationSLAPenalty"));
 		}
 		
 		totalIncomingWork += incomingWork;

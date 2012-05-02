@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim2.application;
 import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim2.application.loadbalancer.LoadBalancer;
+import edu.uwo.csd.dcsim2.core.Simulation;
 
 public abstract class ApplicationTier implements WorkConsumer, ApplicationFactory {
 
@@ -10,9 +11,9 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 	private LoadBalancer loadBalancer;
 	private ArrayList<Application> applications = new ArrayList<Application>();
 	private double incomingWork = 0; //used in the case of no load balancer being present
-	
-	public Application createApplication() {
-		Application newApp = instantiateApplication();
+
+	public Application createApplication(Simulation simulation) {
+		Application newApp = instantiateApplication(simulation);
 		startApplication(newApp);
 		
 		return newApp;
@@ -38,7 +39,7 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 		this.applications.remove(application);
 	}
 	
-	protected abstract Application instantiateApplication();
+	protected abstract Application instantiateApplication(Simulation simulation);
 
 	public int getHeight() {
 		int height = 1;

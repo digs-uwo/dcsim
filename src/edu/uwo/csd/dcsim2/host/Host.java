@@ -33,6 +33,8 @@ public class Host extends SimulationEntity {
 	
 	private static int nextId = 1;
 	
+	private Simulation simulation;
+	
 	private int id;
 	private ArrayList<Cpu> cpus;
 	private int memory;	//in MB
@@ -73,7 +75,7 @@ public class Host extends SimulationEntity {
 	
 	private HostState state;
 	
-	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, 
 			MemoryManager memoryManager, 
 			BandwidthManager bandwidthManager,
@@ -81,7 +83,7 @@ public class Host extends SimulationEntity {
 			CpuScheduler cpuScheduler,
 			HostPowerModel powerModel) {
 		
-		this(nCpu, nCores, coreCapacity, memory, bandwidth, storage,
+		this(simulation, nCpu, nCores, coreCapacity, memory, bandwidth, storage,
 			cpuManager, 
 			memoryManager, 
 			bandwidthManager,
@@ -92,7 +94,7 @@ public class Host extends SimulationEntity {
 		
 	}
 	
-	public Host(int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
 			CpuManager cpuManager, 
 			MemoryManager memoryManager, 
 			BandwidthManager bandwidthManager,
@@ -100,6 +102,8 @@ public class Host extends SimulationEntity {
 			CpuScheduler cpuScheduler,
 			HostPowerModel powerModel,
 			ApplicationFactory vmmApplicationFactory) {
+		
+		this.simulation = simulation;
 		
 		cpus = new ArrayList<Cpu>();
 		for (int i = 0; i < nCpu; ++i) {
@@ -134,7 +138,7 @@ public class Host extends SimulationEntity {
 		bandwidthManager.allocatePrivDomain(privDomainAllocation);
 		storageManager.allocatePrivDomain(privDomainAllocation);
 
-		PrivDomainVM privVM = new PrivDomainVM(privDomainDescription, privDomainDescription.getApplicationFactory().createApplication());
+		PrivDomainVM privVM = new PrivDomainVM(simulation, privDomainDescription, privDomainDescription.getApplicationFactory().createApplication(simulation));
 		privDomainAllocation.attachVm(privVM);
 
 		//set default state
@@ -233,7 +237,7 @@ public class Host extends SimulationEntity {
 		vmAllocations.add(newAllocation);
 		
 		//create a new VM in the allocation
-		VM newVm = newAllocation.getVMDescription().createVM();
+		VM newVm = newAllocation.getVMDescription().createVM(simulation);
 		newAllocation.setVm(newVm);
 		newVm.setVMAllocation(newAllocation);
 		
@@ -306,13 +310,13 @@ public class Host extends SimulationEntity {
 	 */
 	public void sendMigrationEvent(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
 		Event e = new Event(Host.HOST_MIGRATE_EVENT, 
-				Simulation.getInstance().getSimulationTime(),
+				simulation.getSimulationTime(),
 				source, 
 				this);
 		e.getData().put("vmAllocationRequest", vmAllocationRequest);
 		e.getData().put("vm", vm);
 		e.getData().put("source", source);
-		Simulation.getInstance().sendEvent(e);
+		simulation.sendEvent(e);
 	}
 	
 	public void markVmForMigration(VM vm) {
@@ -380,12 +384,12 @@ public class Host extends SimulationEntity {
 
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
-				Simulation.getInstance().getSimulationTime() + timeToMigrate,
+				simulation.getSimulationTime() + timeToMigrate,
 				this, this);
 		e.getData().put("vmAllocation", newAllocation);
 		e.getData().put("vm", vm);
 		e.getData().put("source", source);
-		Simulation.getInstance().sendEvent(e);
+		simulation.sendEvent(e);
 	}
 	
 	public void migrateOut(VM vm) {
@@ -459,10 +463,10 @@ public class Host extends SimulationEntity {
 	public void suspend() {
 		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
-			long delay = Long.parseLong(Simulation.getInstance().getProperty("hostSuspendDelay"));
-			Simulation.getInstance().sendEvent(
+			long delay = Long.parseLong(simulation.getProperty("hostSuspendDelay"));
+			simulation.sendEvent(
 					new Event(Host.HOST_COMPLETE_SUSPEND_EVENT,
-							Simulation.getInstance().getSimulationTime() + delay,
+							simulation.getSimulationTime() + delay,
 							this, this));
 		}
 	}
@@ -475,10 +479,10 @@ public class Host extends SimulationEntity {
 				powerOffAfterMigrations = true;
 			} else {
 				state = HostState.POWERING_OFF;
-				long delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
-				Simulation.getInstance().sendEvent(
+				long delay = Long.parseLong(simulation.getProperty("hostPowerOffDelay"));
+				simulation.sendEvent(
 						new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
-								Simulation.getInstance().getSimulationTime() + delay,
+								simulation.getSimulationTime() + delay,
 								this, this));
 				powerOffAfterMigrations = false;
 			}
@@ -491,27 +495,27 @@ public class Host extends SimulationEntity {
 			long delay = 0;
 			switch (state) {
 				case SUSPENDED:
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 				case OFF:
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case FAILED:					
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromFailedDelay"));
+					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromFailedDelay"));
 					break;
 				case POWERING_OFF:
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostPowerOffDelay"));
-					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(simulation.getProperty("hostPowerOffDelay"));
+					delay += Long.parseLong(simulation.getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case SUSPENDING:
-					delay = Long.parseLong(Simulation.getInstance().getProperty("hostSuspendDelay"));
-					delay += Long.parseLong(Simulation.getInstance().getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(simulation.getProperty("hostSuspendDelay"));
+					delay += Long.parseLong(simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 			}
 			
-			Simulation.getInstance().sendEvent(
+			simulation.sendEvent(
 				new Event(Host.HOST_COMPLETE_POWER_ON_EVENT,
-						Simulation.getInstance().getSimulationTime() + delay,
+						simulation.getSimulationTime() + delay,
 						this, this));
 			
 			state = HostState.POWERING_ON;
@@ -584,16 +588,16 @@ public class Host extends SimulationEntity {
 		if (state == HostState.ON) {
 			++currentActiveHosts;
 			
-			timeActive += Simulation.getInstance().getElapsedTime();
-			globalTimeActive += Simulation.getInstance().getElapsedTime();
+			timeActive += simulation.getElapsedTime();
+			globalTimeActive += simulation.getElapsedTime();
 			
-			utilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
-			globalUtilizationSum += getCpuManager().getCpuUtilization() * Simulation.getInstance().getElapsedTime();
+			utilizationSum += getCpuManager().getCpuUtilization() * simulation.getElapsedTime();
+			globalUtilizationSum += getCpuManager().getCpuUtilization() * simulation.getElapsedTime();
 
 		}
 		
-		powerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
-		globalPowerConsumed += getCurrentPowerConsumption() * Simulation.getInstance().getElapsedSeconds();
+		powerConsumed += getCurrentPowerConsumption() * simulation.getElapsedSeconds();
+		globalPowerConsumed += getCurrentPowerConsumption() * simulation.getElapsedSeconds();
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null)

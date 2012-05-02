@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
+
 public class WebServerTier extends ApplicationTier {
 
 	private double cpuPerWork;
@@ -17,8 +19,8 @@ public class WebServerTier extends ApplicationTier {
 	}
 	
 	@Override
-	protected WebServerApplication instantiateApplication() {
-		return new WebServerApplication(this, memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
+	protected WebServerApplication instantiateApplication(Simulation simulation) {
+		return new WebServerApplication(simulation, this, memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
 	}
 
 }

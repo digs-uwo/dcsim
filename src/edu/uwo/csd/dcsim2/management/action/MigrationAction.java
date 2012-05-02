@@ -56,13 +56,13 @@ public class MigrationAction implements ManagementAction {
 	 * Perform this VM migration
 	 * @param triggeringEntity The SimulationEntity (VMRelocationPolicy, VMConsolidiationPolicy, etc.) that is triggering this migration
 	 */
-	public void execute(SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
 		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVM().getVMAllocation()); //create allocation request based on current allocation
 		
 		if (target.getHost().getState() != Host.HostState.ON && target.getHost().getState() != Host.HostState.POWERING_ON) {
-			Simulation.getInstance().sendEvent(
+			simulation.sendEvent(
 					new Event(Host.HOST_POWER_ON_EVENT,
-							Simulation.getInstance().getSimulationTime(),
+							simulation.getSimulationTime(),
 							triggeringEntity,
 							target.getHost())
 					);
@@ -70,14 +70,14 @@ public class MigrationAction implements ManagementAction {
 		
 		target.getHost().sendMigrationEvent(vmAllocationRequest, vm.getVM(), source.getHost());
 		
-		if (Simulation.getInstance().isRecordingMetrics())
+		if (simulation.isRecordingMetrics())
 			incrementMigrationCount(triggeringEntity);
 		
 		//if the source host will no longer contain any VMs, instruct it to shut down
 		if (source.getVms().size() == 0) {
-			Simulation.getInstance().sendEvent(
+			simulation.sendEvent(
 					new Event(Host.HOST_POWER_OFF_EVENT,
-							Simulation.getInstance().getSimulationTime(),
+							simulation.getSimulationTime(),
 							triggeringEntity,
 							source.getHost())
 					);

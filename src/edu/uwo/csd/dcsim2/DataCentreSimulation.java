@@ -8,22 +8,21 @@ import edu.uwo.csd.dcsim2.application.Application;
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEntity;
-import edu.uwo.csd.dcsim2.core.SimulationUpdateController;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.host.scheduler.*;
-import edu.uwo.csd.dcsim2.management.action.*;
+import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
+import edu.uwo.csd.dcsim2.management.action.MigrationAction;
+import edu.uwo.csd.dcsim2.management.action.ReplicateAction;
+import edu.uwo.csd.dcsim2.management.action.ShutdownVmAction;
 
-public class DCSimUpdateController implements SimulationUpdateController {
+public class DataCentreSimulation extends Simulation {
 
-	private static Logger logger = Logger.getLogger(DCSimUpdateController.class);
-	
-	public static final int DCSIM_UPDATE_CONTROLLER_RECORD_METRICS = 1;
+	private static Logger logger = Logger.getLogger(DataCentreSimulation.class);
 	
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
 	
-	public DCSimUpdateController(DataCentre dc) {
-		addDatacentre(dc);
+	public DataCentreSimulation() {
+
 	}
 	
 	public void addDatacentre(DataCentre dc) {
@@ -36,7 +35,7 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		
 		logger.info("Random Seed: " + Utility.getRandomSeed());
 	}
-	
+
 	@Override
 	public void updateSimulation(long simulationTime) {
 		//update workloads
@@ -46,12 +45,12 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
 		
 		for (DataCentre dc : datacentres) {
-			if (Simulation.getInstance().isRecordingMetrics())
+			if (this.isRecordingMetrics())
 				dc.updateMetrics();
 			dc.logInfo();
 		}
 		
-		if (Simulation.getInstance().isRecordingMetrics())
+		if (this.isRecordingMetrics())
 			Host.updateGlobalMetrics();
 		
 		//finalize workloads (print logs, calculate stats)
@@ -59,11 +58,11 @@ public class DCSimUpdateController implements SimulationUpdateController {
 	}
 
 	@Override
-	public void completeSimulation(long simulationTime) {
-		logger.info("DCSim2 Simulation Complete");
+	public void completeSimulation(long duration) {
+	logger.info("DCSim2 Simulation Complete");
 		
-		double simTime = Simulation.getInstance().getDuration();
-		double recordedTime = Simulation.getInstance().getRecordingDuration();
+		double simTime = this.getDuration();
+		double recordedTime = this.getRecordingDuration();
 		String simUnits = "ms";
 		if (simTime >= 864000000) { //>= 10 days
 			simTime = simTime / 86400000;
@@ -88,7 +87,7 @@ public class DCSimUpdateController implements SimulationUpdateController {
 		logger.info("Total Power [" + Utility.roundDouble((Host.getGlobalPowerConsumed() / 3600000d), 3) + "kWh]");
 		logger.info("Average CPU Utilization [" + Utility.roundDouble((Host.getGlobalAverageUtilization() * 100), 3) + "]");
 		logger.info("Host-Hours [" + Utility.roundDouble((Host.getGlobalTimeActive() / 3600000d), 3) + "]");
-		logger.info("Average Hosts [" + Utility.roundDouble(((double)Host.getGlobalTimeActive() / (double)Simulation.getInstance().getRecordingDuration()), 3) + "]");
+		logger.info("Average Hosts [" + Utility.roundDouble(((double)Host.getGlobalTimeActive() / (double)this.getRecordingDuration()), 3) + "]");
 		logger.info("Min Hosts [" + Host.getMinActiveHosts() + "]");
 		logger.info("Max Hosts [" + Host.getMaxActiveHosts() + "]");
 		

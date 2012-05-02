@@ -9,15 +9,15 @@ public abstract class VMConsolidationPolicy extends ManagementPolicy {
 	DataCentre dc;
 	long interval;
 	
-	public VMConsolidationPolicy(DataCentre dc, long interval, long firstEvent) {
-		super(firstEvent);
+	public VMConsolidationPolicy(Simulation simulation, DataCentre dc, long interval, long firstEvent) {
+		super(simulation, firstEvent);
 		this.dc = dc;
 		this.interval = interval;
 	}
 
 	@Override
 	public long getNextExecutionTime() {		
-		return Simulation.getInstance().getSimulationTime() + interval;
+		return simulation.getSimulationTime() + interval;
 	}
 
 	@Override

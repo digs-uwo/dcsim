@@ -26,13 +26,15 @@ public class StaticAverage {
 		//Utility.setRandomSeed(2074739686644571611l);
 		Utility.setRandomSeed(-1519296228623429147l);
 		
-		DataCentre dc = SVMHelper.createDataCentre();
+		DataCentreSimulation simulation = new DataCentreSimulation();
+		DataCentre dc = SVMHelper.createDataCentre(simulation);
+		simulation.addDatacentre(dc);
 		
-		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList(true);
+		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList(simulation, true);
 		
 		SVMHelper.placeVms(vmList, dc);
 				
-		SVMHelper.runSimulation(864000000, 86400000);
+		simulation.run(864000000, 86400000);
 		
 	}
 	

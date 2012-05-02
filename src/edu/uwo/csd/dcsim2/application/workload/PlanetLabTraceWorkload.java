@@ -16,11 +16,12 @@ public class PlanetLabTraceWorkload extends Workload {
 	
 	int currentPosition;
 	
-	public PlanetLabTraceWorkload(String fileName, double scaleFactor, long offset) {
-		this(fileName, scaleFactor, offset, 5000);
+	public PlanetLabTraceWorkload(Simulation simulation, String fileName, double scaleFactor, long offset) {
+		this(simulation, fileName, scaleFactor, offset, 5000);
 	}
 	
-	public PlanetLabTraceWorkload(String fileName, double scaleFactor, long offset, long stepSize) {
+	public PlanetLabTraceWorkload(Simulation simulation, String fileName, double scaleFactor, long offset, long stepSize) {
+		super(simulation);
 		
 		if (scaleFactor <= 0)
 			throw new RuntimeException("Invalid scaleFactor (must be postive): " + scaleFactor);
@@ -38,7 +39,7 @@ public class PlanetLabTraceWorkload extends Workload {
 	
 	@Override
 	protected double retrievePendingWork() {
-		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate()) / 1000.0);
+		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((simulation.getElapsedTime()) / 1000.0);
 	}
 
 	@Override
@@ -47,7 +48,7 @@ public class PlanetLabTraceWorkload extends Workload {
 		if (currentPosition >= workloadTrace.getValues().size())
 			currentPosition = 0;
 		
-		return Simulation.getInstance().getSimulationTime() + workloadTrace.getStepSize();
+		return simulation.getSimulationTime() + workloadTrace.getStepSize();
 	}
 	
 	private class PlanetLabWorkloadTrace {

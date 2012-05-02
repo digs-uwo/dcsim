@@ -1,10 +1,13 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.vm.VM;
 
 public class CloudSimVmmApplication extends VmmApplication {
 
-	public CloudSimVmmApplication() {
+	public CloudSimVmmApplication(Simulation simulation) {
+		super(simulation);
+		
 		cpuOverhead = 0;
 		bandwidthOverhead = 0;
 	}

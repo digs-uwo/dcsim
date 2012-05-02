@@ -8,15 +8,15 @@ public abstract class VMRelocationPolicy extends ManagementPolicy {
 	DataCentre dc;
 	long interval;
 		
-	public VMRelocationPolicy(DataCentre dc, long interval, long firstEvent) {
-		super(firstEvent);
+	public VMRelocationPolicy(Simulation simulation, DataCentre dc, long interval, long firstEvent) {
+		super(simulation, firstEvent);
 		this.dc = dc;
 		this.interval = interval;
 	}
 
 	@Override
 	public long getNextExecutionTime() {		
-		return Simulation.getInstance().getSimulationTime() + interval;
+		return simulation.getSimulationTime() + interval;
 	}
 
 	@Override

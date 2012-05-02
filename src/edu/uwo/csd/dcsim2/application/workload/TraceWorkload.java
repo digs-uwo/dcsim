@@ -16,7 +16,8 @@ public class TraceWorkload extends Workload {
 	
 	int currentPosition;
 	
-	public TraceWorkload(String fileName, double scaleFactor, long offset) {
+	public TraceWorkload(Simulation simulation, String fileName, double scaleFactor, long offset) {
+		super(simulation);
 		
 		if (scaleFactor <= 0)
 			throw new RuntimeException("Invalid scaleFactor (must be postive): " + scaleFactor);
@@ -34,7 +35,7 @@ public class TraceWorkload extends Workload {
 	
 	@Override
 	protected double retrievePendingWork() {
-		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate()) / 1000.0);
+		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((simulation.getElapsedTime()) / 1000.0);
 	}
 
 	@Override
@@ -43,7 +44,7 @@ public class TraceWorkload extends Workload {
 		if (currentPosition >= workloadTrace.getTimes().size())
 			currentPosition = 0;
 		
-		return Simulation.getInstance().getSimulationTime() + workloadTrace.getStepSize();
+		return simulation.getSimulationTime() + workloadTrace.getStepSize();
 	}
 	
 	private class WorkloadTrace {

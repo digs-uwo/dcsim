@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.comparator.*;
 import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
@@ -13,7 +14,8 @@ public class VMPlacementPolicyFixedCount extends VMPlacementPolicy {
 
 	int vmsPerHost;
 	
-	public VMPlacementPolicyFixedCount(int vmsPerHost) {
+	public VMPlacementPolicyFixedCount(Simulation simulation, int vmsPerHost) {
+		super(simulation);
 		this.vmsPerHost = vmsPerHost;
 	}
 	

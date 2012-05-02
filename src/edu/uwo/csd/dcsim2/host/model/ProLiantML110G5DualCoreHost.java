@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.host.model;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.power.*;
@@ -15,12 +16,13 @@ public class ProLiantML110G5DualCoreHost extends Host {
 	private static long storage = 36864; //36GB
 	private static HostPowerModel powerModel = new SPECHostPowerModel(10, 93.7, 97, 101, 105, 110, 116, 121, 125, 129, 133, 135);
 	
-	public ProLiantML110G5DualCoreHost(CpuManager cpuManager,
+	public ProLiantML110G5DualCoreHost(Simulation simulation, 
+			CpuManager cpuManager,
 			MemoryManager memoryManager,
 			BandwidthManager bandwidthManager,
 			StorageManager storageManager,
 			CpuScheduler cpuScheduler) {
-		super(nCpu, nCores, coreCapacity, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler, powerModel);
+		super(simulation, nCpu, nCores, coreCapacity, memory, bandwidth, storage, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler, powerModel);
 	}
 	
 }

@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.*;
 
@@ -11,8 +12,10 @@ public abstract class Application {
 	protected static double globalSlaViolatedWork = 0;
 
 	protected VM vm;
+	protected Simulation simulation;
 	
-	public Application() {
+	public Application(Simulation simulation) {
+		this.simulation = simulation;
 	}
 	
 	public VM getVM() {

@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
 public class WebServerApplication extends InteractiveApplication {
@@ -9,8 +10,8 @@ public class WebServerApplication extends InteractiveApplication {
 	private int memory;
 	private long storage;
 	
-	public WebServerApplication(ApplicationTier applicationTier, int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
-		super(applicationTier);
+	public WebServerApplication(Simulation simulation, ApplicationTier applicationTier, int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
+		super(simulation, applicationTier);
 		this.memory = memory;
 		this.storage = storage;
 		this.cpuPerWork = cpuPerWork;

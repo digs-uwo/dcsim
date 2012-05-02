@@ -10,10 +10,13 @@ public abstract class CpuScheduler {
 	private Host host;
 	private CpuSchedulerState state;
 	private double availableCpu;
+	protected Simulation simulation;
 	
 	public enum CpuSchedulerState {READY, COMPLETE;}
 	
-	public CpuScheduler() {
+	public CpuScheduler(Simulation simulation) {
+		this.simulation = simulation;
+		
 		MasterCpuScheduler.getMasterCpuScheduler().getCpuSchedulers().add(this);
 		state = CpuSchedulerState.READY;
 	}
@@ -21,9 +24,7 @@ public abstract class CpuScheduler {
 	public void prepareScheduler() {
 		state = CpuSchedulerState.READY;
 		
-		long elapsedTime = Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate();
-		
-		availableCpu = host.getTotalCpu() * (elapsedTime / 1000.0); //cpu in shares/second, elapsed time in ms
+		availableCpu = host.getTotalCpu() * (simulation.getElapsedSeconds()); //cpu in shares/second, elapsed time in ms
 
 	}
 	
@@ -46,7 +47,7 @@ public abstract class CpuScheduler {
 			this.setState(CpuSchedulerState.COMPLETE);
 		}
 		if (getAvailableCpu() < 0)
-			throw new RuntimeException("CPU Scheduler on Host #" + getHost().getId() + " used more CPU than available (sim time: " + Simulation.getInstance().getSimulationTime() + ")");
+			throw new RuntimeException("CPU Scheduler on Host #" + getHost().getId() + " used more CPU than available (sim time: " + simulation.getSimulationTime() + ")");
 	}
 	
 	public CpuSchedulerState getState() {

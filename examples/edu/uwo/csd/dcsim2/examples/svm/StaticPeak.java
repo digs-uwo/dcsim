@@ -26,13 +26,16 @@ public class StaticPeak {
 		//Utility.setRandomSeed(2074739686644571611l);
 		Utility.setRandomSeed(-1519296228623429147l);
 		
-		DataCentre dc = SVMHelper.createDataCentre();
+		DataCentreSimulation simulation = new DataCentreSimulation();
 		
-		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList(false);
+		DataCentre dc = SVMHelper.createDataCentre(simulation);
+		simulation.addDatacentre(dc);
+		
+		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList(simulation, false);
 		
 		SVMHelper.placeVms(vmList, dc);
 				
-		SVMHelper.runSimulation(864000000, 86400000);
+		simulation.run(864000000, 86400000);
 		
 	}
 	

@@ -1,10 +1,12 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
+
 public class VmmApplicationFactory implements ApplicationFactory {
 
 	@Override
-	public Application createApplication() {
-		return new VmmApplication();
+	public Application createApplication(Simulation simulation) {
+		return new VmmApplication(simulation);
 	}
 
 	@Override

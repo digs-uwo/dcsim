@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim2.vm;
 
 import edu.uwo.csd.dcsim2.application.*;
+import edu.uwo.csd.dcsim2.core.Simulation;
 
 public class VMDescription {
 
@@ -20,8 +21,8 @@ public class VMDescription {
 		this.applicationFactory = applicationFactory;
 	}
 	
-	public VM createVM() {
-		return new VM(this, applicationFactory.createApplication());
+	public VM createVM(Simulation simulation) {
+		return new VM(simulation, this, applicationFactory.createApplication(simulation));
 	}
 	
 	public int getCpu() {

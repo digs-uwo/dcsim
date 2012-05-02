@@ -30,16 +30,18 @@ public class BasicReplication {
 		//Set random seed to repeat run
 		//Utility.setRandomSeed(2145730755378205824l);
 		
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
+		Simulation simulation = new Simulation();
+		
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(simulation, 7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
-		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
+		simulation.setSimulationUpdateController(new DCSimUpdateController(dc));
 		
 		//create hosts
-		ArrayList<Host> hostList = createHosts(2);
+		ArrayList<Host> hostList = createHosts(simulation, 2);
 		dc.addHosts(hostList);
 
-		VMAllocationRequest vmAllocationRequest = createServiceVmList().get(0);
+		VMAllocationRequest vmAllocationRequest = createServiceVmList(simulation).get(0);
 		
 		vmPlacementPolicy.submitVM(vmAllocationRequest, hostList.get(0));
 		
@@ -49,22 +51,22 @@ public class BasicReplication {
 		BasicReplication br = new BasicReplication();
 		Replicator replicator = br.new Replicator(hostList.get(0), hostList.get(1), vmPlacementPolicy);
 		
-		Simulation.getInstance().sendEvent(new Event(0, 120000, dc, replicator)); //replicate 2 minutes in
-		Simulation.getInstance().sendEvent(new Event(1, 240000, dc, replicator)); //de-replicate 4 minutes in
+		simulation.sendEvent(new Event(0, 120000, dc, replicator)); //replicate 2 minutes in
+		simulation.sendEvent(new Event(1, 240000, dc, replicator)); //de-replicate 4 minutes in
 		
 		//run the simulation
 		//Simulation.getInstance().run(3600000, 0); //1 hour
-		Simulation.getInstance().run(600000, 0); //10 minutes 
+		simulation.run(600000, 0); //10 minutes 
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
 		
 	}
 	
-	public static ArrayList<VMAllocationRequest> createServiceVmList() {
+	public static ArrayList<VMAllocationRequest> createServiceVmList(Simulation simulation) {
 		
 		//create workload (external)
-		Workload workload = new StaticWorkload(2000);
+		Workload workload = new StaticWorkload(simulation, 2000);
 		
 		int cores = 1; //requires 1 core
 		int coreCapacity = 3000;
@@ -78,17 +80,18 @@ public class BasicReplication {
 
 	}
 	
-	public static ArrayList<Host> createHosts(int nHosts) {
+	public static ArrayList<Host> createHosts(Simulation simulation, int nHosts) {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(
+					simulation,
 					new StaticOversubscribingCpuManager(500),
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
 					new StaticStorageManager(),
-					new FairShareCpuScheduler());
+					new FairShareCpuScheduler(simulation));
 						
 			hosts.add(host);
 		}

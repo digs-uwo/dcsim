@@ -1,10 +1,12 @@
 package edu.uwo.csd.dcsim2.application;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
+
 public class CloudSimVmmApplicationFactory implements ApplicationFactory {
 
 	@Override
-	public Application createApplication() {
-		return new CloudSimVmmApplication();
+	public Application createApplication(Simulation simulation) {
+		return new CloudSimVmmApplication(simulation);
 	}
 
 	@Override

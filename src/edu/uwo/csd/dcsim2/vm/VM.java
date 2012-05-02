@@ -11,6 +11,7 @@ public class VM extends SimulationEntity {
 	
 	static int nextId = 1;
 	
+	Simulation simulation;
 	int id;
 	VMDescription vmDescription;
 	VirtualResources resourcesInUse; //current level of resource usage (not total used)
@@ -25,7 +26,8 @@ public class VM extends SimulationEntity {
 	
 	Application application;
 
-	public VM(VMDescription vmDescription, Application application) {
+	public VM(Simulation simulation, VMDescription vmDescription, Application application) {
+		this.simulation = simulation;
 		this.id = nextId++;
 		this.vmDescription = vmDescription;
 		this.application = application;
@@ -39,7 +41,7 @@ public class VM extends SimulationEntity {
 	public void beginScheduling() {
 		resourcesAvailable = new VirtualResources();
 		
-		long timeElapsed = Simulation.getInstance().getElapsedTime();
+		long timeElapsed = simulation.getElapsedTime();
 		
 		//do not set CPU, it will be handled by the CPU scheduler and passed in to processWork()
 		
@@ -84,7 +86,7 @@ public class VM extends SimulationEntity {
 	public void completeScheduling() {
 		resourcesInUse = new VirtualResources();
 		
-		long elapsedTime = Simulation.getInstance().getElapsedTime();
+		long elapsedTime = simulation.getElapsedTime();
 		
 		resourcesInUse.setCpu(resourcesConsumed.getCpu() / (elapsedTime / 1000.0));
 		resourcesInUse.setBandwidth(resourcesConsumed.getBandwidth() / (elapsedTime / 1000.0));

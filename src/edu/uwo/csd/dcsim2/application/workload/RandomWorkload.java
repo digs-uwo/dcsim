@@ -9,8 +9,8 @@ public class RandomWorkload extends Workload {
 	double scaleFactor;
 	int workLevel = 0;
 	
-	public RandomWorkload(double scaleFactor, long stepSize) {
-		super();	
+	public RandomWorkload(Simulation simulation, double scaleFactor, long stepSize) {
+		super(simulation);	
 		
 		this.stepSize = stepSize;
 		this.scaleFactor = scaleFactor;
@@ -24,13 +24,13 @@ public class RandomWorkload extends Workload {
 	
 	@Override
 	protected double retrievePendingWork() {
-		return workLevel * Simulation.getInstance().getElapsedSeconds();
+		return workLevel * simulation.getElapsedSeconds();
 	}
 
 	@Override
 	protected long updateWorkLevel() {
 		workLevel = generateRandomWorkLevel();
-		return Simulation.getInstance().getSimulationTime() + stepSize;
+		return simulation.getSimulationTime() + stepSize;
 	}
 		
 	

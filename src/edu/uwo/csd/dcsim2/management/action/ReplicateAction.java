@@ -39,11 +39,11 @@ public class ReplicateAction implements ManagementAction {
 		return vmPlacementPolicy;
 	}
 	
-	public void execute(SimulationEntity triggeringEntity) {
+	public void execute(Simulation simulation, SimulationEntity triggeringEntity) {
 		VMAllocationRequest request = new VMAllocationRequest(vmDescription);
 		vmPlacementPolicy.submitVM(request);
 		
-		if (Simulation.getInstance().isRecordingMetrics())
+		if (simulation.isRecordingMetrics())
 			incrementReplicateCount(triggeringEntity);
 	}
 	

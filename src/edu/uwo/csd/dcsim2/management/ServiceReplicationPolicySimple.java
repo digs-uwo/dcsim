@@ -20,7 +20,8 @@ public class ServiceReplicationPolicySimple extends ManagementPolicy {
 	double scaleInThreshold;
 	VMPlacementPolicy vmPlacementPolicy;
 	
-	public ServiceReplicationPolicySimple(ArrayList<Service> services, long interval, double scaleOutThreshold, double scaleInThreshold, VMPlacementPolicy vmPlacementPolicy) {
+	public ServiceReplicationPolicySimple(Simulation simulation, ArrayList<Service> services, long interval, double scaleOutThreshold, double scaleInThreshold, VMPlacementPolicy vmPlacementPolicy) {
+		super(simulation);
 		this.services = services;
 		this.interval = interval;
 		this.scaleOutThreshold = scaleOutThreshold;
@@ -73,17 +74,17 @@ public class ServiceReplicationPolicySimple extends ManagementPolicy {
 		}
 		
 		for (ReplicateAction action : replicateActions) {
-			action.execute(this);
+			action.execute(simulation, this);
 		}
 		
 		for (ShutdownVmAction action : shutdownActions) {
-			action.execute(this);
+			action.execute(simulation, this);
 		}
 	}
 
 	@Override
 	public long getNextExecutionTime() {
-		return Simulation.getInstance().getSimulationTime() + interval;
+		return simulation.getSimulationTime() + interval;
 	}
 
 	@Override

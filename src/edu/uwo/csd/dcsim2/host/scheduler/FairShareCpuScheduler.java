@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
@@ -9,6 +10,10 @@ public class FairShareCpuScheduler extends CpuScheduler {
 	private double minShare;
 	private int nVms; //keeps track of the number of VMs that still have work to execute
 	
+	public FairShareCpuScheduler(Simulation simulation) {
+		super(simulation);
+	}
+
 	@Override
 	public void beginScheduling() {
 		nVms = getHost().getVMAllocations().size();

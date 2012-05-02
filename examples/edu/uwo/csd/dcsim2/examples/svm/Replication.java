@@ -33,13 +33,15 @@ public class Replication {
 //		Utility.setRandomSeed(4294062650326098795l);
 //		Utility.setRandomSeed(3901350559651978320l);
 		
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD();
+		DataCentreSimulation simulation = new DataCentreSimulation();
+		
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
-		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
+		simulation.addDatacentre(dc);
 		
 		//create hosts
-		ArrayList<Host> hostList = createHosts(100);
+		ArrayList<Host> hostList = createHosts(simulation, 100);
 		dc.addHosts(hostList);
 
 		//create services and VMs
@@ -49,15 +51,15 @@ public class Replication {
 
 		for (int i = 0; i < nService; ++i) {
 			int scale = (Math.abs(Utility.getRandom().nextInt()) % 4) + 2;
-			serviceList.add(createService("traces/clarknet", (int)(Utility.getRandom().nextDouble() * 200000000), scale));
+			serviceList.add(createService(simulation, "traces/clarknet", (int)(Utility.getRandom().nextDouble() * 200000000), scale));
 		}
 		for (int i = 0; i < nService; ++i) {
 			int scale = (Math.abs(Utility.getRandom().nextInt()) % 4) + 2;
-			serviceList.add(createService("traces/epa", (int)(Utility.getRandom().nextDouble() * 40000000), scale));
+			serviceList.add(createService(simulation, "traces/epa", (int)(Utility.getRandom().nextDouble() * 40000000), scale));
 		}
 		for (int i = 0; i < nService; ++i) {
 			int scale = (Math.abs(Utility.getRandom().nextInt()) % 4) + 2;
-			serviceList.add(createService("traces/sdsc", (int)(Utility.getRandom().nextDouble() * 40000000), scale));
+			serviceList.add(createService(simulation, "traces/sdsc", (int)(Utility.getRandom().nextDouble() * 40000000), scale));
 		}
 		
 //		for (int i = 0; i < 1; ++i) {
@@ -87,20 +89,20 @@ public class Replication {
 		logger.info("Start time: " + startTime + "ms");
 			
 		//run the simulation
-		Simulation.getInstance().run(864000000, 86400000); //10 days
-		//Simulation.getInstance().run(86400000, 0); //1 day
-		//Simulation.getInstance().run(3600000, 0); //1 hour
-		//Simulation.getInstance().run(600000, 0); //10 minutes 
+		simulation.run(864000000, 86400000); //10 days
+		//simulation.run(86400000, 0); //1 day
+		//simulation.run(3600000, 0); //1 hour
+		//simulation.run(600000, 0); //10 minutes 
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
 		
 	}
 	
-	public static Service createService(String fileName, long offset, int scale) {
+	public static Service createService(Simulation simulation, String fileName, long offset, int scale) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, 2700 * scale, offset); //scale to n replicas
+		Workload workload = new TraceWorkload(simulation, fileName, 2700 * scale, offset); //scale to n replicas
 		
 		int cores = 1; //requires 1 core
 		int coreCapacity = 3000;
@@ -115,17 +117,18 @@ public class Replication {
 
 	}
 	
-	public static ArrayList<Host> createHosts(int nHosts) {
+	public static ArrayList<Host> createHosts(Simulation simulation, int nHosts) {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL360G5E5450Host(
+					simulation,
 					new StaticOversubscribingCpuManager(500),
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
 					new StaticStorageManager(),
-					new FairShareCpuScheduler());
+					new FairShareCpuScheduler(simulation));
 						
 			hosts.add(host);
 		}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.*;
@@ -14,12 +15,12 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 	double targetThreshold;
 	double upperThreshold;
 	
-	public VMAllocationPolicyGreedy(DataCentre dc, long interval,
+	public VMAllocationPolicyGreedy(Simulation simulation, DataCentre dc, long interval,
 			long firstEvent,
 			double lowerThreshold,
 			double targetThreshold,
 			double upperThreshold) {
-		super(dc, interval, firstEvent);
+		super(simulation, dc, interval, firstEvent);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.targetThreshold = targetThreshold;
@@ -148,7 +149,7 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 		
 		//trigger migrations
 		for (MigrationAction migration : migrationList) {
-			migration.execute(this);
+			migration.execute(simulation, this);
 		}
 		
 	}

@@ -15,6 +15,7 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	
 	private static ArrayList<Workload> workloads = new ArrayList<Workload>();
 	
+	protected Simulation simulation;
 	private double totalWork = 0;
 	private double completedWork = 0;
 	private WorkConsumer workTarget;
@@ -53,18 +54,21 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 		}
 	}
 	
-	public Workload() {
+	public Workload(Simulation simulation) {
+		
+		this.simulation = simulation;
+		
 		//add to global list of workloads
 		workloads.add(this);
 		
 		//schedule initial update event
-		Simulation.getInstance().sendEvent(
+		simulation.sendEvent(
 				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, 0, this, this));
 	}
 	
 	@Override
 	public void addWork(double work) {
-		if (Simulation.getInstance().isRecordingMetrics()) {
+		if (simulation.isRecordingMetrics()) {
 			completedWork += work;
 			completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
 		}
@@ -75,14 +79,14 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	protected abstract double retrievePendingWork(); 
 	
 	public void update() {
-		if (workTarget != null && Simulation.getInstance().getLastUpdate() < Simulation.getInstance().getSimulationTime()) {
+		if (workTarget != null && simulation.getLastUpdate() < simulation.getSimulationTime()) {
 			double pendingWork = retrievePendingWork();
 			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
 			
 			currentIncomingWork = pendingWork;
 			currentCompletedWork = 0;
 			
-			if (Simulation.getInstance().isRecordingMetrics()) {
+			if (simulation.isRecordingMetrics()) {
 				totalWork += pendingWork;
 				totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
 			}
@@ -122,8 +126,8 @@ public abstract class Workload extends SimulationEntity implements WorkConsumer 
 	public void handleEvent(Event e) {
 		if (e.getType() == Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT) {
 			long nextEventTime = updateWorkLevel();
-			if (nextEventTime > Simulation.getInstance().getSimulationTime()) {
-				Simulation.getInstance().sendEvent(
+			if (nextEventTime > simulation.getSimulationTime()) {
+				simulation.sendEvent(
 						new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, nextEventTime, this, this));
 			}
 		}

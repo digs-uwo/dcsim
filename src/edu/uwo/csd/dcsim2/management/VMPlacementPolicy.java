@@ -9,10 +9,11 @@ import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class VMPlacementPolicy extends SimulationEntity {
 	
+	Simulation simulation;
 	DataCentre datacentre;
 	
-	public VMPlacementPolicy() {
-		
+	public VMPlacementPolicy(Simulation simulation) {
+		this.simulation = simulation;
 	}
 	
 	public void setDataCentre(DataCentre datacentre) {
@@ -47,9 +48,9 @@ public abstract class VMPlacementPolicy extends SimulationEntity {
 	protected void sendVM(VMAllocationRequest vmAllocationRequest, Host host) {
 		
 		if (host.getState() != Host.HostState.ON && host.getState() != Host.HostState.POWERING_ON) {
-			Simulation.getInstance().sendEvent(
+			simulation.sendEvent(
 					new Event(Host.HOST_POWER_ON_EVENT,
-							Simulation.getInstance().getSimulationTime(),
+							simulation.getSimulationTime(),
 							this,
 							host)
 					);

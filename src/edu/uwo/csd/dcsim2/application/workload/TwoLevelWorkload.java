@@ -9,8 +9,8 @@ public class TwoLevelWorkload extends Workload {
 	long switchTime;
 	double workPerSecond;
 	
-	public TwoLevelWorkload(double firstLevel, double secondLevel, long switchTime) {
-		super();
+	public TwoLevelWorkload(Simulation simulation, double firstLevel, double secondLevel, long switchTime) {
+		super(simulation);
 		
 		this.firstLevel = firstLevel;
 		this.secondLevel = secondLevel;
@@ -20,12 +20,12 @@ public class TwoLevelWorkload extends Workload {
 	
 	@Override
 	protected double retrievePendingWork() {
-		return workPerSecond * ((Simulation.getInstance().getSimulationTime() - Simulation.getInstance().getLastUpdate()) / 1000.0);
+		return workPerSecond * ((simulation.getSimulationTime() - simulation.getLastUpdate()) / 1000.0);
 	}
 
 	@Override
 	protected long updateWorkLevel() {
-		if (Simulation.getInstance().getSimulationTime() == switchTime) {
+		if (simulation.getSimulationTime() == switchTime) {
 			workPerSecond = secondLevel;
 			return 0;
 		} else {

@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim2.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
@@ -14,6 +15,10 @@ import edu.uwo.csd.dcsim2.vm.*;
  *
  */
 public class VMPlacementPolicyMBFD extends VMPlacementPolicy {
+
+	public VMPlacementPolicyMBFD(Simulation simulation) {
+		super(simulation);
+	}
 
 	@Override
 	public boolean submitVM(VMAllocationRequest vmAllocationRequest) {
