@@ -93,6 +93,15 @@ public abstract class Simulation implements SimulationEventListener {
 		}
 		
 		completeSimulation(duration);
+		outputMetrics();
+	}
+	
+	private void outputMetrics() {
+		for (Metric metric : metrics.values()) {
+			logger.info(metric.getName() +
+					" = " +
+					metric.getValue());
+		}
 	}
 	
 	public abstract void beginSimulation();
