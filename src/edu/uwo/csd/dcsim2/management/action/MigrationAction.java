@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.core.AggregateMetric;
 import edu.uwo.csd.dcsim2.core.Event;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEventListener;
+import edu.uwo.csd.dcsim2.core.metrics.AggregateMetric;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;

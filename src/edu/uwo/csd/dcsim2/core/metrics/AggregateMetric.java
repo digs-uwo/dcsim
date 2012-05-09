@@ -1,4 +1,6 @@
-package edu.uwo.csd.dcsim2.core;
+package edu.uwo.csd.dcsim2.core.metrics;
+
+import edu.uwo.csd.dcsim2.core.Simulation;
 
 public class AggregateMetric extends Metric {
 

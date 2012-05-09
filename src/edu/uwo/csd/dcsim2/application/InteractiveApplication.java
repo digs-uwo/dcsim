@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim2.application;
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.core.metrics.FractionalMetric;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 

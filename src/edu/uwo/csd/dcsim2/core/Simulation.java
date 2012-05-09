@@ -2,6 +2,8 @@ package edu.uwo.csd.dcsim2.core;
 
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim2.core.metrics.Metric;
+
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Properties;
