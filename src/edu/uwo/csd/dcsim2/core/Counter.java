@@ -8,6 +8,12 @@ public class Counter {
 		return val;
 	}
 	
+	public int getValueAndReset() {
+		int value = getValue();
+		reset();
+		return value;
+	}
+	
 	public void increment() {
 		++val;
 	}

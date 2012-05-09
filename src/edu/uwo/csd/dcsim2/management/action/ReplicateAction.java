@@ -9,23 +9,11 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class ReplicateAction implements ManagementAction {
 
-	private static Map<SimulationEventListener, Integer> replicateCount = new HashMap<SimulationEventListener, Integer>();
+	private static final String REPLICATE_COUNT_METRIC = "replicationCount";
 	
 	private VMDescription vmDescription;
 	private VMPlacementPolicy vmPlacementPolicy;
 	
-	private static void incrementReplicateCount(SimulationEventListener triggeringEntity) {
-		int count = 0;
-		if (replicateCount.containsKey(triggeringEntity)) {
-			count = replicateCount.get(triggeringEntity);
-		}
-		replicateCount.put(triggeringEntity, count + 1);
-	}
-
-	public static Map<SimulationEventListener, Integer> getReplicateCount() {
-		return replicateCount;
-	}
-
 	public ReplicateAction(VMDescription vmDescription, VMPlacementPolicy vmPlacementPolicy) {
 		this.vmDescription = vmDescription;
 		this.vmPlacementPolicy = vmPlacementPolicy;
@@ -43,8 +31,9 @@ public class ReplicateAction implements ManagementAction {
 		VMAllocationRequest request = new VMAllocationRequest(vmDescription);
 		vmPlacementPolicy.submitVM(request);
 		
-		if (simulation.isRecordingMetrics())
-			incrementReplicateCount(triggeringEntity);
+		if (simulation.isRecordingMetrics()) {
+			AggregateMetric.getSimulationMetric(simulation, REPLICATE_COUNT_METRIC).addValue(1);
+		}
 	}
 	
 }

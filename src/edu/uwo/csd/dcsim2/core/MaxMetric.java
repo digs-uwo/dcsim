@@ -8,10 +8,13 @@ public class MaxMetric extends Metric {
 		super(name);
 	}
 	
-	@Override
 	public void addValue(double val) {
 		if (val > max)
 			max = val;
+	}
+	
+	public void addCounterAndReset() {
+		addValue(getCounter().getValueAndReset());
 	}
 
 	@Override

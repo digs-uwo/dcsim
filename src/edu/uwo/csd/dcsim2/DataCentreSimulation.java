@@ -79,36 +79,9 @@ public class DataCentreSimulation extends Simulation {
 		}
 		logger.info("Simulation Time: " + simTime + simUnits);
 		logger.info("Recorded Time: " + recordedTime + simUnits);
+
 		
-		logger.info("Total Power [" + Utility.roundDouble((Host.getGlobalPowerConsumed() / 3600000d), 3) + "kWh]");
-		logger.info("Average CPU Utilization [" + Utility.roundDouble((Host.getGlobalAverageUtilization() * 100), 3) + "]");
-		logger.info("Host-Hours [" + Utility.roundDouble((Host.getGlobalTimeActive() / 3600000d), 3) + "]");
-		logger.info("Average Hosts [" + Utility.roundDouble(((double)Host.getGlobalTimeActive() / (double)this.getRecordingDuration()), 3) + "]");
-		logger.info("Min Hosts [" + Host.getMinActiveHosts() + "]");
-		logger.info("Max Hosts [" + Host.getMaxActiveHosts() + "]");
-		
-		double underProvision;
-		underProvision = (Application.getGlobalResourceDemand().getCpu() - Application.getGlobalResourceUsed().getCpu()) / Application.getGlobalResourceDemand().getCpu();
-		logger.info("CPU Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
-//		underProvision = (Application.getGlobalResourceDemand().getBandwidth() - Application.getGlobalResourceUsed().getBandwidth()) / Application.getGlobalResourceDemand().getBandwidth();
-//		logger.info("BW Underprovision [" + Utility.roundDouble((underProvision * 100), 3) + "%]");
-		
-		for (SimulationEventListener simEntity : MigrationAction.getMigrationCount().keySet()) {
-			logger.info(simEntity.getClass().getSimpleName() + " migrations: " + MigrationAction.getMigrationCount().get(simEntity));
-		}
-		
-		for (SimulationEventListener simEntity : ReplicateAction.getReplicateCount().keySet()) {
-			logger.info(simEntity.getClass().getSimpleName() + " replications: " + ReplicateAction.getReplicateCount().get(simEntity));
-		}
-		
-		for (SimulationEventListener simEntity : ShutdownVmAction.getShutdownCount().keySet()) {
-			logger.info(simEntity.getClass().getSimpleName() + " shutdown vm: " + ShutdownVmAction.getShutdownCount().get(simEntity));
-		}
-		
-		//logger.info("Total Work [" + Utility.roundDouble(Workload.getGlobalCompletedWork(), 3) + "/" + Utility.roundDouble(Workload.getGlobalTotalWork(), 3) + "]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
-		logger.info("Total Work Missed [" + Utility.roundDouble((1 - (Workload.getGlobalCompletedWork() / Workload.getGlobalTotalWork())) * 100, 3) + "%]"); //WARNING: this metric is only meaningful if each incoming work unit is identical!
-		logger.info("SLA Violation: " + Application.getGlobalSLAViolation() + "%");
-	
+			
 	}
 
 }

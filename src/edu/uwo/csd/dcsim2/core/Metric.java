@@ -17,15 +17,6 @@ public abstract class Metric {
 		return counter;
 	}
 	
-	public void addCounterValue() {
-		addValue(counter.getValue());
-	}
-	
-	public void addCounterAndReset() {
-		addCounterValue();
-		counter.reset();
-	}
-	
 	public void incrementCounter() {
 		counter.increment();
 	}
@@ -33,8 +24,7 @@ public abstract class Metric {
 	public void resetCounter() {
 		counter.reset();
 	}
-	
-	public abstract void addValue(double val);
+
 	public abstract double getValue();
 	
 }

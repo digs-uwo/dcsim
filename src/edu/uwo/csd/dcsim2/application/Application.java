@@ -6,11 +6,10 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class Application {
 
-	protected static VirtualResources globalResourceDemand = new VirtualResources();
-	protected static VirtualResources globalResourceUsed = new VirtualResources();
-	protected static double globalIncomingWork = 0;
-	protected static double globalSlaViolatedWork = 0;
-
+	public static final String SLA_VIOLATION_METRIC = "slaViolation";
+	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision";
+	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; 
+	
 	protected VM vm;
 	protected Simulation simulation;
 	
@@ -44,6 +43,8 @@ public abstract class Application {
 	public abstract double getTotalSLAViolation();
 	public abstract double getSLAViolatedWork();
 	public abstract double getTotalSLAViolatedWork();
+	public abstract double getMigrationPenalty();
+	public abstract double getTotalMigrationPenalty();
 	
 	public abstract VirtualResources getResourceDemand();
 	public abstract VirtualResources getResourceInUse();
@@ -52,16 +53,5 @@ public abstract class Application {
 	
 	public abstract void updateMetrics();
 	
-	public static VirtualResources getGlobalResourceDemand() {
-		return globalResourceDemand;
-	}
-	
-	public static VirtualResources getGlobalResourceUsed() {
-		return globalResourceUsed;
-	}
-	
-	public static double getGlobalSLAViolation() {
-		return Utility.roundDouble((globalSlaViolatedWork / globalIncomingWork) * 100, 3); 
-	}
 	
 }

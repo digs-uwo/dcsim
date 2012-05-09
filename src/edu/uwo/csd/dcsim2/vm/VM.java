@@ -25,7 +25,7 @@ public class VM implements SimulationEventListener {
 	VirtualResources resourcesConsumed; //the resources consumed by the VM over the last time interval
 	
 	Application application;
-
+	
 	public VM(Simulation simulation, VMDescription vmDescription, Application application) {
 		this.simulation = simulation;
 		this.id = nextId++;
@@ -84,6 +84,7 @@ public class VM implements SimulationEventListener {
 	}
 
 	public void completeScheduling() {
+		
 		resourcesInUse = new VirtualResources();
 		
 		long elapsedTime = simulation.getElapsedTime();

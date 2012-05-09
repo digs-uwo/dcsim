@@ -9,12 +9,15 @@ public class AverageMetric extends Metric {
 		super(name);
 	}
 	
-	@Override
 	public void addValue(double val) {
 		total += val;
 		++count;
 	}
 
+	public void addCounterAndReset() {
+		addValue(getCounter().getValueAndReset());
+	}
+	
 	@Override
 	public double getValue() {
 		return total / count;

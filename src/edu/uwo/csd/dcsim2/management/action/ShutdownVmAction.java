@@ -10,22 +10,10 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class ShutdownVmAction implements ManagementAction {
 
-	private static Map<SimulationEventListener, Integer> shutdownCount = new HashMap<SimulationEventListener, Integer>();
+	private static final String SHUTDOWN_COUNT_METRIC = "shutdownCount";
 	
 	private VM vm;
 	
-	private static void incrementShutdownCount(SimulationEventListener triggeringEntity) {
-		int count = 0;
-		if (shutdownCount.containsKey(triggeringEntity)) {
-			count = shutdownCount.get(triggeringEntity);
-		}
-		shutdownCount.put(triggeringEntity, count + 1);
-	}
-
-	public static Map<SimulationEventListener, Integer> getShutdownCount() {
-		return shutdownCount;
-	}
-
 	public ShutdownVmAction(VM vm) {
 		this.vm = vm;
 	}
@@ -45,8 +33,9 @@ public class ShutdownVmAction implements ManagementAction {
 		host.deallocate(vmAllocation);
 		vm.stopApplication();
 		
-		if (simulation.isRecordingMetrics())
-			incrementShutdownCount(triggeringEntity);
+		if (simulation.isRecordingMetrics()) {
+			AggregateMetric.getSimulationMetric(simulation, SHUTDOWN_COUNT_METRIC).addValue(1);
+		}
 		
 		//if the host will no longer contain any VMs, instruct it to shut down
 		if (host.getVMAllocations().size() == 0) {

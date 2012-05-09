@@ -36,7 +36,7 @@ public class Host implements SimulationEventListener {
 	public static final String MAX_ACTIVE_METRIC = "maxActiveHosts";
 	public static final String POWER_CONSUMED_METRIC = "powerConsumed";
 	public static final String AVERAGE_UTILIZATION_METRIC = "avgHostUtil";
-	public static final String HOST_SECONDS_METRIC = "hostSeconds";
+	public static final String HOST_TIME_METRIC = "hostTime";
 	
 	private static int nextId = 1;
 	
@@ -71,10 +71,6 @@ public class Host implements SimulationEventListener {
 	private long timeActive = 0; //time this host has spent active (ON)
 	private double utilizationSum = 0; //used to calculate average utilization
 	private double powerConsumed = 0; //total power consumed by the host
-	
-	private static long globalTimeActive = 0; //Host time active for all hosts in the simulation
-	private static double globalUtilizationSum = 0; //used to calculate average utilization for all hosts
-	private static double globalPowerConsumed = 0; //total power consumed by all hosts
 	
 	private static long currentActiveHosts = 0;
 	private static long minActiveHosts = Long.MAX_VALUE;
@@ -604,21 +600,18 @@ public class Host implements SimulationEventListener {
 			
 			//Collect active host time metric
 			timeActive += simulation.getElapsedTime();
-			globalTimeActive += simulation.getElapsedTime();
 			
-			AggregateMetric.getSimulationMetric(simulation, HOST_SECONDS_METRIC).addValue(simulation.getElapsedSeconds());
+			AggregateMetric.getSimulationMetric(simulation, HOST_TIME_METRIC).addValue(simulation.getElapsedSeconds());
 
 			//Collect average host utilization metric
 			utilizationSum += getCpuManager().getCpuUtilization() * simulation.getElapsedTime();
-			globalUtilizationSum += getCpuManager().getCpuUtilization() * simulation.getElapsedTime();
 
-			AverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).addValue(getCpuManager().getCpuUtilization() * simulation.getElapsedTime());
+			WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).addValue(getCpuManager().getCpuUtilization(), simulation.getElapsedTime());
 			
 		}
 		
 		//Collect power consumed metric
 		powerConsumed += getCurrentPowerConsumption() * simulation.getElapsedSeconds();
-		globalPowerConsumed += getCurrentPowerConsumption() * simulation.getElapsedSeconds();
 		
 		AggregateMetric.getSimulationMetric(simulation, POWER_CONSUMED_METRIC).addValue(getCurrentPowerConsumption() * simulation.getElapsedSeconds());
 		
@@ -779,30 +772,6 @@ public class Host implements SimulationEventListener {
 	
 	public double getAverageUtilization() {
 		return utilizationSum / timeActive;
-	}
-	
-	/*
-	 * Static accessor methods
-	 */
-	
-	public static long getGlobalTimeActive() {
-		return globalTimeActive;
-	}
-	
-	public static double getGlobalAverageUtilization() {
-		return globalUtilizationSum / globalTimeActive;
-	}
-	
-	public static double getGlobalPowerConsumed() {
-		return globalPowerConsumed;
-	}
-	
-	public static long getMinActiveHosts() {
-		return minActiveHosts;
-	}
-	
-	public static long getMaxActiveHosts() {
-		return maxActiveHosts;
 	}
 
 }

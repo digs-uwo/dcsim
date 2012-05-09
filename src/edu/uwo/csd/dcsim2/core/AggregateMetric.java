@@ -8,9 +8,12 @@ public class AggregateMetric extends Metric {
 		super(name);
 	}
 	
-	@Override
 	public void addValue(double val) {
 		value += val;
+	}
+	
+	public void addCounterAndReset() {
+		addValue(getCounter().getValueAndReset());
 	}
 	
 	@Override

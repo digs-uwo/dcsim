@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.application;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.core.Simulation;
+import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
@@ -29,6 +29,10 @@ public abstract class InteractiveApplication extends Application {
 	private double totalIncomingWork = 0;
 	private double slaViolatedWork = 0;
 	private double totalSlaViolatedWork = 0;
+	private double migrationPenalty = 0;
+	private double totalMigrationPenalty = 0;
+	
+	private long x = -1;
 	
 	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier) {
 		super(simulation);
@@ -67,6 +71,7 @@ public abstract class InteractiveApplication extends Application {
 		//set up sla metrics
 		incomingWork = 0;
 		slaViolatedWork = 0;
+		migrationPenalty = 0;
 	}
 
 	public void updateResourceDemand() {
@@ -144,7 +149,7 @@ public abstract class InteractiveApplication extends Application {
 	 * Called once at the end of scheduling
 	 */
 	public void completeScheduling() {
-
+		
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
 		resourceDemand = new VirtualResources();
 		resourceDemand.setCpu(resourcesDemanded.getCpu() / (simulation.getElapsedSeconds()));
@@ -159,12 +164,16 @@ public abstract class InteractiveApplication extends Application {
 		resourceInUse.setStorage(resourcesUsed.getStorage());
 		
 		slaViolatedWork = workRemaining;
+		
+		
 		if (vm.isMigrating()) {
-			slaViolatedWork += (incomingWork - workRemaining) * Double.parseDouble(simulation.getProperty("vmMigrationSLAPenalty"));
+			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(simulation.getProperty("vmMigrationSLAPenalty"));
+			slaViolatedWork += migrationPenalty;
 		}
 		
 		totalIncomingWork += incomingWork;
 		totalSlaViolatedWork += slaViolatedWork;
+		totalMigrationPenalty += migrationPenalty;
 		
 		//clear work remaining (i.e. drop requests that could not be fulfilled)
 		workRemaining = 0;
@@ -172,15 +181,15 @@ public abstract class InteractiveApplication extends Application {
 	
 	@Override
 	public void updateMetrics() {
+		
 		//add resource demand and use for this time interval to total values
 		totalResourceDemand = totalResourceDemand.add(resourcesDemanded);
 		totalResourceUsed = totalResourceUsed.add(resourcesUsed);
 		
-		globalResourceDemand = globalResourceDemand.add(resourcesDemanded);
-		globalResourceUsed = globalResourceUsed.add(resourcesUsed);
-		
-		globalIncomingWork += incomingWork;
-		globalSlaViolatedWork += slaViolatedWork;
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addValue(slaViolatedWork, incomingWork);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addValue(slaViolatedWork - migrationPenalty, incomingWork);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addValue(migrationPenalty, incomingWork);
+
 	}
 
 	protected abstract VirtualResources calculateRequiredResources(double work);
@@ -232,6 +241,16 @@ public abstract class InteractiveApplication extends Application {
 	@Override
 	public double getTotalSLAViolatedWork() {
 		return totalSlaViolatedWork;
+	}
+	
+	@Override	
+	public double getMigrationPenalty() {
+		return migrationPenalty;
+	}
+	
+	@Override	
+	public double getTotalMigrationPenalty() {
+		return totalMigrationPenalty;
 	}
 	
 	protected class CompletedWork {

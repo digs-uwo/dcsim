@@ -8,10 +8,13 @@ public class MinMetric extends Metric {
 		super(name);
 	}
 	
-	@Override
 	public void addValue(double val) {
 		if (val < min)
 			min = val;
+	}
+	
+	public void addCounterAndReset() {
+		addValue(getCounter().getValueAndReset());
 	}
 
 	@Override

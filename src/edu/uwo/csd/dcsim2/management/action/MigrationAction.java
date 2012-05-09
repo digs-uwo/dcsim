@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim2.core.AggregateMetric;
 import edu.uwo.csd.dcsim2.core.Event;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEventListener;
@@ -14,26 +15,14 @@ import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
 
 public class MigrationAction implements ManagementAction {
 	
-	private static Logger logger = Logger.getLogger(MigrationAction.class);
+	private static final String MIGRATION_COUNT_METRIC = "migrationCount";
 	
-	private static Map<SimulationEventListener, Integer> migrationCount = new HashMap<SimulationEventListener, Integer>();
+	private static Logger logger = Logger.getLogger(MigrationAction.class);
 
 	private HostStub source;
 	private HostStub target;
 	private VmStub vm;
-	
-	private static void incrementMigrationCount(SimulationEventListener triggeringEntity) {
-		int count = 0;
-		if (migrationCount.containsKey(triggeringEntity)) {
-			count = migrationCount.get(triggeringEntity);
-		}
-		migrationCount.put(triggeringEntity, count + 1);
-	}
-	
-	public static Map<SimulationEventListener, Integer> getMigrationCount() {
-		return migrationCount;
-	}
-	
+		
 	public MigrationAction(HostStub source, HostStub target, VmStub vm) {
 		this.source = source;
 		this.target = target;
@@ -70,8 +59,9 @@ public class MigrationAction implements ManagementAction {
 		
 		target.getHost().sendMigrationEvent(vmAllocationRequest, vm.getVM(), source.getHost());
 		
-		if (simulation.isRecordingMetrics())
-			incrementMigrationCount(triggeringEntity);
+		if (simulation.isRecordingMetrics()) {
+			AggregateMetric.getSimulationMetric(simulation, MIGRATION_COUNT_METRIC).addValue(1);
+		}
 		
 		//if the source host will no longer contain any VMs, instruct it to shut down
 		if (source.getVms().size() == 0) {

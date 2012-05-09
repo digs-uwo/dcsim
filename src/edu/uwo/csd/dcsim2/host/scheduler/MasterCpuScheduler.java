@@ -27,8 +27,7 @@ public class MasterCpuScheduler {
 		ArrayList<VMAllocation> vmList = new ArrayList<VMAllocation>();
 		
 		for (CpuScheduler cpuScheduler : cpuSchedulers) {
-			//if (cpuScheduler.getHost().getState() == Host.HostState.ON)
-				vmList.addAll(cpuScheduler.getHost().getVMAllocations());
+			vmList.addAll(cpuScheduler.getHost().getVMAllocations());
 		}
 		Collections.sort(vmList, new VMAllocationSchedulingComparator());
 		
@@ -62,7 +61,8 @@ public class MasterCpuScheduler {
 			notDone = false;
 			
 			for (CpuScheduler cpuScheduler : cpuSchedulers) {
-				cpuScheduler.beginRound();
+				if (cpuScheduler.getHost().getState() == Host.HostState.ON)
+					cpuScheduler.beginRound();
 			}
 			
 			//execute VMs
@@ -79,7 +79,8 @@ public class MasterCpuScheduler {
 			}
 			
 			for (CpuScheduler cpuScheduler : cpuSchedulers) {
-				cpuScheduler.endRound();
+				if (cpuScheduler.getHost().getState() == Host.HostState.ON)
+					cpuScheduler.endRound();
 			}
 			
 		} while (notDone);
@@ -94,8 +95,9 @@ public class MasterCpuScheduler {
 		
 		//update the resourcesInUse for each VM
 		for (VMAllocation vmAllocation : vmList) {
-			if (vmAllocation.getVm() != null)			
+			if (vmAllocation.getVm() != null) {		
 				vmAllocation.getVm().completeScheduling();
+			}
 		}
 
 	}

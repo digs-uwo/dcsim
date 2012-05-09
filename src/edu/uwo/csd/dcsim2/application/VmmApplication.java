@@ -188,6 +188,17 @@ public class VmmApplication extends Application {
 	@Override
 	public double getTotalSLAViolatedWork() {
 		return 0;
+	}
+	
+	@Override
+	public double getMigrationPenalty() {
+		return 0;
+	}
+	
+	@Override
+	public double getTotalMigrationPenalty() {
+		return 0;
 	}	
+
 
 }
