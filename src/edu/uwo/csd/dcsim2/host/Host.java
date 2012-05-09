@@ -7,11 +7,7 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
-import edu.uwo.csd.dcsim2.core.metrics.AggregateMetric;
-import edu.uwo.csd.dcsim2.core.metrics.AverageMetric;
-import edu.uwo.csd.dcsim2.core.metrics.MaxMetric;
-import edu.uwo.csd.dcsim2.core.metrics.MinMetric;
-import edu.uwo.csd.dcsim2.core.metrics.WeightedAverageMetric;
+import edu.uwo.csd.dcsim2.core.metrics.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -151,6 +147,12 @@ public class Host implements SimulationEventListener {
 
 		//set default state
 		state = HostState.ON;
+		
+		//initialize metric output formatting
+		AggregateMetric.getSimulationMetric(simulation, POWER_CONSUMED_METRIC).initializeOutputFormatter(new PowerFormatter());
+		AggregateMetric.getSimulationMetric(simulation, HOST_TIME_METRIC).initializeOutputFormatter(new TimeFormatter(TimeFormatter.TimeUnit.SECONDS, TimeFormatter.TimeUnit.HOURS));
+		WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
+		
 	}
 	
 	@Override

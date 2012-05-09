@@ -102,7 +102,7 @@ public abstract class Simulation implements SimulationEventListener {
 		for (Metric metric : metrics.values()) {
 			logger.info(metric.getName() +
 					" = " +
-					metric.getValue());
+					metric.toString(3));
 		}
 	}
 	

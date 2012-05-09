@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim2.application;
 
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
+import edu.uwo.csd.dcsim2.core.metrics.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class Application {
@@ -15,6 +15,10 @@ public abstract class Application {
 	
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
+		
+		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
+		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_UNDERPROVISION_METRIC).initializeOutputFormatter(new PercentageFormatter());
+		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).initializeOutputFormatter(new PercentageFormatter());
 	}
 	
 	public VM getVM() {
