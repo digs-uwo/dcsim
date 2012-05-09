@@ -69,7 +69,7 @@ public class DataCentreSimulation extends Simulation {
 		}
 		
 		if (this.isRecordingMetrics())
-			Host.updateGlobalMetrics(this);
+			Host.updateSimulationScopeMetrics(this);
 
 	}
 

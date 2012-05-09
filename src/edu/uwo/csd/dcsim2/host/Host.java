@@ -628,21 +628,13 @@ public class Host implements SimulationEventListener {
 		}
 	}
 	
-	public static void updateGlobalMetrics(Simulation simulation) {
+	public static void updateSimulationScopeMetrics(Simulation simulation) {
 		
 		//Collect Active Host metrics
 		AverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).addCounterAndReset();
 		MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).addCounterAndReset();
 		MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).addCounterAndReset();
-		
-		
-		if (currentActiveHosts < minActiveHosts) {
-			minActiveHosts = currentActiveHosts;
-		}
-		if (currentActiveHosts > maxActiveHosts) {
-			maxActiveHosts = currentActiveHosts;
-		}
-		currentActiveHosts = 0;
+
 	}
 
 	//ACCESSOR & MUTATOR METHODS
