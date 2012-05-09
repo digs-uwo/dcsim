@@ -32,16 +32,16 @@ public abstract class Application {
 	/*
 	 * Called once at the beginning of scheduling
 	 */
-	public abstract void beginScheduling();
+	public abstract void prepareExecution();
 	
 	public abstract void updateResourceDemand();
 	
-	public abstract VirtualResources runApplication(VirtualResources resourcesAvailable);
+	public abstract VirtualResources execute(VirtualResources resourcesAvailable);
 
 	/*
 	 * Called once at the end of scheduling
 	 */
-	public abstract void completeScheduling();
+	public abstract void completeExecution();
 	
 	public abstract double getSLAViolation();
 	public abstract double getTotalSLAViolation();

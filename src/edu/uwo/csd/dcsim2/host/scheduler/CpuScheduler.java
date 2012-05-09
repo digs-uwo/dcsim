@@ -17,7 +17,6 @@ public abstract class CpuScheduler {
 	public CpuScheduler(Simulation simulation) {
 		this.simulation = simulation;
 		
-		MasterCpuScheduler.getMasterCpuScheduler().getCpuSchedulers().add(this);
 		state = CpuSchedulerState.READY;
 	}
 	

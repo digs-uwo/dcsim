@@ -10,7 +10,6 @@ import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEventListener;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.host.scheduler.MasterCpuScheduler;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.action.ReplicateAction;
 import edu.uwo.csd.dcsim2.management.action.ShutdownVmAction;
@@ -20,9 +19,25 @@ public class DataCentreSimulation extends Simulation {
 	private static Logger logger = Logger.getLogger(DataCentreSimulation.class);
 	
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
-
+	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector();
+	
 	public void addDatacentre(DataCentre dc) {
 		datacentres.add(dc);
+	}
+	
+	private ArrayList<Host> getHostList() {
+		
+		int nHosts = 0;
+		for (DataCentre dc : datacentres)
+			nHosts += dc.getHosts().size();
+		
+		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
+		
+		for (DataCentre dc : datacentres) {
+			hosts.addAll(dc.getHosts());
+		}
+		
+		return hosts;
 	}
 	
 	@Override
@@ -38,7 +53,7 @@ public class DataCentreSimulation extends Simulation {
 		Workload.updateAllWorkloads();
 		
 		//schedule cpu
-		MasterCpuScheduler.getMasterCpuScheduler().scheduleCpu();
+		vmExecutionDirector.execute(getHostList());
 		
 		for (DataCentre dc : datacentres) {
 			if (this.isRecordingMetrics())
@@ -48,9 +63,7 @@ public class DataCentreSimulation extends Simulation {
 		
 		if (this.isRecordingMetrics())
 			Host.updateGlobalMetrics(this);
-		
-		//finalize workloads (print logs, calculate stats)
-		//Workload.logAllWorkloads();
+
 	}
 
 	@Override

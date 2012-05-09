@@ -45,7 +45,7 @@ public class VmmApplication extends Application {
 	}
 	
 	@Override
-	public void beginScheduling() {
+	public void prepareExecution() {
 		long elapsedTime = simulation.getElapsedTime();
 		
 		//reset the resource demand and consumption values for the current interval
@@ -84,7 +84,7 @@ public class VmmApplication extends Application {
 	}
 
 	@Override
-	public VirtualResources runApplication(VirtualResources resourcesAvailable) {
+	public VirtualResources execute(VirtualResources resourcesAvailable) {
 		VirtualResources resourcesConsumed = new VirtualResources();
 		
 		//consume cpu
@@ -114,7 +114,7 @@ public class VmmApplication extends Application {
 	}
 	
 	@Override
-	public void completeScheduling() {
+	public void completeExecution() {
 		//at this point, no resources should be remaining to run
 		if (resourcesRemaining.getCpu() != 0 || resourcesRemaining.getBandwidth() != 0) {
 			throw new RuntimeException(simulation.getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRemaining.getCpu() + "], BW [" + resourcesRemaining.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());

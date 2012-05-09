@@ -36,7 +36,7 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 	
 	@Override
 	public void schedulePrivDomain(VMAllocation privDomainAllocation) {
-		double cpuConsumed = privDomainAllocation.getVm().processWork(cpuAllocations.get(privDomainAllocation));
+		double cpuConsumed = privDomainAllocation.getVm().execute(cpuAllocations.get(privDomainAllocation));
 
 		consumeAvailableCpu(cpuConsumed);
 	}
@@ -50,7 +50,7 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 	public boolean processVM(VMAllocation vmAllocation) {
 		
 		double cpuAllocated = cpuAllocations.get(vmAllocation);
-		double cpuConsumed = vmAllocation.getVm().processWork(cpuAllocated);
+		double cpuConsumed = vmAllocation.getVm().execute(cpuAllocated);
 		
 		if (cpuConsumed == 0)
 			return false;

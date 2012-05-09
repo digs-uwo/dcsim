@@ -26,7 +26,7 @@ public class FairShareCpuScheduler extends CpuScheduler {
 	@Override
 	public void schedulePrivDomain(VMAllocation privDomainAllocation) {
 		//schedule privileged domain as much CPU as it requires (takes priority over all other VMs)
-		double cpuConsumed = privDomainAllocation.getVm().processWork(getAvailableCpu()) ;
+		double cpuConsumed = privDomainAllocation.getVm().execute(getAvailableCpu()) ;
 		
 		consumeAvailableCpu(cpuConsumed);
 	}
@@ -44,7 +44,7 @@ public class FairShareCpuScheduler extends CpuScheduler {
 		
 		double cpuAvail = Math.min(roundCpuShare, getAvailableCpu()); //overcome rounding errors that allow sightly more CPU to be used than available
 		
-		double cpuConsumed = vmAllocation.getVm().processWork(cpuAvail);
+		double cpuConsumed = vmAllocation.getVm().execute(cpuAvail);
 		
 		if (cpuConsumed == 0) {
 			--nVms; //once a VM does not execute any work, it will no longer have any work for this interval, due to the order in which dependent VMs are scheduled by the master scheduler

@@ -38,7 +38,7 @@ public class VM implements SimulationEventListener {
 		vmAllocation = null;
 	}
 	
-	public void beginScheduling() {
+	public void prepareExecution() {
 		resourcesAvailable = new VirtualResources();
 		
 		long timeElapsed = simulation.getElapsedTime();
@@ -57,10 +57,10 @@ public class VM implements SimulationEventListener {
 		//calculate a cap on the maximum CPU this VM could physically use
 		maxCpuAvailable = vmDescription.getCores() * vmAllocation.getHost().getMaxCoreCapacity() * (timeElapsed / 1000.0);
 		
-		application.beginScheduling();
+		application.prepareExecution();
 	}
 	
-	public double processWork(double cpuAvailable) {
+	public double execute(double cpuAvailable) {
 		
 		//ensure that the VM does not use more CPU than is possible for it to use
 		cpuAvailable = Math.min(cpuAvailable, maxCpuAvailable);
@@ -72,7 +72,7 @@ public class VM implements SimulationEventListener {
 		application.updateResourceDemand();
 		
 		//instruct the application to process work with available resources
-		VirtualResources newResourcesConsumed = application.runApplication(resourcesAvailable);
+		VirtualResources newResourcesConsumed = application.execute(resourcesAvailable);
 		
 		resourcesConsumed = resourcesConsumed.add(newResourcesConsumed);
 		
@@ -83,7 +83,7 @@ public class VM implements SimulationEventListener {
 		return newResourcesConsumed.getCpu();
 	}
 
-	public void completeScheduling() {
+	public void completeExecution() {
 		
 		resourcesInUse = new VirtualResources();
 		
@@ -98,7 +98,7 @@ public class VM implements SimulationEventListener {
 		//update the resource demand of the application
 		application.updateResourceDemand();
 		
-		application.completeScheduling();
+		application.completeExecution();
 	}
 	
 	public void startApplication() {

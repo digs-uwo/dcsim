@@ -53,7 +53,7 @@ public abstract class InteractiveApplication extends Application {
 	/*
 	 * Called once at the beginning of scheduling
 	 */
-	public void beginScheduling() {
+	public void prepareExecution() {
 		//reset the resource demand and consumption values for the current interval
 		resourcesDemanded = new VirtualResources();
 		resourcesUsed = new VirtualResources();
@@ -87,7 +87,7 @@ public abstract class InteractiveApplication extends Application {
 		}
 	}
 	
-	public VirtualResources runApplication(VirtualResources resourcesAvailable) {
+	public VirtualResources execute(VirtualResources resourcesAvailable) {
 
 		VirtualResources resourcesConsumed = new VirtualResources();
 		
@@ -149,7 +149,7 @@ public abstract class InteractiveApplication extends Application {
 	/*
 	 * Called once at the end of scheduling
 	 */
-	public void completeScheduling() {
+	public void completeExecution() {
 		
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
 		resourceDemand = new VirtualResources();
