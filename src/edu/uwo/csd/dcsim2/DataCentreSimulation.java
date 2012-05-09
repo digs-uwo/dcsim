@@ -1,28 +1,34 @@
 package edu.uwo.csd.dcsim2;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.application.Application;
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.SimulationEventListener;
 import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.management.action.MigrationAction;
-import edu.uwo.csd.dcsim2.management.action.ReplicateAction;
-import edu.uwo.csd.dcsim2.management.action.ShutdownVmAction;
 
 public class DataCentreSimulation extends Simulation {
 
 	private static Logger logger = Logger.getLogger(DataCentreSimulation.class);
 	
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
+	private Set<Workload> workloads = new HashSet<Workload>();
 	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector();
 	
 	public void addDatacentre(DataCentre dc) {
 		datacentres.add(dc);
+	}
+	
+	public void addWorkload(Workload workload) {
+		workloads.add(workload);
+	}
+	
+	public void removeWorkload(Workload workload) {
+		workloads.remove(workload);
 	}
 	
 	private ArrayList<Host> getHostList() {
@@ -49,8 +55,9 @@ public class DataCentreSimulation extends Simulation {
 
 	@Override
 	public void updateSimulation(long simulationTime) {
-		//update workloads
-		Workload.updateAllWorkloads();
+				
+		for (Workload workload : workloads)
+			workload.update();
 		
 		//schedule cpu
 		vmExecutionDirector.execute(getHostList());
@@ -92,9 +99,7 @@ public class DataCentreSimulation extends Simulation {
 		}
 		logger.info("Simulation Time: " + simTime + simUnits);
 		logger.info("Recorded Time: " + recordedTime + simUnits);
-
-		
-			
+	
 	}
 
 }

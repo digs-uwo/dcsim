@@ -1,7 +1,5 @@
 package edu.uwo.csd.dcsim2.application.workload;
 
-import java.util.ArrayList;
-
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.application.WorkConsumer;
@@ -13,8 +11,6 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	
 	public static final int WORKLOAD_UPDATE_WORKLEVEL_EVENT = 1;
 	
-	private static ArrayList<Workload> workloads = new ArrayList<Workload>();
-	
 	protected Simulation simulation;
 	private double totalWork = 0;
 	private double completedWork = 0;
@@ -23,43 +19,9 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	private double currentIncomingWork = 0;
 	private double currentCompletedWork = 0;
 	
-	public static void updateAllWorkloads() {
-		for (Workload workload : workloads) {
-			workload.update();
-		}
-	}
-	
-	public static double getGlobalTotalWork() {
-		double totalWork = 0;
-		
-		for (Workload workload : workloads)
-			totalWork += workload.getTotalWork();
-		
-		return totalWork;
-	}
-	
-	public static double getGlobalCompletedWork() {
-		double completedWork = 0;
-		
-		for (Workload workload : workloads) {
-			completedWork += workload.getCompletedWork();
-		}
-		
-		return completedWork;
-	}
-	
-	public static void logAllWorkloads() {
-		for (Workload workload : workloads) {
-			workload.logCompleted();
-		}
-	}
-	
 	public Workload(Simulation simulation) {
 		
 		this.simulation = simulation;
-		
-		//add to global list of workloads
-		workloads.add(this);
 		
 		//schedule initial update event
 		simulation.sendEvent(

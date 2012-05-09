@@ -6,15 +6,10 @@ import java.util.Collections;
 
 import org.apache.log4j.Logger;
 
-import edu.uwo.csd.dcsim2.DataCentre;
-import edu.uwo.csd.dcsim2.application.Service;
-import edu.uwo.csd.dcsim2.application.SingleTierWebService;
-import edu.uwo.csd.dcsim2.application.WebServerTier;
-import edu.uwo.csd.dcsim2.application.workload.PlanetLabTraceWorkload;
-import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim2.application.workload.Workload;
-import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
+import edu.uwo.csd.dcsim2.*;
+import edu.uwo.csd.dcsim2.application.*;
+import edu.uwo.csd.dcsim2.application.workload.*;
+import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.model.*;
@@ -84,7 +79,7 @@ public class SVMHelper {
 		return hosts;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createVmList(Simulation simulation, boolean allocAvg) {
+	public static ArrayList<VMAllocationRequest> createVmList(DataCentreSimulation simulation, boolean allocAvg) {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
 		
@@ -114,10 +109,12 @@ public class SVMHelper {
 	}
 	
 
-	private static Service createService(Simulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
+	private static Service createService(DataCentreSimulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
 		
 		//create workload (external)
 		Workload workload = new TraceWorkload(simulation, fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
+		simulation.addWorkload(workload);
+		
 		
 		int bandwidth = 12800; //100 Mb/s
 		long storage = 1024; //1GB
