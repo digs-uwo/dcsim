@@ -6,7 +6,6 @@ import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.host.scheduler.VMAllocationSchedulingComparator;
-import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler.CpuSchedulerState;
 
 public final class VmExecutionDirector {
 		

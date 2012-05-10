@@ -8,7 +8,6 @@ import org.apache.log4j.*;
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
-import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class StaticPeak {

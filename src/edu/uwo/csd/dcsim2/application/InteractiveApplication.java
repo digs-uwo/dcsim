@@ -33,8 +33,6 @@ public abstract class InteractiveApplication extends Application {
 	private double migrationPenalty = 0;
 	private double totalMigrationPenalty = 0;
 	
-	private long x = -1;
-	
 	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier) {
 		super(simulation);
 		

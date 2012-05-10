@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim2.examples;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.host.power.*;
@@ -31,18 +33,16 @@ public class RelocST03 {
 
 		logger.info(RelocST03.class.toString());
 		
-		//Set random seed to repeat run
-		Utility.setRandomSeed(1546554024939817112l);
-		
+		DataCentreSimulation simulation = new DataCentreSimulation();		
 		//create datacentre
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(7);
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(simulation, 7);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
-		
-		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
+	
+		simulation.addDatacentre(dc);
 		
 		//create hosts
-		ArrayList<Host> hostList = createHosts(nHosts);
+		ArrayList<Host> hostList = createHosts(simulation, nHosts);
 		dc.addHosts(hostList);
 		
 		//create VMs
@@ -50,18 +50,18 @@ public class RelocST03 {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/clarknet", 1164, (int)(Utility.getRandom().nextDouble() * 200000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc(simulation, "traces/clarknet", 1164, (int)(simulation.getRandom().nextDouble() * 200000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/epa", 975, (int)(Utility.getRandom().nextDouble() * 40000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc(simulation, "traces/epa", 975, (int)(simulation.getRandom().nextDouble() * 40000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_0", 2271, (int)(Utility.getRandom().nextDouble() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc(simulation, "traces/google_cores_job_type_0", 2271, (int)(simulation.getRandom().nextDouble() * 15000000))));
 		}
 		for (int i = 0; i < nVM; ++i) {
-			vmList.add(new VMAllocationRequest(createVMDesc("traces/google_cores_job_type_1", 2325, (int)(Utility.getRandom().nextDouble() * 15000000))));
+			vmList.add(new VMAllocationRequest(createVMDesc(simulation, "traces/google_cores_job_type_1", 2325, (int)(simulation.getRandom().nextDouble() * 15000000))));
 		}
-		Collections.shuffle(vmList, Utility.getRandom());
+		Collections.shuffle(vmList, simulation.getRandom());
 		
 		//submit VMs
 		dc.getVMPlacementPolicy().submitVMs(vmList);
@@ -75,36 +75,38 @@ public class RelocST03 {
 		
 		//create the VM relocation policy
 		@SuppressWarnings("unused")
-		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(dc, 600000, 600000, 0.5, 0.85, 0.85);
-		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
+		VMRelocationPolicy vmRelocationPolicy = new VMRelocationPolicyST03(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(simulation, dc, 600000, 600001, 0.5, 0.85); //every 10 minutes
 		@SuppressWarnings("unused")
-		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
-		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 86400000, 86400001, 0.5, 0.85); //every day
+		VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(simulation, dc, 8640000, 8640001, 0.5, 0.85); //every 2.4 hours
+		//VMConsolidationPolicy vmConsolidationPolicy = new VMConsolidationPolicySimple(simulation, dc, 86400000, 86400001, 0.5, 0.85); //every day
 		
 		long startTime = System.currentTimeMillis();
 		logger.info("Start time: " + startTime + "ms");
 		
 		//run the simulation
-		//Simulation.getInstance().run(864000000, 86400000); //10 days, record metrics after 1 day
-		Simulation.getInstance().run(864000000, 0); //10 days
-		//Simulation.getInstance().run(86400000, 0); //1 day
+		Collection<Metric> metrics = simulation.run(864000000, 0); //10 days
+
+		for (Metric metric : metrics)
+			logger.info(metric.getName() + " = " + metric.toString(3));
+		
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
 		
 	}
 	
-	public static ArrayList<Host> createHosts(int nHosts) {
+	public static ArrayList<Host> createHosts(DataCentreSimulation simulation, int nHosts) {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
 		for (int i = 0; i < nHosts; ++i) {
-			Host host = new ProLiantDL380G5QuadCoreHost(
+			Host host = new ProLiantDL380G5QuadCoreHost(simulation,
 					new StaticOversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
 					new StaticMemoryManager(),
 					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
 					new StaticStorageManager(),
-					new FairShareCpuScheduler());
+					new FairShareCpuScheduler(simulation));
 			
 			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments
 			
@@ -114,10 +116,11 @@ public class RelocST03 {
 		return hosts;
 	}
 	
-	public static VMDescription createVMDesc(String fileName, int coreCapacity, long offset) {
+	public static VMDescription createVMDesc(DataCentreSimulation simulation, String fileName, int coreCapacity, long offset) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, 2700, offset); //scale of 2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost
+		Workload workload = new TraceWorkload(simulation, fileName, 2700, offset); //scale of 2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost
+		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(1024, 0, 1, 0, 300); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead

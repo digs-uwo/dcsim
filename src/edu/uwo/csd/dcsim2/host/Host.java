@@ -73,10 +73,6 @@ public class Host implements SimulationEventListener {
 	private double utilizationSum = 0; //used to calculate average utilization
 	private double powerConsumed = 0; //total power consumed by the host
 	
-	private static long currentActiveHosts = 0;
-	private static long minActiveHosts = Long.MAX_VALUE;
-	private static long maxActiveHosts = 0;
-	
 	private HostState state;
 	
 	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
@@ -596,10 +592,6 @@ public class Host implements SimulationEventListener {
 		
 		
 		if (state == HostState.ON) {
-			
-			
-			//Collect Active Host metrics
-			++currentActiveHosts;
 			
 			AverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).incrementCounter();
 			MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).incrementCounter();

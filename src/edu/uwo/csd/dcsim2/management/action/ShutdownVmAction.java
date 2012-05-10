@@ -1,12 +1,8 @@
 package edu.uwo.csd.dcsim2.management.action;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.AggregateMetric;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.management.VMPlacementPolicy;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class ShutdownVmAction implements ManagementAction {

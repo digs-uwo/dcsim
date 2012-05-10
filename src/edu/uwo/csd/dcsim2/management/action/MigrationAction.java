@@ -1,7 +1,5 @@
 package edu.uwo.csd.dcsim2.management.action;
 
-import java.util.Map;
-import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.core.Event;

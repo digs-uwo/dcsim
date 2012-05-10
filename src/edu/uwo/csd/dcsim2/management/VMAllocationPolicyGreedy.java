@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.*;
 

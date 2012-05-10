@@ -1,24 +1,18 @@
 package edu.uwo.csd.dcsim2.examples;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import edu.uwo.csd.dcsim2.DCSimUpdateController;
-import edu.uwo.csd.dcsim2.DataCentre;
-import edu.uwo.csd.dcsim2.application.WebServerTier;
-import edu.uwo.csd.dcsim2.application.workload.RandomWorkload;
-import edu.uwo.csd.dcsim2.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim2.application.workload.Workload;
+import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
+import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.Host;
-import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
-import edu.uwo.csd.dcsim2.vm.VMDescription;
 
 public class CloudSimMM {
 	
@@ -32,22 +26,21 @@ public class CloudSimMM {
 
 		logger.info(CloudSimMM.class.toString());
 		
-		//Set random seed to repeat run
-		//Utility.setRandomSeed(8314174893186720729l);
+		DataCentreSimulation simulation = new DataCentreSimulation();
 		
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD();
+		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD(simulation);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
-		Simulation.getInstance().setSimulationUpdateController(new DCSimUpdateController(dc));
-		
+		simulation.addDatacentre(dc);
+				
 		//create hosts
-		ArrayList<Host> hostList = CloudSimHelper.createHosts(nHosts);
+		ArrayList<Host> hostList = CloudSimHelper.createHosts(simulation, nHosts);
 		dc.addHosts(hostList);
 	
-		ArrayList<VMAllocationRequest> vmList = CloudSimHelper.createPlanetLabVMs("traces/planetlab/20110303", 500);
-		Collections.shuffle(vmList, Utility.getRandom()); //should this be done?
-		
+		ArrayList<VMAllocationRequest> vmList = CloudSimHelper.createPlanetLabVMs(simulation, "traces/planetlab/20110303", 500);
+		Collections.shuffle(vmList, simulation.getRandom()); //should this be done?
+				
 		//submit VMs
 		if (!dc.getVMPlacementPolicy().submitVMs(vmList))
 			throw new RuntimeException("Could not place all VMs");
@@ -68,20 +61,18 @@ public class CloudSimMM {
 		
 		//create the VM relocation policy
 		@SuppressWarnings("unused")
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 600000, 600000, 0.5, 0.85, 0.85);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
 		
 //		@SuppressWarnings("unused")
 //		VMAllocationPolicyMM vmAllocationPolicyMM = new VMAllocationPolicyMM(dc, 60000, 60000, 0.45, 0.81);
-		
-		long startTime = System.currentTimeMillis();
-		logger.info("Start time: " + startTime + "ms");
-		
+				
 		//run the simulation
-		Simulation.getInstance().run(36000000, 0); //10 hours
-		//Simulation.getInstance().run(600000, 0); //10 minutes
+		Collection<Metric> metrics = simulation.run(36000000, 0); //10 hours
+		//Collection<Metric> metrics = simulation.run(600000, 0); //10 minutes
 		
-		long endTime = System.currentTimeMillis();
-		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
+		for (Metric metric : metrics) {
+			logger.info(metric.getName() + " = " + metric.toString());
+		}
 		
 	}
 	

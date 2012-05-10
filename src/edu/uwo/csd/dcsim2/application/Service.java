@@ -23,6 +23,10 @@ public class Service {
 		return vmList;
 	}
 	
+	public Workload getWorkload() {
+		return workload;
+	}
+	
 	public void setWorkload(Workload workload) {
 		this.workload = workload;
 	}

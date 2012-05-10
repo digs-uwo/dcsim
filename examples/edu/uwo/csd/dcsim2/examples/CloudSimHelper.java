@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim2.examples;
 import java.io.File;
 import java.util.ArrayList;
 
+import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.host.*;
@@ -11,7 +12,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class CloudSimHelper {
 
-	public static ArrayList<Host> createHosts(int nHosts) {
+	public static ArrayList<Host> createHosts(DataCentreSimulation simulation, int nHosts) {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
@@ -20,7 +21,7 @@ public class CloudSimHelper {
 			
 			int hostType = i % 4;
 			
-			Host host = new CloudSimHost(hostSize[hostType]);
+			Host host = new CloudSimHost(simulation, hostSize[hostType]);
 			
 			hosts.add(host);
 		}
@@ -28,10 +29,11 @@ public class CloudSimHelper {
 		return hosts;
 	}
 	
-	public static VMDescription createVMDesc(int coreCapacity) {
+	public static VMDescription createVMDesc(DataCentreSimulation simulation, int coreCapacity) {
 		
 		//create workload (random)
-		Workload workload = new RandomWorkload(coreCapacity, 300000);
+		Workload workload = new RandomWorkload(simulation, coreCapacity, 300000);
+		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(128, 1024, 1, 0, 0); //128MB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
@@ -50,7 +52,7 @@ public class CloudSimHelper {
 		return vmDescription;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createPlanetLabVMs(String tracePath, int nVms) {
+	public static ArrayList<VMAllocationRequest> createPlanetLabVMs(DataCentreSimulation simulation, String tracePath, int nVms) {
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		
 		File inputFolder = new File(tracePath);
@@ -65,7 +67,8 @@ public class CloudSimHelper {
 			
 			int vmType = i / (int) Math.ceil((double) nVms / 4);
 			
-			Workload workload = new PlanetLabTraceWorkload(files[i].getAbsolutePath(), vmSize[vmType], 0);
+			Workload workload = new PlanetLabTraceWorkload(simulation, files[i].getAbsolutePath(), vmSize[vmType], 0);
+			simulation.addWorkload(workload);
 			
 			//create single tier (web tier)
 			WebServerTier webServerTier = new WebServerTier(1024, 1024, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
@@ -87,10 +90,11 @@ public class CloudSimHelper {
 		return vmList;
 	}
 	
-	public static VMDescription createTraceVMDesc(String fileName, int coreCapacity, long offset) {
+	public static VMDescription createTraceVMDesc(DataCentreSimulation simulation, String fileName, int coreCapacity, long offset) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(fileName, coreCapacity, offset); //scale of 2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost
+		Workload workload = new TraceWorkload(simulation, fileName, coreCapacity, offset); //scale of 2700 + 300 overhead = 1 core on ProLiantDL380G5QuadCoreHost
+		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
 		WebServerTier webServerTier = new WebServerTier(128, 1024, 1, 0, 0); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead

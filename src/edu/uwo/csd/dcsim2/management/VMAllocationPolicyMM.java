@@ -5,12 +5,10 @@ import java.util.Collections;
 
 import edu.uwo.csd.dcsim2.DataCentre;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.management.action.MigrationAction;
 import edu.uwo.csd.dcsim2.management.stub.HostStub;
 import edu.uwo.csd.dcsim2.management.stub.VmStub;
 import edu.uwo.csd.dcsim2.management.stub.VmStubCpuInUseComparator;
-import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMAllocationPolicyMM extends VMRelocationPolicy {
 
