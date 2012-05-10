@@ -2,6 +2,7 @@ package edu.uwo.csd.dcsim2.examples.svm;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
@@ -10,6 +11,7 @@ import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.model.*;
@@ -85,7 +87,7 @@ public class SVMHelper {
 		
 		for (int i = 0; i < N_VMS; ++i) {
 			String trace = TRACES[i % N_TRACES];
-			long offset = (int)(Utility.getRandom().nextDouble() * OFFSET_MAX[i % N_TRACES]);
+			long offset = (int)(simulation.getRandom().nextDouble() * OFFSET_MAX[i % N_TRACES]);
 			
 			int size = VM_SIZES[i % N_VM_SIZES];
 			int cores = VM_CORES[i % N_VM_SIZES];
@@ -103,7 +105,7 @@ public class SVMHelper {
 			vmList.add(vmAllocationRequest);
 		}
 		
-		Collections.shuffle(vmList, Utility.getRandom());
+		Collections.shuffle(vmList, simulation.getRandom());
 		
 		return vmList;
 	}
@@ -175,5 +177,12 @@ public class SVMHelper {
 		return vmList;
 	}
 	
+	public static void printMetrics(Collection<Metric> metrics) {
+		for (Metric metric : metrics) {
+			logger.info(metric.getName() +
+					" = " +
+					metric.toString(3));
+		}
+	}
 	
 }

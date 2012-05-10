@@ -19,7 +19,7 @@ public class RandomWorkload extends Workload {
 	}
 	
 	protected int generateRandomWorkLevel() {
-		return (int)Math.round(Utility.getRandom().nextDouble() * scaleFactor);
+		return (int)Math.round(simulation.getRandom().nextDouble() * scaleFactor);
 	}
 	
 	@Override

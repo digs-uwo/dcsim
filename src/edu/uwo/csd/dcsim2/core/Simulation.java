@@ -4,11 +4,8 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 import java.io.*;
-import java.util.PriorityQueue;
 
 public abstract class Simulation implements SimulationEventListener {
 	
@@ -33,6 +30,14 @@ public abstract class Simulation implements SimulationEventListener {
 	private long eventSendCount = 0;
 	private Map<String, Metric> metrics = new HashMap<String, Metric>();
 	
+	private Random random;
+	private long randomSeed;
+	
+	public Simulation(long randomSeed) {
+		this();
+		this.setRandomSeed(randomSeed);
+	}
+	
 	public Simulation() {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
@@ -50,15 +55,13 @@ public abstract class Simulation implements SimulationEventListener {
 		} catch (IOException e) {
 			logger.error("Properties file could not be loaded", e);
 		}
-		
-		
 	}
 	
 	public final void run(long duration) {
 		run(duration, 0);
 	}
 	
-	public final void run(long duration, long metricRecordStart) {
+	public final Collection<Metric> run(long duration, long metricRecordStart) {
 		Event e;
 		
 		//configure simulation duration
@@ -95,16 +98,11 @@ public abstract class Simulation implements SimulationEventListener {
 		}
 		
 		completeSimulation(duration);
-		outputMetrics();
+		
+		return metrics.values();
 	}
 	
-	private void outputMetrics() {
-		for (Metric metric : metrics.values()) {
-			logger.info(metric.getName() +
-					" = " +
-					metric.toString(3));
-		}
-	}
+	
 	
 	public abstract void beginSimulation();
 	public abstract void updateSimulation(long simulationTime);
@@ -129,6 +127,24 @@ public abstract class Simulation implements SimulationEventListener {
 			default:
 				throw new RuntimeException("Simulation received unknown event type");
 		}
+	}
+	
+	public  Random getRandom() {
+		if (random == null) {
+			random = new Random();
+			setRandomSeed(random.nextLong());
+		}
+	
+		return random;
+	}
+	
+	public long getRandomSeed() {
+		return randomSeed;
+	}
+	
+	public void setRandomSeed(long seed) {
+		randomSeed = seed;
+		random = new Random(randomSeed);
 	}
 	
 	public boolean hasMetric(String name) {

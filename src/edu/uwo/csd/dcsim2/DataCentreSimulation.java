@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.host.Host;
 
 public class DataCentreSimulation extends Simulation {
@@ -18,6 +17,14 @@ public class DataCentreSimulation extends Simulation {
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
 	private Set<Workload> workloads = new HashSet<Workload>();
 	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector();
+
+	public DataCentreSimulation() {
+		super();
+	}
+	
+	public DataCentreSimulation(long randomSeed) {
+		super(randomSeed);
+	}
 	
 	public void addDatacentre(DataCentre dc) {
 		datacentres.add(dc);
@@ -50,7 +57,7 @@ public class DataCentreSimulation extends Simulation {
 	public void beginSimulation() {
 		logger.info("Starting DCSim2");
 		
-		logger.info("Random Seed: " + Utility.getRandomSeed());
+		logger.info("Random Seed: " + this.getRandomSeed());
 	}
 
 	@Override
