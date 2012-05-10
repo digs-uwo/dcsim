@@ -44,7 +44,9 @@ public class Host implements SimulationEventListener {
 	private Simulation simulation;
 	
 	private int id;
-	private ArrayList<Cpu> cpus;
+	private int nCpu;
+	private int nCores;
+	private int coreCapacity;
 	private int memory;	//in MB
 	private int bandwidth; //in KB
 	private long storage; //in MB
@@ -105,10 +107,9 @@ public class Host implements SimulationEventListener {
 		
 		this.simulation = simulation;
 		
-		cpus = new ArrayList<Cpu>();
-		for (int i = 0; i < nCpu; ++i) {
-			cpus.add(new Cpu(nCores, coreCapacity));
-		}
+		this.nCpu = nCpu;
+		this.nCores = nCores;
+		this.coreCapacity = coreCapacity;
 
 		this.id = nextId++;
 		this.memory = memory;
@@ -127,7 +128,7 @@ public class Host implements SimulationEventListener {
 		 */
 		
 		//description allows privileged domain to use any or all of the resources of the host
-		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getMaxCoreCapacity(), 0, bandwidth, 0, vmmApplicationFactory);
+		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getCoreCapacity(), 0, bandwidth, 0, vmmApplicationFactory);
 		
 		//create the allocation
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);
@@ -635,33 +636,20 @@ public class Host implements SimulationEventListener {
 		return id;
 	}
 	
-	public ArrayList<Cpu> getCpus() {
-		return cpus;
+	public int getCpuCount() {
+		return nCpu;
 	}
 	
-	public int getMaxCoreCapacity() {
-		int max = 0;
-		for (Cpu cpu : cpus) {
-			if (cpu.getCoreCapacity() > max) {
-				max = cpu.getCoreCapacity();
-			}
-		}
-		return max;
+	public int getCoreCapacity() {
+		return coreCapacity;
 	}
 	
 	public int getCoreCount() {
-		int cores = 0;
-		for (Cpu cpu : cpus) {
-			cores += cpu.getCores();
-		}
-		return cores;
+		return nCores;
 	}
 	
 	public int getTotalCpu() {
-		int total = 0;
-		for (Cpu cpu : cpus)
-			total += cpu.getCoreCapacity() * cpu.getCores();
-		return total;
+		return nCpu * nCores * coreCapacity;
 	}
 	
 	public int getMemory() {

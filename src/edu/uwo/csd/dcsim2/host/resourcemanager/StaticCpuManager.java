@@ -17,7 +17,7 @@ public class StaticCpuManager extends CpuManager {
 		//check cores and core capacity
 		if (vmDescription.getCores() > this.getHost().getCoreCount())
 			return false;
-		if (vmDescription.getCoreCapacity() > this.getHost().getMaxCoreCapacity())
+		if (vmDescription.getCoreCapacity() > this.getHost().getCoreCapacity())
 			return false;
 				
 		return true;

@@ -55,7 +55,7 @@ public class VM implements SimulationEventListener {
 		resourcesConsumed = new VirtualResources();
 		
 		//calculate a cap on the maximum CPU this VM could physically use
-		maxCpuAvailable = vmDescription.getCores() * vmAllocation.getHost().getMaxCoreCapacity() * (timeElapsed / 1000.0);
+		maxCpuAvailable = vmDescription.getCores() * vmAllocation.getHost().getCoreCapacity() * (timeElapsed / 1000.0);
 		
 		application.prepareExecution();
 	}
