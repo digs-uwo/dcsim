@@ -20,7 +20,7 @@ public abstract class CpuScheduler {
 		state = CpuSchedulerState.READY;
 	}
 	
-	public void prepareScheduler() {
+	public final void prepareScheduler() {
 		state = CpuSchedulerState.READY;
 		
 		availableCpu = host.getTotalCpu() * (simulation.getElapsedSeconds()); //cpu in shares/second, elapsed time in ms
@@ -34,11 +34,11 @@ public abstract class CpuScheduler {
 	public abstract void endRound();
 	public abstract void endScheduling();
 	
-	protected double getAvailableCpu() {
+	protected final double getAvailableCpu() {
 		return availableCpu;
 	}
 	
-	protected void consumeAvailableCpu(double cpuConsumed) {
+	protected final void consumeAvailableCpu(double cpuConsumed) {
 		availableCpu -= cpuConsumed;
 		availableCpu = Utility.roundDouble(availableCpu); //round off precision errors
 		
@@ -49,19 +49,19 @@ public abstract class CpuScheduler {
 			throw new RuntimeException("CPU Scheduler on Host #" + getHost().getId() + " used more CPU than available (sim time: " + simulation.getSimulationTime() + ")");
 	}
 	
-	public CpuSchedulerState getState() {
+	public final CpuSchedulerState getState() {
 		return state;
 	}
 	
-	public void setState(CpuSchedulerState state) {
+	public final void setState(CpuSchedulerState state) {
 		this.state = state;
 	}
 	
-	public void setHost(Host host) {
+	public final void setHost(Host host) {
 		this.host = host;
 	}
 	
-	public Host getHost() {
+	public final Host getHost() {
 		return host;
 	}
 	
