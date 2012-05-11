@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
@@ -29,11 +28,9 @@ public class RelocST03 {
 	
 	public static void main(String args[]) {
 		
-		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
-
-		logger.info(RelocST03.class.toString());
+		Simulation.initializeLogging();
 		
-		DataCentreSimulation simulation = new DataCentreSimulation();		
+		DataCentreSimulation simulation = new DataCentreSimulation("RelocST03");		
 		//create datacentre
 		//VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(); //new VMPlacementPolicyFixedCount(7);
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFixedCount(simulation, 7);

@@ -1,26 +1,34 @@
 package edu.uwo.csd.dcsim2.core;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
+import edu.uwo.csd.dcsim2.logging.*;
 
 import java.util.*;
 import java.io.*;
 
 public abstract class Simulation implements SimulationEventListener {
 	
+	public static final String DEFAULT_LOGGER_CONVERSION_PATTERN = "%-10s %-5p - %m%n";
+	public static final String DEFAULT_LOGGER_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
+	public static final String DEFAULT_LOGGER_FILE_NAME = "dcsim-%n-%d";
+	
+	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
-	
-	
-	private static Logger logger = Logger.getLogger(Simulation.class);
 	
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
 	
-	private Properties properties;
-		
+	private static Properties loggerProperties;
+	
+	protected final Logger logger;
+	private static Properties properties;
+	
+	private String name;
 	private PriorityQueue<Event> eventQueue;
 	private long simulationTime; //in milliseconds
 	private long lastUpdate; //in milliseconds
@@ -33,28 +41,89 @@ public abstract class Simulation implements SimulationEventListener {
 	private Random random;
 	private long randomSeed;
 	
-	public Simulation(long randomSeed) {
-		this();
+	public static void initializeLogging() {
+		
+		Properties properties = new Properties();
+		
+		try {
+			properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/logger.properties"));
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("Logging properties file could not be loaded", e);
+		} catch (IOException e) {
+			throw new RuntimeException("Logging properties file could not be loaded", e);
+		}
+		
+		PropertyConfigurator.configure(properties);
+		loggerProperties = properties;
+	}
+	
+	private static Properties getProperties() {
+		if (properties == null) {
+			/*
+			 * Load configuration properties from file
+			 */
+			properties = new Properties();
+			
+			try {
+				properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/simulation.properties"));
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException("Properties file could not be loaded", e);
+			} catch (IOException e) {
+				throw new RuntimeException("Properties file could not be loaded", e);
+			}
+		}
+		
+		return properties;
+	}
+	
+	public Simulation(String name, long randomSeed) {
+		this(name);
 		this.setRandomSeed(randomSeed);
 	}
 	
-	public Simulation() {
+	public Simulation(String name) {
 		eventQueue = new PriorityQueue<Event>(1000, new EventComparator());
 		simulationTime = 0;
 		lastUpdate = 0;
+		this.name = name;
 		
-		/*
-		 * Load configuration properties from file
-		 */
-		properties = new Properties();
+		//configure simulation logger
+		logger = Logger.getLogger("simLogger." + name);
 		
-		try {
-			properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/simulation.properties"));
-		} catch (FileNotFoundException e) {
-			logger.error("Properties file could not be loaded", e);
-		} catch (IOException e) {
-			logger.error("Properties file could not be loaded", e);
+		boolean enableFileLogging = true;
+		String conversionPattern = DEFAULT_LOGGER_CONVERSION_PATTERN;
+		String dateFormat = DEFAULT_LOGGER_DATE_FORMAT;
+		String fileName = DEFAULT_LOGGER_FILE_NAME;
+		
+		if (loggerProperties != null) {
+			if (loggerProperties.getProperty("log4j.logger.simLogger.enableFile") != null) {
+				enableFileLogging = Boolean.parseBoolean(loggerProperties.getProperty("log4j.logger.simLogger.enableFile"));
+			}
+			if (loggerProperties.getProperty("log4j.logger.simLogger.ConversionPattern") != null) {
+				conversionPattern = loggerProperties.getProperty("log4j.logger.simLogger.ConversionPattern");
+			}
+			if (loggerProperties.getProperty("log4j.logger.simLogger.DateFormat") != null) {
+				dateFormat = loggerProperties.getProperty("log4j.logger.simLogger.DateFormat");
+			}
+			if (loggerProperties.getProperty("log4j.logger.simLogger.File") != null) {
+				fileName = loggerProperties.getProperty("log4j.logger.simLogger.File");
+			}
 		}
+
+		if (enableFileLogging) {
+			SimulationFileAppender simAppender = new SimulationFileAppender();
+			
+			SimulationPatternLayout patternLayout = new SimulationPatternLayout(this);
+			patternLayout.setConversionPattern(conversionPattern);
+			simAppender.setLayout(patternLayout);
+			simAppender.setSimName(name);
+			simAppender.setDateFormat(dateFormat);
+			simAppender.setFile(getLogDirectory() + "/" + fileName);
+			simAppender.activateOptions();
+			logger.addAppender(simAppender);
+		}
+		
+		
 	}
 	
 	public final void run(long duration) {
@@ -75,6 +144,8 @@ public abstract class Simulation implements SimulationEventListener {
 		} else {
 			recordingMetrics = true;
 		}
+		
+		logger.info("Starting simulation " + name);
 		
 		beginSimulation();
 		
@@ -98,6 +169,13 @@ public abstract class Simulation implements SimulationEventListener {
 		}
 		
 		completeSimulation(duration);
+		
+		logger.info("Completed simulation " + name);
+		
+		
+		for (Metric metric : metrics.values()) {
+			logger.info(metric.getName() + "=" + metric.toString());
+		}
 		
 		return metrics.values();
 	}
@@ -127,6 +205,10 @@ public abstract class Simulation implements SimulationEventListener {
 			default:
 				throw new RuntimeException("Simulation received unknown event type");
 		}
+	}
+	
+	public Logger getLogger() {
+		return logger;
 	}
 	
 	public  Random getRandom() {
@@ -232,8 +314,8 @@ public abstract class Simulation implements SimulationEventListener {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
 	
-	public final boolean hasProperty(String name) {
-		if (System.getProperty(name) != null || properties.getProperty(name) != null)
+	public static final boolean hasProperty(String name) {
+		if (System.getProperty(name) != null || getProperties().getProperty(name) != null)
 			return true;
 		return false;
 	}
@@ -244,12 +326,12 @@ public abstract class Simulation implements SimulationEventListener {
 	 * @param name Name of property.
 	 * @return The value of the property.
 	 */
-	public final String getProperty(String name) {
+	public static final String getProperty(String name) {
 		String prop = null;
 		if (System.getProperty(name) != null) {
 			prop = System.getProperty(name);
 		} else {
-			prop = properties.getProperty(name);
+			prop = getProperties().getProperty(name);
 		}
 		
 		if (prop == null)

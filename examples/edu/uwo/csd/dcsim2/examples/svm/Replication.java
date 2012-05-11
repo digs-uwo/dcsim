@@ -24,16 +24,18 @@ public class Replication {
 	
 	public static void main(String args[]) {
 		
-		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
+		Simulation.initializeLogging();
 		
-		logger.info(Replication.class.toString());
+		runSimulation("replication-1", -2250887070548558400l);
+//		runSimulation("replication-2", 9028535546026732111l);
+//		runSimulation("replication-3", 2169085675430796896l);
+//		runSimulation("replication-4", 4294062650326098795l);
+//		runSimulation("replication-5", 3901350559651978320l);	
 		
-		//Set random seed to repeat run
-		DataCentreSimulation simulation = new DataCentreSimulation(-2250887070548558400l);
-//		DataCentreSimulation simulation = new DataCentreSimulation(9028535546026732111l);
-//		DataCentreSimulation simulation = new DataCentreSimulation(2169085675430796896l);
-//		DataCentreSimulation simulation = new DataCentreSimulation(4294062650326098795l);
-//		DataCentreSimulation simulation = new DataCentreSimulation(3901350559651978320l);
+	}
+	
+	public static void runSimulation(String name, long seed) {
+		DataCentreSimulation simulation = new DataCentreSimulation(name, seed);
 		
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
@@ -82,11 +84,6 @@ public class Replication {
 		
 		//run the simulation
 		Collection<Metric> metrics = simulation.run(864000000, 86400000); //10 days
-		//Collection<Metric> metrics = simulation.run(86400000, 0); //1 day
-		//Collection<Metric> metrics = simulation.run(3600000, 0); //1 hour
-		//Collection<Metric> metrics = simulation.run(600000, 0); //10 minutes 
-		SVMHelper.printMetrics(metrics);
-		
 		
 	}
 	

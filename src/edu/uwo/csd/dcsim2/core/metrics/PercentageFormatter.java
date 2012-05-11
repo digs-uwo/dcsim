@@ -10,10 +10,10 @@ public class PercentageFormatter implements OutputFormatter {
 	}
 
 	@Override
-	public String format(double value, int decimalPlaces) {
+	public String format(double value, int precision) {
 		value = value * 100;
-		if (decimalPlaces != NO_ROUNDING)
-			value = Utility.roundDouble(value, decimalPlaces);
+		if (precision != NO_ROUNDING)
+			value = Utility.roundDouble(value, precision);
 		
 		return value + "%";
 	}

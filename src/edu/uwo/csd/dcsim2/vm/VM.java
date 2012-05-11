@@ -1,13 +1,9 @@
 package edu.uwo.csd.dcsim2.vm;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 
 public class VM implements SimulationEventListener {
-
-	static Logger logger = Logger.getLogger(VM.class);
 	
 	static int nextId = 1;
 	
@@ -114,7 +110,7 @@ public class VM implements SimulationEventListener {
 	}
 	
 	public void logInfo() {
-		logger.debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
+		simulation.getLogger().debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
 				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 

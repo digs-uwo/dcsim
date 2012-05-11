@@ -1,7 +1,5 @@
 package edu.uwo.csd.dcsim2.management.action;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.core.Event;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.SimulationEventListener;
@@ -14,8 +12,6 @@ import edu.uwo.csd.dcsim2.vm.VMAllocationRequest;
 public class MigrationAction implements ManagementAction {
 	
 	private static final String MIGRATION_COUNT_METRIC = "migrationCount";
-	
-	private static Logger logger = Logger.getLogger(MigrationAction.class);
 
 	private HostStub source;
 	private HostStub target;
@@ -71,7 +67,7 @@ public class MigrationAction implements ManagementAction {
 					);
 		}
 		
-		logger.debug(triggeringEntity.getClass().getName() + " Migrating VM #" + vm.getVM().getId() + " from Host #" + source.getHost().getId() + " to #" + target.getHost().getId());
+		simulation.getLogger().debug(triggeringEntity.getClass().getName() + " Migrating VM #" + vm.getVM().getId() + " from Host #" + source.getHost().getId() + " to #" + target.getHost().getId());
 	}
 	
 }

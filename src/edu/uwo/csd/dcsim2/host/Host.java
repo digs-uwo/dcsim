@@ -3,8 +3,6 @@ package edu.uwo.csd.dcsim2.host;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.*;
@@ -14,8 +12,6 @@ import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.power.*;
 
 public class Host implements SimulationEventListener {
-
-	private static Logger logger = Logger.getLogger(Host.class);
 	
 	/**
 	 * Event types for events that Host receives
@@ -248,7 +244,7 @@ public class Host implements SimulationEventListener {
 		newAllocation.setVm(newVm);
 		newVm.setVMAllocation(newAllocation);
 		
-		logger.debug("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
+		simulation.getLogger().debug("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
 	}
 
 	
@@ -379,7 +375,7 @@ public class Host implements SimulationEventListener {
 		//inform the source host that the VM is migrating out
 		source.migrateOut(vm);
 		
-		logger.debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
+		simulation.getLogger().debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
 		
 		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms), using privileged domain bandwidth TODO is this correct?
 		//long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesInUse().getMemory() * 1024) / (double)privDomainAllocation.getBandwidth()) * 1000);
@@ -415,7 +411,7 @@ public class Host implements SimulationEventListener {
 		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
 		vmm.addMigratingVm(vm);
 		
-		logger.debug("Host #" + this.getId() + " migrating out VM #" + vm.getId());
+		simulation.getLogger().debug("Host #" + this.getId() + " migrating out VM #" + vm.getId());
 	}
 	
 	/**
@@ -440,7 +436,7 @@ public class Host implements SimulationEventListener {
 		vmAllocation.setVm(vm);
 		vm.setVMAllocation(vmAllocation);
 		
-		logger.debug("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
+		simulation.getLogger().debug("Host #" + this.getId() + " completed migrating incoming VM #" + vm.getId());
 		
 	}
 	
@@ -456,7 +452,7 @@ public class Host implements SimulationEventListener {
 		//deallocate the VM
 		deallocate(vmAllocation);
 				
-		logger.debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
+		simulation.getLogger().debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
 		
 		if (powerOffAfterMigrations && migratingOut.isEmpty() && pendingOutgoingMigrations.isEmpty())
 			powerOff();
@@ -470,7 +466,7 @@ public class Host implements SimulationEventListener {
 	public void suspend() {
 		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
-			long delay = Long.parseLong(simulation.getProperty("hostSuspendDelay"));
+			long delay = Long.parseLong(Simulation.getProperty("hostSuspendDelay"));
 			simulation.sendEvent(
 					new Event(Host.HOST_COMPLETE_SUSPEND_EVENT,
 							simulation.getSimulationTime() + delay,
@@ -486,7 +482,7 @@ public class Host implements SimulationEventListener {
 				powerOffAfterMigrations = true;
 			} else {
 				state = HostState.POWERING_OFF;
-				long delay = Long.parseLong(simulation.getProperty("hostPowerOffDelay"));
+				long delay = Long.parseLong(Simulation.getProperty("hostPowerOffDelay"));
 				simulation.sendEvent(
 						new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
 								simulation.getSimulationTime() + delay,
@@ -502,21 +498,21 @@ public class Host implements SimulationEventListener {
 			long delay = 0;
 			switch (state) {
 				case SUSPENDED:
-					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(Simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 				case OFF:
-					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(Simulation.getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case FAILED:					
-					delay = Long.parseLong(simulation.getProperty("hostPowerOnFromFailedDelay"));
+					delay = Long.parseLong(Simulation.getProperty("hostPowerOnFromFailedDelay"));
 					break;
 				case POWERING_OFF:
-					delay = Long.parseLong(simulation.getProperty("hostPowerOffDelay"));
-					delay += Long.parseLong(simulation.getProperty("hostPowerOnFromOffDelay"));
+					delay = Long.parseLong(Simulation.getProperty("hostPowerOffDelay"));
+					delay += Long.parseLong(Simulation.getProperty("hostPowerOnFromOffDelay"));
 					break;
 				case SUSPENDING:
-					delay = Long.parseLong(simulation.getProperty("hostSuspendDelay"));
-					delay += Long.parseLong(simulation.getProperty("hostPowerOnFromSuspendDelay"));
+					delay = Long.parseLong(Simulation.getProperty("hostSuspendDelay"));
+					delay += Long.parseLong(Simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 			}
 			
@@ -559,26 +555,25 @@ public class Host implements SimulationEventListener {
 	 */
 	public void logInfo() {
 
-		if (getCpuManager().getCpuUtilization() > 1)
-			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
-		
-		if (state == HostState.ON) {
-			logger.debug("Host #" + getId() + 
-					" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
-					" BW[" + bandwidthManager.getAllocatedBandwidth() + "/" + bandwidthManager.getTotalBandwidth() + "] " +
-					" MEM[" + memoryManager.getAllocatedMemory() + "/" + memoryManager.getTotalMemory() + "] " +
-					" STORAGE[" + storageManager.getAllocatedStorage() + "/" + storageManager.getTotalStorage() + "] " +
-					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
-			privDomainAllocation.getVm().logInfo();
-		} else {
-			logger.debug("Host #" + getId() + " " + state);
-		}
-		
-		for (VMAllocation vmAllocation : vmAllocations) {
-			if (vmAllocation.getVm() != null) {
-				vmAllocation.getVm().logInfo();
+		if (simulation.getLogger().isDebugEnabled()) {
+			if (state == HostState.ON) {
+				simulation.getLogger().debug("Host #" + getId() + 
+						" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
+						" BW[" + bandwidthManager.getAllocatedBandwidth() + "/" + bandwidthManager.getTotalBandwidth() + "] " +
+						" MEM[" + memoryManager.getAllocatedMemory() + "/" + memoryManager.getTotalMemory() + "] " +
+						" STORAGE[" + storageManager.getAllocatedStorage() + "/" + storageManager.getTotalStorage() + "] " +
+						"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
+				privDomainAllocation.getVm().logInfo();
 			} else {
-				logger.debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
+				simulation.getLogger().debug("Host #" + getId() + " " + state);
+			}
+			
+			for (VMAllocation vmAllocation : vmAllocations) {
+				if (vmAllocation.getVm() != null) {
+					vmAllocation.getVm().logInfo();
+				} else {
+					simulation.getLogger().debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
+				}
 			}
 		}
 	}

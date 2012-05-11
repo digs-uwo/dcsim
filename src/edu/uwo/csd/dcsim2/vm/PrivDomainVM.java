@@ -13,7 +13,7 @@ public class PrivDomainVM extends VM {
 
 	@Override
 	public void logInfo() {
-		logger.debug("PRIV  CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
+		simulation.getLogger().debug("PRIV  CPU[" + Utility.roundDouble(resourcesInUse.getCpu(), 2) + 
 				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourceDemand().getCpu(), 2) + "] " + 
 				"BW[" + Utility.roundDouble(resourcesInUse.getBandwidth(), 2) + 

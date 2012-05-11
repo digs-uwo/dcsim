@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.core.metrics;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.core.Utility;
 
 
@@ -48,17 +49,21 @@ public abstract class Metric {
 
 	@Override
 	public String toString() {
+		
+		if (Simulation.hasProperty("metricPrecision"))
+			return toString(Integer.parseInt(Simulation.getProperty("metricPrecision")));
+		
 		if (outputFormatter != null)
 			return outputFormatter.format(getValue());
 		else
 			return Double.toString(getValue());
 	}
 	
-	public String toString(int decimalPlaces) {
+	public String toString(int precision) {
 		if (outputFormatter != null)
-			return outputFormatter.format(getValue(), decimalPlaces);
+			return outputFormatter.format(getValue(), precision);
 		else
-			return Double.toString(Utility.roundDouble(getValue(), decimalPlaces));
+			return Double.toString(Utility.roundDouble(getValue(), precision));
 	}
 	
 	public abstract double getValue();

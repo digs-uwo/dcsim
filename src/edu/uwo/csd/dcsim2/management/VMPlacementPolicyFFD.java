@@ -3,8 +3,6 @@ package edu.uwo.csd.dcsim2.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.comparator.*;
@@ -12,10 +10,6 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 
-	@SuppressWarnings("unused")
-	private static Logger logger = Logger.getLogger(VMPlacementPolicyFFD.class);
-	
-	
 	public VMPlacementPolicyFFD(Simulation simulation) {
 		super(simulation);
 	}

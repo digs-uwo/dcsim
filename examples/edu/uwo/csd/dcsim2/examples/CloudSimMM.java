@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.core.Simulation;
@@ -22,11 +21,9 @@ public class CloudSimMM {
 	
 	public static void main(String args[]) {
 		
-		PropertyConfigurator.configure(Simulation.getConfigDirectory() +"/logger.properties"); //configure logging from file
-
-		logger.info(CloudSimMM.class.toString());
+		Simulation.initializeLogging();
 		
-		DataCentreSimulation simulation = new DataCentreSimulation();
+		DataCentreSimulation simulation = new DataCentreSimulation("CloudSimMM");
 		
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyMBFD(simulation);

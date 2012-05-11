@@ -2,11 +2,16 @@ package edu.uwo.csd.dcsim2.logging;
 
 import org.apache.log4j.helpers.PatternParser;
 
+import edu.uwo.csd.dcsim2.core.Simulation;
+
 public class SimulationPatternParser extends PatternParser {
 	private static final char SIMULATION_TIME_CHAR = 's';
 	
-	public SimulationPatternParser(String pattern) {
+	private Simulation simulation;
+	
+	public SimulationPatternParser(Simulation simulation, String pattern) {
 		super(pattern);
+		this.simulation = simulation;
 	}
 	
 	@Override
@@ -14,7 +19,7 @@ public class SimulationPatternParser extends PatternParser {
 		switch (c) {
 		case SIMULATION_TIME_CHAR:
 			currentLiteral.setLength(0);
-			addConverter(new SimulationPatternConverter(this.formattingInfo));
+			addConverter(new SimulationPatternConverter(simulation, this.formattingInfo));
 			break;
 		default:
 			super.finalizeConverter(c);

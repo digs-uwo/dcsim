@@ -1,16 +1,11 @@
 package edu.uwo.csd.dcsim2.application;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.FractionalMetric;
-import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
 public abstract class InteractiveApplication extends Application {
 
-	private static Logger logger = Logger.getLogger(Host.class);
-	
 	//variables to keep track of resource demand and consumption
 	VirtualResources resourceDemand;		//the current level of resource demand / second
 	VirtualResources resourceInUse;			//the current level of resource use  / second
@@ -122,7 +117,7 @@ public abstract class InteractiveApplication extends Application {
 		
 		//check minimum memory and storage. If not met, assume the application does not run. TODO is this correct? Should we use what we can? How would this affect application performance?
 		if (resourcesAvailable.getMemory() < overheadRemaining.getMemory() || resourcesAvailable.getStorage() < overheadRemaining.getStorage()) {
-			logger.info("Application has insufficient memory or storage to meet overhead requirements");
+			simulation.getLogger().info("Application has insufficient memory or storage to meet overhead requirements");
 			return new VirtualResources(); //no resources consumed
 		}
 		
@@ -166,7 +161,7 @@ public abstract class InteractiveApplication extends Application {
 		
 		
 		if (vm.isMigrating()) {
-			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(simulation.getProperty("vmMigrationSLAPenalty"));
+			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
 			slaViolatedWork += migrationPenalty;
 		}
 		

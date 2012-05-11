@@ -4,26 +4,22 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.HashSet;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 
 public class DataCentreSimulation extends Simulation {
 
-	private static Logger logger = Logger.getLogger(DataCentreSimulation.class);
-	
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
 	private Set<Workload> workloads = new HashSet<Workload>();
 	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector();
 
-	public DataCentreSimulation() {
-		super();
+	public DataCentreSimulation(String name) {
+		super(name);
 	}
 	
-	public DataCentreSimulation(long randomSeed) {
-		super(randomSeed);
+	public DataCentreSimulation(String name, long randomSeed) {
+		super(name, randomSeed);
 	}
 	
 	public void addDatacentre(DataCentre dc) {

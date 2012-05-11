@@ -181,7 +181,7 @@ public class SVMHelper {
 		for (Metric metric : metrics) {
 			logger.info(metric.getName() +
 					" = " +
-					metric.toString(3));
+					metric.toString());
 		}
 	}
 	

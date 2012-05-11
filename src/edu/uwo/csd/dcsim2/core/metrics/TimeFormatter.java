@@ -20,7 +20,7 @@ public class TimeFormatter implements OutputFormatter {
 	}
 
 	@Override
-	public String format(double value, int decimalPlaces) {
+	public String format(double value, int precision) {
 		String unit = "s";
 		
 		switch (from) {
@@ -56,8 +56,8 @@ public class TimeFormatter implements OutputFormatter {
 				break;
 		}
 		
-		if (decimalPlaces != NO_ROUNDING) {
-			value = Utility.roundDouble(value, decimalPlaces);
+		if (precision != NO_ROUNDING) {
+			value = Utility.roundDouble(value, precision);
 		}
 		
 		return value + unit;

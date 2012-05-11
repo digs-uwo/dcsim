@@ -1,13 +1,9 @@
 package edu.uwo.csd.dcsim2.application.workload;
 
-import org.apache.log4j.Logger;
-
 import edu.uwo.csd.dcsim2.application.WorkConsumer;
 import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class Workload implements SimulationEventListener, WorkConsumer {
-
-	private static Logger logger = Logger.getLogger(Workload.class);
 	
 	public static final int WORKLOAD_UPDATE_WORKLEVEL_EVENT = 1;
 	
@@ -16,8 +12,7 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	private double completedWork = 0;
 	private WorkConsumer workTarget;
 	
-	private double currentIncomingWork = 0;
-	private double currentCompletedWork = 0;
+	
 	
 	public Workload(Simulation simulation) {
 		
@@ -34,8 +29,6 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 			completedWork += work;
 			completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
 		}
-		currentCompletedWork += work;
-		currentCompletedWork = Utility.roundDouble(currentCompletedWork); //correct for precision errors by rounding
 	}
 
 	protected abstract double retrievePendingWork(); 
@@ -44,10 +37,7 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 		if (workTarget != null && simulation.getLastUpdate() < simulation.getSimulationTime()) {
 			double pendingWork = retrievePendingWork();
 			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
-			
-			currentIncomingWork = pendingWork;
-			currentCompletedWork = 0;
-			
+
 			if (simulation.isRecordingMetrics()) {
 				totalWork += pendingWork;
 				totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
@@ -55,10 +45,6 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 			
 			workTarget.addWork(pendingWork);
 		}
-	}
-	
-	public void logCompleted() {
-		logger.debug("Workload Total [" + Utility.roundDouble(currentCompletedWork, 2) + "/" + Utility.roundDouble(currentIncomingWork, 2) + "] work units");
 	}
 	
 	/**
