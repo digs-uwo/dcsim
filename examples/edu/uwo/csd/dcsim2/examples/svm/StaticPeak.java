@@ -33,7 +33,7 @@ public class StaticPeak {
 		SVMHelper.placeVms(vmList, dc);
 				
 		Collection<Metric> metrics = simulation.run(864000000, 86400000);
-		
+		SVMHelper.printMetrics(metrics);
 	}
 	
 }

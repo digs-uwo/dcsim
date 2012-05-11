@@ -51,7 +51,7 @@ public class DynamicManagement {
 		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
 
 		Collection<Metric> metrics = simulation.run(864000000, 86400000);
-			
+		SVMHelper.printMetrics(metrics);
 		
 		long endTime = System.currentTimeMillis();
 		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");

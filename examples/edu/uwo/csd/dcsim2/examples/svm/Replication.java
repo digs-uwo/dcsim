@@ -3,9 +3,6 @@ package edu.uwo.csd.dcsim2.examples.svm;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
@@ -19,8 +16,6 @@ import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class Replication {
-
-	private static Logger logger = Logger.getLogger(Replication.class);
 	
 	public static void main(String args[]) {
 		
@@ -84,7 +79,7 @@ public class Replication {
 		
 		//run the simulation
 		Collection<Metric> metrics = simulation.run(864000000, 86400000); //10 days
-		
+		SVMHelper.printMetrics(metrics);
 	}
 	
 	public static Service createService(DataCentreSimulation simulation, String fileName, long offset, int scale) {

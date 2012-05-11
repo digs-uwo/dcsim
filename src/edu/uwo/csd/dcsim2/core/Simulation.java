@@ -172,11 +172,6 @@ public abstract class Simulation implements SimulationEventListener {
 		
 		logger.info("Completed simulation " + name);
 		
-		
-		for (Metric metric : metrics.values()) {
-			logger.info(metric.getName() + "=" + metric.toString());
-		}
-		
 		return metrics.values();
 	}
 	
