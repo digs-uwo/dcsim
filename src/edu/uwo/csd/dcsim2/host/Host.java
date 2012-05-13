@@ -219,7 +219,7 @@ public class Host implements SimulationEventListener {
 	 */
 	
 	public double getCurrentPowerConsumption() {
-		return powerModel.getPowerConsumption(this);
+		return powerModel.getPowerConsumption(this.getCpuManager().getCpuUtilization());
 	}
 	
 

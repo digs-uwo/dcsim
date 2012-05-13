@@ -2,6 +2,13 @@ package edu.uwo.csd.dcsim2.host.power;
 
 import edu.uwo.csd.dcsim2.host.Host;
 
+/**
+ * SPECHostPowerModel is a HostPowerModel that uses power utilization data in the form provided by the SPECpower benchmark
+ * to determine host power consumption.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class SPECHostPowerModel implements HostPowerModel {
 
 	private double suspended;
@@ -38,16 +45,16 @@ public class SPECHostPowerModel implements HostPowerModel {
 	}
 	
 	@Override
-	public double getPowerConsumption(Host host) {
+	public double getPowerConsumption(Host.HostState state, double cpu) {
 		
-		if (host.getState() == Host.HostState.ON || 
-				host.getState() == Host.HostState.POWERING_OFF || 
-				host.getState() == Host.HostState.POWERING_ON ||
-				host.getState() == Host.HostState.SUSPENDING) {
-			double cpuUtilization = host.getCpuManager().getCpuUtilization();
+		if (state == Host.HostState.ON || 
+				state == Host.HostState.POWERING_OFF || 
+				state == Host.HostState.POWERING_ON ||
+				state == Host.HostState.SUSPENDING) {
+			double cpuUtilization = cpu;
 
 			return getPowerConsumption(cpuUtilization);
-		} else if (host.getState() == Host.HostState.SUSPENDED) {
+		} else if (state == Host.HostState.SUSPENDED) {
 			return suspended;
 		} else {
 			return 0;

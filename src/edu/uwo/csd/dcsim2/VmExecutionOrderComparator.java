@@ -1,10 +1,10 @@
-package edu.uwo.csd.dcsim2.host.scheduler;
+package edu.uwo.csd.dcsim2;
 
 import java.util.Comparator;
 
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
-public class VMAllocationSchedulingComparator implements Comparator<VMAllocation> {
+public class VmExecutionOrderComparator implements Comparator<VMAllocation> {
 
 	@Override
 	public int compare(VMAllocation arg0, VMAllocation arg1) {

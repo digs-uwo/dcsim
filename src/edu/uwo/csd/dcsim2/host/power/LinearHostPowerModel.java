@@ -2,6 +2,14 @@ package edu.uwo.csd.dcsim2.host.power;
 
 import edu.uwo.csd.dcsim2.host.Host;
 
+/**
+ * LinearHostPowerModel models Host power consumption as a linear function starting from
+ * a fixed consumption at idle CPU and scaling linearly with CPU utilization to a maximum
+ * power consumption level.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class LinearHostPowerModel implements HostPowerModel {
 
 	double idlePower;
@@ -13,9 +21,9 @@ public class LinearHostPowerModel implements HostPowerModel {
 	}
 	
 	@Override
-	public double getPowerConsumption(Host host) {
-		if (host.getState() == Host.HostState.ON)
-			return idlePower + ((maxPower - idlePower) * host.getCpuManager().getCpuUtilization());
+	public double getPowerConsumption(Host.HostState state, double cpu) {
+		if (state == Host.HostState.ON)
+			return getPowerConsumption(cpu);
 		else
 			return 0;
 	}

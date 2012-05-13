@@ -5,7 +5,6 @@ import java.util.*;
 import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.Host;
 import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
-import edu.uwo.csd.dcsim2.host.scheduler.VMAllocationSchedulingComparator;
 
 public final class VmExecutionDirector {
 		
@@ -15,7 +14,7 @@ public final class VmExecutionDirector {
 		for (Host host : hosts) {
 			vmList.addAll(host.getVMAllocations());
 		}
-		Collections.sort(vmList, new VMAllocationSchedulingComparator());
+		Collections.sort(vmList, new VmExecutionOrderComparator());
 		
 		return vmList;
 	}
