@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim2.application.workload;
 
 import edu.uwo.csd.dcsim2.application.WorkConsumer;
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.*;
 
 public abstract class Workload implements SimulationEventListener, WorkConsumer {

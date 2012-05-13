@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import edu.uwo.csd.dcsim2.application.*;
+import edu.uwo.csd.dcsim2.common.ObjectBuilder;
+import edu.uwo.csd.dcsim2.common.ObjectFactory;
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
@@ -11,7 +14,7 @@ import edu.uwo.csd.dcsim2.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim2.vm.*;
 import edu.uwo.csd.dcsim2.host.power.*;
 
-public class Host implements SimulationEventListener {
+public final class Host implements SimulationEventListener {
 	
 	/**
 	 * Event types for events that Host receives
@@ -73,70 +76,43 @@ public class Host implements SimulationEventListener {
 	
 	private HostState state;
 	
-	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
-			int privCpu, int privMemory, int privBandwidth, long privStorage,
-			CpuManager cpuManager, 
-			MemoryManager memoryManager, 
-			BandwidthManager bandwidthManager,
-			StorageManager storageManager, 
-			CpuScheduler cpuScheduler,
-			HostPowerModel powerModel) {
+	private Host(Builder builder) {
 		
-		this(simulation, nCpu, nCores, coreCapacity, memory, bandwidth, storage,
-			privCpu, privMemory, privBandwidth, privStorage,
-			cpuManager, 
-			memoryManager, 
-			bandwidthManager,
-			storageManager, 
-			cpuScheduler,
-			powerModel,
-			new VmmApplicationFactory());
-		
-	}
-	
-	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
-			int privCpu, int privMemory, int privBandwidth, long privStorage,
-			CpuManager cpuManager, 
-			MemoryManager memoryManager, 
-			BandwidthManager bandwidthManager,
-			StorageManager storageManager, 
-			CpuScheduler cpuScheduler,
-			HostPowerModel powerModel,
-			ApplicationFactory vmmApplicationFactory) {
-		
-		this.simulation = simulation;
-		
-		this.nCpu = nCpu;
-		this.nCores = nCores;
-		this.coreCapacity = coreCapacity;
-
 		this.id = nextId++;
-		this.memory = memory;
-		this.bandwidth = bandwidth;
-		this.storage = storage;
 		
-		setCpuManager(cpuManager);
-		setMemoryManager(memoryManager);
-		setBandwidthManager(bandwidthManager);
-		setStorageManager(storageManager);
-		setCpuScheduler(cpuScheduler);
-		setHostPowerModel(powerModel);
+		this.simulation = builder.simulation;
+		
+		this.nCpu = builder.nCpu;
+		this.nCores = builder.nCores;
+		this.coreCapacity = builder.coreCapacity;
+
+		
+		this.memory = builder.memory;
+		this.bandwidth = builder.bandwidth;
+		this.storage = builder.storage;
+		
+		setCpuManager(builder.cpuManagerFactory.newInstance());
+		setMemoryManager(builder.memoryManagerFactory.newInstance());
+		setBandwidthManager(builder.bandwidthManagerFactory.newInstance());
+		setStorageManager(builder.storageManagerFactory.newInstance());
+		setCpuScheduler(builder.cpuSchedulerFactory.newInstance());
+		setHostPowerModel(builder.powerModel);
 					
 		/*
 		 * Create and allocate privileged domain
 		 */
 		
 		//description allows privileged domain to use any or all of the resources of the host
-		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getCoreCapacity(), 0, bandwidth, 0, vmmApplicationFactory);
+		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getCoreCapacity(), builder.privMemory, builder.privBandwidth, builder.privStorage, builder.vmmApplicationFactory);
 		
 		//create the allocation
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);
 		
 		//request allocations from resource managers. Each manager determines how much resource to allocate
-		cpuManager.allocatePrivDomain(privDomainAllocation, privCpu);
-		memoryManager.allocatePrivDomain(privDomainAllocation, privMemory);
-		bandwidthManager.allocatePrivDomain(privDomainAllocation, privBandwidth);
-		storageManager.allocatePrivDomain(privDomainAllocation, privStorage);
+		cpuManager.allocatePrivDomain(privDomainAllocation, builder.privCpu);
+		memoryManager.allocatePrivDomain(privDomainAllocation, builder.privMemory);
+		bandwidthManager.allocatePrivDomain(privDomainAllocation, builder.privBandwidth);
+		storageManager.allocatePrivDomain(privDomainAllocation, builder.privStorage);
 
 		PrivDomainVM privVM = new PrivDomainVM(simulation, privDomainDescription, privDomainDescription.getApplicationFactory().createApplication(simulation));
 		privDomainAllocation.attachVm(privVM);
@@ -148,6 +124,115 @@ public class Host implements SimulationEventListener {
 		AggregateMetric.getSimulationMetric(simulation, POWER_CONSUMED_METRIC).initializeOutputFormatter(new PowerFormatter());
 		AggregateMetric.getSimulationMetric(simulation, HOST_TIME_METRIC).initializeOutputFormatter(new TimeFormatter(TimeFormatter.TimeUnit.SECONDS, TimeFormatter.TimeUnit.HOURS));
 		WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
+	}
+	
+	public static class Builder implements ObjectBuilder<Host> {
+
+		private final Simulation simulation;
+		
+		private int nCpu = -1;
+		private int nCores = -1;
+		private int coreCapacity = -1;
+		private int memory = -1;
+		private int bandwidth = -1;
+		private long storage = -1;
+		private int privCpu = 0;
+		private int privMemory = 0;
+		private int privBandwidth = 0;
+		private long privStorage = 0;
+		
+		private ObjectFactory<? extends CpuManager> cpuManagerFactory = null;
+		private ObjectFactory<? extends MemoryManager> memoryManagerFactory = null;
+		private ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory = null;
+		private ObjectFactory<? extends StorageManager> storageManagerFactory = null;
+		
+		private ObjectFactory<? extends CpuScheduler> cpuSchedulerFactory = null; 
+		
+		private HostPowerModel powerModel = null;
+		
+		private ApplicationFactory vmmApplicationFactory = new VmmApplicationFactory(); //default value
+		
+		public Builder(Simulation simulation) {
+			if (simulation == null)
+				throw new NullPointerException();
+			this.simulation = simulation;
+		}
+		
+		public Builder nCpu(int val) {this.nCpu = val; return this;}
+		
+		public Builder nCores(int val) {this.nCores = val; return this;}
+		
+		public Builder coreCapacity(int val) {this.coreCapacity = val; return this;}
+		
+		public Builder memory(int val) {this.memory = val; return this;}
+		
+		public Builder bandwidth(int val) {this.bandwidth = val; return this;}
+		
+		public Builder storage(long val) {this.storage = val; return this;}
+				
+		public Builder privCpu(int val) {this.privCpu = val; return this;}
+		
+		public Builder privMemory(int val) {this.privMemory = val; return this;}
+		
+		public Builder privBandwidth(int val) {this.privBandwidth = val; return this;}
+		
+		public Builder privStorage(long val) {this.privStorage = val; return this;}
+		
+		public Builder cpuManagerFactory(ObjectFactory<? extends CpuManager> cpuManagerFactory) {
+			this.cpuManagerFactory = cpuManagerFactory;
+			return this;
+		}
+		
+		public Builder memoryManagerFactory(ObjectFactory<? extends MemoryManager> memoryManagerFactory) {
+			this.memoryManagerFactory = memoryManagerFactory;
+			return this;
+		}
+		
+		public Builder bandwidthManagerFactory(ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory) {
+			this.bandwidthManagerFactory = bandwidthManagerFactory;
+			return this;
+		}
+		
+		public Builder storageManagerFactory(ObjectFactory<? extends StorageManager> storageManagerFactory) {
+			this.storageManagerFactory = storageManagerFactory;
+			return this;
+		}
+		
+		public Builder cpuSchedulerFactory(ObjectFactory<? extends CpuScheduler> cpuSchedulerFactory) {
+			this.cpuSchedulerFactory = cpuSchedulerFactory;
+			return this;
+		}
+		
+		public Builder powerModel(HostPowerModel powerModel) {
+			this.powerModel = powerModel;
+			return this;
+		}
+		
+		public Builder vmmApplicationFactory(ApplicationFactory vmmApplicationFactory) {
+			this.vmmApplicationFactory = vmmApplicationFactory;
+			return this;
+		}
+		
+		@Override
+		public Host build() {
+			
+			if (nCpu == -1 || nCores == -1 || coreCapacity == -1 || memory == -1 || bandwidth == -1 || storage == -1)
+				throw new IllegalStateException("Must specific Host resources before building Host");
+			if (cpuManagerFactory == null)
+				throw new IllegalStateException("Must specify CPU Manager factory before building Host");
+			if (bandwidthManagerFactory == null)
+				throw new IllegalStateException("Must specify Bandwidth Manager factory before building Host");
+			if (memoryManagerFactory == null)
+				throw new IllegalStateException("Must specify Memory Manager factory before building Host");
+			if (storageManagerFactory == null)
+				throw new IllegalStateException("Must specify Storage Manager factory before building Host");
+			if (cpuSchedulerFactory == null)
+				throw new IllegalStateException("Must specify CPU Scheduler factory before building Host");
+			if (powerModel == null)
+				throw new IllegalStateException("Must specify power model before building Host");
+			
+			return new Host(this);
+		}
 		
 	}
 	
@@ -380,8 +465,6 @@ public class Host implements SimulationEventListener {
 		
 		simulation.getLogger().debug("Host #" + this.getId() + " allocated for incoming VM #" + vm.getId());
 		
-		//compute time to migrate as (memory / bandwidth) * 1000 (seconds to ms), using privileged domain bandwidth TODO is this correct?
-		//long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesInUse().getMemory() * 1024) / (double)privDomainAllocation.getBandwidth()) * 1000);
 		if (privDomainAllocation.getBandwidth() == 0)
 			throw new RuntimeException("Privileged Domain has no bandwidth available for migration");
 		
@@ -630,66 +713,44 @@ public class Host implements SimulationEventListener {
 
 	//ACCESSOR & MUTATOR METHODS
 	
-	public int getId() {
-		return id;
-	}
+	public int getId() { return id; }
 	
-	public int getCpuCount() {
-		return nCpu;
-	}
+	public int getCpuCount() { return nCpu; }
 	
-	public int getCoreCapacity() {
-		return coreCapacity;
-	}
+	public int getCoreCapacity() { return coreCapacity; }
 	
-	public int getCoreCount() {
-		return nCores;
-	}
+	public int getCoreCount() { return nCores; }
 	
-	public int getTotalCpu() {
-		return nCpu * nCores * coreCapacity;
-	}
+	public int getTotalCpu() {	return nCpu * nCores * coreCapacity; }
 	
-	public int getMemory() {
-		return memory;
-	}
+	public int getMemory() { return memory; }
 	
-	public int getBandwidth() {
-		return bandwidth;
-	}
+	public int getBandwidth() { return bandwidth; }
 	
-	public long getStorage() {
-		return storage;
-	}
+	public long getStorage() {	return storage; }
 	
-	public HostState getState() {
-		return state;
-	}
+	public HostState getState() { return state; }
 	
-	public void setState(HostState state) {
-		this.state = state;
-	}
+	public void setState(HostState state) { this.state = state; }
 	
-	public CpuManager getCpuManager() {
-		return cpuManager;
-	}
+	public CpuManager getCpuManager() { 	return cpuManager;	}
+	
+	public MemoryManager getMemoryManager() { return memoryManager;}
+	
+	public BandwidthManager getBandwidthManager() { return bandwidthManager; }
+	
+	public StorageManager getStorageManager() { 	return storageManager; }
+	
+	public CpuScheduler getCpuScheduler() { 	return cpuScheduler; }
 	
 	public void setCpuManager(CpuManager cpuManager) {
 		this.cpuManager = cpuManager;
 		cpuManager.setHost(this);
 	}
-	
-	public MemoryManager getMemoryManager() {
-		return memoryManager;
-	}
-	
+		
 	public void setMemoryManager(MemoryManager memoryManager) {
 		this.memoryManager = memoryManager;
 		memoryManager.setHost(this);
-	}
-	
-	public BandwidthManager getBandwidthManager() {
-		return bandwidthManager;
 	}
 	
 	public void setBandwidthManager(BandwidthManager bandwidthManager) {
@@ -697,17 +758,9 @@ public class Host implements SimulationEventListener {
 		bandwidthManager.setHost(this);
 	}
 	
-	public StorageManager getStorageManager() {
-		return storageManager;
-	}
-	
 	public void setStorageManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
 		storageManager.setHost(this);
-	}
-	
-	public CpuScheduler getCpuScheduler() {
-		return cpuScheduler;
 	}
 	
 	public void setCpuScheduler(CpuScheduler cpuScheduler) {
@@ -715,40 +768,24 @@ public class Host implements SimulationEventListener {
 		cpuScheduler.setHost(this);
 	}
 	
-	public ArrayList<VMAllocation> getVMAllocations() {
-		return vmAllocations;
-	}
+	public ArrayList<VMAllocation> getVMAllocations() { return vmAllocations;	}
 	
-	public VMAllocation getPrivDomainAllocation() {
-		return privDomainAllocation;
-	}
+	public VMAllocation getPrivDomainAllocation() { 	return privDomainAllocation; }
 	
-	public ArrayList<VMAllocation> getMigratingIn() {
-		return migratingIn;
-	}
+	public ArrayList<VMAllocation> getMigratingIn() { return migratingIn;	}
 	
-	public ArrayList<VMAllocation> getMigratingOut() {
-		return migratingOut;
-	}
+	public ArrayList<VMAllocation> getMigratingOut() {	return migratingOut; }
 	
-	public HostPowerModel getPowerModel() {
-		return powerModel;
-	}
+	public HostPowerModel getPowerModel() { 	return powerModel;	}
 	
 	public void setHostPowerModel(HostPowerModel powerModel) {
 		this.powerModel = powerModel;
 	}
 	
-	public long getTimeActive() {
-		return timeActive;
-	}
+	public long getTimeActive() { return timeActive; }
 	
-	public double getPowerConsumed() {
-		return powerConsumed;
-	}
+	public double getPowerConsumed() { return powerConsumed; }
 	
-	public double getAverageUtilization() {
-		return utilizationSum / timeActive;
-	}
+	public double getAverageUtilization() { return utilizationSum / timeActive; }
 
 }

@@ -1,6 +1,6 @@
 package edu.uwo.csd.dcsim2.core.metrics;
 
-import edu.uwo.csd.dcsim2.core.Utility;
+import edu.uwo.csd.dcsim2.common.Utility;
 
 public class PercentageFormatter implements OutputFormatter {
 

@@ -11,7 +11,7 @@ import edu.uwo.csd.dcsim2.vm.*;
  *
  */
 public class SimpleCpuManager extends CpuManager {
-
+	
 	@Override
 	public boolean hasCapacity(int cpu) {
 		return cpu <= getAvailableAllocation();

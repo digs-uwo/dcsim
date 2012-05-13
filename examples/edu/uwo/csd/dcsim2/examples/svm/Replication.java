@@ -9,7 +9,6 @@ import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
-import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.management.*;
@@ -105,16 +104,15 @@ public class Replication {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
-		for (int i = 0; i < nHosts; ++i) {
-			Host host = new ProLiantDL360G5E5450Host(
-					simulation,
-					new OversubscribingCpuManager(500),
-					new SimpleMemoryManager(),
-					new SimpleBandwidthManager(131072), //assuming a separate 1Gb link for management!
-					new SimpleStorageManager(),
-					new FairShareCpuScheduler(simulation));
-						
-			hosts.add(host);
+		Host.Builder proLiantDL360G5E5450 = StandardHostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
+				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
+				.memoryManagerFactory(new SimpleMemoryManagerFactory())
+				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
+				.storageManagerFactory(new SimpleStorageManagerFactory())
+				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+		
+		for (int i = 0; i < nHosts; ++i) {						
+			hosts.add(proLiantDL360G5E5450.build());
 		}
 		
 		return hosts;

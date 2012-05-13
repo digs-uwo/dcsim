@@ -12,8 +12,6 @@ import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
-import edu.uwo.csd.dcsim2.host.model.*;
-import edu.uwo.csd.dcsim2.host.power.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.management.*;
@@ -97,17 +95,15 @@ public class RelocST03 {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
+		Host.Builder proLiantDL380G5QuadCore = StandardHostModels.ProLiantDL380G5QuadCore(simulation).privCpu(500).privBandwidth(131072)
+				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
+				.memoryManagerFactory(new SimpleMemoryManagerFactory())
+				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
+				.storageManagerFactory(new SimpleStorageManagerFactory())
+				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+		
 		for (int i = 0; i < nHosts; ++i) {
-			Host host = new ProLiantDL380G5QuadCoreHost(simulation,
-					new OversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
-					new SimpleMemoryManager(),
-					new SimpleBandwidthManager(131072), //assuming a separate 1Gb link for management!
-					new SimpleStorageManager(),
-					new FairShareCpuScheduler(simulation));
-			
-			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments
-			
-			hosts.add(host);
+			hosts.add(proLiantDL380G5QuadCore.build());
 		}
 		
 		return hosts;

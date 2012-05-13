@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim2.host.scheduler;
 
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
 public class FairShareCpuScheduler extends CpuScheduler {
@@ -57,15 +57,10 @@ public class FairShareCpuScheduler extends CpuScheduler {
 	}
 
 	@Override
-	public void endRound() {
-		// TODO Auto-generated method stub
-	}
+	public void endRound() {}
 
 	@Override
-	public void endScheduling() {
-		// TODO Auto-generated method stub
-		
-	}
+	public void endScheduling() {}
 
 	
 

@@ -41,7 +41,6 @@ public class SPECHostPowerModel implements HostPowerModel {
 		powerLevels[8] = util80;
 		powerLevels[9] = util90;
 		powerLevels[10] = util100;
-		
 	}
 	
 	@Override

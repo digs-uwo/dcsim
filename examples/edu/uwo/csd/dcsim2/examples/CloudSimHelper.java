@@ -7,28 +7,10 @@ import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.host.*;
-import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class CloudSimHelper {
 
-	public static ArrayList<Host> createHosts(DataCentreSimulation simulation, int nHosts) {
-		
-		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
-		
-		int hostSize[] = {2000, 2500, 3000, 3500};
-		for (int i = 0; i < nHosts; ++i) {
-			
-			int hostType = i % 4;
-			
-			Host host = new CloudSimHost(simulation, hostSize[hostType]);
-			
-			hosts.add(host);
-		}
-		
-		return hosts;
-	}
-	
 	public static VMDescription createVMDesc(DataCentreSimulation simulation, int coreCapacity) {
 		
 		//create workload (random)

@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim2.vm;
 
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 

@@ -2,8 +2,8 @@ package edu.uwo.csd.dcsim2.application;
 
 import java.util.ArrayList;
 
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.*;
 
 public class VmmApplication extends Application {

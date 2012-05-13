@@ -2,8 +2,8 @@ package edu.uwo.csd.dcsim2.host.scheduler;
 
 import java.util.HashMap;
 
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
 import edu.uwo.csd.dcsim2.vm.VMAllocation;
 
 public class FixedAllocationCpuScheduler extends CpuScheduler {
@@ -42,9 +42,7 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 	}
 
 	@Override
-	public void beginRound() {
-
-	}
+	public void beginRound() {}
 
 	@Override
 	public boolean processVM(VMAllocation vmAllocation) {
@@ -63,14 +61,10 @@ public class FixedAllocationCpuScheduler extends CpuScheduler {
 	}
 
 	@Override
-	public void endRound() {
-
-	}
+	public void endRound() {}
 
 	@Override
-	public void endScheduling() {
-
-	}
+	public void endScheduling() {}
 
 
 

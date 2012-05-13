@@ -14,7 +14,6 @@ import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
-import edu.uwo.csd.dcsim2.host.model.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
@@ -63,16 +62,25 @@ public class SVMHelper {
 		
 		for (int i = 0; i < N_HOSTS; ++i) {
 			Host host;
-			CpuManager cpuManager = new OversubscribingCpuManager(500);
-			MemoryManager memoryManager = new SimpleMemoryManager();
-			BandwidthManager bandwidthManager = new SimpleBandwidthManager(131072); //assumes separate 1GB link for migration
-			StorageManager storageManager = new SimpleStorageManager();
-			CpuScheduler cpuScheduler = new FairShareCpuScheduler(simulation);
+			
+			Host.Builder proLiantDL360G5E5450 = StandardHostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
+					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
+					.memoryManagerFactory(new SimpleMemoryManagerFactory())
+					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
+					.storageManagerFactory(new SimpleStorageManagerFactory())
+					.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+			
+			Host.Builder proLiantDL160G5E5420 = StandardHostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
+					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
+					.memoryManagerFactory(new SimpleMemoryManagerFactory())
+					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
+					.storageManagerFactory(new SimpleStorageManagerFactory())
+					.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
 			
 			if (i % 2 == 1) {
-				host = new ProLiantDL360G5E5450Host(simulation, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = proLiantDL360G5E5450.build();
 			} else {
-				host = new ProLiantDL160G5E5420Host(simulation, cpuManager, memoryManager, bandwidthManager, storageManager, cpuScheduler);
+				host = proLiantDL160G5E5420.build();
 			}
 			
 			hosts.add(host);

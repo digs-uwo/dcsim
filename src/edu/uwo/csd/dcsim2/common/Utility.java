@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.core;
+package edu.uwo.csd.dcsim2.common;
 
 public class Utility {
 

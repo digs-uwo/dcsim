@@ -1,8 +1,8 @@
 package edu.uwo.csd.dcsim2.vm;
 
 import edu.uwo.csd.dcsim2.application.Application;
+import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.Simulation;
-import edu.uwo.csd.dcsim2.core.Utility;
 
 public class PrivDomainVM extends VM {
 
