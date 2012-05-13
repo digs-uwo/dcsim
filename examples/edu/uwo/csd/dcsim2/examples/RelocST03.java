@@ -99,10 +99,10 @@ public class RelocST03 {
 		
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL380G5QuadCoreHost(simulation,
-					new StaticOversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
-					new StaticMemoryManager(),
-					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
-					new StaticStorageManager(),
+					new OversubscribingCpuManager(500), //300 VMM overhead + 200 migration reserve
+					new SimpleMemoryManager(),
+					new SimpleBandwidthManager(131072), //assuming a separate 1Gb link for management!
+					new SimpleStorageManager(),
 					new FairShareCpuScheduler(simulation));
 			
 			host.setHostPowerModel(new LinearHostPowerModel(250, 500)); //override default power model to match original DCSim experiments

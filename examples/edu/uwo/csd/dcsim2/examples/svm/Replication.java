@@ -108,10 +108,10 @@ public class Replication {
 		for (int i = 0; i < nHosts; ++i) {
 			Host host = new ProLiantDL360G5E5450Host(
 					simulation,
-					new StaticOversubscribingCpuManager(500),
-					new StaticMemoryManager(),
-					new StaticBandwidthManager(131072), //assuming a separate 1Gb link for management!
-					new StaticStorageManager(),
+					new OversubscribingCpuManager(500),
+					new SimpleMemoryManager(),
+					new SimpleBandwidthManager(131072), //assuming a separate 1Gb link for management!
+					new SimpleStorageManager(),
 					new FairShareCpuScheduler(simulation));
 						
 			hosts.add(host);

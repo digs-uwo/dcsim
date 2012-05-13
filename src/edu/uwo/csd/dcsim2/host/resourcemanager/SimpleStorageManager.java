@@ -1,10 +1,16 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class StaticStorageManager extends StorageManager {
+/**
+ * SimpleStorageManager allocates storage to VMs on the Host provided that there is enough storage available to satisfy the entire requested amount
+ * 
+ * @author Michael Tighe
+ *
+ */
+public class SimpleStorageManager extends StorageManager {
 
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
@@ -12,13 +18,17 @@ public class StaticStorageManager extends StorageManager {
 	}
 
 	@Override
-	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getStorage() <= getAvailableStorage();
+	public boolean hasCapacity(long storage) {
+		return storage <= getAvailableStorage();
 	}
 	
 	@Override
-	public boolean hasCapacity(
-			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
+		return hasCapacity(vmAllocationRequest.getStorage());
+	}
+	
+	@Override
+	public boolean hasCapacity(Collection<VMAllocationRequest> vmAllocationRequests) {
 
 		long totalAlloc = 0;
 		
@@ -35,7 +45,6 @@ public class StaticStorageManager extends StorageManager {
 		if (hasCapacity(vmAllocationRequest)) {
 			long newAlloc = vmAllocationRequest.getStorage();
 			vmAllocation.setStorage(newAlloc);
-			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
 		}
@@ -46,22 +55,15 @@ public class StaticStorageManager extends StorageManager {
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
 		vmAllocation.setStorage(0);
-		allocationMap.remove(vmAllocation);
 	}
 
 	@Override
-	public void updateAllocations() {
-		//do nothing, allocation is static
+	public void allocatePrivDomain(VMAllocation privDomainAllocation, long allocation) {
+		if (hasCapacity(allocation)) {
+			privDomainAllocation.setStorage(allocation);
+		} else {
+			throw new RuntimeException("Could not allocate privileged domain on Host #" + getHost().getId());
+		}
 	}
-
-	@Override
-	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
-		privDomainAllocation.setStorage(0); //currently allocating no storage
-		this.privDomainAllocation = privDomainAllocation;
-	}
-
-
-
-	
 	
 }

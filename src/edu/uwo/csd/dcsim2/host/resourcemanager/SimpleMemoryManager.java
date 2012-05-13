@@ -1,10 +1,15 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class StaticMemoryManager extends MemoryManager {
+/**
+ * SimpleMemoryManager allocates memory to VMs provided that there is enough unallocated memory to satisfy the entire requested allocation.
+ * @author Michael Tighe
+ *
+ */
+public class SimpleMemoryManager extends MemoryManager {
 
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
@@ -12,14 +17,17 @@ public class StaticMemoryManager extends MemoryManager {
 	}
 
 	@Override
+	public boolean hasCapacity(int memory) {
+		return memory <= getAvailableMemory();
+	}
+		
+	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getMemory() <= getAvailableMemory();
+		return hasCapacity(vmAllocationRequest.getMemory());
 	}
 	
 	@Override
-	public boolean hasCapacity(
-			ArrayList<VMAllocationRequest> vmAllocationRequests) {
-
+	public boolean hasCapacity(Collection<VMAllocationRequest> vmAllocationRequests) {
 		int totalAlloc = 0;
 		
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
@@ -35,7 +43,6 @@ public class StaticMemoryManager extends MemoryManager {
 		if (hasCapacity(vmAllocationRequest)) {
 			int newAlloc = vmAllocationRequest.getMemory();
 			vmAllocation.setMemory(newAlloc);
-			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
 		}
@@ -46,21 +53,15 @@ public class StaticMemoryManager extends MemoryManager {
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
 		vmAllocation.setMemory(0);
-		allocationMap.remove(vmAllocation);
 	}
 
 	@Override
-	public void updateAllocations() {
-		//do nothing, allocation is static
+	public void allocatePrivDomain(VMAllocation privDomainAllocation, int allocation) {
+		if (hasCapacity(allocation)) {
+			privDomainAllocation.setMemory(allocation);
+		} else {
+			throw new RuntimeException("Could not allocate privileged domain on Host #" + getHost().getId());
+		}
 	}
-
-	@Override
-	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
-		privDomainAllocation.setMemory(0); //currently allocating no memory
-	}
-
-	
-
-	
 	
 }

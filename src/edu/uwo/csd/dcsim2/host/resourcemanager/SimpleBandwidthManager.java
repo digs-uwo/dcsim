@@ -1,16 +1,16 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class StaticBandwidthManager extends BandwidthManager {
-	
-	int privDomainAlloc;
-	
-	public StaticBandwidthManager(int privDomainAlloc) {
-		this.privDomainAlloc = privDomainAlloc;
-	}
+/**
+ * SimpleBandwidthManager allocates bandwidth to VMs provided there is enough bandwidth available to satisfy the entire requested amount
+ * 
+ * @author Michael Tighe
+ *
+ */
+public class SimpleBandwidthManager extends BandwidthManager {
 	
 	@Override
 	public boolean isCapable(VMDescription vmDescription) {
@@ -18,13 +18,17 @@ public class StaticBandwidthManager extends BandwidthManager {
 	}
 
 	@Override
+	public boolean hasCapacity(int bandwidth) {
+		return bandwidth <= getAvailableBandwidth();
+	}
+	
+	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		return vmAllocationRequest.getBandwidth() <= getAvailableBandwidth();
 	}
 	
 	@Override
-	public boolean hasCapacity(
-			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public boolean hasCapacity(Collection<VMAllocationRequest> vmAllocationRequests) {
 		
 		int totalAlloc = 0;
 		
@@ -41,7 +45,6 @@ public class StaticBandwidthManager extends BandwidthManager {
 		if (hasCapacity(vmAllocationRequest)) {
 			int newAlloc = vmAllocationRequest.getBandwidth();
 			vmAllocation.setBandwidth(newAlloc);
-			allocationMap.put(vmAllocation, newAlloc);
 			
 			return true;
 		}
@@ -52,22 +55,16 @@ public class StaticBandwidthManager extends BandwidthManager {
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
 		vmAllocation.setBandwidth(0);
-		allocationMap.remove(vmAllocation);
 	}
 
 	@Override
-	public void updateAllocations() {
-		//do nothing, allocation is static
-	}
-
-	@Override
-	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
-		
-		if (getAvailableBandwidth() >= privDomainAlloc) {
-			privDomainAllocation.setBandwidth(privDomainAlloc);
-			this.privDomainAllocation = privDomainAllocation;
+	public void allocatePrivDomain(VMAllocation privDomainAllocation, int allocation) {
+		if (hasCapacity(allocation)) {
+			privDomainAllocation.setBandwidth(allocation);
 		}
 	}
+
+
 
 
 

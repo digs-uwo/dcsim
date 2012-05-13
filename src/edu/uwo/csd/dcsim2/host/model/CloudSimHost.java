@@ -14,10 +14,10 @@ public class CloudSimHost extends Host {
 	public CloudSimHost(Simulation simulation, int coreCapacity) {	
 		//16GB RAM, 10Gb/s network (* 2 to assume separate network for migration), 1TB storage
 		super(simulation, 1, 1, coreCapacity, 16384, 1310720*2, 1048576, 
-				new StaticOversubscribingCpuManager(0),
-				new StaticMemoryManager(), 
-				new StaticBandwidthManager(1310720), 
-				new StaticStorageManager(), 
+				new OversubscribingCpuManager(0),
+				new SimpleMemoryManager(), 
+				new SimpleBandwidthManager(1310720), 
+				new SimpleStorageManager(), 
 				new FairShareCpuScheduler(simulation),
 				powerModel,
 				new CloudSimVmmApplicationFactory());

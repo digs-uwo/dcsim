@@ -63,10 +63,10 @@ public class SVMHelper {
 		
 		for (int i = 0; i < N_HOSTS; ++i) {
 			Host host;
-			CpuManager cpuManager = new StaticOversubscribingCpuManager(500);
-			MemoryManager memoryManager = new StaticMemoryManager();
-			BandwidthManager bandwidthManager = new StaticBandwidthManager(131072); //assumes separate 1GB link for migration
-			StorageManager storageManager = new StaticStorageManager();
+			CpuManager cpuManager = new OversubscribingCpuManager(500);
+			MemoryManager memoryManager = new SimpleMemoryManager();
+			BandwidthManager bandwidthManager = new SimpleBandwidthManager(131072); //assumes separate 1GB link for migration
+			StorageManager storageManager = new SimpleStorageManager();
 			CpuScheduler cpuScheduler = new FairShareCpuScheduler(simulation);
 			
 			if (i % 2 == 1) {

@@ -74,6 +74,7 @@ public class Host implements SimulationEventListener {
 	private HostState state;
 	
 	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+			int privCpu, int privMemory, int privBandwidth, long privStorage,
 			CpuManager cpuManager, 
 			MemoryManager memoryManager, 
 			BandwidthManager bandwidthManager,
@@ -82,6 +83,7 @@ public class Host implements SimulationEventListener {
 			HostPowerModel powerModel) {
 		
 		this(simulation, nCpu, nCores, coreCapacity, memory, bandwidth, storage,
+			privCpu, privMemory, privBandwidth, privStorage,
 			cpuManager, 
 			memoryManager, 
 			bandwidthManager,
@@ -93,6 +95,7 @@ public class Host implements SimulationEventListener {
 	}
 	
 	public Host(Simulation simulation, int nCpu, int nCores, int coreCapacity, int memory, int bandwidth, long storage,
+			int privCpu, int privMemory, int privBandwidth, long privStorage,
 			CpuManager cpuManager, 
 			MemoryManager memoryManager, 
 			BandwidthManager bandwidthManager,
@@ -130,10 +133,10 @@ public class Host implements SimulationEventListener {
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);
 		
 		//request allocations from resource managers. Each manager determines how much resource to allocate
-		cpuManager.allocatePrivDomain(privDomainAllocation);
-		memoryManager.allocatePrivDomain(privDomainAllocation);
-		bandwidthManager.allocatePrivDomain(privDomainAllocation);
-		storageManager.allocatePrivDomain(privDomainAllocation);
+		cpuManager.allocatePrivDomain(privDomainAllocation, privCpu);
+		memoryManager.allocatePrivDomain(privDomainAllocation, privMemory);
+		bandwidthManager.allocatePrivDomain(privDomainAllocation, privBandwidth);
+		storageManager.allocatePrivDomain(privDomainAllocation, privStorage);
 
 		PrivDomainVM privVM = new PrivDomainVM(simulation, privDomainDescription, privDomainDescription.getApplicationFactory().createApplication(simulation));
 		privDomainAllocation.attachVm(privVM);
@@ -322,7 +325,7 @@ public class Host implements SimulationEventListener {
 		simulation.sendEvent(e);
 	}
 	
-	public void markVmForMigration(VM vm) {
+	private void markVmForMigration(VM vm) {
 		if (!vmAllocations.contains(vm.getVMAllocation()))
 				throw new RuntimeException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
 						" but it resides on Host #" + vm.getVMAllocation().getHost().getId());
@@ -395,7 +398,7 @@ public class Host implements SimulationEventListener {
 		simulation.sendEvent(e);
 	}
 	
-	public void migrateOut(VM vm) {
+	private void migrateOut(VM vm) {
 		//get the allocation for this vm
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		
@@ -440,7 +443,7 @@ public class Host implements SimulationEventListener {
 		
 	}
 	
-	public void completeMigrationOut(VM vm) {
+	private void completeMigrationOut(VM vm) {
 		//get the allocation for this vm
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		migratingOut.remove(vmAllocation);

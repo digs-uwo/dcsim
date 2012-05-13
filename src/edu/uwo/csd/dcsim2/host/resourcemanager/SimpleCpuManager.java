@@ -1,36 +1,29 @@
 package edu.uwo.csd.dcsim2.host.resourcemanager;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class StaticCpuManager extends CpuManager {
-	
-	int privDomainAlloc;
-	
-	public StaticCpuManager(int privDomainAlloc) {
-		this.privDomainAlloc = privDomainAlloc;
-	}
-	
-	@Override
-	public boolean isCapable(VMDescription vmDescription) {
-		//check cores and core capacity
-		if (vmDescription.getCores() > this.getHost().getCoreCount())
-			return false;
-		if (vmDescription.getCoreCapacity() > this.getHost().getCoreCapacity())
-			return false;
-				
-		return true;
-	}
+/**
+ * SimpleCpuManager allocates CPU to VMs on the Host provided there is enough available CPU to satisfy the entire requested allocation
+ * 
+ * @author Michael Tighe
+ *
+ */
+public class SimpleCpuManager extends CpuManager {
 
+	@Override
+	public boolean hasCapacity(int cpu) {
+		return cpu <= getAvailableAllocation();
+	}
+	
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
 		return vmAllocationRequest.getCpu() <= this.getAvailableAllocation();
 	}
 
 	@Override
-	public boolean hasCapacity(
-			ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public boolean hasCapacity(Collection<VMAllocationRequest> vmAllocationRequests) {
 		
 		double totalAlloc = 0;
 		
@@ -46,8 +39,7 @@ public class StaticCpuManager extends CpuManager {
 		if (hasCapacity(vmAllocationRequest)) {
 			int newAlloc = vmAllocationRequest.getCpu();
 			vmAllocation.setCpu(newAlloc);
-			allocationMap.put(vmAllocation, newAlloc);
-			
+
 			return true;
 		}
 		
@@ -55,11 +47,10 @@ public class StaticCpuManager extends CpuManager {
 	}
 	
 	@Override
-	public void allocatePrivDomain(VMAllocation privDomainAllocation) {
+	public void allocatePrivDomain(VMAllocation privDomainAllocation, int allocation) {
 
-		if (this.getAvailableAllocation() >= privDomainAlloc) {
-			privDomainAllocation.setCpu(privDomainAlloc);
-			setPrivDomainAllocation(privDomainAllocation);
+		if (hasCapacity(allocation)) {
+			privDomainAllocation.setCpu(allocation);
 		} else {
 			throw new RuntimeException("Could not allocate privileged domain on Host #" + getHost().getId());
 		}
@@ -68,14 +59,6 @@ public class StaticCpuManager extends CpuManager {
 	@Override
 	public void deallocateResource(VMAllocation vmAllocation) {
 		vmAllocation.setCpu(0);
-		allocationMap.remove(vmAllocation);
 	}
-
-	@Override
-	public void updateAllocations() {
-		//do nothing, allocation is static
-	}
-
-	
 
 }
