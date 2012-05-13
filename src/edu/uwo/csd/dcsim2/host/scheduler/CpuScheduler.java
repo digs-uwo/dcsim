@@ -7,7 +7,7 @@ import edu.uwo.csd.dcsim2.vm.*;
 
 public abstract class CpuScheduler {
 
-	private Host host;
+	protected Host host;
 	private CpuSchedulerState state;
 	private double availableCpu;
 	protected Simulation simulation;

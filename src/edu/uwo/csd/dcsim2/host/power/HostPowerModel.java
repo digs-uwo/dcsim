@@ -3,7 +3,7 @@ package edu.uwo.csd.dcsim2.host.power;
 import edu.uwo.csd.dcsim2.host.*;
 
 /**
- * HostPowerModel determines the current power consumption level of a Host
+ * HostPowerModel determines the current power consumption level of a Host. All HostPowerModel implementations should be immutable.
  * 
  * @author Michael Tighe
  *

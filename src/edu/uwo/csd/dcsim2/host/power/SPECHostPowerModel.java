@@ -11,8 +11,8 @@ import edu.uwo.csd.dcsim2.host.Host;
  */
 public class SPECHostPowerModel implements HostPowerModel {
 
-	private double suspended;
-	private double powerLevels[];
+	private final double suspended;
+	private final double powerLevels[];
 	
 	public SPECHostPowerModel(
 			double suspended,

@@ -12,8 +12,8 @@ import edu.uwo.csd.dcsim2.host.Host;
  */
 public class LinearHostPowerModel implements HostPowerModel {
 
-	double idlePower;
-	double maxPower;
+	private final double idlePower;
+	private final double maxPower;
 	
 	public LinearHostPowerModel(double idlePower, double maxPower) {
 		this.idlePower = idlePower;

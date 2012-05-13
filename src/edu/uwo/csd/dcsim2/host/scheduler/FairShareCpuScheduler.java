@@ -16,7 +16,7 @@ public class FairShareCpuScheduler extends CpuScheduler {
 
 	@Override
 	public void beginScheduling() {
-		nVms = getHost().getVMAllocations().size();
+		nVms = host.getVMAllocations().size();
 		
 		if (nVms > 0) {
 			minShare = 1 / nVms; //limit the smallest amount of allocation to be 1 cpu share divided by the number of VMs on the host
