@@ -41,7 +41,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private Random random;
 	private long randomSeed;
 	
-	public static void initializeLogging() {
+	public static final void initializeLogging() {
 		
 		Properties properties = new Properties();
 		
@@ -57,7 +57,7 @@ public abstract class Simulation implements SimulationEventListener {
 		loggerProperties = properties;
 	}
 	
-	private static Properties getProperties() {
+	private static final Properties getProperties() {
 		if (properties == null) {
 			/*
 			 * Load configuration properties from file
@@ -126,8 +126,8 @@ public abstract class Simulation implements SimulationEventListener {
 		
 	}
 	
-	public final void run(long duration) {
-		run(duration, 0);
+	public final Collection<Metric> run(long duration) {
+		return run(duration, 0);
 	}
 	
 	public final Collection<Metric> run(long duration, long metricRecordStart) {
@@ -202,11 +202,11 @@ public abstract class Simulation implements SimulationEventListener {
 		}
 	}
 	
-	public Logger getLogger() {
+	public final Logger getLogger() {
 		return logger;
 	}
 	
-	public  Random getRandom() {
+	public final Random getRandom() {
 		if (random == null) {
 			random = new Random();
 			setRandomSeed(random.nextLong());
@@ -215,24 +215,24 @@ public abstract class Simulation implements SimulationEventListener {
 		return random;
 	}
 	
-	public long getRandomSeed() {
+	public final long getRandomSeed() {
 		return randomSeed;
 	}
 	
-	public void setRandomSeed(long seed) {
+	public final void setRandomSeed(long seed) {
 		randomSeed = seed;
 		random = new Random(randomSeed);
 	}
 	
-	public boolean hasMetric(String name) {
+	public final boolean hasMetric(String name) {
 		return metrics.containsKey(name);
 	}
 	
-	public Metric getMetric(String name) {
+	public final Metric getMetric(String name) {
 		return metrics.get(name);
 	}
 	
-	public void addMetric(Metric metric) {
+	public final void addMetric(Metric metric) {
 		if (!metrics.containsKey(metric)) {
 			metrics.put(metric.getName(), metric);
 		} else {
@@ -280,7 +280,7 @@ public abstract class Simulation implements SimulationEventListener {
 	 * Get the directory of the manager application
 	 * @return The directory of the manager application
 	 */
-	public static String getHomeDirectory() {
+	public static final String getHomeDirectory() {
 		if (homeDirectory == null) {
 			File dir = new File(".");
 			try {
@@ -297,7 +297,7 @@ public abstract class Simulation implements SimulationEventListener {
 	 * Get the directory that contains log files
 	 * @return The directory that contains log files.
 	 */
-	public static String getLogDirectory() {
+	public static final String getLogDirectory() {
 		return getHomeDirectory() + LOG_DIRECTORY;
 	}
 	
@@ -305,7 +305,7 @@ public abstract class Simulation implements SimulationEventListener {
 	 * Get the directory that contains configuration files
 	 * @return The directory that contains configuration files.
 	 */
-	public static String getConfigDirectory() {
+	public static final String getConfigDirectory() {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
 	

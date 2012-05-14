@@ -8,7 +8,7 @@ import edu.uwo.csd.dcsim2.application.workload.Workload;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.Host;
 
-public class DataCentreSimulation extends Simulation {
+public final class DataCentreSimulation extends Simulation {
 
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>();
 	private Set<Workload> workloads = new HashSet<Workload>();

@@ -412,7 +412,7 @@ public final class Host implements SimulationEventListener {
 	
 	private void markVmForMigration(VM vm) {
 		if (!vmAllocations.contains(vm.getVMAllocation()))
-				throw new RuntimeException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
+				throw new IllegalStateException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
 						" but it resides on Host #" + vm.getVMAllocation().getHost().getId());
 		
 		pendingOutgoingMigrations.add(vm.getVMAllocation());
@@ -436,7 +436,7 @@ public final class Host implements SimulationEventListener {
 		
 		//verify source
 		if (vm.getVMAllocation().getHost() != source)
-			throw new RuntimeException("Migration failed: Source (host #" + source.getId() + ") does not match VM (#" + 
+			throw new IllegalStateException("Migration failed: Source (host #" + source.getId() + ") does not match VM (#" + 
 					vm.getId() + ") location (host #" + 
 					vm.getVMAllocation().getHost().getId() + ").");
 		
@@ -486,7 +486,7 @@ public final class Host implements SimulationEventListener {
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		
 		if (migratingOut.contains(vmAllocation))
-			throw new RuntimeException("Migrate out failed: VM #" + vm.getId() + " is already migrating out of Host #" + getId() + ".");
+			throw new IllegalStateException("Migrate out failed: VM #" + vm.getId() + " is already migrating out of Host #" + getId() + ".");
 		
 		migratingOut.add(vmAllocation);
 		
@@ -667,10 +667,10 @@ public final class Host implements SimulationEventListener {
 	public void updateMetrics() {
 		
 		if (getCpuManager().getCpuUtilization() > 1)
-			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
+			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
 	
 		if (getCpuManager().getCpuUtilization() < 0)
-			throw new RuntimeException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));	
+			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));	
 		
 		
 		if (state == HostState.ON) {
