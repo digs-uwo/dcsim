@@ -15,7 +15,6 @@ public abstract class Simulation implements SimulationEventListener {
 	public static final String DEFAULT_LOGGER_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
 	public static final String DEFAULT_LOGGER_FILE_NAME = "dcsim-%n-%d";
 	
-	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
 	
@@ -40,6 +39,8 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	private Random random;
 	private long randomSeed;
+	
+	private Map<String, Integer> nextIdMap = new HashMap<String, Integer>();
 	
 	public static final void initializeLogging() {
 		
@@ -204,6 +205,17 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	public final Logger getLogger() {
 		return logger;
+	}
+	
+	public final int nextId(String name) {
+		int id = 1;
+		
+		if (nextIdMap.containsKey(name))
+			id = nextIdMap.get(name);
+		
+		nextIdMap.put(name, id + 1);
+		
+		return id;
 	}
 	
 	public final Random getRandom() {

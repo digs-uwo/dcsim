@@ -5,9 +5,7 @@ import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.application.*;
 
 public class VM implements SimulationEventListener {
-	
-	static int nextId = 1;
-	
+
 	Simulation simulation;
 	int id;
 	VMDescription vmDescription;
@@ -25,7 +23,7 @@ public class VM implements SimulationEventListener {
 	
 	public VM(Simulation simulation, VMDescription vmDescription, Application application) {
 		this.simulation = simulation;
-		this.id = nextId++;
+		this.id = simulation.nextId(VM.class.toString());
 		this.vmDescription = vmDescription;
 		this.application = application;
 		application.setVM(this);

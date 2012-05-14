@@ -38,8 +38,6 @@ public final class Host implements SimulationEventListener {
 	public static final String AVERAGE_UTILIZATION_METRIC = "avgHostUtil";
 	public static final String HOST_TIME_METRIC = "hostTime";
 	
-	private static int nextId = 1;
-	
 	private Simulation simulation;
 	
 	private int id;
@@ -78,9 +76,9 @@ public final class Host implements SimulationEventListener {
 	
 	private Host(Builder builder) {
 		
-		this.id = nextId++;
-		
 		this.simulation = builder.simulation;
+		
+		this.id = simulation.nextId(Host.class.toString());
 		
 		this.nCpu = builder.nCpu;
 		this.nCores = builder.nCores;
