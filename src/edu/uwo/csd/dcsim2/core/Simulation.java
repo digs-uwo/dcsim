@@ -42,6 +42,8 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	private Map<String, Integer> nextIdMap = new HashMap<String, Integer>();
 	
+	private boolean complete = false;
+	
 	public static final void initializeLogging() {
 		
 		Properties properties = new Properties();
@@ -79,7 +81,7 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	public Simulation(String name, long randomSeed) {
 		this(name);
-		this.setRandomSeed(randomSeed);
+		this.setRandomSeed(randomSeed); //override Random seed with specified value
 	}
 	
 	public Simulation(String name) {
@@ -124,6 +126,8 @@ public abstract class Simulation implements SimulationEventListener {
 			logger.addAppender(simAppender);
 		}
 		
+		//initialize Random
+		setRandomSeed(new Random().nextLong());
 		
 	}
 	
@@ -132,6 +136,10 @@ public abstract class Simulation implements SimulationEventListener {
 	}
 	
 	public final Collection<Metric> run(long duration, long metricRecordStart) {
+		
+		if (complete)
+			throw new IllegalStateException("Simulation has already been run");
+		
 		Event e;
 		
 		//configure simulation duration
@@ -172,6 +180,8 @@ public abstract class Simulation implements SimulationEventListener {
 		completeSimulation(duration);
 		
 		logger.info("Completed simulation " + name);
+		
+		complete = true;
 		
 		return metrics.values();
 	}
