@@ -7,11 +7,10 @@ import org.apache.log4j.*;
 
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.core.*;
-import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class DynamicManagement {
+public class DynamicManagement extends DCSimulationTask {
 
 	private static Logger logger = Logger.getLogger(DynamicManagement.class);
 	
@@ -19,20 +18,32 @@ public class DynamicManagement {
 		
 		Simulation.initializeLogging();
 		
-		runSimulation("dynamic-1", 1088501048448116498l);
-//		runSimulation("dynamic-2", 3081198553457496232l);
-//		runSimulation("dynamic-3", -2485691440833440205l);
-//		runSimulation("dynamic-4", 2074739686644571611l);
-//		runSimulation("dynamic-5", -1519296228623429147l);
+		Collection<SimulationTask> completedTasks;
+		SimulationExecutor executor = new SimulationExecutor();
+		
+		executor.addTask(new DynamicManagement("dynamic-1", 1088501048448116498l));
+		executor.addTask(new DynamicManagement("dynamic-2", 3081198553457496232l));
+		executor.addTask(new DynamicManagement("dynamic-3", -2485691440833440205l));
+		executor.addTask(new DynamicManagement("dynamic-4", 2074739686644571611l));
+		executor.addTask(new DynamicManagement("dynamic-5", -1519296228623429147l));
+		
+		completedTasks = executor.execute();
+		
+		for(SimulationTask task : completedTasks) {
+			logger.info(task.getName());
+			SVMHelper.printMetrics(task.getResults());
+		}
 
 	}
 	
-	public static void runSimulation(String name, long seed) {
-		
-		long startTime = System.currentTimeMillis();
-		
-		//Set random seed to repeat run		
-		DataCentreSimulation simulation = new DataCentreSimulation(name, seed);
+	public DynamicManagement(String name, long randomSeed) {
+		super(name, 864000000);
+		this.setMetricRecordStart(86400000);
+		this.setRandomSeed(randomSeed);
+	}
+
+	@Override
+	public void setup(DataCentreSimulation simulation) {
 		
 		DataCentre dc = SVMHelper.createDataCentre(simulation);
 		simulation.addDatacentre(dc);
@@ -41,20 +52,12 @@ public class DynamicManagement {
 				
 		SVMHelper.placeVms(vmList, dc);
 		
-		//create the VM relocation policy
-		
 		/*
 		 * Basic Greedy Relocation & Consolidation together. Relocation same as RelocST03, Consolidation similar but
 		 * evicts ALL VMs from underprovisioned hosts, not 1.
 		 */
 		@SuppressWarnings("unused")
 		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
-
-		Collection<Metric> metrics = simulation.run(864000000, 86400000);
-		SVMHelper.printMetrics(metrics);
-		
-		long endTime = System.currentTimeMillis();
-		logger.info("End time: " + endTime + "ms. Elapsed: " + ((endTime - startTime) / 1000) + "s");
 	}
 	
 }

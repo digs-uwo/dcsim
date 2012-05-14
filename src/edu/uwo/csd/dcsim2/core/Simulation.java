@@ -183,7 +183,10 @@ public abstract class Simulation implements SimulationEventListener {
 		
 		complete = true;
 		
-		return metrics.values();
+		//wrap result in new Collection so that Collection is modifyable, as modifying the values() collection of a HashMap directly breaks things.
+		Vector<Metric> result = new Vector<Metric>(metrics.values());
+		
+		return result;
 	}
 	
 	
@@ -226,6 +229,10 @@ public abstract class Simulation implements SimulationEventListener {
 		nextIdMap.put(name, id + 1);
 		
 		return id;
+	}
+	
+	public final String getName() {
+		return name;
 	}
 	
 	public final Random getRandom() {
