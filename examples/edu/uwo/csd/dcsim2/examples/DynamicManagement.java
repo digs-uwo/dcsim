@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim2.examples.svm;
+package edu.uwo.csd.dcsim2.examples;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +31,7 @@ public class DynamicManagement extends DCSimulationTask {
 		
 		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
-			SVMHelper.printMetrics(task.getResults());
+			ExampleHelper.printMetrics(task.getResults());
 		}
 
 	}
@@ -45,12 +45,12 @@ public class DynamicManagement extends DCSimulationTask {
 	@Override
 	public void setup(DataCentreSimulation simulation) {
 		
-		DataCentre dc = SVMHelper.createDataCentre(simulation);
+		DataCentre dc = ExampleHelper.createDataCentre(simulation);
 		simulation.addDatacentre(dc);
 		
-		ArrayList<VMAllocationRequest> vmList = SVMHelper.createVmList(simulation, false);
+		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
 				
-		SVMHelper.placeVms(vmList, dc);
+		ExampleHelper.placeVms(vmList, dc);
 		
 		/*
 		 * Basic Greedy Relocation & Consolidation together. Relocation same as RelocST03, Consolidation similar but

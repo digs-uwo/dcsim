@@ -1,6 +1,5 @@
-package edu.uwo.csd.dcsim2.examples.svm;
+package edu.uwo.csd.dcsim2.examples;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +22,7 @@ import edu.uwo.csd.dcsim2.vm.*;
  * @author Michael Tighe
  *
  */
-public class SVMHelper {
+public class ExampleHelper {
 
 	public static final int N_HOSTS = 200; //200
 	public static final int N_VMS = 400; //400
@@ -45,7 +44,7 @@ public class SVMHelper {
 	public static final long[] OFFSET_MAX = {200000000, 40000000, 40000000, 15000000, 15000000, 15000000, 15000000};
 	public static final double[] TRACE_AVG = {0.32, 0.25, 0.32, 0.72, 0.74, 0.77, 0.83};
 	
-	private static Logger logger = Logger.getLogger(SVMHelper.class);
+	private static Logger logger = Logger.getLogger(ExampleHelper.class);
 	
 	public static DataCentre createDataCentre(Simulation simulation) {
 		//create datacentre
@@ -146,43 +145,6 @@ public class SVMHelper {
 				host.setState(Host.HostState.OFF);
 			}
 		}
-	}
-	
-	public static ArrayList<VMAllocationRequest> createPlanetLabVmList(Simulation simulation, String tracePath) {
-		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
-		
-		File inputFolder = new File(tracePath);
-		File[] files = inputFolder.listFiles();
-		
-		if (N_VMS > files.length)
-			throw new RuntimeException("Could not create " + N_VMS + " PlanetLab workloads, only " + files.length + " exist in folder '" + tracePath + "'");
-		
-		for (int i = 0; i < N_VMS; ++i) {
-			
-			int vmType = i % 3;
-			
-			Workload workload = new PlanetLabTraceWorkload(simulation, files[i].getAbsolutePath(), VM_SIZES[vmType], 0);
-			
-			//build VMDescription
-			int cores = 1; //requires 1 core
-			int memory = 1024;
-			int bandwidth = 16384; //102400; //100Mb/s
-			long storage = 1024; //1GB
-			
-			//create single tier (web tier)
-			InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(memory, storage, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
-			webServerTier.setWorkTarget(workload);
-			
-			//set the tier as the target for the external workload
-			workload.setWorkTarget(webServerTier);
-			
-			VMDescription vmDescription = new VMDescription(cores, VM_SIZES[vmType], memory, bandwidth, storage, webServerTier);
-			
-			vmList.add(new VMAllocationRequest(vmDescription));
-		}
-		
-		
-		return vmList;
 	}
 	
 	public static void printMetrics(Collection<Metric> metrics) {

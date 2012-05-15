@@ -1,36 +1,54 @@
-package edu.uwo.csd.dcsim2.examples.svm;
+package edu.uwo.csd.dcsim2.examples;
 
 import java.util.ArrayList;
 import java.util.Collection;
+
+import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim2.*;
 import edu.uwo.csd.dcsim2.application.*;
 import edu.uwo.csd.dcsim2.application.workload.*;
 import edu.uwo.csd.dcsim2.core.*;
-import edu.uwo.csd.dcsim2.core.metrics.Metric;
 import edu.uwo.csd.dcsim2.host.*;
 import edu.uwo.csd.dcsim2.host.resourcemanager.*;
 import edu.uwo.csd.dcsim2.host.scheduler.*;
 import edu.uwo.csd.dcsim2.management.*;
 import edu.uwo.csd.dcsim2.vm.*;
 
-public class Replication {
+public class Replication extends DCSimulationTask {
+	
+	private static Logger logger = Logger.getLogger(Replication.class);
 	
 	public static void main(String args[]) {
 		
 		Simulation.initializeLogging();
 		
-		runSimulation("replication-1", -2250887070548558400l);
-//		runSimulation("replication-2", 9028535546026732111l);
-//		runSimulation("replication-3", 2169085675430796896l);
-//		runSimulation("replication-4", 4294062650326098795l);
-//		runSimulation("replication-5", 3901350559651978320l);	
+		Collection<SimulationTask> completedTasks;
+		SimulationExecutor executor = new SimulationExecutor();
+		
+		executor.addTask(new Replication("replication-1", 1088501048448116498l));
+//		executor.addTask(new Replication("replication-2", 3081198553457496232l));
+//		executor.addTask(new Replication("replication-3", -2485691440833440205l));
+//		executor.addTask(new Replication("replication-4", 2074739686644571611l));
+//		executor.addTask(new Replication("replication-5", -1519296228623429147l));
+		
+		completedTasks = executor.execute();
+		
+		for(SimulationTask task : completedTasks) {
+			logger.info(task.getName());
+			ExampleHelper.printMetrics(task.getResults());
+		}
 		
 	}
 	
-	public static void runSimulation(String name, long seed) {
-		DataCentreSimulation simulation = new DataCentreSimulation(name, seed);
-		
+	public Replication(String name, long randomSeed) {
+		super(name, 864000000);
+		this.setMetricRecordStart(86400000);
+		this.setRandomSeed(randomSeed);
+	}
+	
+	@Override
+	public void setup(DataCentreSimulation simulation) {
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
 		DataCentre dc = new DataCentre(vmPlacementPolicy);
 		
@@ -74,13 +92,8 @@ public class Replication {
 		
 		@SuppressWarnings("unused")
 		ServiceReplicationPolicySimple serviceReplicationPolicy = new ServiceReplicationPolicySimple(simulation, serviceList, 600000, 0.85, 0.7, vmPlacementPolicy);
-		
-		
-		//run the simulation
-		Collection<Metric> metrics = simulation.run(864000000, 86400000); //10 days
-		SVMHelper.printMetrics(metrics);
 	}
-	
+
 	public static Service createService(DataCentreSimulation simulation, String fileName, long offset, int scale) {
 		
 		//create workload (external)
@@ -120,5 +133,7 @@ public class Replication {
 		
 		return hosts;
 	}
+
+
 	
 }
