@@ -71,9 +71,13 @@ public final class DataCentreSimulation extends Simulation {
 			dc.logInfo();
 		}
 		
-		if (this.isRecordingMetrics())
+		if (this.isRecordingMetrics()) {
 			Host.updateSimulationScopeMetrics(this);
-
+	
+			for (Workload workload : workloads)
+				workload.updateMetrics();
+		}
+				
 	}
 
 	@Override

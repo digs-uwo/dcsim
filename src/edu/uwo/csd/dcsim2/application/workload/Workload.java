@@ -1,8 +1,10 @@
 package edu.uwo.csd.dcsim2.application.workload;
 
+import edu.uwo.csd.dcsim2.application.Application;
 import edu.uwo.csd.dcsim2.application.WorkConsumer;
 import edu.uwo.csd.dcsim2.common.Utility;
 import edu.uwo.csd.dcsim2.core.*;
+import edu.uwo.csd.dcsim2.core.metrics.FractionalMetric;
 
 public abstract class Workload implements SimulationEventListener, WorkConsumer {
 	
@@ -11,10 +13,9 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	protected Simulation simulation;
 	private double totalWork = 0;
 	private double completedWork = 0;
+	private double currentWork = 0;
 	private WorkConsumer workTarget;
-	
-	
-	
+
 	public Workload(Simulation simulation) {
 		
 		this.simulation = simulation;
@@ -35,6 +36,8 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	protected abstract double retrievePendingWork(); 
 	
 	public void update() {
+		
+		//ensure that new work is only calculated once per simulation time interval 
 		if (workTarget != null && simulation.getLastUpdate() < simulation.getSimulationTime()) {
 			double pendingWork = retrievePendingWork();
 			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
@@ -45,7 +48,15 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 			}
 			
 			workTarget.addWork(pendingWork);
+			
+			currentWork = pendingWork;			
 		}
+	}
+	
+	public void updateMetrics() {
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addDenominator(currentWork);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addDenominator(currentWork);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addDenominator(currentWork);
 	}
 	
 	/**

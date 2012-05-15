@@ -219,9 +219,13 @@ public class InteractiveApplication extends Application {
 		totalResourceDemand = totalResourceDemand.add(resourcesDemanded);
 		totalResourceUsed = totalResourceUsed.add(resourcesUsed);
 		
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addValue(slaViolatedWork, incomingWork);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addValue(slaViolatedWork - migrationPenalty, incomingWork);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addValue(migrationPenalty, incomingWork);
+		/**
+		 * Add values to the SLA violation numerators only. The denominator (total incoming requests) is populated by Workload objects, to prevent 
+		 * tiers of a multi-tiered application from counting the same incoming work unit multiple times
+		 */
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addNumerator(slaViolatedWork);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addNumerator(slaViolatedWork - migrationPenalty);
+		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addNumerator(migrationPenalty);
 
 	}
 
