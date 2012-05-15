@@ -51,7 +51,7 @@ public final class DataCentreSimulation extends Simulation {
 	
 	@Override
 	public void beginSimulation() {
-		logger.info("Starting DCSim2");
+		logger.info("Starting DCSim");
 		
 		logger.info("Random Seed: " + this.getRandomSeed());
 	}
@@ -82,7 +82,7 @@ public final class DataCentreSimulation extends Simulation {
 
 	@Override
 	public void completeSimulation(long duration) {
-		logger.info("DCSim2 Simulation Complete");
+		logger.info("DCSim Simulation Complete");
 		
 		double simTime = this.getDuration();
 		double recordedTime = this.getRecordingDuration();
