@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim2.application;
 
 import edu.uwo.csd.dcsim2.core.Simulation;
 
-public class WebServerTier extends ApplicationTier {
+public class InteractiveApplicationTier extends ApplicationTier {
 
 	private double cpuPerWork;
 	private double bwPerWork;
@@ -10,7 +10,7 @@ public class WebServerTier extends ApplicationTier {
 	private int memory;
 	private long storage;
 	
-	public WebServerTier(int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
+	public InteractiveApplicationTier(int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
 		this.memory = memory;
 		this.storage = storage;
 		this.cpuPerWork = cpuPerWork;
@@ -19,8 +19,8 @@ public class WebServerTier extends ApplicationTier {
 	}
 	
 	@Override
-	protected WebServerApplication instantiateApplication(Simulation simulation) {
-		return new WebServerApplication(simulation, this, memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
+	protected InteractiveApplication instantiateApplication(Simulation simulation) {
+		return new InteractiveApplication(simulation, this, memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
 	}
 
 }

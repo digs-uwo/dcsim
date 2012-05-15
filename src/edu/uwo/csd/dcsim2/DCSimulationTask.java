@@ -2,10 +2,14 @@ package edu.uwo.csd.dcsim2;
 
 import java.util.Collection;
 
+import org.apache.log4j.Logger;
+
 import edu.uwo.csd.dcsim2.core.metrics.*;
 
 public abstract class DCSimulationTask implements SimulationTask {
 
+	private static Logger logger = Logger.getLogger(DCSimulationTask.class);
+	
 	private final DataCentreSimulation simulation;
 	private long duration;
 	private long metricRecordStart = 0;
@@ -41,22 +45,28 @@ public abstract class DCSimulationTask implements SimulationTask {
 	@Override
 	public final void run() {
 	
-		if (complete)
-			throw new IllegalStateException("Simulation task has already been run");
+		try {
+			if (complete)
+				throw new IllegalStateException("Simulation task has already been run");
+		
+			long startTime = System.currentTimeMillis();
+			
+			setup(simulation);
 	
-		long startTime = System.currentTimeMillis();
+			metrics = simulation.run(duration, metricRecordStart);
+			
+			long endTime = System.currentTimeMillis();
+			
+			ValueMetric timeMetric = new ValueMetric("simExecTime");
+			timeMetric.setValue(endTime - startTime);
+			metrics.add(timeMetric);
+			
+			complete = true;
+		} catch (Exception e) {
+			logger.error(simulation.getName() + " failed. " + e);
+			e.printStackTrace();
+		}
 		
-		setup(simulation);
-
-		metrics = simulation.run(duration, metricRecordStart);
-		
-		long endTime = System.currentTimeMillis();
-		
-		ValueMetric timeMetric = new ValueMetric("simExecTime");
-		timeMetric.setValue(endTime - startTime);
-		metrics.add(timeMetric);
-		
-		complete = true;
 	}
 	
 	@Override

@@ -35,7 +35,11 @@ public class Service {
 		return tiers;
 	}
 	
-	public class ServiceTier {
+	public void addServiceTier(ServiceTier serviceTier) {
+		tiers.add(serviceTier);
+	}
+	
+	public static class ServiceTier {
 		
 		private ApplicationTier applicationTier;
 		private VMDescription vmDescription;

@@ -22,10 +22,10 @@ public class DynamicManagement extends DCSimulationTask {
 		SimulationExecutor executor = new SimulationExecutor();
 		
 		executor.addTask(new DynamicManagement("dynamic-1", 1088501048448116498l));
-		executor.addTask(new DynamicManagement("dynamic-2", 3081198553457496232l));
-		executor.addTask(new DynamicManagement("dynamic-3", -2485691440833440205l));
-		executor.addTask(new DynamicManagement("dynamic-4", 2074739686644571611l));
-		executor.addTask(new DynamicManagement("dynamic-5", -1519296228623429147l));
+//		executor.addTask(new DynamicManagement("dynamic-2", 3081198553457496232l));
+//		executor.addTask(new DynamicManagement("dynamic-3", -2485691440833440205l));
+//		executor.addTask(new DynamicManagement("dynamic-4", 2074739686644571611l));
+//		executor.addTask(new DynamicManagement("dynamic-5", -1519296228623429147l));
 		
 		completedTasks = executor.execute();
 		

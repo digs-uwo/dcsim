@@ -63,14 +63,14 @@ public class SVMHelper {
 		for (int i = 0; i < N_HOSTS; ++i) {
 			Host host;
 			
-			Host.Builder proLiantDL360G5E5450 = StandardHostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
+			Host.Builder proLiantDL360G5E5450 = HostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
 					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 					.memoryManagerFactory(new SimpleMemoryManagerFactory())
 					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 					.storageManagerFactory(new SimpleStorageManagerFactory())
 					.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
 			
-			Host.Builder proLiantDL160G5E5420 = StandardHostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
+			Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
 					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 					.memoryManagerFactory(new SimpleMemoryManagerFactory())
 					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
@@ -128,10 +128,10 @@ public class SVMHelper {
 		
 		int bandwidth = 12800; //100 Mb/s
 		long storage = 1024; //1GB
-		
-		SingleTierWebService webService = new SingleTierWebService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, CPU_OVERHEAD);
 
-		return webService;
+		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, CPU_OVERHEAD, 1, Integer.MAX_VALUE); 
+		
+		return service;
 
 	}
 	
@@ -170,7 +170,7 @@ public class SVMHelper {
 			long storage = 1024; //1GB
 			
 			//create single tier (web tier)
-			WebServerTier webServerTier = new WebServerTier(memory, storage, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
+			InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(memory, storage, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
 			webServerTier.setWorkTarget(workload);
 			
 			//set the tier as the target for the external workload

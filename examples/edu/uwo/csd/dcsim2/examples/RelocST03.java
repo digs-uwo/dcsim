@@ -95,7 +95,7 @@ public class RelocST03 {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
-		Host.Builder proLiantDL380G5QuadCore = StandardHostModels.ProLiantDL380G5QuadCore(simulation).privCpu(500).privBandwidth(131072)
+		Host.Builder proLiantDL380G5QuadCore = HostModels.ProLiantDL380G5QuadCore(simulation).privCpu(500).privBandwidth(131072)
 				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
@@ -116,7 +116,7 @@ public class RelocST03 {
 		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(1024, 0, 1, 0, 300); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
+		InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(1024, 0, 1, 0, 300); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
 		webServerTier.setWorkTarget(workload);
 		
 		//set the tier as the target for the external workload

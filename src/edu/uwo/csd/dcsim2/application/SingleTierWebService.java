@@ -13,7 +13,7 @@ public class SingleTierWebService extends Service {
 	public SingleTierWebService(Workload workload, int cores, int coreCapacity, int memory, int bandwidth, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead, int tierMin) {
 		setWorkload(workload);
 		
-		WebServerTier webServerTier = new WebServerTier(memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
+		InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
 		webServerTier.setLoadBalancer(new EqualShareLoadBalancer());
 		webServerTier.setWorkTarget(workload);
 		

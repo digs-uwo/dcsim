@@ -3,12 +3,12 @@ package edu.uwo.csd.dcsim2.host;
 import edu.uwo.csd.dcsim2.core.Simulation;
 import edu.uwo.csd.dcsim2.host.power.*;
 
-public final class StandardHostModels {
+public final class HostModels {
 
 	/*
 	 * Enforce non-instantiable class 
 	 */
-	private StandardHostModels() {}
+	private HostModels() {}
 	
 
 	

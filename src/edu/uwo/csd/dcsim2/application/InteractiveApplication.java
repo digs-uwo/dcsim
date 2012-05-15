@@ -4,7 +4,7 @@ import edu.uwo.csd.dcsim2.core.*;
 import edu.uwo.csd.dcsim2.core.metrics.FractionalMetric;
 import edu.uwo.csd.dcsim2.vm.VirtualResources;
 
-public abstract class InteractiveApplication extends Application {
+public class InteractiveApplication extends Application {
 
 	//variables to keep track of resource demand and consumption
 	VirtualResources resourceDemand;		//the current level of resource demand / second
@@ -28,8 +28,18 @@ public abstract class InteractiveApplication extends Application {
 	private double migrationPenalty = 0;
 	private double totalMigrationPenalty = 0;
 	
-	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier) {
+	private double cpuPerWork;
+	private double bwPerWork;
+	private int memory;
+	private long storage;
+	
+	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier, int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
 		super(simulation);
+		
+		this.memory = memory;
+		this.storage = storage;
+		this.cpuPerWork = cpuPerWork;
+		this.bwPerWork = bwPerWork;
 		
 		//initialize resource demand/consumption values
 		resourceDemand = new VirtualResources();
@@ -40,7 +50,9 @@ public abstract class InteractiveApplication extends Application {
 		totalResourceUsed = new VirtualResources();
 		
 		this.applicationTier = applicationTier;
-		overhead = new VirtualResources(); //no overhead, by default
+		
+		overhead = new VirtualResources();
+		overhead.setCpu(cpuOverhead);
 	}
 	
 	/*
@@ -76,7 +88,10 @@ public abstract class InteractiveApplication extends Application {
 		
 		//if there is incoming work, calculate the resources required to perform it and add it to resourceDemand
 		if (incomingWork > 0) {
-			resourcesDemanded = resourcesDemanded.add(calculateRequiredResources(incomingWork));
+			resourcesDemanded.setCpu(resourcesDemanded.getCpu() + (incomingWork * cpuPerWork));
+			resourcesDemanded.setBandwidth(resourcesDemanded.getBandwidth() + (incomingWork * bwPerWork));
+			resourcesDemanded.setMemory(memory);
+			resourcesDemanded.setStorage(storage);
 		}
 	}
 	
@@ -121,23 +136,47 @@ public abstract class InteractiveApplication extends Application {
 			return new VirtualResources(); //no resources consumed
 		}
 		
-		//next, we can process actual work
-		CompletedWork completedWork = performWork(resourcesAvailable, workRemaining);
+		/* 
+		 * Process actual work
+		 * 
+		 * total work completed depends on CPU and BW. Calculate the
+		 * amount of work possible for each assuming the other is infinite,
+		 * and the minimum of the two is the amount of work completed
+		 */
 		
-		if (completedWork.getWorkCompleted() > workRemaining)
-			throw new RuntimeException("Application class " + this.getClass().getName() + " performed more work than was available to perform. Programming error.");
+		double cpuWork, bwWork;
 		
-		applicationTier.getWorkTarget().addWork(completedWork.getWorkCompleted());
-		workRemaining -= completedWork.getWorkCompleted();
+		if (cpuPerWork != 0)
+			cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
+		else
+			cpuWork = Double.MAX_VALUE;
+		
+		if (bwPerWork != 0)
+			bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
+		else
+			bwWork = Double.MAX_VALUE;
+		
+		double workCompleted = Math.min(cpuWork, bwWork);
+		workCompleted = Math.min(workCompleted, workRemaining);
+		
+		if (workCompleted > workRemaining)
+			throw new IllegalStateException("Application class " + this.getClass().getName() + " performed more work than was available to perform. Programming error.");
+		
+		applicationTier.getWorkTarget().addWork(workCompleted);
+		workRemaining -= workCompleted;
 	
 		//compute total consumed resources
-		resourcesConsumed = resourcesConsumed.add(completedWork.resourcesConsumed);
+		resourcesConsumed.setCpu(resourcesConsumed.getCpu() + (workCompleted * cpuPerWork));
+		resourcesConsumed.setBandwidth(resourcesConsumed.getBandwidth() + (workCompleted * bwPerWork));
+		resourcesConsumed.setMemory(memory);
+		resourcesConsumed.setStorage(storage);
 		
 		//add resourcesConsumed to resourcesInUse, which is keeping track of all resources used during this time interval
 		resourcesUsed = resourcesUsed.add(resourcesConsumed);
 		
 		return resourcesConsumed;
 	}
+
 
 	/*
 	 * Called once at the end of scheduling
@@ -186,9 +225,6 @@ public abstract class InteractiveApplication extends Application {
 
 	}
 
-	protected abstract VirtualResources calculateRequiredResources(double work);
-	protected abstract CompletedWork performWork(VirtualResources resourcesAvailable, double workRemaining);
-	
 	public VirtualResources getOverhead() {
 		return overhead;
 	}
@@ -245,26 +281,6 @@ public abstract class InteractiveApplication extends Application {
 	@Override	
 	public double getTotalMigrationPenalty() {
 		return totalMigrationPenalty;
-	}
-	
-	protected class CompletedWork {
-		
-		private double workCompleted;
-		private VirtualResources resourcesConsumed;
-		
-		public CompletedWork(double workCompleted, VirtualResources resourcesConsumed) {
-			this.workCompleted = workCompleted;
-			this.resourcesConsumed = resourcesConsumed;
-		}
-		
-		public double getWorkCompleted() {
-			return workCompleted;
-		}
-		
-		public VirtualResources getResourcesConsumed() {
-			return resourcesConsumed;
-		}
-		
 	}
 	
 }

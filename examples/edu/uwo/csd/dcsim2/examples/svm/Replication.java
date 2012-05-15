@@ -93,10 +93,13 @@ public class Replication {
 		int bandwidth = 16384; //16MB = 16384KB
 		long storage = 1024; //1GB
 		
-		//SingleTierWebService webService = new SingleTierWebService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300, scale); //start with peak # of VMs
-		SingleTierWebService webService = new SingleTierWebService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300); //start with 1 VM
+		//Create a service that always has enough VMs to serve the peak workload
+		//Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300, scale, Integer.MAX_VALUE);  
 
-		return webService;
+		//Create a service that has a minimum of 1 VM and can scale up indefinitely
+		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300, 1, Integer.MAX_VALUE); 
+
+		return service;
 
 	}
 	
@@ -104,7 +107,7 @@ public class Replication {
 		
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
-		Host.Builder proLiantDL360G5E5450 = StandardHostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
+		Host.Builder proLiantDL360G5E5450 = HostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
 				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())

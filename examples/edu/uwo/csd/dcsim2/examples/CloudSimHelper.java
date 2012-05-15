@@ -18,7 +18,7 @@ public class CloudSimHelper {
 		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(128, 1024, 1, 0, 0); //128MB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
+		InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(128, 1024, 1, 0, 0); //128MB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
 		webServerTier.setWorkTarget(workload);
 		
 		//set the tier as the target for the external workload
@@ -53,7 +53,7 @@ public class CloudSimHelper {
 			simulation.addWorkload(workload);
 			
 			//create single tier (web tier)
-			WebServerTier webServerTier = new WebServerTier(1024, 1024, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
+			InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(1024, 1024, 1, 0, 0); //1GB RAM, 1GB Storage, 1 cpu per request, 0 bw per request, 0 cpu overhead
 			webServerTier.setWorkTarget(workload);
 			
 			//set the tier as the target for the external workload
@@ -79,7 +79,7 @@ public class CloudSimHelper {
 		simulation.addWorkload(workload);
 		
 		//create single tier (web tier)
-		WebServerTier webServerTier = new WebServerTier(128, 1024, 1, 0, 0); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
+		InteractiveApplicationTier webServerTier = new InteractiveApplicationTier(128, 1024, 1, 0, 0); //256MB RAM, 0MG Storage, 1 cpu per request, 1 bw per request, 300 cpu overhead
 		webServerTier.setWorkTarget(workload);
 		
 		//set the tier as the target for the external workload
