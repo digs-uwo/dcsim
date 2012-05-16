@@ -43,11 +43,46 @@ public abstract class Application {
 	 */
 	public abstract void completeExecution();
 	
+	/**
+	 * Get the percentage of incoming work to this application for which SLA is violated
+	 * at the current simulation time
+	 * @return
+	 */
 	public abstract double getSLAViolation();
+	
+	/**
+	 * Get the percentage of incoming work to this application for which SLA has been violated
+	 * since the simulation began
+	 * @return
+	 */
 	public abstract double getTotalSLAViolation();
+	
+	/**
+	 * Get the amount of work (in units of work) for which SLA is violated at the current
+	 * simulation time
+	 * @return
+	 */
 	public abstract double getSLAViolatedWork();
+	
+	/**
+	 * Get the amount of work (in units of work) for which SLA has been violated since
+	 * the simulation began
+	 * @return
+	 */
 	public abstract double getTotalSLAViolatedWork();
+	
+	/**
+	 * Get the percentage of incoming work to this application for which SLA is violated
+	 * due to VM migration involving this application at the current simulation time 
+	 * @return
+	 */
 	public abstract double getMigrationPenalty();
+	
+	/**
+	 * Get the percentage of incoming work to this application for which SLA has been violated
+	 * due to VM migration involving this application since the simulation began
+	 * @return
+	 */
 	public abstract double getTotalMigrationPenalty();
 	
 	public abstract VirtualResources getResourceDemand();

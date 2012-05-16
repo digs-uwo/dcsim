@@ -82,6 +82,10 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 		this.workTarget = workTarget;
 	}
 	
+	public double getCurrentWork() {
+		return currentWork;
+	}
+	
 	@Override
 	public void handleEvent(Event e) {
 		if (e.getType() == Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT) {

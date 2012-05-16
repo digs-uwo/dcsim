@@ -23,6 +23,40 @@ public class Service {
 		return vmList;
 	}
 	
+	/**
+	 * Get the percentage of current incoming work to the Service for which SLA is violated
+	 * @return
+	 */
+	public double getSLAViolation() {
+		double sla = 0;
+		for (ServiceTier tier : tiers) {
+			for (Application app : tier.getApplications()) {
+				sla += app.getSLAViolatedWork();
+			}
+		}
+		
+		sla = sla / workload.getCurrentWork();
+		
+		return sla;
+	}
+	
+	/**
+	 * Get the percentage of all incoming work to the Service for which SLA has been violated
+	 * @return
+	 */
+	public double getTotalSLAViolation() {
+		double sla = 0;
+		for (ServiceTier tier : tiers) {
+			for (Application app : tier.getApplications()) {
+				sla += app.getTotalSLAViolatedWork();
+			}
+		}
+		
+		sla = sla / workload.getTotalWork();
+		
+		return sla;
+	}
+	
 	public Workload getWorkload() {
 		return workload;
 	}

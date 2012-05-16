@@ -266,7 +266,7 @@ public class InteractiveApplication extends Application {
 	public double getTotalSLAViolation() {
 		return totalSlaViolatedWork / totalIncomingWork;
 	}
-
+	
 	@Override
 	public double getSLAViolatedWork() {
 		return slaViolatedWork;
