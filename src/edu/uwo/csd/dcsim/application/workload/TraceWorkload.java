@@ -7,15 +7,29 @@ import java.io.*;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * TraceWorkload sets the incoming work level based on a trace file. Trace files list workload values 
+ * in the range [0, 1]
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class TraceWorkload extends Workload {
 
 	private static Map<String, WorkloadTrace> workloadTraces =  new HashMap<String, WorkloadTrace>();
 	
-	double scaleFactor;
-	WorkloadTrace workloadTrace;
+	double scaleFactor; //the factor by which to scale work values
+	WorkloadTrace workloadTrace; //the workload trace
 	
-	int currentPosition;
+	int currentPosition; //the current position in the trace
 	
+	/**
+	 * Create a new TraceWorkload.
+	 * @param simulation
+	 * @param fileName The file name of the trace to use.
+	 * @param scaleFactor The factor by which to scale trace workload values. Traces values are in the range [0, 1], so workload values are in the range [0, scaleFactor]
+	 * @param offset The offset in simulation time to start the trace at.
+	 */
 	public TraceWorkload(Simulation simulation, String fileName, double scaleFactor, long offset) {
 		super(simulation);
 		

@@ -6,13 +6,18 @@ import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.vm.*;
 
+/**
+ * VmmApplication is a special application that handles the virtual machine manager on a Host.
+ * @author Michael Tighe
+ *
+ */
 public class VmmApplication extends Application {
 
 	private ArrayList<VM> migratingVms = new ArrayList<VM>();
 	private VirtualResources resourcesRemaining;
 	
-	protected double cpuOverhead = 300;
-	protected double bandwidthOverhead = 0;
+	protected double cpuOverhead = 300; //fixed cpu overhead
+	protected double bandwidthOverhead = 0; //fixed bandwidth overhead
 	
 	//variables to keep track of resource demand and consumption
 	VirtualResources resourceDemand = new VirtualResources();		//the current level of resource demand / second

@@ -7,6 +7,12 @@ import java.io.*;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * A Workload based on traces from PlanetLab
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class PlanetLabTraceWorkload extends Workload {
 
 	private static Map<String, PlanetLabWorkloadTrace> workloadTraces =  new HashMap<String, PlanetLabWorkloadTrace>();

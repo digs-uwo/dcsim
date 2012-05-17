@@ -2,6 +2,11 @@ package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * Instantiates VmmApplications
+ * @author Michael Tighe
+ *
+ */
 public class VmmApplicationFactory implements ApplicationFactory {
 
 	@Override

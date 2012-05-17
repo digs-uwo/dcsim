@@ -2,6 +2,12 @@ package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * A tier of InteractiveApplications 
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class InteractiveApplicationTier extends ApplicationTier {
 
 	private double cpuPerWork;

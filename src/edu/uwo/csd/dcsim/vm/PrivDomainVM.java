@@ -4,6 +4,12 @@ import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * A special VM that runs the VmmApplication for a Host 
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class PrivDomainVM extends VM {
 
 	public PrivDomainVM(Simulation simulation, VMDescription vmDescription, Application application) {

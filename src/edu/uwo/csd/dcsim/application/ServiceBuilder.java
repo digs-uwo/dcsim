@@ -19,11 +19,24 @@ public class ServiceBuilder implements ObjectBuilder<Service> {
 	private Workload workload;
 	private ArrayList<Service.ServiceTier> tiers =  new ArrayList<Service.ServiceTier>();
 	
+	/**
+	 * Add the Workload that will feed this Service
+	 * @param value
+	 * @return
+	 */
 	public ServiceBuilder workload(Workload value) {
 		this.workload = value;
 		return this;
 	}
 	
+	/**
+	 * Add a new tier to the Service
+	 * @param applicationTier
+	 * @param vmDescription
+	 * @param minSize
+	 * @param maxSize
+	 * @return
+	 */
 	public ServiceBuilder tier(ApplicationTier applicationTier, VMDescription vmDescription, int minSize, int maxSize) {
 		Service.ServiceTier tier = new Service.ServiceTier(applicationTier, vmDescription, minSize, maxSize);
 		tiers.add(tier);

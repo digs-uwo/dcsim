@@ -1,5 +1,11 @@
 package edu.uwo.csd.dcsim.vm;
 
+/**
+ * A request sent to a Host asking it to create a VMAllocation to host a VM, with specified properties.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VMAllocationRequest {
 
 	private VMDescription vmDescription;

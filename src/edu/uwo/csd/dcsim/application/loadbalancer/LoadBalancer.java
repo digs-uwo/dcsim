@@ -5,6 +5,12 @@ import java.util.*;
 import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.application.ApplicationTier;
 
+/**
+ * Represents a load balancer, splitting incoming workload between Applications in an ApplicationTier
+ * 
+ * @author Michael Tighe
+ *
+ */
 public abstract class LoadBalancer {
 
 	ApplicationTier applicationTier;

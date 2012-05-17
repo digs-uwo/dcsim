@@ -5,6 +5,13 @@ import java.util.Map;
 
 import edu.uwo.csd.dcsim.application.Application;
 
+/**
+ * EqualShareLoadBalancer is a LoadBalancer that splits incoming work equal among all Applications in an
+ * ApplicationTier
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class EqualShareLoadBalancer extends LoadBalancer {
 
 	@Override

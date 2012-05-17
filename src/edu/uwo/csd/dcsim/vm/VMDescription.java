@@ -3,6 +3,13 @@ package edu.uwo.csd.dcsim.vm;
 import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * Describes the general characteristics of a VM, and can instantiate new
+ * instances of VMs based on the description
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VMDescription {
 
 	private int cores;

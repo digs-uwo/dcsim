@@ -4,6 +4,13 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.FractionalMetric;
 import edu.uwo.csd.dcsim.vm.VirtualResources;
 
+/**
+ * Represents an Application that operates in an interactive, request/reply manner, such as a web server. Incoming work
+ * are considered 'requests' which are processed by a specified amount of CPU and Bandwidth per work unit.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class InteractiveApplication extends Application {
 
 	//variables to keep track of resource demand and consumption
@@ -16,23 +23,33 @@ public class InteractiveApplication extends Application {
 	VirtualResources totalResourceDemand;	//the total amount of resources required since the application started
 	VirtualResources totalResourceUsed;		//the total amount of resources used since the application started
 
-	private double workRemaining = 0;
-	private ApplicationTier applicationTier;
+	private double workRemaining = 0; //amount of work remaining to be processed
+	private ApplicationTier applicationTier; //the tier which this Application belongs to
 	private VirtualResources overhead; //the amount of overhead per second this application creates
 	private VirtualResources overheadRemaining; //the amount of overhead accumulated over the elapsed period that remains to be processed
 	
-	private double incomingWork = 0;
-	private double totalIncomingWork = 0;
-	private double slaViolatedWork = 0;
-	private double totalSlaViolatedWork = 0;
-	private double migrationPenalty = 0;
-	private double totalMigrationPenalty = 0;
+	private double incomingWork = 0; //amount of current incoming work
+	private double totalIncomingWork = 0; //total incoming work during the simulation
+	private double slaViolatedWork = 0; //amount of current work for which SLA is violated
+	private double totalSlaViolatedWork = 0; //total amount of work for which SLA is violated
+	private double migrationPenalty = 0; //the current SLA penalty due to migration
+	private double totalMigrationPenalty = 0; //the total SLA penalty due to migration during the simulation
 	
-	private double cpuPerWork;
-	private double bwPerWork;
-	private int memory;
-	private long storage;
+	private double cpuPerWork; //the amount of CPU required to complete 1 work
+	private double bwPerWork; //the amount of bandwdith required to complete 1 work
+	private int memory; //fixed memory usage
+	private long storage; //fixed storage usage
 	
+	/**
+	 * Create a new InteractiveApplication
+	 * @param simulation
+	 * @param applicationTier
+	 * @param memory
+	 * @param storage
+	 * @param cpuPerWork
+	 * @param bwPerWork
+	 * @param cpuOverhead The amount of CPU required by the application even if there is no incoming work.
+	 */
 	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier, int memory, long storage, double cpuPerWork, double bwPerWork, double cpuOverhead) {
 		super(simulation);
 		
@@ -51,13 +68,12 @@ public class InteractiveApplication extends Application {
 		
 		this.applicationTier = applicationTier;
 		
+		//overhead current consists only of a fixed CPU overhead added to the Applications resource use, even if there is no incoming work
 		overhead = new VirtualResources();
 		overhead.setCpu(cpuOverhead);
 	}
 	
-	/*
-	 * Called once at the beginning of scheduling
-	 */
+	@Override
 	public void prepareExecution() {
 		//reset the resource demand and consumption values for the current interval
 		resourcesDemanded = new VirtualResources();
@@ -80,6 +96,7 @@ public class InteractiveApplication extends Application {
 		migrationPenalty = 0;
 	}
 
+	@Override
 	public void updateResourceDemand() {
 		//retrieve incoming work
 		double incomingWork = applicationTier.retrieveWork(this);
@@ -95,6 +112,7 @@ public class InteractiveApplication extends Application {
 		}
 	}
 	
+	@Override
 	public VirtualResources execute(VirtualResources resourcesAvailable) {
 
 		VirtualResources resourcesConsumed = new VirtualResources();
@@ -178,9 +196,7 @@ public class InteractiveApplication extends Application {
 	}
 
 
-	/*
-	 * Called once at the end of scheduling
-	 */
+	@Override
 	public void completeExecution() {
 		
 		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
@@ -198,7 +214,7 @@ public class InteractiveApplication extends Application {
 		
 		slaViolatedWork = workRemaining;
 		
-		
+		//add a migration penalty, if the VM is migrating
 		if (vm.isMigrating()) {
 			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
 			slaViolatedWork += migrationPenalty;
@@ -229,10 +245,18 @@ public class InteractiveApplication extends Application {
 
 	}
 
+	/**
+	 * Get the amount of fixed overhead
+	 * @return
+	 */
 	public VirtualResources getOverhead() {
 		return overhead;
 	}
 	
+	/**
+	 * Set the amount of fixed overhead
+	 * @param overhead
+	 */
 	public void setOverhead(VirtualResources overhead) {
 		this.overhead = overhead;
 	}

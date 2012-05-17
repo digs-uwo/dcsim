@@ -2,6 +2,12 @@ package edu.uwo.csd.dcsim.management;
 
 import edu.uwo.csd.dcsim.core.*;
 
+/**
+ * A policy to manage some aspect of the DataCentre.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public abstract class ManagementPolicy implements SimulationEventListener {
 
 	public static final int MANAGEMENT_POLICY_EXECUTE_EVENT = 1;

@@ -15,6 +15,21 @@ public final class Services {
 
 	private Services() {}
 	
+	/**
+	 * Creates a new single tiered Service
+	 * @param workload
+	 * @param cores
+	 * @param coreCapacity
+	 * @param memory
+	 * @param bandwidth
+	 * @param storage
+	 * @param cpuPerWork
+	 * @param bwPerWork
+	 * @param cpuOverhead
+	 * @param tierMin
+	 * @param tierMax
+	 * @return
+	 */
 	public static Service singleTierInteractiveService(Workload workload, 
 			int cores, int coreCapacity, int memory, int bandwidth, long storage, 
 			double cpuPerWork, double bwPerWork, double cpuOverhead, 

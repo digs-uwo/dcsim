@@ -1,5 +1,11 @@
 package edu.uwo.csd.dcsim.vm;
 
+/**
+ * Represents a set of resources
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VirtualResources {
 	
 	private double cpu = 0;

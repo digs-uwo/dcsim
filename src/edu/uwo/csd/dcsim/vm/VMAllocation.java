@@ -2,6 +2,14 @@ package edu.uwo.csd.dcsim.vm;
 
 import edu.uwo.csd.dcsim.host.*;
 
+/**
+ * VMAllocation is an resource allocation made by a Host for a VM. VMAllocation is instantiate on a Host
+ * to hold a VM, and never leaves the Host even if the VM migrates. A migrating VM moves to a new 
+ * VMAllocation on the target Host. 
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VMAllocation {
 
 	private VM vm;

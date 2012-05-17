@@ -4,13 +4,19 @@ import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 
+/**
+ * Represents a Virtual Machine, running an Application. Must be contained within a VMAllocation on a Host
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VM implements SimulationEventListener {
 
 	Simulation simulation;
 	int id;
 	VMDescription vmDescription;
 	VirtualResources resourcesInUse; //current level of resource usage (not total used)
-	VMAllocation vmAllocation;
+	VMAllocation vmAllocation; //the allocation this VM is running within
 	
 	/*
 	 * Keep track of resources while calculating usage over the last time interval 

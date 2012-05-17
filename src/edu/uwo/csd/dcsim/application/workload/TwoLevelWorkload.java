@@ -2,6 +2,12 @@ package edu.uwo.csd.dcsim.application.workload;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * TwoLevelWorkload keeps a constant workload level until a specified time at which point it switches to a second constant level.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class TwoLevelWorkload extends Workload {
 
 	double firstLevel;

@@ -2,6 +2,11 @@ package edu.uwo.csd.dcsim.application.workload;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
+/**
+ * StaticWorkload generates a constant workload level through the entire simulation
+ * @author Michael Tighe
+ *
+ */
 public class StaticWorkload extends Workload {
 
 	double workPerSecond;

@@ -14,6 +14,12 @@ import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim.vm.*;
 
+/**
+ * A Host machine (server) within a DataCentre. Hosts VMs (Virtual Machines).
+ * 
+ * @author Michael Tighe
+ *
+ */
 public final class Host implements SimulationEventListener {
 	
 	/**
@@ -124,6 +130,12 @@ public final class Host implements SimulationEventListener {
 		WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
 	}
 	
+	/**
+	 * Builds a new Host object. This is the only way to instantiate Host.
+	 * 
+	 * @author Michael Tighe
+	 *
+	 */
 	public static class Builder implements ObjectBuilder<Host> {
 
 		private final Simulation simulation;
