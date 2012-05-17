@@ -5,31 +5,27 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim.*;
-import edu.uwo.csd.dcsim.application.Service;
-import edu.uwo.csd.dcsim.application.Services;
-import edu.uwo.csd.dcsim.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim.application.workload.Workload;
+import edu.uwo.csd.dcsim.application.InteractiveApplicationTier;
+import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.host.HostModels;
-import edu.uwo.csd.dcsim.host.resourcemanager.OversubscribingCpuManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleBandwidthManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleMemoryManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleStorageManagerFactory;
+import edu.uwo.csd.dcsim.host.power.LinearHostPowerModel;
+import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.FairShareCpuSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.*;
 
 /**
- * A basic example of how to setup and run a simulation.
+ * A basic example of how to setup and run a simulation without using some of the helper functions. This should
+ * give a better understanding of the underlying structure of the simulation.
  * 
  * @author Michael Tighe
  *
  */
-public class SimpleExample extends DCSimulationTask {
+public class SimpleExampleDetailed extends DCSimulationTask {
 
-	private static Logger logger = Logger.getLogger(SimpleExample.class);
+	private static Logger logger = Logger.getLogger(SimpleExampleDetailed.class);
 	
 	public static void main(String args[]) {
 		
@@ -37,7 +33,7 @@ public class SimpleExample extends DCSimulationTask {
 		Simulation.initializeLogging();
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
-		DCSimulationTask task = new SimpleExample("simple", 86400000);
+		DCSimulationTask task = new SimpleExampleDetailed("simple", 86400000);
 		
 		//run the simulation
 		task.run();
@@ -52,7 +48,7 @@ public class SimpleExample extends DCSimulationTask {
 		
 	}
 	
-	public SimpleExample(String name, long duration) {
+	public SimpleExampleDetailed(String name, long duration) {
 		super(name, duration);
 	}
 
@@ -80,11 +76,9 @@ public class SimpleExample extends DCSimulationTask {
 		simulation.addDatacentre(dc);
 		
 		/*
-		 * Create a Host to add to the DataCentre. For this example, we will create a single Host, using
-		 * a factory method in the HostModels class to create a prebuilt host model. This returns
-		 * a Host.Builder object, which has been partially initialized with the properties of the Host. We
-		 * still must add resource managers and a CPU scheduler. This is done by adding factories for the
-		 * resource managers. We add simple managers for all resources, except for CPU, for which we 
+		 * Create a Host to add to the DataCentre. For this example, we will create a single Host using the Host.Builder class.
+		 * 
+		 * We add simple managers for all resources, except for CPU, for which we 
 		 * add the Oversubscribing manager. Simple managers allocate a fixed amount of resources up to
 		 * the maximum resource available. The Oversubscribing manager allocates any amount of CPU resources,
 		 * even if the allocated amount exceeds the actual Host capacity.
@@ -94,15 +88,15 @@ public class SimpleExample extends DCSimulationTask {
 		 * CPU.
 		 */
 		
-		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
+		Host host = new Host.Builder(simulation).nCpu(2).nCores(4).coreCapacity(2500).memory(16384).bandwidth(1310720).storage(36864)
+				.privCpu(500).privBandwidth(131072)
 				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 				.storageManagerFactory(new SimpleStorageManagerFactory())
-				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
-		
-		//Instantiate the Host
-		Host host = proLiantDL160G5E5420.build();
+				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation))
+				.powerModel(new LinearHostPowerModel(150, 300))
+				.build();
 		
 		//Add the Host to the DataCentre
 		dc.addHost(host);
@@ -123,26 +117,40 @@ public class SimpleExample extends DCSimulationTask {
 		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
 		
 		/*
-		 * We use the Services helper class to build a single tier service running InteractiveApplication application instances.
+		 * Next we must create an ApplicationFactory for the Application we want to run. We create an InteractiveApplicationTier,
+		 * which both coordinates a tier of Applications and plays the role of ApplicationFactory.
 		 * 
-		 * We specify that VMs in the service should use 1 core of 2500 capacity, 1024MB of RAM, 12800KB of Bandwidth (100Mb/s) (NOTE: bandwidth is in KB),
-		 * 1024MB of storage. The Application running on the VM requires 1 CPU and 1 Bandwidth to complete 1 work, and has a fixed overhead of 300 CPU. Finally,
-		 * the tier has a minimum of 1 application (VM), and an unlimited maximum. These values are to be used by ManagementPolicies, and will not automatically
-		 * have any effect.
+		 * We specify that each Application in the tier will require 1024MB of RAM and 1024MB of storage, statically. It will 
+		 * require 1 CPU and 1 Bandwidth to complete 1 work unit, and there is a 300 CPU fixed overhead.
 		 */
-		Service service = Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 1, 300, 1, Integer.MAX_VALUE); 
+		InteractiveApplicationTier appTier = new InteractiveApplicationTier(1024, 1024, 1, 1, 300);
 		
 		/*
-		 * Now we create a VMAllocationRequest to submit to the DataCentre. A VMAllocationRequest represents a request for a Host to allocate
+		 * We need to configure the workload to send work to our application tier, and for the tier to send completed work
+		 * back to the workload.
+		 */
+		workload.setWorkTarget(appTier);
+		appTier.setWorkTarget(workload);
+		
+		/*
+		 * Now, we must create a VMDescription which describe the properties of the VM we want to create. We create a VM that 
+		 * has 1 virtual core with 2500 capacity, 1024MB of RAM, 12800KB of bandwidth (100Mb/s), and 1024MB storage. We specify that
+		 * it will run applications created by our application tier.
+		 */
+		VMDescription vmDescription = new VMDescription(1, 2500, 1024, 12800, 1024, appTier);
+		
+		/*
+		 * Finally, we create a VMAllocationRequest to submit to the DataCentre. A VMAllocationRequest represents a request for a Host to allocate
 		 * resources for the instantiation of a VM. We can create one based on a VMDescription, which we can grab from the single tier of our
 		 * Service.
 		 */
-		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
+		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vmDescription);
 		
 		/*
 		 * Next we submit the VMAllocationRequest to the DataCentre, which will place it on a Host. Since we only have one Host, that is 
 		 * where it will be placed. Note that we can do this before the simulation is run, so that we have an initial placement at the
-		 * beginning of the simulation.
+		 * beginning of the simulation. Once our host accepts and creates a VMAllocation for the VM, it will instantiate the VM using
+		 * the VMDescription.
 		 */
 		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
 		
