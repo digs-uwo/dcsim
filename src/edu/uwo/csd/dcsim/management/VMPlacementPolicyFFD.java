@@ -8,6 +8,13 @@ import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.comparator.*;
 import edu.uwo.csd.dcsim.vm.*;
 
+/**
+ * Implements a First Fit Decreasing algorithm, placing VMs on the Host with the most resources
+ * allocated while still having room to add the VM. 
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 
 	public VMPlacementPolicyFFD(Simulation simulation) {

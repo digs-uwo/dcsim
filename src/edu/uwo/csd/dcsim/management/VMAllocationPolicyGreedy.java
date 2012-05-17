@@ -86,7 +86,8 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 			for (VmStub vm : vmList) {
 				
 				for (HostStub target : targets) {
-					if (target.hasCapacity(vm) &&														//target has capacity
+					if (source != target &&
+							target.hasCapacity(vm) &&														//target has capacity
 							 ((target.getCpuInUse(vm)) / target.getTotalCpu()) <= targetThreshold &&	//target will still not be stressed
 							 target.getHost().isCapable(vm.getVM().getVMDescription())) {				//target is capable
 						 
@@ -127,7 +128,8 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 						//ensure this target has not already been used as a source for consolidation
 						if (!usedSources.contains(target)) {
 							
-							if (target.hasCapacity(vm) &&														//target has capacity
+							if (source != target &&
+									target.hasCapacity(vm) &&														//target has capacity
 									 ((target.getCpuInUse(vm)) / target.getTotalCpu()) <= targetThreshold &&	//target will still not be stressed
 									 target.getHost().isCapable(vm.getVM().getVMDescription())) {				//target is capable
 								 
