@@ -15,8 +15,8 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 	double lowerThreshold;
 	double upperThreshold;
 	
-	public VMAllocationPolicyMM(Simulation simulation, DataCentre dc, long interval, long firstEvent, double lowerThreshold, double upperThreshold) {
-		super(simulation, dc, interval, firstEvent);
+	public VMAllocationPolicyMM(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold) {
+		super(simulation, dc, interval);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;

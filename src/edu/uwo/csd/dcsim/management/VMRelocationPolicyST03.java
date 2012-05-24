@@ -13,8 +13,8 @@ import edu.uwo.csd.dcsim.management.stub.VmStubCpuInUseComparator;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 
-	public VMRelocationPolicyST03(Simulation simulation, DataCentre dc, long interval, long firstEvent, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(simulation, dc, interval, firstEvent, lowerThreshold, upperThreshold, targetUtilization);
+	public VMRelocationPolicyST03(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
+		super(simulation, dc, interval, lowerThreshold, upperThreshold, targetUtilization);
 	}
 	
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {

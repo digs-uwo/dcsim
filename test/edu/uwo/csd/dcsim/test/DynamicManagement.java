@@ -56,8 +56,8 @@ public class DynamicManagement extends DCSimulationTask {
 		 * Basic Greedy Relocation & Consolidation together. Relocation same as RelocST03, Consolidation similar but
 		 * evicts ALL VMs from underprovisioned hosts, not 1.
 		 */
-		@SuppressWarnings("unused")
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		vmAllocationPolicyGreedy.start(600000);
 	}
 	
 }

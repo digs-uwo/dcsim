@@ -15,11 +15,10 @@ public class VMAllocationPolicyGreedy extends VMRelocationPolicy {
 	double upperThreshold;
 	
 	public VMAllocationPolicyGreedy(Simulation simulation, DataCentre dc, long interval,
-			long firstEvent,
 			double lowerThreshold,
 			double targetThreshold,
 			double upperThreshold) {
-		super(simulation, dc, interval, firstEvent);
+		super(simulation, dc, interval);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.targetThreshold = targetThreshold;

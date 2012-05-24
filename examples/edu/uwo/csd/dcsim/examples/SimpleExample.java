@@ -151,11 +151,12 @@ public class SimpleExample extends DCSimulationTask {
 		 * won't have anything to do, but we will add one anyways to show how it is done.
 		 * 
 		 * All we need to do is instantiate the policy, and it will execute. We specify the simulation it will run in, the datacentre
-		 * which it will manage, the interval on which it will execute, the first time it will execute, and the lower, upper, and target
+		 * which it will manage, the interval on which it will execute, and the lower, upper, and target
 		 * CPU utilization thresholds. Note that we can create any number of ManagementPolicies that we want.
+		 * We then start the policy with the first execution at 600000ms.
 		 */
-		@SuppressWarnings("unused")
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		vmAllocationPolicyGreedy.start(600000);
 		
 		/*
 		 * The simulation is now ready. It will be executed when the run() method is called externally.

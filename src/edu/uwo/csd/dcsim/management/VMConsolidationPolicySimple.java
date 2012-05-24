@@ -19,8 +19,8 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 	double lowerThreshold;
 	double upperThreshold;
 	
-	public VMConsolidationPolicySimple(Simulation simulation, DataCentre dc, long interval, long firstEvent, double lowerThreshold, double upperThreshold) {
-		super(simulation, dc, interval, firstEvent);
+	public VMConsolidationPolicySimple(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold) {
+		super(simulation, dc, interval);
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 	}
