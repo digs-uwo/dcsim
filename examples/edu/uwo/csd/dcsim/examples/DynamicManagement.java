@@ -57,7 +57,7 @@ public class DynamicManagement extends DCSimulationTask {
 		 * evicts ALL VMs from underprovisioned hosts, not 1.
 		 */
 		@SuppressWarnings("unused")
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.5, 0.85, 0.85);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 600000, 0.2, 0.5, 0.5);
 	}
 	
 }

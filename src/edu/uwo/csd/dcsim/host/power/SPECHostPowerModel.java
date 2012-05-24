@@ -66,7 +66,7 @@ public class SPECHostPowerModel implements HostPowerModel {
 		int lower = (int)Math.floor((cpu * 100) / 10);
 		int upper = (int)Math.ceil((cpu * 100) / 10); 
 		
-		return powerLevels[lower] + ((powerLevels[upper] - powerLevels[lower]) * ((cpu % 10) / 10));
+		return powerLevels[lower] + ((powerLevels[upper] - powerLevels[lower]) * ((cpu * 10) % 1));
 	}
 
 }
