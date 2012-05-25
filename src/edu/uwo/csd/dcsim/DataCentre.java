@@ -94,4 +94,11 @@ public class DataCentre implements SimulationEventListener {
 		}
 	}
 	
+	public double getCurrentPowerConsumption() {
+		double power = 0;
+		for (Host host : hosts)
+			power += host.getCurrentPowerConsumption();
+		return power;
+	}
+	
 }
