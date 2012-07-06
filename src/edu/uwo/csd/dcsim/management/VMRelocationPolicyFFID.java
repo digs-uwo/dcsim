@@ -47,7 +47,6 @@ public class VMRelocationPolicyFFID extends VMRelocationPolicyGreedy {
 	 */
 	@Override
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {
-		//ArrayList<VmStub> sorted = new ArrayList<VmStub>(sourceVms);
 		ArrayList<VmStub> sorted = new ArrayList<VmStub>();
 		
 		// Remove VMs with less CPU load than the CPU load by which the source 
@@ -60,7 +59,7 @@ public class VMRelocationPolicyFFID extends VMRelocationPolicyGreedy {
 		
 		if (!sorted.isEmpty())
 			// Sort VMs in increasing order by CPU load.
-			Collections.sort(sorted, new VmStubCpuInUseComparator());		// Is this comparator using an absolute value of CPU (load) instead of a relative value (utilization %) ???
+			Collections.sort(sorted, new VmStubCpuInUseComparator());
 		else {
 			// Add original list of VMs and sort them in decreasing order by 
 			// CPU load, so as to avoid trying to migrate the smallest VMs 
