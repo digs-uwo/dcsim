@@ -4,13 +4,14 @@
  * Licence:      GPL - http://www.gnu.org/copyleft/gpl.html
  *
  */
-package edu.uwo.csd.dcsim.management;
+package edu.uwo.csd.dcsim.extras.policies;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.management.VMRelocationPolicyGreedy;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim.management.stub.HostStubPowerStateComparator;
