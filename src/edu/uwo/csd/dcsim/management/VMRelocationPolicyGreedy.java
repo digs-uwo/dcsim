@@ -13,9 +13,9 @@ import edu.uwo.csd.dcsim.management.stub.VmStub;
 
 public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 
-	double lowerThreshold;
-	double upperThreshold;
-	double targetUtilization;
+	protected double lowerThreshold;
+	protected double upperThreshold;
+	protected double targetUtilization;
 	
 	public VMRelocationPolicyGreedy(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
 		super(simulation, dc, interval);
