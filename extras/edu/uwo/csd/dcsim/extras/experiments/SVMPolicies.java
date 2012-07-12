@@ -65,21 +65,25 @@ public class SVMPolicies extends DCSimulationTask {
 		/*
 		 * Relocation policies.
 		 */
-		VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(simulation, dc, dcMon, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFDD vmRelocationPolicy = new VMRelocationPolicyFFDD(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFDM vmRelocationPolicy = new VMRelocationPolicyFFDM(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFII vmRelocationPolicy = new VMRelocationPolicyFFII(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		vmRelocationPolicy.start(600000);
+		VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFDD vmRelocationPolicy = new VMRelocationPolicyFFDD(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFDM vmRelocationPolicy = new VMRelocationPolicyFFDM(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFII vmRelocationPolicy = new VMRelocationPolicyFFII(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(dc, dcMon, 0.5, 0.85, 0.85);
+		
+		DaemonScheduler relocationPolicyDaemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmRelocationPolicy);
+		relocationPolicyDaemon.start(600000);
 		
 		/*
 		 * Consolidation policies.
 		 */
-		VMConsolidationPolicySimple vmConsolidationPolicy = new VMConsolidationPolicySimple(simulation, dc, 14400000, 0.5, 0.85);
-		vmConsolidationPolicy.start(14401000);
-		//vmConsolidationPolicy.start(86401000);
-		//vmConsolidationPolicy.start(3601000);
+		VMConsolidationPolicySimple vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 0.5, 0.85);
+		
+		DaemonScheduler consolidationPolicyDaemon = new FixedIntervalDaemonScheduler(simulation, 14400000, vmConsolidationPolicy);
+		consolidationPolicyDaemon.start(14401000);
+		//consolidationPolicyDaemon.start(86401000);
+		//consolidationPolicyDaemon.start(3601000);
 		
 		/*
 		 * Relocation + Consolidation policies.

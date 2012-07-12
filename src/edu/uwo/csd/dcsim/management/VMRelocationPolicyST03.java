@@ -3,17 +3,13 @@ package edu.uwo.csd.dcsim.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import edu.uwo.csd.dcsim.DataCentre;
-import edu.uwo.csd.dcsim.management.stub.HostStub;
-import edu.uwo.csd.dcsim.management.stub.HostStubCpuInUseComparator;
-import edu.uwo.csd.dcsim.management.stub.HostStubPowerStateComparator;
-import edu.uwo.csd.dcsim.management.stub.VmStub;
-import edu.uwo.csd.dcsim.management.stub.VmStubCpuInUseComparator;
+import edu.uwo.csd.dcsim.*;
+import edu.uwo.csd.dcsim.management.stub.*;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 
-	public VMRelocationPolicyST03(DataCentre dc, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(dc, lowerThreshold, upperThreshold, targetUtilization);
+	public VMRelocationPolicyST03(DataCentre dc, DCUtilizationMonitor utilizationMonitor, double lowerThreshold, double upperThreshold, double targetUtilization) {
+		super(dc, utilizationMonitor, lowerThreshold, upperThreshold, targetUtilization);
 	}
 	
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {

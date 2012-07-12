@@ -7,9 +7,7 @@ import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
-import edu.uwo.csd.dcsim.management.stub.HostStub;
-import edu.uwo.csd.dcsim.management.stub.HostStubCpuInUseComparator;
-import edu.uwo.csd.dcsim.management.stub.VmStub;
+import edu.uwo.csd.dcsim.management.stub.*;
 
 public abstract class VMRelocationPolicyGreedy implements Daemon {
 
