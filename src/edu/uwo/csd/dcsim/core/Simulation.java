@@ -38,7 +38,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private long eventSendCount = 0;
 	private Map<String, Metric> metrics = new HashMap<String, Metric>();
 	
-	private Map<String, Monitor> monitors = new HashMap<String, Monitor>();
+	private Vector<Monitor> monitors = new Vector<Monitor>();
 	
 	private Random random;
 	private long randomSeed;
@@ -177,7 +177,7 @@ public abstract class Simulation implements SimulationEventListener {
 					//run monitors
 					if (monitors.size() > 0) {
 						long nextMonitor = duration;
-						for (Monitor monitor : monitors.values()) {
+						for (Monitor monitor : monitors) {
 							long nextExec = monitor.run();
 							if (nextExec < nextMonitor)
 								nextMonitor = nextExec;
@@ -288,14 +288,10 @@ public abstract class Simulation implements SimulationEventListener {
 		}
 	}
 	
-	public final void addMonitor(String name, Monitor monitor) {
-		monitors.put(name, monitor);
+	public final void addMonitor(Monitor monitor) {
+		monitors.add(monitor);
 	}
-	
-	public final Monitor getMonitor(String name) {
-		return monitors.get(name);
-	}
-	
+
 	public final long getSimulationTime() {
 		return simulationTime;
 	}
