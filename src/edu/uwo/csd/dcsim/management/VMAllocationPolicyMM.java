@@ -4,27 +4,29 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.core.Daemon;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.VmStub;
 import edu.uwo.csd.dcsim.management.stub.VmStubCpuInUseComparator;
 
-public class VMAllocationPolicyMM extends VMRelocationPolicy {
+public class VMAllocationPolicyMM implements Daemon {
 
+	DataCentre dc;
 	double lowerThreshold;
 	double upperThreshold;
 	
-	public VMAllocationPolicyMM(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold) {
-		super(simulation, dc, interval);
+	public VMAllocationPolicyMM(DataCentre dc, double lowerThreshold, double upperThreshold) {
 		
+		this.dc = dc;
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 		
 	}
 
 	@Override
-	public void execute() {
+	public void run(Simulation simulation) {
 			
 		ArrayList<HostStub> hostList = HostStub.createHostStubList(dc.getHosts());
 		ArrayList<VmStub> migrationList = new ArrayList<VmStub>();
@@ -66,11 +68,11 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 			}
 		}
 		
-		placeVMs(hostList, migrationList);
+		placeVMs(hostList, migrationList, simulation);
 		
 	}
 	
-	void placeVMs(ArrayList<HostStub> hostList, ArrayList<VmStub> vmList) {
+	void placeVMs(ArrayList<HostStub> hostList, ArrayList<VmStub> vmList, Simulation simulation) {
 				
 		//place using MBFD algorithm
 		
@@ -111,6 +113,18 @@ public class VMAllocationPolicyMM extends VMRelocationPolicy {
 		double powerBefore = host.getHost().getPowerModel().getPowerConsumption(host.getCpuUtilization());
 		double powerAfter = host.getHost().getPowerModel().getPowerConsumption(host.getCpuUtilization(vm));
 		return powerAfter - powerBefore;
+	}
+
+	@Override
+	public void start(Simulation simulation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop(Simulation simulation) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

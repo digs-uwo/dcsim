@@ -90,8 +90,10 @@ public class Replication extends DCSimulationTask {
 			}
 		}
 		
-		@SuppressWarnings("unused")
-		ServiceReplicationPolicySimple serviceReplicationPolicy = new ServiceReplicationPolicySimple(simulation, serviceList, 600000, 0.85, 0.7, vmPlacementPolicy);
+		ServiceReplicationPolicySimple serviceReplicationPolicy = new ServiceReplicationPolicySimple(serviceList, 0.85, 0.7, vmPlacementPolicy);
+		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, serviceReplicationPolicy);
+		daemon.start(600000);
+		
 	}
 
 	public static Service createService(DataCentreSimulation simulation, String fileName, long offset, int scale) {

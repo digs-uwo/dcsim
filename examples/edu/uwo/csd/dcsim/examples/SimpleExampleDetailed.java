@@ -155,16 +155,19 @@ public class SimpleExampleDetailed extends DCSimulationTask {
 		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
 		
 		/*
-		 * At this point we can add ManagementPolicies to the simulation. Since we only have one Host and one VM running, a ManagementPolicy
+		 * At this point we can add Management Policies to the simulation. Since we only have one Host and one VM running, a Management Policy
 		 * won't have anything to do, but we will add one anyways to show how it is done.
 		 * 
-		 * All we need to do is instantiate the policy, and it will execute. We specify the simulation it will run in, the datacentre
-		 * which it will manage, the interval on which it will execute, and the lower, upper, and target
+		 * First we need to create the policy. We specify the datacentre which it will manage and the lower, upper, and target
 		 * CPU utilization thresholds. Note that we can create any number of ManagementPolicies that we want.
-		 * We then start the policy with the first execution at 600000ms.
+		 * 
+		 * Policies run in the simulation as a 'Daemon', which is simply a piece of code that is executed on a fixed interval. The policy
+		 * implements the Daemon interface. We create a DaemonScheduler to run the daemon on a fixed interval. Finally, we start the daemon
+		 * at the specified simulation time. 
 		 */
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		vmAllocationPolicyGreedy.start(600000);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
+		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
+		daemon.start(600000);
 		
 		/*
 		 * The simulation is now ready. It will be executed when the run() method is called externally.

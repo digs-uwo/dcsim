@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim.DataCentre;
-import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim.management.stub.HostStubPowerStateComparator;
@@ -13,8 +12,8 @@ import edu.uwo.csd.dcsim.management.stub.VmStubCpuInUseComparator;
 
 public class VMRelocationPolicyST03 extends VMRelocationPolicyGreedy {
 
-	public VMRelocationPolicyST03(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(simulation, dc, interval, lowerThreshold, upperThreshold, targetUtilization);
+	public VMRelocationPolicyST03(DataCentre dc, double lowerThreshold, double upperThreshold, double targetUtilization) {
+		super(dc, lowerThreshold, upperThreshold, targetUtilization);
 	}
 	
 	protected ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms) {

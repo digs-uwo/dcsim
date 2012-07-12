@@ -4,22 +4,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import edu.uwo.csd.dcsim.DataCentre;
-import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.HostStubCpuInUseComparator;
 import edu.uwo.csd.dcsim.management.stub.VmStub;
 
-public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
+public abstract class VMRelocationPolicyGreedy implements Daemon {
 
+	protected DataCentre dc;
 	protected double lowerThreshold;
 	protected double upperThreshold;
 	protected double targetUtilization;
 	
-	public VMRelocationPolicyGreedy(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(simulation, dc, interval);
-		
+	public VMRelocationPolicyGreedy(DataCentre dc, double lowerThreshold, double upperThreshold, double targetUtilization) {
+
+		this.dc = dc;
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 		this.targetUtilization = targetUtilization;
@@ -27,9 +28,9 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 	
 	protected abstract ArrayList<HostStub> orderTargetHosts(ArrayList<HostStub> partiallyUtilized, ArrayList<HostStub> underUtilized, ArrayList<HostStub> empty);
 	protected abstract ArrayList<VmStub> orderSourceVms(ArrayList<VmStub> sourceVms);
-	
+
 	@Override
-	public void execute() {
+	public void run(Simulation simulation) {
 		
 		ArrayList<Host> hostList = dc.getHosts();
 		
@@ -92,6 +93,16 @@ public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 		for (MigrationAction migration : migrations) {
 			migration.execute(simulation, this);
 		}
+		
+	}
+	
+	@Override
+	public void start(Simulation simulation) {
+
+	}
+
+	@Override
+	public void stop(Simulation simulation) {
 		
 	}
 }

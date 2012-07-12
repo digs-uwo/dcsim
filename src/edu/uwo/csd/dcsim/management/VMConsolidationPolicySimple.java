@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.core.Daemon;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -14,19 +15,21 @@ import edu.uwo.csd.dcsim.management.stub.HostStubVmCountComparator;
 import edu.uwo.csd.dcsim.management.stub.VmStub;
 import edu.uwo.csd.dcsim.management.stub.VmStubCpuInUseComparator;
 
-public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
+public class VMConsolidationPolicySimple implements Daemon {
 
+	DataCentre dc;
 	double lowerThreshold;
 	double upperThreshold;
 	
-	public VMConsolidationPolicySimple(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold) {
-		super(simulation, dc, interval);
+	public VMConsolidationPolicySimple(DataCentre dc, double lowerThreshold, double upperThreshold) {
+
+		this.dc = dc;
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 	}
 
 	@Override
-	public void execute() {
+	public void run(Simulation simulation) {
 	
 		ArrayList<Host> hostList = dc.getHosts();
 		
@@ -116,6 +119,18 @@ public class VMConsolidationPolicySimple extends VMConsolidationPolicy {
 		Collections.reverse(targets);
 		
 		return targets;
+	}
+
+	@Override
+	public void start(Simulation simulation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void stop(Simulation simulation) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
