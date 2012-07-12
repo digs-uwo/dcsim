@@ -53,7 +53,7 @@ public class MigrationAction implements ManagementAction {
 		target.getHost().sendMigrationEvent(vmAllocationRequest, vm.getVM(), source.getHost());
 		
 		if (simulation.isRecordingMetrics()) {
-			AggregateMetric.getSimulationMetric(simulation, MIGRATION_COUNT_METRIC).addValue(1);
+			AggregateMetric.getSimulationMetric(simulation, MIGRATION_COUNT_METRIC + "-" + triggeringEntity.getClass().getSimpleName()).addValue(1);
 		}
 		
 		//if the source host will no longer contain any VMs, instruct it to shut down
