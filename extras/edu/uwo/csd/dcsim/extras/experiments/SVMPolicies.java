@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.uwo.csd.dcsim.extras.experiments;
 
 import java.util.ArrayList;
@@ -10,13 +7,17 @@ import org.apache.log4j.*;
 
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.examples.ExampleHelper;
 import edu.uwo.csd.dcsim.extras.policies.*;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
- * @author gurtaj
+ * This class defines experiments _similar_ to those run for the SVM 2012 
+ * paper. These experiments are not exactly the same as those of the SVM paper 
+ * due to several modifications that took place in DCSim since the submission 
+ * of said paper.
+ *   
+ * @author Gaston Keller
  *
  */
 public class SVMPolicies extends DCSimulationTask {
@@ -40,7 +41,7 @@ public class SVMPolicies extends DCSimulationTask {
 		
 		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
-			ExampleHelper.printMetrics(task.getResults());
+			DataCentreTestEnvironment.printMetrics(task.getResults());
 		}
 
 	}
@@ -53,30 +54,33 @@ public class SVMPolicies extends DCSimulationTask {
 
 	@Override
 	public void setup(DataCentreSimulation simulation) {
-		
-		DataCentre dc = ExampleHelper.createDataCentre(simulation);
+		DataCentre dc = DataCentreTestEnvironment.createDataCentre(simulation);
 		simulation.addDatacentre(dc);
-		
-		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
-				
-		ExampleHelper.placeVms(vmList, dc);
+		ArrayList<VMAllocationRequest> vmList = DataCentreTestEnvironment.createVmList(simulation, true);
+		DataCentreTestEnvironment.placeVms(vmList, dc);
 		
 		/*
-		 * Relocation & Consolidation policies.
+		 * Relocation policies.
 		 */
 		//VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDD vmRelocationPolicy = new VMRelocationPolicyFFDD(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDM vmRelocationPolicy = new VMRelocationPolicyFFDM(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFII vmRelocationPolicy = new VMRelocationPolicyFFII(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		vmRelocationPolicy.start(600000);
 		
+		/*
+		 * Consolidation policies.
+		 */
 		VMConsolidationPolicySimple vmConsolidationPolicy = new VMConsolidationPolicySimple(simulation, dc, 14400000, 0.5, 0.85);
 		vmConsolidationPolicy.start(14401000);
 		//vmConsolidationPolicy.start(86401000);
 		//vmConsolidationPolicy.start(3601000);
 		
+		/*
+		 * Relocation + Consolidation policies.
+		 */
 		//VMAllocationPolicyGreedy vmAllocationPolicy = new VMAllocationPolicyGreedy(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//vmAllocationPolicy.start(600000);
 	}
