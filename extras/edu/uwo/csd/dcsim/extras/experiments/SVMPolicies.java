@@ -59,14 +59,17 @@ public class SVMPolicies extends DCSimulationTask {
 		ArrayList<VMAllocationRequest> vmList = DataCentreTestEnvironment.createVmList(simulation, true);
 		DataCentreTestEnvironment.placeVms(vmList, dc);
 		
+		DCUtilizationMonitor dcMon = new DCUtilizationMonitor(simulation, 120000, 5, dc);
+		//simulation.addMonitor("dcMon", dcMon);
+		
 		/*
 		 * Relocation policies.
 		 */
-		//VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(simulation, dc, dcMon, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDD vmRelocationPolicy = new VMRelocationPolicyFFDD(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDM vmRelocationPolicy = new VMRelocationPolicyFFDM(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFII vmRelocationPolicy = new VMRelocationPolicyFFII(simulation, dc, 600000, 0.5, 0.85, 0.85);
-		VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(simulation, dc, 600000, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(simulation, dc, 600000, 0.5, 0.85, 0.85);
 		vmRelocationPolicy.start(600000);
 		

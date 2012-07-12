@@ -9,7 +9,7 @@ package edu.uwo.csd.dcsim.extras.policies;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.management.VMRelocationPolicyGreedy;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
@@ -37,8 +37,8 @@ public class VMRelocationPolicyFFDI extends VMRelocationPolicyGreedy {
 	/**
 	 * Creates a new instance of VMRelocationPolicyFFDI.
 	 */
-	public VMRelocationPolicyFFDI(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(simulation, dc, interval, lowerThreshold, upperThreshold, targetUtilization);
+	public VMRelocationPolicyFFDI(Simulation simulation, DataCentre dc, DCUtilizationMonitor utilizationMonitor, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
+		super(simulation, dc, utilizationMonitor, interval, lowerThreshold, upperThreshold, targetUtilization);
 	}
 	
 	/**

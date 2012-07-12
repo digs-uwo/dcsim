@@ -3,7 +3,7 @@ package edu.uwo.csd.dcsim.management;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -13,13 +13,15 @@ import edu.uwo.csd.dcsim.management.stub.VmStub;
 
 public abstract class VMRelocationPolicyGreedy extends VMRelocationPolicy {
 
+	protected DCUtilizationMonitor utilizationMonitor;
 	protected double lowerThreshold;
 	protected double upperThreshold;
 	protected double targetUtilization;
 	
-	public VMRelocationPolicyGreedy(Simulation simulation, DataCentre dc, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
+	public VMRelocationPolicyGreedy(Simulation simulation, DataCentre dc, DCUtilizationMonitor utilizationMonitor, long interval, double lowerThreshold, double upperThreshold, double targetUtilization) {
 		super(simulation, dc, interval);
 		
+		this.utilizationMonitor = utilizationMonitor;
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 		this.targetUtilization = targetUtilization;
