@@ -17,6 +17,7 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
+	public static final int SIMULATION_RUN_MONITORS_EVENT = 3;
 	
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
@@ -36,6 +37,8 @@ public abstract class Simulation implements SimulationEventListener {
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
 	private Map<String, Metric> metrics = new HashMap<String, Metric>();
+	
+	private Map<String, Monitor> monitors = new HashMap<String, Monitor>();
 	
 	private Random random;
 	private long randomSeed;
@@ -63,7 +66,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private static final Properties getProperties() {
 		if (properties == null) {
 			/*
-			 * Load configuration properties from file
+			 * Load configuration properties from fileSIMULATION_RUN_MONITORS_EVENT
 			 */
 			properties = new Properties();
 			
@@ -160,15 +163,26 @@ public abstract class Simulation implements SimulationEventListener {
 		
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			e = eventQueue.poll();
-				
+			
 			if (e.getTime() >= simulationTime) {
-				
+
 				//check if simulationTime is advancing
 				if (simulationTime != e.getTime()) {
 					lastUpdate = simulationTime;
 					simulationTime = e.getTime();
 					
+					//update the simulation
 					updateSimulation(simulationTime);
+
+					//run monitors
+					long nextMonitor = Long.MAX_VALUE;
+					for (Monitor monitor : monitors.values()) {
+						long nextExec = monitor.run();
+						if (nextExec < nextMonitor)
+							nextMonitor = nextExec;
+					}
+					sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
+					
 				}
 				
 				e.getTarget().handleEvent(e);
@@ -210,6 +224,9 @@ public abstract class Simulation implements SimulationEventListener {
 			case Simulation.SIMULATION_RECORD_METRICS_EVENT:
 				logger.debug("Metric recording started");
 				recordingMetrics = true;
+				break;
+			case Simulation.SIMULATION_RUN_MONITORS_EVENT:
+				//Do nothing. This ensures that monitors are run in the case that no other event is scheduled.
 				break;
 			default:
 				throw new RuntimeException("Simulation received unknown event type");
@@ -267,6 +284,14 @@ public abstract class Simulation implements SimulationEventListener {
 		} else {
 			throw new RuntimeException("Metric " + metric.getName() + " already exists in simulation. Cannot add multiple copies of the same metric to the same simulation.");
 		}
+	}
+	
+	public final void addMonitor(String name, Monitor monitor) {
+		monitors.put(name, monitor);
+	}
+	
+	public final Monitor getMonitor(String name) {
+		return monitors.get(name);
 	}
 	
 	public final long getSimulationTime() {

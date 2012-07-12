@@ -37,7 +37,8 @@ public class SimpleExample extends DCSimulationTask {
 		Simulation.initializeLogging();
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
-		DCSimulationTask task = new SimpleExample("simple", 86400000);
+		//DCSimulationTask task = new SimpleExample("simple", 86400000);
+		DCSimulationTask task = new SimpleExample("simple", 1000000);
 		
 		//run the simulation
 		task.run();
