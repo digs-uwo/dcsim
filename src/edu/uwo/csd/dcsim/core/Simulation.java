@@ -175,13 +175,15 @@ public abstract class Simulation implements SimulationEventListener {
 					updateSimulation(simulationTime);
 
 					//run monitors
-					long nextMonitor = Long.MAX_VALUE;
-					for (Monitor monitor : monitors.values()) {
-						long nextExec = monitor.run();
-						if (nextExec < nextMonitor)
-							nextMonitor = nextExec;
+					if (monitors.size() > 0) {
+						long nextMonitor = duration;
+						for (Monitor monitor : monitors.values()) {
+							long nextExec = monitor.run();
+							if (nextExec < nextMonitor)
+								nextMonitor = nextExec;
+						}
+						sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
 					}
-					sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
 					
 				}
 				
