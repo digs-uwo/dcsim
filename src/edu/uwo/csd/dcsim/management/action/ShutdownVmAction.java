@@ -19,7 +19,7 @@ public class ShutdownVmAction implements ManagementAction {
 		return vm;
 	}
 		
-	public void execute(Simulation simulation, SimulationEventListener triggeringEntity) {
+	public void execute(Simulation simulation, Object triggeringEntity) {
 		
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		Host host = vmAllocation.getHost();

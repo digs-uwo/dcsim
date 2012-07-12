@@ -25,7 +25,7 @@ public class ReplicateAction implements ManagementAction {
 		return vmPlacementPolicy;
 	}
 	
-	public void execute(Simulation simulation, SimulationEventListener triggeringEntity) {
+	public void execute(Simulation simulation, Object triggeringEntity) {
 		VMAllocationRequest request = new VMAllocationRequest(vmDescription);
 		vmPlacementPolicy.submitVM(request);
 		

@@ -8,25 +8,22 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.management.action.*;
 import edu.uwo.csd.dcsim.vm.*;
 
-public class ServiceReplicationPolicySimple extends ManagementPolicy {
+public class ServiceReplicationPolicySimple implements Daemon {
 
 	ArrayList<Service> services;
-	long interval;
 	double scaleOutThreshold;
 	double scaleInThreshold;
 	VMPlacementPolicy vmPlacementPolicy;
 	
-	public ServiceReplicationPolicySimple(Simulation simulation, ArrayList<Service> services, long interval, double scaleOutThreshold, double scaleInThreshold, VMPlacementPolicy vmPlacementPolicy) {
-		super(simulation);
+	public ServiceReplicationPolicySimple(ArrayList<Service> services, double scaleOutThreshold, double scaleInThreshold, VMPlacementPolicy vmPlacementPolicy) {
 		this.services = services;
-		this.interval = interval;
 		this.scaleOutThreshold = scaleOutThreshold;
 		this.scaleInThreshold = scaleInThreshold;
 		this.vmPlacementPolicy = vmPlacementPolicy;
 	}
 	
 	@Override
-	public void execute() {
+	public void run(Simulation simulation) {
 		ArrayList<ReplicateAction> replicateActions = new ArrayList<ReplicateAction>();
 		ArrayList<ShutdownVmAction> shutdownActions = new ArrayList<ShutdownVmAction>();
 		
@@ -79,13 +76,13 @@ public class ServiceReplicationPolicySimple extends ManagementPolicy {
 	}
 
 	@Override
-	public long getNextExecutionTime() {
-		return simulation.getSimulationTime() + interval;
+	public void start(Simulation simulation) {
+
 	}
 
 	@Override
-	public void processEvent(Event e) {
-		//nothing to do
+	public void stop(Simulation simulation) {
+		
 	}
 
 	
