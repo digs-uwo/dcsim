@@ -60,16 +60,16 @@ public class SVMPolicies extends DCSimulationTask {
 		DataCentreTestEnvironment.placeVms(vmList, dc);
 		
 		DCUtilizationMonitor dcMon = new DCUtilizationMonitor(simulation, 120000, 5, dc);
-		//simulation.addMonitor("dcMon", dcMon);
+		simulation.addMonitor(dcMon);
 		
 		/*
 		 * Relocation policies.
 		 */
-		VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(dc, dcMon, 0.5, 0.85, 0.85);
+		//VMRelocationPolicyFFDI vmRelocationPolicy = new VMRelocationPolicyFFDI(dc, dcMon, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDD vmRelocationPolicy = new VMRelocationPolicyFFDD(dc, dcMon, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFDM vmRelocationPolicy = new VMRelocationPolicyFFDM(dc, dcMon, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFII vmRelocationPolicy = new VMRelocationPolicyFFII(dc, dcMon, 0.5, 0.85, 0.85);
-		//VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(dc, dcMon, 0.5, 0.85, 0.85);
+		VMRelocationPolicyFFID vmRelocationPolicy = new VMRelocationPolicyFFID(dc, dcMon, 0.5, 0.85, 0.85);
 		//VMRelocationPolicyFFIM vmRelocationPolicy = new VMRelocationPolicyFFIM(dc, dcMon, 0.5, 0.85, 0.85);
 		
 		DaemonScheduler relocationPolicyDaemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmRelocationPolicy);
@@ -78,7 +78,7 @@ public class SVMPolicies extends DCSimulationTask {
 		/*
 		 * Consolidation policies.
 		 */
-		VMConsolidationPolicySimple vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, 0.5, 0.85);
+		VMConsolidationPolicySimple vmConsolidationPolicy = new VMConsolidationPolicySimple(dc, dcMon, 0.5, 0.85);
 		
 		DaemonScheduler consolidationPolicyDaemon = new FixedIntervalDaemonScheduler(simulation, 14400000, vmConsolidationPolicy);
 		consolidationPolicyDaemon.start(14401000);

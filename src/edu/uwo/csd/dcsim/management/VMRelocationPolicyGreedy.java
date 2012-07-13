@@ -2,8 +2,10 @@ package edu.uwo.csd.dcsim.management;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 
 import edu.uwo.csd.dcsim.*;
+import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -40,17 +42,40 @@ public abstract class VMRelocationPolicyGreedy implements Daemon {
 		ArrayList<HostStub> stressed = new ArrayList<HostStub>();
 		
 		for (Host host : hostList) {
-			double cpuUtilization = host.getCpuManager().getCpuUtilization();
+			// Calculate host's avg CPU utilization in the last window of time.
+			LinkedList<Double> hostUtilValues = this.utilizationMonitor.getHostInUse(host);
+			double avgCpuInUse = 0;
+			for (Double x : hostUtilValues) {
+				avgCpuInUse += x;
+			}
+			avgCpuInUse = avgCpuInUse / this.utilizationMonitor.getWindowSize();
+			
+			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getCpuManager().getTotalCpu());
+			
 			if (host.getVMAllocations().size() == 0) {
 				empty.add(new HostStub(host));
-			} else if (cpuUtilization < lowerThreshold) {
+			} else if (avgCpuUtilization < lowerThreshold) {
 				underUtilized.add(new HostStub(host));
-			} else if (cpuUtilization > upperThreshold) {
+			} else if (avgCpuUtilization > upperThreshold) {
 				stressed.add(new HostStub(host));
 			} else {
 				partiallyUtilized.add(new HostStub(host));
 			}
 		}
+		
+//		for (Host host : hostList) {
+//			double cpuUtilization = host.getCpuManager().getCpuUtilization();
+//			
+//			if (host.getVMAllocations().size() == 0) {
+//				empty.add(new HostStub(host));
+//			} else if (cpuUtilization < lowerThreshold) {
+//				underUtilized.add(new HostStub(host));
+//			} else if (cpuUtilization > upperThreshold) {
+//				stressed.add(new HostStub(host));
+//			} else {
+//				partiallyUtilized.add(new HostStub(host));
+//			}
+//		}
 				
 		//sort stressed list
 		Collections.sort(stressed, new HostStubCpuInUseComparator());
