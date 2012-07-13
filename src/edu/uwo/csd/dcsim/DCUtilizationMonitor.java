@@ -53,5 +53,9 @@ public class DCUtilizationMonitor extends Monitor {
 	public LinkedList<Double> getDCInUse() {
 		return dcUtilValues;
 	}
+	
+	public long getWindowSize() {
+		return windowSize;
+	}
 
 }
