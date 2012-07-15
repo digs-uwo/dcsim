@@ -310,5 +310,15 @@ public class InteractiveApplication extends Application {
 	public double getTotalMigrationPenalty() {
 		return totalMigrationPenalty;
 	}
+
+	@Override
+	public double getIncomingWork() {
+		return incomingWork;
+	}
+
+	@Override
+	public double getTotalIncomingWork() {
+		return totalIncomingWork;
+	}
 	
 }

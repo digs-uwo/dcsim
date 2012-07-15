@@ -203,6 +203,16 @@ public class VmmApplication extends Application {
 	@Override
 	public double getTotalMigrationPenalty() {
 		return 0;
+	}
+
+	@Override
+	public double getIncomingWork() {
+		return 0;
+	}
+
+	@Override
+	public double getTotalIncomingWork() {
+		return 0;
 	}	
 
 

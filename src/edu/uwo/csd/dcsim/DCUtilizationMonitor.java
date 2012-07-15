@@ -4,12 +4,15 @@ import java.util.*;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.*;
+import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 public class DCUtilizationMonitor extends Monitor {
 
 	long windowSize;
 	HashMap<Host, LinkedList<Double>> utilizationValues = new HashMap<Host, LinkedList<Double>>();
 	LinkedList<Double> dcUtilValues = new LinkedList<Double>();
+	LinkedList<Double> dcSLAValues = new LinkedList<Double>();
+	LinkedList<Double> dcPowerValues = new LinkedList<Double>();
 	DataCentre dc;
 	
 	/**
@@ -29,7 +32,13 @@ public class DCUtilizationMonitor extends Monitor {
 	public void execute() {
 		
 		double dcUtil = 0;
+		double dcPower = 0;
+		double slavWork = 0;
+		double work = 0;		
+
 		for (Host host : dc.getHosts()) {
+			
+			//store host CPU utilization
 			if (!utilizationValues.containsKey(host))
 				utilizationValues.put(host, new LinkedList<Double>());
 			
@@ -39,11 +48,26 @@ public class DCUtilizationMonitor extends Monitor {
 			
 			if (hostUtils.size() > windowSize)
 				hostUtils.removeFirst();
+			
+			//get VM SLA values
+			for (VMAllocation vmAlloc : host.getVMAllocations()) {
+				slavWork += vmAlloc.getVm().getApplication().getSLAViolatedWork();
+				work += vmAlloc.getVm().getApplication().getIncomingWork(); //NOTE: This ONLY works with SINGLE TIERED applications. For multi-tiered applications, this will count incoming work multiple times!!
+			}
+			
+			//get power consumption
+			dcPower += host.getCurrentPowerConsumption();
 		}
 		
-		dcUtilValues.addLast(dcUtil);
-		if (dcUtilValues.size() > windowSize)
-			dcUtilValues.removeFirst();
+		dcUtilValues.addFirst(dcUtil);
+		dcPowerValues.addFirst(dcPower);
+		dcSLAValues.addFirst(slavWork / work);
+		if (dcUtilValues.size() > windowSize) {
+			dcUtilValues.removeLast();
+			dcPowerValues.removeLast();
+			dcSLAValues.removeLast();
+		}
+			
 	}
 	
 	public LinkedList<Double> getHostInUse(Host host) {
@@ -52,6 +76,14 @@ public class DCUtilizationMonitor extends Monitor {
 	
 	public LinkedList<Double> getDCInUse() {
 		return dcUtilValues;
+	}
+	
+	public LinkedList<Double> getDCsla() {
+		return dcSLAValues;
+	}
+	
+	public LinkedList<Double> getDCPower() {
+		return dcPowerValues;
 	}
 	
 	public long getWindowSize() {

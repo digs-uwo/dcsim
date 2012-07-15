@@ -126,6 +126,18 @@ public abstract class Application {
 	public abstract VirtualResources getResourceInUse();
 	
 	/**
+	 * Get the incoming work to the application
+	 * @return
+	 */
+	public abstract double getIncomingWork();
+	
+	/**
+	 * Get the total incoming work for the entire simulation
+	 * @return
+	 */
+	public abstract double getTotalIncomingWork();
+	
+	/**
 	 * Get the total resources demanded by this Application during the simulation
 	 * @return
 	 */
