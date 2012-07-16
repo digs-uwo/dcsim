@@ -13,6 +13,9 @@ public class DCUtilizationMonitor extends Monitor {
 	LinkedList<Double> dcUtilValues = new LinkedList<Double>();
 	LinkedList<Double> dcSLAValues = new LinkedList<Double>();
 	LinkedList<Double> dcPowerValues = new LinkedList<Double>();
+	double totalSlavWork;
+	double totalWork;
+	double totalPower;
 	DataCentre dc;
 	
 	/**
@@ -35,7 +38,10 @@ public class DCUtilizationMonitor extends Monitor {
 		double dcPower = 0;
 		double slavWork = 0;
 		double work = 0;		
-
+		totalSlavWork = 0;
+		totalWork = 0;
+		totalPower = 0;
+		
 		for (Host host : dc.getHosts()) {
 			
 			//store host CPU utilization
@@ -53,10 +59,14 @@ public class DCUtilizationMonitor extends Monitor {
 			for (VMAllocation vmAlloc : host.getVMAllocations()) {
 				slavWork += vmAlloc.getVm().getApplication().getSLAViolatedWork();
 				work += vmAlloc.getVm().getApplication().getIncomingWork(); //NOTE: This ONLY works with SINGLE TIERED applications. For multi-tiered applications, this will count incoming work multiple times!!
+				
+				totalSlavWork += vmAlloc.getVm().getApplication().getTotalSLAViolatedWork();
+				totalWork += vmAlloc.getVm().getApplication().getTotalIncomingWork();
 			}
 			
 			//get power consumption
 			dcPower += host.getCurrentPowerConsumption();
+			totalPower += host.getPowerConsumed();
 		}
 		
 		dcUtilValues.addFirst(dcUtil);
@@ -88,6 +98,18 @@ public class DCUtilizationMonitor extends Monitor {
 	
 	public long getWindowSize() {
 		return windowSize;
+	}
+	
+	public double getTotalSlavWork() {
+		return totalSlavWork;
+	}
+	
+	public double getTotalWork() {
+		return totalWork;
+	}
+	
+	public double getTotalPower() {
+		return totalPower;
 	}
 
 }
