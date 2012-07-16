@@ -12,6 +12,7 @@
     <path id="dcsim2.classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/log4j-1.2.16.jar"/>
+        <pathelement location="lib/commons-math3-3.0.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -57,16 +58,6 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="SimpleExample">
-        <java classname="edu.uwo.csd.dcsim.examples.SimpleExample" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
-    <target name="SimpleExampleDetailed">
-        <java classname="edu.uwo.csd.dcsim.examples.SimpleExampleDetailed" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
     <target name="DynamicManagement">
         <java classname="edu.uwo.csd.dcsim.examples.DynamicManagement" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
@@ -74,6 +65,16 @@
     </target>
     <target name="Replication">
         <java classname="edu.uwo.csd.dcsim.examples.Replication" failonerror="true" fork="yes">
+            <classpath refid="dcsim2.classpath"/>
+        </java>
+    </target>
+    <target name="SimpleExample">
+        <java classname="edu.uwo.csd.dcsim.examples.SimpleExample" failonerror="true" fork="yes">
+            <classpath refid="dcsim2.classpath"/>
+        </java>
+    </target>
+    <target name="SimpleExampleDetailed">
+        <java classname="edu.uwo.csd.dcsim.examples.SimpleExampleDetailed" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
         </java>
     </target>
