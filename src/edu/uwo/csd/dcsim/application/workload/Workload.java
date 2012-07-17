@@ -28,7 +28,7 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 		
 		//schedule initial update event
 		simulation.sendEvent(
-				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, 0, this, this));
+				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, simulation.getSimulationTime(), this, this));
 	}
 	
 	@Override

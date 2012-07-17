@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.application;
 import java.util.*;
 
 import edu.uwo.csd.dcsim.application.workload.*;
+import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -66,6 +67,38 @@ public class Service {
 		sla = sla / workload.getTotalWork();
 		
 		return sla;
+	}
+	
+	public boolean canShutdown() {
+		
+		//verify that none of the VMs in the service are currently migrating
+		for (ServiceTier tier : tiers) {
+			for (Application application : tier.getApplications()) {
+				if (application.getVM().isMigrating()) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	public void shutdownService() {
+		
+		for (ServiceTier tier : tiers) {
+			for (Application application : new ArrayList<Application>(tier.getApplications())) {
+				VM vm = application.getVM();
+				VMAllocation vmAlloc = vm.getVMAllocation();
+				Host host = vmAlloc.getHost();
+				
+				if (vm.isMigrating())
+					throw new RuntimeException("Tried to shutdown migrating VM #" + vm.getId() + ". Operation not allowed in simulation.");
+				
+				host.deallocate(vmAlloc);
+				vm.stopApplication();
+				
+			}
+		}
 	}
 	
 	/**
