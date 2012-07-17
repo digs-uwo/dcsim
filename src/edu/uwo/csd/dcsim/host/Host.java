@@ -721,6 +721,11 @@ public final class Host implements SimulationEventListener {
 
 	}
 	
+	/**
+	 * Get the power efficiency of the host.
+	 * @param utilization
+	 * @return
+	 */
 	public double getPowerEfficiency(double utilization) {
 		return (getTotalCpu() * utilization) / powerModel.getPowerConsumption(utilization);
 	}
