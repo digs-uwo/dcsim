@@ -720,6 +720,10 @@ public final class Host implements SimulationEventListener {
 		MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).addCounterAndReset();
 
 	}
+	
+	public double getPowerEfficiency(double utilization) {
+		return (getTotalCpu() * utilization) / powerModel.getPowerConsumption(utilization);
+	}
 
 	//ACCESSOR & MUTATOR METHODS
 	
