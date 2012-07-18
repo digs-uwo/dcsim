@@ -150,13 +150,13 @@ public class VMConsolidationPolicySimple implements Daemon {
 	}
 
 	@Override
-	public void start(Simulation simulation) {
+	public void onStart(Simulation simulation) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void stop(Simulation simulation) {
+	public void onStop(Simulation simulation) {
 		// TODO Auto-generated method stub
 		
 	}

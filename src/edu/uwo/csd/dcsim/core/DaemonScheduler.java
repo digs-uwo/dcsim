@@ -39,14 +39,14 @@ public abstract class DaemonScheduler implements SimulationEventListener {
 	public final void start(long time) {
 		running = true;
 		for (Daemon daemon : daemons)
-			daemon.start(simulation);
+			daemon.onStart(simulation);
 		simulation.sendEvent(new Event(DaemonScheduler.DAEMON_RUN_EVENT, time, this, this));
 	}
 	
 	public final void stop() {
 		running = false;
 		for (Daemon daemon : daemons)
-			daemon.stop(simulation);
+			daemon.onStop(simulation);
 	}
 	
 }

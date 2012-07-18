@@ -157,12 +157,12 @@ public class VMAllocationPolicyGreedy implements Daemon {
 	}
 
 	@Override
-	public void start(Simulation simulation) {
+	public void onStart(Simulation simulation) {
 		
 	}
 
 	@Override
-	public void stop(Simulation simulation) {
+	public void onStop(Simulation simulation) {
 		
 	}
 

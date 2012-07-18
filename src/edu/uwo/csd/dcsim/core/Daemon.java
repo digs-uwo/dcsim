@@ -5,7 +5,7 @@ public interface Daemon {
 	/**
 	 * Called when the service is started
 	 */
-	public void start(Simulation simulation);
+	public void onStart(Simulation simulation);
 	
 	/**
 	 * Called when the service is to run
@@ -15,6 +15,6 @@ public interface Daemon {
 	/**
 	 * Called when the service is stopped
 	 */
-	public void stop(Simulation simulation);
+	public void onStop(Simulation simulation);
 	
 }
