@@ -29,6 +29,11 @@ public class DCUtilizationMonitor extends Monitor {
 		super(simulation, frequency);
 		this.windowSize = windowSize;
 		this.dc = dc;
+		
+		//initialize host values
+		for (Host host : dc.getHosts()) {
+			utilizationValues.put(host, new LinkedList<Double>());
+		}
 	}
 
 	@Override
