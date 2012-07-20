@@ -58,7 +58,12 @@ public class TraceWorkload extends Workload {
 		if (currentPosition >= workloadTrace.getTimes().size())
 			currentPosition = 0;
 		
-		return simulation.getSimulationTime() + workloadTrace.getStepSize();
+		/*
+		 * Calculate the update time so that the event times are always divisible by the step size. This ensures that regardless
+		 * of when the workload is created and started, all workloads with the same step size will update at the same time. This 
+		 * is a performance optimization to reduce the number of time jumps in the simulation.
+		 */
+		return (simulation.getSimulationTime() - (simulation.getSimulationTime() % workloadTrace.getStepSize())) + workloadTrace.getStepSize();
 	}
 	
 	private class WorkloadTrace {

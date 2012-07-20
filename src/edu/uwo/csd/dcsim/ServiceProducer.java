@@ -61,7 +61,6 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		arrivalDist.reseedRandomGenerator(simulation.getRandom().nextLong());
 		
 		simulation.getLogger().debug("Service Arrival Rate set to " + servicesPerHour + " services-per-hour");
-		System.out.println(simulation.getSimulationTime() + " - Service Arrival Rate set to " + servicesPerHour + " services-per-hour");
 	}
 	
 	private void sendNextRateChangeEvent() {
