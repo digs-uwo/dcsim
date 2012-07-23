@@ -51,5 +51,10 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	public long getFrequency() {
 		return frequency;
 	}
+	
+	@Override
+	public boolean isRunning() {
+		return running;
+	}
 
 }

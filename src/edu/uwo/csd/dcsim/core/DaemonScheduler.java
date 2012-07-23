@@ -8,4 +8,6 @@ public interface DaemonScheduler {
 	
 	public void stop();
 	
+	public boolean isRunning();
+	
 }
