@@ -1,32 +1,60 @@
 package edu.uwo.csd.dcsim.core;
 
-public class FixedIntervalDaemonScheduler extends DaemonScheduler {
+public class FixedIntervalDaemonScheduler implements DaemonScheduler, SimulationEventListener {
+	
+	public static final int DAEMON_RUN_EVENT = 1;
 	
 	long frequency;
-	
-	public FixedIntervalDaemonScheduler(Simulation simulation, long frequency) {
-		super(simulation);
-		
-		this.frequency = frequency;
-	}
+	protected Simulation simulation;
+	Daemon daemon;
+	boolean running = false;
 	
 	public FixedIntervalDaemonScheduler(Simulation simulation, long frequency, Daemon daemon) {
-		super(simulation, daemon);
-		
+		this.simulation = simulation;
+		this.daemon = daemon;
 		this.frequency = frequency;
 	}
-
-	@Override
+	
+	public final void start() {
+		start(simulation.getSimulationTime());
+	}
+	
+	public final void start(long time) {
+		running = true;
+		daemon.onStart(simulation);
+		simulation.sendEvent(new Event(DAEMON_RUN_EVENT, time, this, this));
+	}
+	
+	public final void stop() {
+		running = false;
+		daemon.onStop(simulation);
+	}
+	
 	public long getNextRunTime() {
 		return simulation.getSimulationTime() + frequency;
 	}
 	
+	@Override
+	public final void handleEvent(Event e) {
+		if (e.getType() == DAEMON_RUN_EVENT) {
+			if (running) {
+				daemon.run(simulation);
+				simulation.sendEvent(new Event(DAEMON_RUN_EVENT, getNextRunTime(), this, this));
+			}
+		}
+	}
+
 	public void setFrequency(long frequency) {	
 		this.frequency = frequency;
 	}
 	
 	public long getFrequency() {
 		return frequency;
+	}
+	
+	@Override
+	public boolean isRunning() {
+		return running;
 	}
 
 }
