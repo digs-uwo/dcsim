@@ -28,13 +28,21 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	private final static String SHUTDOWN_COUNT_METRIC = "servicesEnded";
 	
 	DataCentre dcTarget;
-	RealDistribution lifespanDist;
+	RealDistribution lifespanDist; //if null, create services that do not stop
 	ExponentialDistribution arrivalDist;
 	List<Tuple<Long, Double>> servicesPerHour;
 	int currentRate = -1;
 	long startTime = 0;
 	
 	protected DataCentreSimulation simulation;
+	
+	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, List<Tuple<Long, Double>> servicesPerHour) {
+		this(simulation, dcTarget, null, servicesPerHour);
+	}
+	
+	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, double servicesPerHour) {
+		this(simulation, dcTarget, null, servicesPerHour);
+	}
 	
 	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, List<Tuple<Long, Double>> servicesPerHour) {
 		this(simulation, dcTarget, lifespanDist, 0);
@@ -48,7 +56,8 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		this.simulation = simulation;
 		
 		//reseed the random number generator based on the simulation Random instance to ensure experiment repeatability
-		lifespanDist.reseedRandomGenerator(simulation.getRandom().nextLong());
+		if (lifespanDist != null)
+			lifespanDist.reseedRandomGenerator(simulation.getRandom().nextLong());
 		
 		setArrivalRate(servicesPerHour);
 	}
@@ -79,7 +88,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	
 	private void spawnService() {
 		Service service = buildService();
-		long lifeSpan = (long)Math.round(lifespanDist.sample());
+		
 		
 		ArrayList<VMAllocationRequest> vmAllocationRequests = service.createInitialVmRequests();
 		
@@ -88,10 +97,15 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		AggregateMetric.getSimulationMetric(simulation, SPAWN_COUNT_METRIC).addValue(1);
 		
 		if (dcTarget.getVMPlacementPolicy().submitVMs(vmAllocationRequests)) {
+			
 			//send event to trigger service shutdown on lifespan + currentTime
-			Event shutdownEvent = new Event(SHUTDOWN_SERVICE_EVENT, simulation.getSimulationTime() + lifeSpan, this, this);
-			shutdownEvent.getData().put("service", service);
-			simulation.sendEvent(shutdownEvent);
+			if (lifespanDist != null) {
+				long lifeSpan = (long)Math.round(lifespanDist.sample());
+				Event shutdownEvent = new Event(SHUTDOWN_SERVICE_EVENT, simulation.getSimulationTime() + lifeSpan, this, this);
+				shutdownEvent.getData().put("service", service);
+				simulation.sendEvent(shutdownEvent);
+			}
+			
 		} else {
 			simulation.getLogger().debug("Service Placement Failed");
 			AggregateMetric.getSimulationMetric(simulation, PLACEMENT_FAIL_METRIC).addValue(1);
