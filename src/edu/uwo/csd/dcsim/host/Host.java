@@ -685,7 +685,7 @@ public final class Host implements SimulationEventListener {
 		
 		if (state == HostState.ON) {
 			
-			AverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).incrementCounter();
+			WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).incrementCounter();
 			MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).incrementCounter();
 			MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).incrementCounter();
 			
@@ -715,7 +715,8 @@ public final class Host implements SimulationEventListener {
 	public static void updateSimulationScopeMetrics(Simulation simulation) {
 		
 		//Collect Active Host metrics
-		AverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).addCounterAndReset();
+		WeightedAverageMetric avgActiveMetric = WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC); 
+		avgActiveMetric.addValue(avgActiveMetric.getCounter().getValueAndReset(), simulation.getElapsedTime());
 		MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).addCounterAndReset();
 		MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).addCounterAndReset();
 
