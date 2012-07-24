@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim.core.metrics;
 
+import java.util.*;
+
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.Simulation;
 
@@ -9,6 +11,7 @@ public abstract class Metric {
 	private final String name;
 	private final Counter counter = new Counter();
 	private OutputFormatter outputFormatter = null;
+	private ArrayList<MetricRecord> recordedValues =  new ArrayList<MetricRecord>();
 	
 	public Metric(String name) {
 		this.name = name;
@@ -67,5 +70,26 @@ public abstract class Metric {
 	}
 	
 	public abstract double getValue();
+	
+	public class MetricRecord {
+		
+		public final long time;
+		public final double value;
+		
+		public MetricRecord(long time, double value) {
+			this.time = time;
+			this.value = value;
+		}
+		
+		@Override 
+		public String toString() {
+			if (Metric.this.outputFormatter != null) {
+				return Metric.this.outputFormatter.format(value);
+			} else {
+				return Double.toString(value);
+			}
+		}
+		
+	}
 	
 }
