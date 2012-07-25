@@ -11,11 +11,21 @@ public class PercentageFormatter implements OutputFormatter {
 
 	@Override
 	public String format(double value, int precision) {
+		return formatNoUnits(value, precision) + "%";
+	}
+
+	@Override
+	public String formatNoUnits(double value) {
+		return formatNoUnits(value, NO_ROUNDING);
+	}
+
+	@Override
+	public String formatNoUnits(double value, int precision) {
 		value = value * 100;
 		if (precision != NO_ROUNDING)
 			value = Utility.roundDouble(value, precision);
 		
-		return value + "%";
+		return Double.toString(value);
 	}
 
 }

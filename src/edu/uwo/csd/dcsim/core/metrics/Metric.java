@@ -112,7 +112,7 @@ public abstract class Metric {
 				return toString(Integer.parseInt(Simulation.getProperty("metricPrecision")));
 			
 			if (Metric.this.outputFormatter != null) {
-				return Metric.this.outputFormatter.format(value);
+				return Metric.this.outputFormatter.formatNoUnits(value);
 			} else {
 				return Double.toString(value);
 			}
@@ -120,7 +120,7 @@ public abstract class Metric {
 		
 		public String toString(int precision) {
 			if (outputFormatter != null)
-				return outputFormatter.format(value, precision);
+				return outputFormatter.formatNoUnits(value, precision);
 			else
 				return Double.toString(Utility.roundDouble(value, precision));
 		}

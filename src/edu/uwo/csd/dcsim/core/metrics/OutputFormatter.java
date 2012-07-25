@@ -6,5 +6,7 @@ public interface OutputFormatter {
 	
 	public String format(double value);
 	public String format(double value, int precision);
+	public String formatNoUnits(double value);
+	public String formatNoUnits(double value, int precision);
 	
 }

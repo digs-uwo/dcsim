@@ -11,11 +11,20 @@ public class PowerFormatter implements OutputFormatter {
 
 	@Override
 	public String format(double value, int precision) {
-		value = (value / 3600000);
+		return formatNoUnits(value, precision) + "kWh"; //convert from watt-seconds to kWh
+	}
+
+	@Override
+	public String formatNoUnits(double value) {
+		return formatNoUnits(value, NO_ROUNDING);
+	}
+
+	@Override
+	public String formatNoUnits(double value, int precision) {
 		if (precision != NO_ROUNDING)
 			value = Utility.roundDouble(value, precision);
-			
-		return value + "kWh"; //convert from watt-seconds to kWh
+		
+		return Double.toString(value); //output value in watt-hours, not kWh
 	}
 
 }

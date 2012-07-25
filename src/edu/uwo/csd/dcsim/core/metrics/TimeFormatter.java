@@ -64,4 +64,18 @@ public class TimeFormatter implements OutputFormatter {
 		
 	}
 
+	@Override
+	public String formatNoUnits(double value) {
+		return formatNoUnits(value, NO_ROUNDING);
+	}
+
+	@Override
+	public String formatNoUnits(double value, int precision) {
+		if (precision != NO_ROUNDING) {
+			value = Utility.roundDouble(value, precision);
+		}
+		
+		return Double.toString(value); //without printing units, simply output result in ms
+	}
+
 }
