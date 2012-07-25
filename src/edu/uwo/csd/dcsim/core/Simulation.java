@@ -3,7 +3,7 @@ package edu.uwo.csd.dcsim.core;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import edu.uwo.csd.dcsim.core.metrics.Metric;
+import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.logging.*;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private long metricRecordStart;
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
-	private Map<String, Metric> metrics = new HashMap<String, Metric>();
+	protected Map<String, Metric> metrics = new HashMap<String, Metric>();
 	
 	private Vector<Monitor> monitors = new Vector<Monitor>();
 	
@@ -201,6 +201,7 @@ public abstract class Simulation implements SimulationEventListener {
 		
 		//wrap result in new Collection so that Collection is modifyable, as modifying the values() collection of a HashMap directly breaks things.
 		Vector<Metric> result = new Vector<Metric>(metrics.values());
+		Collections.sort(result, new MetricAlphaComparator());
 		
 		return result;
 	}
