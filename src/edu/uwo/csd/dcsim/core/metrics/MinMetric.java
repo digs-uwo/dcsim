@@ -23,6 +23,16 @@ public class MinMetric extends Metric {
 	public double getValue() {
 		return min;
 	}
+
+	@Override
+	public double getCurrentValue() {
+		return min; //the 'current' value of min is the same as the value that has been collected since the start of metric recording, since the 'current' set would only have one value
+	}
+
+	@Override
+	public void resetCurrentValue() {
+		//nothing to do
+	}
 	
 	public static MinMetric getSimulationMetric(Simulation simulation, String name) {
 		MinMetric metric;

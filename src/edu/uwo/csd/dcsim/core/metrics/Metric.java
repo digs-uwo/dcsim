@@ -49,6 +49,10 @@ public abstract class Metric {
 		if (this.outputFormatter == null)
 			this.outputFormatter = outputFormatter;
 	}
+	
+	public ArrayList<MetricRecord> getRecordedValues() {
+		return recordedValues;
+	}
 
 	@Override
 	public String toString() {
@@ -69,7 +73,28 @@ public abstract class Metric {
 			return Double.toString(Utility.roundDouble(getValue(), precision));
 	}
 	
+	/**
+	 * This gets the value of the metric as calculated since the start of metric recording
+	 * @return
+	 */
 	public abstract double getValue();
+	
+	/**
+	 * This gets the value of the metric over the current time interval
+	 * @return
+	 */
+	public abstract double getCurrentValue();
+	
+	/**
+	 * Reset the current value
+	 */
+	public abstract void resetCurrentValue();
+	
+	public void completeTimeInterval(Simulation simulation) {
+		MetricRecord record = new MetricRecord(simulation.getSimulationTime(), getCurrentValue());
+		recordedValues.add(record);
+		resetCurrentValue();
+	}
 	
 	public class MetricRecord {
 		
@@ -83,11 +108,21 @@ public abstract class Metric {
 		
 		@Override 
 		public String toString() {
+			if (Simulation.hasProperty("metricPrecision"))
+				return toString(Integer.parseInt(Simulation.getProperty("metricPrecision")));
+			
 			if (Metric.this.outputFormatter != null) {
 				return Metric.this.outputFormatter.format(value);
 			} else {
 				return Double.toString(value);
 			}
+		}
+		
+		public String toString(int precision) {
+			if (outputFormatter != null)
+				return outputFormatter.format(value, precision);
+			else
+				return Double.toString(Utility.roundDouble(value, precision));
 		}
 		
 	}

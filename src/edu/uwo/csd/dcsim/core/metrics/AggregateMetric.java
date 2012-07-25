@@ -5,12 +5,14 @@ import edu.uwo.csd.dcsim.core.Simulation;
 public class AggregateMetric extends Metric {
 
 	private double value = 0;
+	private double currentValue = 0;
 	
 	public AggregateMetric(String name) {
 		super(name);
 	}
 	
 	public void addValue(double val) {
+		currentValue += val;
 		value += val;
 	}
 	
@@ -23,6 +25,16 @@ public class AggregateMetric extends Metric {
 		return value;
 	}
 
+	@Override
+	public double getCurrentValue() {
+		return currentValue;
+	}
+
+	@Override
+	public void resetCurrentValue() {
+		currentValue = 0;
+	}
+	
 	public static AggregateMetric getSimulationMetric(Simulation simulation, String name) {
 		AggregateMetric metric;
 		if (simulation.hasMetric(name)) {

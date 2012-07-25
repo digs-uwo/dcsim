@@ -35,5 +35,16 @@ public class MaxMetric extends Metric {
 		}
 		return metric;	
 	}
+
+	@Override
+	public double getCurrentValue() {
+		//the 'current' value of max is the same as the value that has been collected since the start of metric recording, since the 'current' set would only have one value
+		return max;
+	}
+
+	@Override
+	public void resetCurrentValue() {
+		//nothing to do
+	}
 	
 }

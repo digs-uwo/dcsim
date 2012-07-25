@@ -7,11 +7,17 @@ public class WeightedAverageMetric extends Metric {
 	private double total = 0;
 	private double totalWeight = 0;
 	
+	private double currentTotal = 0;
+	private double currentTotalWeight = 0;
+	
 	public WeightedAverageMetric(String name) {
 		super(name);
 	}
 	
 	public void addValue(double val, double weight) {
+		currentTotal += val * weight;
+		currentTotalWeight += weight;
+		
 		total += val * weight;
 		totalWeight += weight;
 	}
@@ -21,6 +27,17 @@ public class WeightedAverageMetric extends Metric {
 		return total / totalWeight;
 	}
 
+	@Override
+	public double getCurrentValue() {
+		return currentTotal / currentTotalWeight;
+	}
+
+	@Override
+	public void resetCurrentValue() {
+		currentTotal = 0;
+		currentTotalWeight = 0;
+	}
+	
 	public static WeightedAverageMetric getSimulationMetric(Simulation simulation, String name) {
 		WeightedAverageMetric metric;
 		if (simulation.hasMetric(name)) {

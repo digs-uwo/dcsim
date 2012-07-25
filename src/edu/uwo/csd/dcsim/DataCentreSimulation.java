@@ -6,6 +6,7 @@ import java.util.HashSet;
 
 import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
 
 /**
@@ -112,11 +113,19 @@ public final class DataCentreSimulation extends Simulation {
 		}
 		
 		if (this.isRecordingMetrics()) {
+			//update host simulation scope metrics
 			Host.updateSimulationScopeMetrics(this);
 	
+			//update metrics tracked by workloads (i.e. SLA)
 			for (Workload workload : workloads)
 				workload.updateMetrics();
+			
+			//record the metric values for this time interval
+			for (Metric metric : this.metrics.values()) {
+				metric.completeTimeInterval(this);
+			}
 		}
+		
 				
 	}
 

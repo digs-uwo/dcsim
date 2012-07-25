@@ -17,4 +17,14 @@ public class ValueMetric extends Metric {
 		return value;
 	}
 
+	@Override
+	public double getCurrentValue() {
+		return value; //'current' value is the same as regular value
+	}
+
+	@Override
+	public void resetCurrentValue() {
+		//nothing to do
+	}
+
 }
