@@ -11,7 +11,7 @@ public class PowerFormatter implements OutputFormatter {
 
 	@Override
 	public String format(double value, int precision) {
-		return formatNoUnits(value, precision) + "kWh"; //convert from watt-seconds to kWh
+		return formatNoUnits(value / 3600000, precision) + "kWh"; //convert from watt-seconds to kWh
 	}
 
 	@Override
