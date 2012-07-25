@@ -51,6 +51,10 @@ public class SimpleExample extends DCSimulationTask {
 			logger.info(metric.getName() + "=" + metric.toString()); //metric.getValue() returns the raw value, while toString() provides formatting
 		}
 		
+		//write the metric values to a trace file
+		DCSimulationTraceWriter traceWriter = new DCSimulationTraceWriter(task);
+		traceWriter.writeTrace();
+		
 	}
 	
 	public SimpleExample(String name, long duration) {

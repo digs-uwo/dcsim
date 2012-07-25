@@ -23,8 +23,8 @@ public class Replication extends DCSimulationTask {
 		
 		Simulation.initializeLogging();
 		
-		Collection<SimulationTask> completedTasks;
-		SimulationExecutor executor = new SimulationExecutor();
+		Collection<DCSimulationTask> completedTasks;
+		SimulationExecutor<DCSimulationTask> executor = new SimulationExecutor<DCSimulationTask>();
 		
 		executor.addTask(new Replication("replication-1", 1088501048448116498l));
 //		executor.addTask(new Replication("replication-2", 3081198553457496232l));

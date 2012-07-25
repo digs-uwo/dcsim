@@ -18,8 +18,8 @@ public class DynamicManagement extends DCSimulationTask {
 		
 		Simulation.initializeLogging();
 		
-		Collection<SimulationTask> completedTasks;
-		SimulationExecutor executor = new SimulationExecutor();
+		Collection<DCSimulationTask> completedTasks;
+		SimulationExecutor<DCSimulationTask> executor = new SimulationExecutor<DCSimulationTask>();
 		
 		executor.addTask(new DynamicManagement("dynamic-1", 1088501048448116498l));
 //		executor.addTask(new DynamicManagement("dynamic-2", 3081198553457496232l));
@@ -29,7 +29,7 @@ public class DynamicManagement extends DCSimulationTask {
 		
 		completedTasks = executor.execute();
 		
-		for(SimulationTask task : completedTasks) {
+		for(DCSimulationTask task : completedTasks) {
 			logger.info(task.getName());
 			ExampleHelper.printMetrics(task.getResults());
 		}

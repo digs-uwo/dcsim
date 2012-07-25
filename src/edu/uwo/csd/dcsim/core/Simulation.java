@@ -22,6 +22,7 @@ public abstract class Simulation implements SimulationEventListener {
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
+	private static String OUTPUT_DIRECTORY = "/output";
 	
 	private static Properties loggerProperties;
 	
@@ -360,6 +361,19 @@ public abstract class Simulation implements SimulationEventListener {
 	 */
 	public static final String getConfigDirectory() {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
+	}
+	
+	/**
+	 * Get the directory that contains simulation trace files
+	 * @return The directory that contains configuration files.
+	 */
+	public static final String getOutputDirectory() {
+		//ensure directory exists
+		File file = new File(getHomeDirectory() + OUTPUT_DIRECTORY);
+		if (!file.exists())
+			file.mkdir();
+		
+		return getHomeDirectory() + OUTPUT_DIRECTORY;
 	}
 	
 	public static final boolean hasProperty(String name) {
