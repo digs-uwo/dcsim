@@ -6,6 +6,7 @@ public class DaemonSchedulerGroup implements DaemonScheduler {
 
 	protected Simulation simulation;
 	boolean running = false;
+	boolean enabled = true;
 	public List<DaemonGroupMember> members = new ArrayList<DaemonGroupMember>();
 	
 	public DaemonSchedulerGroup(Simulation simulation) {
@@ -42,6 +43,18 @@ public class DaemonSchedulerGroup implements DaemonScheduler {
 		return running;
 	}
 	
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		for (DaemonGroupMember member : members) {
+			member.daemonScheduler.setEnabled(enabled);
+		}
+	}
+	
 	private class DaemonGroupMember {
 		private final DaemonScheduler daemonScheduler;
 		private final long startOffset;
@@ -52,5 +65,6 @@ public class DaemonSchedulerGroup implements DaemonScheduler {
 		}
 		
 	}
+
 	
 }

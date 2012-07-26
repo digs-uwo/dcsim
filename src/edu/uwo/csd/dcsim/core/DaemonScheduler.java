@@ -10,4 +10,8 @@ public interface DaemonScheduler {
 	
 	public boolean isRunning();
 	
+	public boolean isEnabled();
+	
+	public void setEnabled(boolean enabled);
+	
 }

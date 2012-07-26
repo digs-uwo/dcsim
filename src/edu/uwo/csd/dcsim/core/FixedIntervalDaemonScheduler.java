@@ -8,6 +8,7 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	protected Simulation simulation;
 	Daemon daemon;
 	boolean running = false;
+	boolean enabled = true;
 	
 	public FixedIntervalDaemonScheduler(Simulation simulation, long frequency, Daemon daemon) {
 		this.simulation = simulation;
@@ -38,7 +39,8 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	public final void handleEvent(Event e) {
 		if (e.getType() == DAEMON_RUN_EVENT) {
 			if (running) {
-				daemon.run(simulation);
+				if (enabled)
+					daemon.run(simulation);
 				simulation.sendEvent(new Event(DAEMON_RUN_EVENT, getNextRunTime(), this, this));
 			}
 		}
@@ -55,6 +57,16 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	@Override
 	public boolean isRunning() {
 		return running;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }
