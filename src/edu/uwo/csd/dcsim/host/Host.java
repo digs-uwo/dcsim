@@ -40,7 +40,7 @@ public final class Host implements SimulationEventListener {
 	public static final String AVERAGE_ACTIVE_METRIC = "avgActiveHosts";
 	public static final String MIN_ACTIVE_METRIC = "minActiveHosts";
 	public static final String MAX_ACTIVE_METRIC = "maxActiveHosts";
-	public static final String POWER_CONSUMED_METRIC = "powerConsumed";
+	public static final String POWER_CONSUMPTION_METRIC = "powerConsumption";
 	public static final String AVERAGE_UTILIZATION_METRIC = "avgHostUtil";
 	public static final String HOST_TIME_METRIC = "hostTime";
 	
@@ -125,9 +125,9 @@ public final class Host implements SimulationEventListener {
 		state = HostState.ON;
 		
 		//initialize metric output formatting
-		AggregateMetric.getSimulationMetric(simulation, POWER_CONSUMED_METRIC).initializeOutputFormatter(new PowerFormatter());
+		AggregateRateMetric.getSimulationMetric(simulation, POWER_CONSUMPTION_METRIC).initializeOutputFormatter(new PowerFormatter());
 		AggregateMetric.getSimulationMetric(simulation, HOST_TIME_METRIC).initializeOutputFormatter(new TimeFormatter(TimeFormatter.TimeUnit.SECONDS, TimeFormatter.TimeUnit.HOURS));
-		WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
+		TimeWeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
 	}
 	
 	/**
@@ -685,7 +685,7 @@ public final class Host implements SimulationEventListener {
 		
 		if (state == HostState.ON) {
 			
-			WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).incrementCounter();
+			TimeWeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC).incrementCounter();
 			MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).incrementCounter();
 			MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).incrementCounter();
 			
@@ -697,14 +697,14 @@ public final class Host implements SimulationEventListener {
 			//Collect average host utilization metric
 			utilizationSum += getCpuManager().getCpuUtilization() * simulation.getElapsedTime();
 
-			WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).addValue(getCpuManager().getCpuUtilization(), simulation.getElapsedTime());
+			TimeWeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_UTILIZATION_METRIC).addValue(getCpuManager().getCpuUtilization(), simulation.getElapsedTime());
 			
 		}
 		
 		//Collect power consumed metric
 		powerConsumed += getCurrentPowerConsumption() * simulation.getElapsedSeconds();
 		
-		AggregateMetric.getSimulationMetric(simulation, POWER_CONSUMED_METRIC).addValue(getCurrentPowerConsumption() * simulation.getElapsedSeconds());
+		AggregateRateMetric.getSimulationMetric(simulation, POWER_CONSUMPTION_METRIC).addValue(getCurrentPowerConsumption(), simulation.getElapsedSeconds());
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null)
@@ -715,7 +715,7 @@ public final class Host implements SimulationEventListener {
 	public static void updateSimulationScopeMetrics(Simulation simulation) {
 		
 		//Collect Active Host metrics
-		WeightedAverageMetric avgActiveMetric = WeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC); 
+		TimeWeightedAverageMetric avgActiveMetric = TimeWeightedAverageMetric.getSimulationMetric(simulation, AVERAGE_ACTIVE_METRIC); 
 		avgActiveMetric.addValue(avgActiveMetric.getCounter().getValueAndReset(), simulation.getElapsedTime());
 		MinMetric.getSimulationMetric(simulation, MIN_ACTIVE_METRIC).addCounterAndReset();
 		MaxMetric.getSimulationMetric(simulation, MAX_ACTIVE_METRIC).addCounterAndReset();

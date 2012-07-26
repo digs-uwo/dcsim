@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim.core.metrics;
 
+import edu.uwo.csd.dcsim.core.Simulation;
+
 public class ValueMetric extends Metric {
 
 	private double value = 0;
@@ -25,6 +27,18 @@ public class ValueMetric extends Metric {
 	@Override
 	public void resetCurrentValue() {
 		//nothing to do
+	}
+	
+	public static ValueMetric getSimulationMetric(Simulation simulation, String name) {
+		ValueMetric metric;
+		if (simulation.hasMetric(name)) {
+			metric = (ValueMetric)simulation.getMetric(name);
+		}
+		else {
+			metric = new ValueMetric(name);
+			simulation.addMetric(metric);
+		}
+		return metric;	
 	}
 
 }
