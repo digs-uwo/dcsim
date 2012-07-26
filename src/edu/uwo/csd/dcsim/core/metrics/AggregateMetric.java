@@ -7,19 +7,20 @@ public class AggregateMetric extends Metric {
 	private double value = 0;
 	private double currentValue = 0;
 	
-	public AggregateMetric(String name) {
-		super(name);
+	public AggregateMetric(Simulation simulation, String name) {
+		super(simulation, name);
+	}
+
+	public void addValue(double value) {
+		this.value += value;
+		this.currentValue += value;
 	}
 	
-	public void addValue(double val) {
-		currentValue += val;
-		value += val;
+	@Override
+	public String toString() {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
 	}
-	
-	public void addCounterAndReset() {
-		addValue(getCounter().getValueAndReset());
-	}
-	
+
 	@Override
 	public double getValue() {
 		return value;
@@ -31,21 +32,26 @@ public class AggregateMetric extends Metric {
 	}
 
 	@Override
-	public void resetCurrentValue() {
+	public void onStartTimeInterval() {
 		currentValue = 0;
 	}
-	
+
+	@Override
+	public void onCompleteTimeInterval() {
+		//nothing to do
+	}
+
 	public static AggregateMetric getSimulationMetric(Simulation simulation, String name) {
 		AggregateMetric metric;
 		if (simulation.hasMetric(name)) {
 			metric = (AggregateMetric)simulation.getMetric(name);
 		}
 		else {
-			metric = new AggregateMetric(name);
+			metric = new AggregateMetric(simulation, name);
 			simulation.addMetric(metric);
 		}
 		return metric;	
 	}
-
+	
 	
 }

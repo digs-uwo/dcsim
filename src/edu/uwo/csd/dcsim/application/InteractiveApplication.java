@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.FractionalMetric;
+import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 import edu.uwo.csd.dcsim.vm.VirtualResources;
 
 /**
@@ -239,9 +239,9 @@ public class InteractiveApplication extends Application {
 		 * Add values to the SLA violation numerators only. The denominator (total incoming requests) is populated by Workload objects, to prevent 
 		 * tiers of a multi-tiered application from counting the same incoming work unit multiple times
 		 */
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addNumerator(slaViolatedWork);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addNumerator(slaViolatedWork - migrationPenalty);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addNumerator(migrationPenalty);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addSlaVWork(slaViolatedWork);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addSlaVWork(slaViolatedWork - migrationPenalty);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addSlaVWork(migrationPenalty);
 
 	}
 

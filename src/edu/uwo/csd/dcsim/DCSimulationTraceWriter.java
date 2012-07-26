@@ -28,7 +28,7 @@ public class DCSimulationTraceWriter {
 			
 			for (Metric metric : task.getResults()) {
 				for (MetricRecord record : metric.getRecordedValues()) {
-					out.write(record.time + "," + metric.getName() + "," + record.toString());
+					out.write(record.time + "," + metric.getName() + "," + record.value);
 					out.newLine();
 				}
 			}

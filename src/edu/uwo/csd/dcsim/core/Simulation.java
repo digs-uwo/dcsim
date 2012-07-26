@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.core;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.logging.*;
 
@@ -23,6 +24,8 @@ public abstract class Simulation implements SimulationEventListener {
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
 	private static String OUTPUT_DIRECTORY = "/output";
+	
+	private static String METRIC_PRECISION_PROP = "metricPrecision";
 	
 	private static Properties loggerProperties;
 	
@@ -402,5 +405,35 @@ public abstract class Simulation implements SimulationEventListener {
 		return prop;
 	}
 
+	/**
+	 * Determine if the property specifying the precision that metrics should be reported with has been set
+	 * @return True, if metric precision has been set
+	 */
+	public static final boolean isMetricPrecisionSet() {
+		return hasProperty(METRIC_PRECISION_PROP);
+	}
+	
+	/**
+	 * Get the precision that metrics should be reported with
+	 * @return The precision of metrics, or -1 if none has been set
+	 */
+	public static final int getMetricPrecision() {
+		if (isMetricPrecisionSet()) {
+			return Integer.parseInt(getProperty(METRIC_PRECISION_PROP));
+		}
+		return -1;
+	}
+	
+	/**
+	 * Round double values to the specified metric precision
+	 * @param value
+	 * @return
+	 */
+	public static final double roundToMetricPrecision(double value) {
+		if (isMetricPrecisionSet()) {
+			return Utility.roundDouble(value, getMetricPrecision());
+		}
+		return value;
+	}
 	
 }

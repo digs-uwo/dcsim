@@ -83,7 +83,7 @@ public abstract class DCSimulationTask implements SimulationTask {
 			long endTime = System.currentTimeMillis();
 			
 			//add the real execution time of the simulation to the list of metrics
-			ValueMetric timeMetric = new ValueMetric("simExecTime");
+			ValueMetric timeMetric = new ValueMetric(simulation, "simExecTime");
 			timeMetric.setValue(endTime - startTime);
 			metrics.add(timeMetric);
 			

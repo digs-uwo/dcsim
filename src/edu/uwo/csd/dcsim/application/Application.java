@@ -1,7 +1,6 @@
 package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.Simulation;
-import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -26,11 +25,6 @@ public abstract class Application {
 	 */
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
-		
-		//initialize metric output formatters
-		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_METRIC).initializeOutputFormatter(new PercentageFormatter());
-		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_UNDERPROVISION_METRIC).initializeOutputFormatter(new PercentageFormatter());
-		FractionalMetric.getSimulationMetric(simulation, SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).initializeOutputFormatter(new PercentageFormatter());
 	}
 	
 	/**

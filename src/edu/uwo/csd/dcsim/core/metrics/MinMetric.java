@@ -5,18 +5,19 @@ import edu.uwo.csd.dcsim.core.Simulation;
 public class MinMetric extends Metric {
 
 	private double min = Double.MAX_VALUE;
+	private double count = 0;
 	
-	public MinMetric(String name) {
-		super(name);
+	public MinMetric(Simulation simulation, String name) {
+		super(simulation, name);
+	}
+
+	public void incrementCount() {
+		++count;
 	}
 	
-	public void addValue(double val) {
-		if (val < min)
-			min = val;
-	}
-	
-	public void addCounterAndReset() {
-		addValue(getCounter().getValueAndReset());
+	@Override
+	public String toString() {
+		return Double.toString(getValue());
 	}
 
 	@Override
@@ -26,24 +27,31 @@ public class MinMetric extends Metric {
 
 	@Override
 	public double getCurrentValue() {
-		return min; //the 'current' value of min is the same as the value that has been collected since the start of metric recording, since the 'current' set would only have one value
+		return count;
 	}
 
 	@Override
-	public void resetCurrentValue() {
-		//nothing to do
+	public void onStartTimeInterval() {
+		count = 0;
+	}
+
+	@Override
+	public void onCompleteTimeInterval() {
+		if (count < min)
+			min = count;
 	}
 	
-	public static MinMetric getSimulationMetric(Simulation simulation, String name) {
+	public static MinMetric getMetric(Simulation simulation, String name) {
 		MinMetric metric;
 		if (simulation.hasMetric(name)) {
 			metric = (MinMetric)simulation.getMetric(name);
 		}
 		else {
-			metric = new MinMetric(name);
+			metric = new MinMetric(simulation, name);
 			simulation.addMetric(metric);
 		}
 		return metric;	
 	}
+	
 
 }

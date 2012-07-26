@@ -4,7 +4,7 @@ import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.application.WorkConsumer;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.FractionalMetric;
+import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 
 /**
  * Represents an external workload submitting work to Applications running in the DataCentre.
@@ -78,9 +78,9 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 		 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
 		 * more than once to the total (thus incorrectly reducing the SLA violation value)
 		 */
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_METRIC).addDenominator(currentWork);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addDenominator(currentWork);
-		FractionalMetric.getSimulationMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addDenominator(currentWork);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(currentWork);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(currentWork);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(currentWork);
 	}
 	
 	/**
