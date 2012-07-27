@@ -98,10 +98,6 @@ public final class DataCentreSimulation extends Simulation {
 	@Override
 	public void updateSimulation(long simulationTime) {
 		
-		//inform metrics that we are starting a new time interval
-		for (Metric metric : this.metrics.values())
-			metric.startTimeInterval();
-		
 		//retrieve work for the elapsed period since the last update
 		for (Workload workload : workloads)
 			workload.update();
@@ -120,11 +116,6 @@ public final class DataCentreSimulation extends Simulation {
 			//update metrics tracked by workloads (i.e. SLA)
 			for (Workload workload : workloads)
 				workload.updateMetrics();
-			
-			//inform metrics that this time interval update is complete
-			for (Metric metric : this.metrics.values()) {
-				metric.completeTimeInterval();
-			}
 		}
 		
 				

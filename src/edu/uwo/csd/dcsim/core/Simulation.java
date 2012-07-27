@@ -172,8 +172,20 @@ public abstract class Simulation implements SimulationEventListener {
 
 				//check if simulationTime is advancing
 				if (simulationTime != e.getTime()) {
+					
+					if (simulationTime != 0) {
+						//inform metrics that this time interval update is complete
+						for (Metric metric : this.metrics.values()) {
+							metric.completeTimeInterval();
+						}
+					}
+					
 					lastUpdate = simulationTime;
 					simulationTime = e.getTime();
+					
+					//inform metrics that we are starting a new time interval
+					for (Metric metric : this.metrics.values())
+						metric.startTimeInterval();
 					
 					//update the simulation
 					updateSimulation(simulationTime);
@@ -195,6 +207,11 @@ public abstract class Simulation implements SimulationEventListener {
 			} else {
 				throw new RuntimeException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
 			}
+		}
+		
+		//inform metrics that this time interval update is complete
+		for (Metric metric : this.metrics.values()) {
+			metric.completeTimeInterval();
 		}
 		
 		completeSimulation(duration);
