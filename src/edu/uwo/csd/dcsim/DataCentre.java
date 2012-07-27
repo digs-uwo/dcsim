@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.core.metrics.DCCpuUtilMetric;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.management.*;
 
@@ -14,17 +15,21 @@ import edu.uwo.csd.dcsim.management.*;
  *
  */
 public class DataCentre implements SimulationEventListener {
+	
+	public static final String DC_UTIL_METRIC = "avgDcUtil";
 
 	private ArrayList<Host> hosts; //the hosts in this datacentre
 	VMPlacementPolicy vmPlacementPolicy; //the placement policy for this datacentre
+	Simulation simulation;
 	
 	/**
 	 * Creates a new DataCentre, specifying the VMPlacementPolicy that will be used
 	 * to place VMs in the DataCentre
 	 * @param vmPlacementPolicy
 	 */
-	public DataCentre(VMPlacementPolicy vmPlacementPolicy) {
+	public DataCentre(Simulation simulation, VMPlacementPolicy vmPlacementPolicy) {
 		hosts = new ArrayList<Host>();
+		this.simulation = simulation;
 		
 		this.vmPlacementPolicy = vmPlacementPolicy;
 		vmPlacementPolicy.setDataCentre(this);
@@ -73,15 +78,20 @@ public class DataCentre implements SimulationEventListener {
 	
 	@Override
 	public void handleEvent(Event e) {
-		//at present, there are no events received by DataCentre. This is left as a hook in case of future nee3d
+		//at present, there are no events received by DataCentre. This is left as a hook in case of future need
 	}
 
 	/**
 	 * Update metrics regarding the DataCentre
 	 */
 	public void updateMetrics() {
+		
+		DCCpuUtilMetric dcUtilMetric = DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC);
+		
 		for (Host host : hosts) {
 			host.updateMetrics();
+			
+			dcUtilMetric.addHostUse(host.getCpuManager().getCpuInUse(), host.getTotalCpu());
 		}
 	}
 	

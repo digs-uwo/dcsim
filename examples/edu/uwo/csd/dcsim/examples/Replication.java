@@ -50,7 +50,7 @@ public class Replication extends DCSimulationTask {
 	@Override
 	public void setup(DataCentreSimulation simulation) {
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
-		DataCentre dc = new DataCentre(vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		
 		simulation.addDatacentre(dc);
 		

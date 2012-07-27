@@ -49,7 +49,7 @@ public class ExampleHelper {
 	public static DataCentre createDataCentre(Simulation simulation) {
 		//create datacentre
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation); //new VMPlacementPolicyFixedCount(7);
-		DataCentre dc = new DataCentre(vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		
 		dc.addHosts(createHosts(simulation));
 		

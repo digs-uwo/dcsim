@@ -49,7 +49,7 @@ public class DynamicServiceSpawning extends DCSimulationTask {
 		
 		//create DC
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
-		DataCentre dc = new DataCentre(vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		simulation.addDatacentre(dc);
 		
 		//create Hosts

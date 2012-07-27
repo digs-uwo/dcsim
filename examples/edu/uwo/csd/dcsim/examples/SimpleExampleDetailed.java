@@ -74,7 +74,7 @@ public class SimpleExampleDetailed extends DCSimulationTask {
 		/*
 		 * Create a new DataCenter object
 		 */
-		DataCentre dc = new DataCentre(vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		
 		//Add the DataCentre to the simulation
 		simulation.addDatacentre(dc);
