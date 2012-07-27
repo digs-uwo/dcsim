@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.vm;
 import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.core.metrics.VmCountMetric;
 
 /**
  * Represents a Virtual Machine, running an Application. Must be contained within a VMAllocation on a Host
@@ -12,6 +13,8 @@ import edu.uwo.csd.dcsim.core.*;
  */
 public class VM implements SimulationEventListener {
 
+	private static final String VM_COUNT_METRIC = "vmCount";
+	
 	Simulation simulation;
 	int id;
 	VMDescription vmDescription;
@@ -111,6 +114,9 @@ public class VM implements SimulationEventListener {
 	}
 	
 	public void updateMetrics() {
+		
+		VmCountMetric.getMetric(simulation, VM_COUNT_METRIC).incrementVmCount();
+		
 		application.updateMetrics();
 	}
 	
