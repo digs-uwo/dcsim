@@ -12,7 +12,6 @@ public class DCCpuUtilMetric extends Metric {
 	
 	public DCCpuUtilMetric(Simulation simulation, String name) {
 		super(simulation, name);
-		// TODO Auto-generated constructor stub
 	}
 
 	public void addHostUse(double inUse, double capacity) {

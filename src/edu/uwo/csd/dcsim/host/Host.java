@@ -43,6 +43,8 @@ public final class Host implements SimulationEventListener {
 	public static final String POWER_CONSUMPTION_METRIC = "powerConsumption";
 	public static final String AVERAGE_UTILIZATION_METRIC = "avgHostUtil";
 	public static final String HOST_TIME_METRIC = "hostTime";
+	public static final String DC_UTIL_METRIC = "avgDcUtil";
+	public static final String POWER_EFFICIENCY_METRIC = "powerEfficiency";
 	
 	private Simulation simulation;
 	
@@ -688,8 +690,12 @@ public final class Host implements SimulationEventListener {
 			
 		}
 		
-		//Collection power metric
+		//Power metrics
 		PowerMetric.getMetric(simulation, POWER_CONSUMPTION_METRIC).addHostPowerConsumption(getCurrentPowerConsumption());
+		PowerEfficiencyMetric.getMetric(simulation, POWER_EFFICIENCY_METRIC).addHostInfo(getCpuManager().getCpuInUse(), getCurrentPowerConsumption());
+		
+		//DataCentre utilization metric
+		DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC).addHostUse(getCpuManager().getCpuInUse(), getTotalCpu());
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null)
