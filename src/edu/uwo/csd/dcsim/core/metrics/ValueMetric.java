@@ -39,7 +39,7 @@ public class ValueMetric extends Metric {
 		//nothing to do
 	}
 	
-	public static ValueMetric getSimulationMetric(Simulation simulation, String name) {
+	public static ValueMetric getMetric(Simulation simulation, String name) {
 		ValueMetric metric;
 		if (simulation.hasMetric(name)) {
 			metric = (ValueMetric)simulation.getMetric(name);

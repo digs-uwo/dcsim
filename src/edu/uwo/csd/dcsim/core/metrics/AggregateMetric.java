@@ -41,7 +41,7 @@ public class AggregateMetric extends Metric {
 		//nothing to do
 	}
 
-	public static AggregateMetric getSimulationMetric(Simulation simulation, String name) {
+	public static AggregateMetric getMetric(Simulation simulation, String name) {
 		AggregateMetric metric;
 		if (simulation.hasMetric(name)) {
 			metric = (AggregateMetric)simulation.getMetric(name);

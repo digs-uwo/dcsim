@@ -94,7 +94,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		
 		simulation.getLogger().debug("Created New Service");
 		
-		AggregateMetric.getSimulationMetric(simulation, SPAWN_COUNT_METRIC).addValue(1);
+		AggregateMetric.getMetric(simulation, SPAWN_COUNT_METRIC).addValue(1);
 		
 		if (dcTarget.getVMPlacementPolicy().submitVMs(vmAllocationRequests)) {
 			
@@ -108,7 +108,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 			
 		} else {
 			simulation.getLogger().debug("Service Placement Failed");
-			AggregateMetric.getSimulationMetric(simulation, PLACEMENT_FAIL_METRIC).addValue(1);
+			AggregateMetric.getMetric(simulation, PLACEMENT_FAIL_METRIC).addValue(1);
 		}
 
 	}
@@ -121,7 +121,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		//check to see if the service is ready to shutdown (i.e. no VMs are migrating)
 		if (service.canShutdown()) {
 			service.shutdownService();
-			AggregateMetric.getSimulationMetric(simulation, SHUTDOWN_COUNT_METRIC).addValue(1);
+			AggregateMetric.getMetric(simulation, SHUTDOWN_COUNT_METRIC).addValue(1);
 			
 			simulation.getLogger().debug("Shutdown Service");
 		}

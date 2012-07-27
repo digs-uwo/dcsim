@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim.management.action;
 
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.AggregateMetric;
+import edu.uwo.csd.dcsim.core.metrics.ActionCountMetric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.vm.*;
 
@@ -31,7 +31,7 @@ public class ShutdownVmAction implements ManagementAction {
 		vm.stopApplication();
 		
 		if (simulation.isRecordingMetrics()) {
-			AggregateMetric.getSimulationMetric(simulation, SHUTDOWN_COUNT_METRIC).addValue(1);
+			ActionCountMetric.getMetric(simulation, SHUTDOWN_COUNT_METRIC).incrementCount();
 		}
 		
 		//if the host will no longer contain any VMs, instruct it to shut down

@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim.management.action;
 
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.Simulation;
-import edu.uwo.csd.dcsim.core.metrics.AggregateMetric;
+import edu.uwo.csd.dcsim.core.metrics.ActionCountMetric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.VmStub;
@@ -53,7 +53,7 @@ public class MigrationAction implements ManagementAction {
 		target.getHost().sendMigrationEvent(vmAllocationRequest, vm.getVM(), source.getHost());
 		
 		if (simulation.isRecordingMetrics()) {
-			AggregateMetric.getSimulationMetric(simulation, MIGRATION_COUNT_METRIC + "-" + triggeringEntity.getClass().getSimpleName()).addValue(1);
+			ActionCountMetric.getMetric(simulation, MIGRATION_COUNT_METRIC + "-" + triggeringEntity.getClass().getSimpleName()).incrementCount();
 		}
 		
 		//if the source host will no longer contain any VMs, instruct it to shut down

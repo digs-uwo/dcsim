@@ -32,6 +32,9 @@ public class DynamicManagement extends DCSimulationTask {
 		for(DCSimulationTask task : completedTasks) {
 			logger.info(task.getName());
 			ExampleHelper.printMetrics(task.getResults());
+			
+			DCSimulationTraceWriter traceWriter = new DCSimulationTraceWriter(task);
+			traceWriter.writeTrace();
 		}
 
 	}
