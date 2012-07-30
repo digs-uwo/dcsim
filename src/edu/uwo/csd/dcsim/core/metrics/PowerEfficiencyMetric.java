@@ -24,17 +24,17 @@ public class PowerEfficiencyMetric extends Metric {
 	
 	@Override
 	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue())) + " watts/cpuShare";
+		return Double.toString(Simulation.roundToMetricPrecision(getValue())) + " cpu/watt";
 	}
 
 	@Override
 	public double getValue() {
-		return totalPowerConsumed / totalCpuUsed;
+		return totalCpuUsed / totalPowerConsumed;
 	}
 
 	@Override
 	public double getCurrentValue() {
-		return currentPowerConsumption / currentCpuInUse;
+		return currentCpuInUse / currentPowerConsumption;
 	}
 
 	@Override
