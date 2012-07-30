@@ -34,7 +34,7 @@ public class PowerEfficiencyMetric extends Metric {
 
 	@Override
 	public double getCurrentValue() {
-		return currentCpuInUse / currentPowerConsumption;
+		return currentPowerConsumption / currentCpuInUse;
 	}
 
 	@Override
