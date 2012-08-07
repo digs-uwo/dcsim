@@ -641,6 +641,15 @@ public final class Host implements SimulationEventListener {
 		state = HostState.FAILED;
 	}
 	
+	/**
+	 * If the Host is set to shutdown upon completion its current set of migrations, cancel this shutdown and remain ON.
+	 */
+	public void cancelPendingShutdown() {
+		powerOffAfterMigrations = false;
+	}
+	
+	
+	
 	//METRICS & LOGGING
 	
 	/*
@@ -788,5 +797,7 @@ public final class Host implements SimulationEventListener {
 	public double getPowerConsumed() { return powerConsumed; }
 	
 	public double getAverageUtilization() { return utilizationSum / timeActive; }
+	
+	public boolean isShutdownPending() {	return powerOffAfterMigrations; }
 
 }
