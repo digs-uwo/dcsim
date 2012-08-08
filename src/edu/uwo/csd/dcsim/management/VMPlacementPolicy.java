@@ -47,6 +47,7 @@ public abstract class VMPlacementPolicy implements SimulationEventListener {
 	
 	protected void sendVM(VMAllocationRequest vmAllocationRequest, Host host) {
 		
+		//if the host is not ON or POWERING_ON, then send an event to power on the host
 		if (host.getState() != Host.HostState.ON && host.getState() != Host.HostState.POWERING_ON) {
 			simulation.sendEvent(
 					new Event(Host.HOST_POWER_ON_EVENT,
@@ -54,6 +55,15 @@ public abstract class VMPlacementPolicy implements SimulationEventListener {
 							this,
 							host)
 					);
+		}
+		
+		//if the host is set to shutdown upon completion of outgoing migrations, cancel this shutdown
+		if (host.isShutdownPending()) {
+			/*
+			 * note that we directly make this call rather than send an event, as we want to
+			 * avoid the host beginning its shutdown process before receiving the cancel event 
+			 */
+			host.cancelPendingShutdown(); 
 		}
 		
 		host.submitVM(vmAllocationRequest);
