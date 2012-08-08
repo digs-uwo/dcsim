@@ -74,7 +74,7 @@ public class Service {
 		//verify that none of the VMs in the service are currently migrating
 		for (ServiceTier tier : tiers) {
 			for (Application application : tier.getApplications()) {
-				if (application.getVM().isMigrating()) {
+				if (application.getVM().isMigrating() || application.getVM().isPendingMigration()) {
 					return false;
 				}
 			}
@@ -91,7 +91,7 @@ public class Service {
 				VMAllocation vmAlloc = vm.getVMAllocation();
 				Host host = vmAlloc.getHost();
 				
-				if (vm.isMigrating())
+				if (vm.isMigrating() || application.getVM().isPendingMigration())
 					throw new RuntimeException("Tried to shutdown migrating VM #" + vm.getId() + ". Operation not allowed in simulation.");
 				
 				host.deallocate(vmAlloc);
