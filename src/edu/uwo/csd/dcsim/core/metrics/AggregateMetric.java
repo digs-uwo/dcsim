@@ -15,11 +15,6 @@ public class AggregateMetric extends Metric {
 		this.value += value;
 		this.currentValue += value;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
-	}
 
 	@Override
 	public double getValue() {
@@ -51,6 +46,11 @@ public class AggregateMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
 	}
 	
 	

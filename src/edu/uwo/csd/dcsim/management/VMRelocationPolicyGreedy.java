@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim.management;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.common.Utility;
@@ -32,61 +31,21 @@ public abstract class VMRelocationPolicyGreedy implements Daemon {
 
 	@Override
 	public void run(Simulation simulation) {
-		
-		ArrayList<Host> hostList = dc.getHosts();
-		
-		//Categorize hosts
-		ArrayList<HostStub> empty = new ArrayList<HostStub>();
-		ArrayList<HostStub> underUtilized = new ArrayList<HostStub>();
-		ArrayList<HostStub> partiallyUtilized = new ArrayList<HostStub>();
+
+		// Categorize hosts.
 		ArrayList<HostStub> stressed = new ArrayList<HostStub>();
+		ArrayList<HostStub> partiallyUtilized = new ArrayList<HostStub>();
+		ArrayList<HostStub> underUtilized = new ArrayList<HostStub>();
+		ArrayList<HostStub> empty = new ArrayList<HostStub>();
 		
-		for (Host host : hostList) {
-			// Calculate host's avg CPU utilization in the last window of time.
-			LinkedList<Double> hostUtilValues = this.utilizationMonitor.getHostInUse(host);
-			double avgCpuInUse = 0;
-			for (Double x : hostUtilValues) {
-				avgCpuInUse += x;
-			}
-			avgCpuInUse = avgCpuInUse / this.utilizationMonitor.getWindowSize();
-			
-			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getCpuManager().getTotalCpu());
-			
-			if (host.getVMAllocations().size() == 0) {
-				empty.add(new HostStub(host));
-			} else if (avgCpuUtilization < lowerThreshold) {
-				underUtilized.add(new HostStub(host));
-			} else if (avgCpuUtilization > upperThreshold) {
-				stressed.add(new HostStub(host));
-			} else {
-				partiallyUtilized.add(new HostStub(host));
-			}
-		}
-		
-//		for (Host host : hostList) {
-//			double cpuUtilization = host.getCpuManager().getCpuUtilization();
-//			
-//			if (host.getVMAllocations().size() == 0) {
-//				empty.add(new HostStub(host));
-//			} else if (cpuUtilization < lowerThreshold) {
-//				underUtilized.add(new HostStub(host));
-//			} else if (cpuUtilization > upperThreshold) {
-//				stressed.add(new HostStub(host));
-//			} else {
-//				partiallyUtilized.add(new HostStub(host));
-//			}
-//		}
+		this.classifyHosts(stressed, partiallyUtilized, underUtilized, empty);
 				
-		//sort stressed list
-		Collections.sort(stressed, new HostStubCpuInUseComparator());
-		Collections.reverse(stressed);
-		
-		//create source and target lists
-		ArrayList<HostStub> sources = stressed;
+		// Create source and target lists.
+		ArrayList<HostStub> sources = orderSourceHosts(stressed);
 		ArrayList<HostStub> targets = orderTargetHosts(partiallyUtilized, underUtilized, empty);
 		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
 		
-		//iterate through source hosts
+		// Iterate through source hosts.
 		boolean found;
 		for (HostStub source : sources) {
 			
@@ -113,13 +72,86 @@ public abstract class VMRelocationPolicyGreedy implements Daemon {
 			}
 		}
 		
-		//trigger migrations
+		// Trigger migrations.
 		for (MigrationAction migration : migrations) {
 			migration.execute(simulation, this);
 		}
 		
 	}
 	
+	/**
+	 * Classifies hosts as Stressed, Partially-Utilized, Underutilized or 
+	 * Empty based on the hosts' current CPU utilization.
+	 */
+	protected void classifyHostsCurrentCpuUtil(ArrayList<HostStub> stressed, 
+			ArrayList<HostStub> partiallyUtilized, 
+			ArrayList<HostStub> underUtilized, 
+			ArrayList<HostStub> empty) {
+		
+		ArrayList<Host> hostList = dc.getHosts();
+		
+		for (Host host : hostList) {
+			double cpuUtilization = host.getCpuManager().getCpuUtilization();
+			
+			if (host.getVMAllocations().size() == 0) {
+				empty.add(new HostStub(host));
+			} else if (cpuUtilization < lowerThreshold) {
+				underUtilized.add(new HostStub(host));
+			} else if (cpuUtilization > upperThreshold) {
+				stressed.add(new HostStub(host));
+			} else {
+				partiallyUtilized.add(new HostStub(host));
+			}
+		}
+	}
+	
+	/**
+	 * Classifies hosts as Stressed, Partially-Utilized, Underutilized or 
+	 * Empty based on the hosts' average CPU utilization over the last CPU 
+	 * load monitoring window (see DCUtilizationMonitor).
+	 */
+	protected void classifyHosts(ArrayList<HostStub> stressed, 
+			ArrayList<HostStub> partiallyUtilized, 
+			ArrayList<HostStub> underUtilized, 
+			ArrayList<HostStub> empty) {
+		
+		ArrayList<Host> hostList = dc.getHosts();
+		
+		for (Host host : hostList) {
+			// Calculate host's avg CPU utilization in the last window of time.
+			double hostUtilValues[] = this.utilizationMonitor.getHostInUse(host).getValues();
+			double avgCpuInUse = 0;
+			for (Double x : hostUtilValues) {
+				avgCpuInUse += x;
+			}
+			avgCpuInUse = avgCpuInUse / this.utilizationMonitor.getWindowSize();
+			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getCpuManager().getTotalCpu());
+			
+			if (host.getVMAllocations().size() == 0) {
+				empty.add(new HostStub(host));
+			} else if (avgCpuUtilization < lowerThreshold) {
+				underUtilized.add(new HostStub(host));
+			} else if (avgCpuUtilization > upperThreshold) {
+				stressed.add(new HostStub(host));
+			} else {
+				partiallyUtilized.add(new HostStub(host));
+			}
+		}
+	}
+	
+	/**
+	 * Sorts Stressed hosts in decreasing order by CPU load (CPU in use).
+	 */
+	protected ArrayList<HostStub> orderSourceHosts(ArrayList<HostStub> stressed) {
+		ArrayList<HostStub> sorted = new ArrayList<HostStub>(stressed);
+		
+		// Sort stressed hosts in decreasing order by CPU load.
+		Collections.sort(sorted, HostStubComparator.getComparator(HostStubComparator.CPU_IN_USE));
+		Collections.reverse(sorted);
+		
+		return sorted;
+	}
+
 	@Override
 	public void onStart(Simulation simulation) {
 

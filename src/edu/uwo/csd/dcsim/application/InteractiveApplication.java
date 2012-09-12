@@ -321,4 +321,8 @@ public class InteractiveApplication extends Application {
 		return totalIncomingWork;
 	}
 	
+	public double getWork(){
+		return incomingWork;
+	}
+	
 }

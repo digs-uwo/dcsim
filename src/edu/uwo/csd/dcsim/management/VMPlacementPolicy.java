@@ -10,7 +10,7 @@ import edu.uwo.csd.dcsim.vm.*;
 public abstract class VMPlacementPolicy implements SimulationEventListener {
 	
 	Simulation simulation;
-	DataCentre datacentre;
+	protected DataCentre datacentre;
 	
 	public VMPlacementPolicy(Simulation simulation) {
 		this.simulation = simulation;

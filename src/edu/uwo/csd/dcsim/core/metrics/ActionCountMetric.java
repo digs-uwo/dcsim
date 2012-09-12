@@ -17,11 +17,6 @@ public class ActionCountMetric extends Metric {
 	}
 	
 	@Override
-	public String toString() {
-		return Double.toString(getValue());
-	}
-
-	@Override
 	public double getValue() {
 		return total;
 	}
@@ -51,6 +46,11 @@ public class ActionCountMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(getValue());
 	}
 
 }

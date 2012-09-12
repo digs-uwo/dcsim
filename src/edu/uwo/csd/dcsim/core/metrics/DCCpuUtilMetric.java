@@ -21,11 +21,6 @@ public class DCCpuUtilMetric extends Metric {
 		currentInUse += inUse;
 		currentCapacity += capacity;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
-	}
 
 	@Override
 	public double getValue() {
@@ -58,6 +53,11 @@ public class DCCpuUtilMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
 	}
 	
 }

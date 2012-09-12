@@ -24,11 +24,16 @@ public abstract class Metric {
 	}
 
 	/**
-	 * Subclasses of Metric should implement toString() to provide a human-readable output. This forces
-	 * them to do so.
+	 * Format an arbitrary value of the type recorded by this metric.
+	 * @param value
+	 * @return
 	 */
+	public abstract String format(double value);
+	
 	@Override
-	public abstract String toString();
+	public String toString() {
+		return format(getValue());
+	}
 	
 	/**
 	 * This gets the value of the metric as calculated since the start of metric recording

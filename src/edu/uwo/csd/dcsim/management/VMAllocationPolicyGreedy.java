@@ -30,7 +30,7 @@ public class VMAllocationPolicyGreedy implements Daemon {
 
 	@Override
 	public void run(Simulation simulation) {
-		
+
 		ArrayList<HostStub> hostList = HostStub.createHostStubList(dc.getHosts());
 		ArrayList<MigrationAction> migrationList = new ArrayList<MigrationAction>();
 		

@@ -23,11 +23,6 @@ public class PowerEfficiencyMetric extends Metric {
 	}
 	
 	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue())) + " cpu/watt";
-	}
-
-	@Override
 	public double getValue() {
 		return totalCpuUsed / totalPowerConsumed;
 	}
@@ -58,6 +53,11 @@ public class PowerEfficiencyMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue())) + " cpu/watt";
 	}
 
 }

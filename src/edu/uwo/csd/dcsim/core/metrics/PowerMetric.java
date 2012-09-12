@@ -40,11 +40,6 @@ public class PowerMetric extends Metric {
 		//nothing to do
 	}
 
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(powerConsumed / 3600000)) + "kWh"; //output power consumed as kWh
-	}
-
 	public static PowerMetric getMetric(Simulation simulation, String name) {
 		PowerMetric metric;
 		if (simulation.hasMetric(name)) {
@@ -55,6 +50,11 @@ public class PowerMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(powerConsumed / 3600000)) + "kWh"; //output power consumed as kWh
 	}
 
 }

@@ -14,11 +14,6 @@ public class MaxMetric extends Metric {
 	public void incrementCount() {
 		++count;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(getValue());
-	}
 
 	@Override
 	public double getValue() {
@@ -51,6 +46,11 @@ public class MaxMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(getValue());
 	}
 	
 }

@@ -3,7 +3,8 @@ package edu.uwo.csd.dcsim;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import edu.uwo.csd.dcsim.core.Monitor;
 import edu.uwo.csd.dcsim.core.Simulation;
@@ -13,13 +14,17 @@ import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 public class DCUtilizationMonitor extends Monitor {
 
-	long windowSize;
-	HashMap<Host, LinkedList<Double>> utilizationValues = new HashMap<Host, LinkedList<Double>>();
-	LinkedList<Double> dcUtilValues = new LinkedList<Double>();
-	LinkedList<Double> dcSLAValues = new LinkedList<Double>();
-	LinkedList<Double> dcPowerValues = new LinkedList<Double>();
-	LinkedList<Double> dcOptimalPowerValues = new LinkedList<Double>();
-	LinkedList<Double> dcOptimalPowerRatioValues = new LinkedList<Double>();
+	int windowSize;
+	
+	DescriptiveStatistics dcUtil = new DescriptiveStatistics();
+	HashMap<Host, DescriptiveStatistics> hostUtil = new HashMap<Host, DescriptiveStatistics>();
+	DescriptiveStatistics dcSla = new DescriptiveStatistics();
+	
+	DescriptiveStatistics dcPower = new DescriptiveStatistics();
+	DescriptiveStatistics dcOptimalPower = new DescriptiveStatistics();
+	DescriptiveStatistics dcPowerEfficiency = new DescriptiveStatistics();
+	DescriptiveStatistics dcOptimalPowerEfficiency = new DescriptiveStatistics();
+	DescriptiveStatistics dcOptimalPowerRatio = new DescriptiveStatistics();
 	
 	double totalSlavWork = 0;
 	double totalWork = 0;
@@ -34,22 +39,30 @@ public class DCUtilizationMonitor extends Monitor {
 	 * @param windowSize The number of historical values to use in calculations
 	 * @param dc
 	 */
-	public DCUtilizationMonitor(Simulation simulation, long frequency, long windowSize, DataCentre dc) {
+	public DCUtilizationMonitor(Simulation simulation, long frequency, int windowSize, DataCentre dc) {
 		super(simulation, frequency);
 		this.windowSize = windowSize;
 		this.dc = dc;
 		
+		dcUtil.setWindowSize(windowSize);
+		dcSla.setWindowSize(windowSize);
+		dcPower.setWindowSize(windowSize);
+		dcOptimalPower.setWindowSize(windowSize);
+		dcPowerEfficiency.setWindowSize(windowSize);
+		dcOptimalPowerEfficiency.setWindowSize(windowSize);
+		dcOptimalPowerRatio.setWindowSize(windowSize);
+
 		//initialize host values
 		for (Host host : dc.getHosts()) {
-			utilizationValues.put(host, new LinkedList<Double>());
+			hostUtil.put(host, new DescriptiveStatistics(windowSize));
 		}
 	}
 
 	@Override
 	public void execute() {
 		
-		double dcUtil = 0;
-		double dcPower = 0;
+		double util = 0;
+		double power = 0;
 		double prevSlavWork;
 		double prevWork;		
 		
@@ -66,15 +79,13 @@ public class DCUtilizationMonitor extends Monitor {
 		for (Host host : dc.getHosts()) {
 			
 			//store host CPU utilization
-			if (!utilizationValues.containsKey(host))
-				utilizationValues.put(host, new LinkedList<Double>());
+			if (!hostUtil.containsKey(host)) {
+				hostUtil.put(host,  new DescriptiveStatistics());
+			}
 			
-			LinkedList<Double> hostUtils = utilizationValues.get(host);
-			hostUtils.addLast(host.getCpuManager().getCpuInUse());
-			dcUtil += host.getCpuManager().getCpuInUse();
+			hostUtil.get(host).addValue(host.getCpuManager().getCpuInUse());
 			
-			if (hostUtils.size() > windowSize)
-				hostUtils.removeFirst();
+			util += host.getCpuManager().getCpuInUse();
 			
 			//get VM SLA values
 			for (VMAllocation vmAlloc : host.getVMAllocations()) {							
@@ -83,31 +94,26 @@ public class DCUtilizationMonitor extends Monitor {
 			}
 			
 			//get power consumption
-			dcPower += host.getCurrentPowerConsumption();
+			power += host.getCurrentPowerConsumption();
 			totalPower += host.getPowerConsumed();
 		}
 		
-		dcUtilValues.addFirst(dcUtil);
 		
-		dcPowerValues.addFirst(dcPower);
-		double optimalPowerEfficiency = calculateOptimalPowerEfficiency(dcUtil);  
-		dcOptimalPowerValues.addFirst(optimalPowerEfficiency);
-		dcOptimalPowerRatioValues.addFirst(optimalPowerEfficiency / (dcUtil / dcPower));
+		dcUtil.addValue(util);
+		
+		dcPower.addValue(power);
+		dcPowerEfficiency.addValue(util / power);
+		double optimalPowerConsumption = calculateOptimalPowerConsumption(util);
+		dcOptimalPower.addValue(optimalPowerConsumption);
+		dcOptimalPowerEfficiency.addValue(util / optimalPowerConsumption);
+		
+		dcOptimalPowerRatio.addValue((util / optimalPowerConsumption) / (util / power));
 		
 		//records the total fraction of SLA violated incoming work since the last time interval
-		dcSLAValues.addFirst((totalSlavWork - prevSlavWork) / (totalWork - prevWork));
-		
-		if (dcUtilValues.size() > windowSize) {
-			dcUtilValues.removeLast();
-			dcPowerValues.removeLast();
-			dcSLAValues.removeLast();
-			dcOptimalPowerValues.removeLast();
-			dcOptimalPowerRatioValues.removeLast();
-		}
-			
+		dcSla.addValue((totalSlavWork - prevSlavWork) / (totalWork - prevWork));			
 	}
 	
-	private double calculateOptimalPowerEfficiency(double cpuInUse) {
+	private double calculateOptimalPowerConsumption(double cpuInUse) {
 		
 		//create new list of all of the Hosts in the datacentre. We create a new list as we are going to resort it
 		ArrayList<Host> hosts = new ArrayList<Host>(dc.getHosts());
@@ -161,33 +167,40 @@ public class DCUtilizationMonitor extends Monitor {
 			
 			++i; //move to next host
 		}
-		
-		//optimal cpu-per-power is (current CPU in use / optimal power consumption)
-		return cpuInUse / optimalPowerConsumption;
+
+		return optimalPowerConsumption;
 	}
 	
-	public LinkedList<Double> getHostInUse(Host host) {
-		return utilizationValues.get(host);
+	public DescriptiveStatistics getHostInUse(Host host) {
+		return hostUtil.get(host);
 	}
 	
-	public LinkedList<Double> getDCInUse() {
-		return dcUtilValues;
+	public DescriptiveStatistics getDCInUse() {
+		return dcUtil;
 	}
 	
-	public LinkedList<Double> getDCsla() {
-		return dcSLAValues;
+	public DescriptiveStatistics getDCsla() {
+		return dcSla;
 	}
 	
-	public LinkedList<Double> getDCPower() {
-		return dcPowerValues;
+	public DescriptiveStatistics getDCPower() {
+		return dcPower;
 	}
 	
-	public LinkedList<Double> getDCOptimalPower() {
-		return dcOptimalPowerValues;
+	public DescriptiveStatistics getDCOptimalPower() {
+		return dcOptimalPower;
 	}
 	
-	public LinkedList<Double> getDCOptimalPowerRatio() {
-		return dcOptimalPowerRatioValues;
+	public DescriptiveStatistics getDCPowerEfficiency() {
+		return dcPowerEfficiency;
+	}
+	
+	public DescriptiveStatistics getDCOptimalPowerEfficiency() {
+		return dcOptimalPowerEfficiency;
+	}
+	
+	public DescriptiveStatistics getDCOptimalPowerRatio() {
+		return dcOptimalPowerRatio;
 	}
 	
 	public long getWindowSize() {

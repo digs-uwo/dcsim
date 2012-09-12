@@ -13,11 +13,6 @@ public class ValueMetric extends Metric {
 	public void setValue(double value) {
 		this.value = value;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
-	}
 
 	@Override
 	public double getValue() {
@@ -49,6 +44,11 @@ public class ValueMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
 	}
 
 

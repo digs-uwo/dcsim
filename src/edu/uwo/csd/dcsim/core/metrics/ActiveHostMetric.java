@@ -17,11 +17,6 @@ public class ActiveHostMetric extends Metric {
 		//increment the current number of active hosts
 		++current;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
-	}
 
 	@Override
 	public double getValue() {
@@ -56,6 +51,11 @@ public class ActiveHostMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue()));
 	}
 	
 

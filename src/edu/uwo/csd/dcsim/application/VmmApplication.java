@@ -215,5 +215,8 @@ public class VmmApplication extends Application {
 		return 0;
 	}	
 
-
+	//I dont know what to do here
+	public double getWork(){
+		return 0;
+	}
 }

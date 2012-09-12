@@ -68,7 +68,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		
 		//reseed the random number generator based on the simulation Random instance to ensure experiment repeatability
 		arrivalDist.reseedRandomGenerator(simulation.getRandom().nextLong());
-		
+
 		simulation.getLogger().debug("Service Arrival Rate set to " + servicesPerHour + " services-per-hour");
 	}
 	
@@ -148,7 +148,10 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		//Check to make sure we are spawning services. Setting a servicesPerHour rate of 0 results in the mean of the distribution being positive infinity
 		if (!(arrivalDist.getMean() == Double.POSITIVE_INFINITY)) {
 			long nextSpawn =  simulation.getSimulationTime() + (long)Math.round(arrivalDist.sample());
-			simulation.sendEvent(new Event(SPAWN_SERVICE_EVENT, nextSpawn, this, this));
+			
+			Event spawnEvent = new Event(SPAWN_SERVICE_EVENT, nextSpawn, this, this);
+			spawnEvent.getData().put("currentRate", new Integer(currentRate));
+			simulation.sendEvent(spawnEvent);
 		}
 	}
 
@@ -156,8 +159,15 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	@Override
 	public final void handleEvent(Event e) {
 		if (e.getType() == SPAWN_SERVICE_EVENT) {
-			spawnService();
-			sendNextSpawnEvent();
+			/*
+			 * We must verify that this event was sent during the current rate, otherwise we may have two separate "threads" of
+			 * service spawning events
+			 */
+			int rate = (Integer)e.getData().get("currentRate"); 
+			if (rate == currentRate) {
+				spawnService();
+				sendNextSpawnEvent();
+			}
 		} else if (e.getType() == SHUTDOWN_SERVICE_EVENT) {
 			shutdownService((Service)e.getData().get("service"));
 		} else if (e.getType() == RATE_CHANGE_EVENT) {

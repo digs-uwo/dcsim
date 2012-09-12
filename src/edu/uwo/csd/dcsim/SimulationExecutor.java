@@ -27,11 +27,27 @@ public class SimulationExecutor<T extends SimulationTask> {
 	}
 	
 	/**
+	 * Add a collection of tasks to execute
+	 * @param tasks
+	 */
+	public void addTasks(Collection<T> taskCollection) {
+		tasks.addAll(taskCollection);
+	}
+	
+	/**
 	 * Execute the tasks, in parallel. This method blocks until all tasks have completed.
 	 * 
 	 * @return
 	 */
 	public Collection<T> execute() {
+		return execute(Executors.newCachedThreadPool());
+	}
+	
+	public Collection<T> execute(int nThreads) {
+		return execute(Executors.newFixedThreadPool(nThreads));
+	}
+	
+	private Collection<T> execute(ExecutorService executorService) {
 		
 		long startTime = System.currentTimeMillis();
 		
@@ -41,7 +57,6 @@ public class SimulationExecutor<T extends SimulationTask> {
 			callableTasks.add(Executors.callable(task));
 		
 		//run the tasks
-		ExecutorService executorService = Executors.newCachedThreadPool();
 		try {
 			executorService.invokeAll(callableTasks);
 		} catch (InterruptedException e) {

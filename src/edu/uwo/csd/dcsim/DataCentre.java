@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.DCCpuUtilMetric;
+import edu.uwo.csd.dcsim.core.metrics.OptimalPowerRatioMetric;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.management.*;
 
@@ -17,6 +18,7 @@ import edu.uwo.csd.dcsim.management.*;
 public class DataCentre implements SimulationEventListener {
 	
 	public static final String DC_UTIL_METRIC = "avgDcUtil";
+	public static final String OPTIMAL_POWER_RATIO_METRIC = "optimalPowerEfficiencyRatio";
 
 	private ArrayList<Host> hosts; //the hosts in this datacentre
 	VMPlacementPolicy vmPlacementPolicy; //the placement policy for this datacentre
@@ -93,6 +95,8 @@ public class DataCentre implements SimulationEventListener {
 			
 			dcUtilMetric.addHostUse(host.getCpuManager().getCpuInUse(), host.getTotalCpu());
 		}
+		
+		OptimalPowerRatioMetric.getMetric(simulation, OPTIMAL_POWER_RATIO_METRIC).update(hosts);
 	}
 	
 	/**

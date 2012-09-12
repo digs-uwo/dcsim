@@ -28,11 +28,6 @@ public class HostAvgCpuUtilMetric extends Metric {
 		currentTotal += hostUtil;
 		++currentCount;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
-	}
 
 	@Override
 	public double getValue() {
@@ -65,6 +60,11 @@ public class HostAvgCpuUtilMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
 	}
 
 }

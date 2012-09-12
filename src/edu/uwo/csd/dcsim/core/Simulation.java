@@ -280,6 +280,7 @@ public abstract class Simulation implements SimulationEventListener {
 		if (random == null) {
 			random = new Random();
 			setRandomSeed(random.nextLong());
+			//setRandomSeed()
 		}
 	
 		return random;

@@ -149,5 +149,9 @@ public final class DataCentreSimulation extends Simulation {
 		logger.info("Recorded Time: " + recordedTime + simUnits);
 	
 	}
+	
+	public ArrayList<DataCentre> getDataCentres(){
+		return datacentres;
+	}
 
 }

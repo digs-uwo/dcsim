@@ -23,11 +23,6 @@ public class SlaViolationMetric extends Metric {
 		totalWork += work;
 		currentWork += work;
 	}
-	
-	@Override
-	public String toString() {
-		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
-	}
 
 	@Override
 	public double getValue() {
@@ -60,6 +55,11 @@ public class SlaViolationMetric extends Metric {
 			simulation.addMetric(metric);
 		}
 		return metric;	
+	}
+
+	@Override
+	public String format(double value) {
+		return Double.toString(Simulation.roundToMetricPrecision(getValue() * 100)) + "%";
 	}
 
 }

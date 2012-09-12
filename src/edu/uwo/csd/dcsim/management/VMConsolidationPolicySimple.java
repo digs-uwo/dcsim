@@ -3,7 +3,6 @@ package edu.uwo.csd.dcsim.management;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 
 import edu.uwo.csd.dcsim.DCUtilizationMonitor;
 import edu.uwo.csd.dcsim.DataCentre;
@@ -46,7 +45,7 @@ public class VMConsolidationPolicySimple implements Daemon {
 		
 		for (Host host : hostList) {
 			// Calculate host's avg CPU utilization in the last window of time.
-			LinkedList<Double> hostUtilValues = this.utilizationMonitor.getHostInUse(host);
+			double hostUtilValues[] = this.utilizationMonitor.getHostInUse(host).getValues();
 			double avgCpuInUse = 0;
 			for (Double x : hostUtilValues) {
 				avgCpuInUse += x;

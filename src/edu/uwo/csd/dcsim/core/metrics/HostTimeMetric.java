@@ -9,7 +9,7 @@ public class HostTimeMetric extends AggregateMetric {
 	}
 	
 	@Override
-	public String toString() {
+	public String format(double value) {
 		return Double.toString(Simulation.roundToMetricPrecision(getValue() / 3600)) + "hrs"; //convert from seconds to hours
 	}
 	
