@@ -45,7 +45,7 @@ public class DynamicServiceSpawning extends DCSimulationTask {
 	}
 
 	@Override
-	public void setup(DataCentreSimulation simulation) {
+	public void setup(Simulation simulation) {
 		
 		//create DC
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.apache.log4j.Logger;
 
+import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.*;
 
 /**
@@ -17,7 +18,7 @@ public abstract class DCSimulationTask implements SimulationTask {
 
 	private static Logger logger = Logger.getLogger(DCSimulationTask.class);
 	
-	private final DataCentreSimulation simulation;
+	private final Simulation simulation;
 	private long duration;
 	private long metricRecordStart = 0;
 	private Collection<Metric> metrics = null;
@@ -29,7 +30,7 @@ public abstract class DCSimulationTask implements SimulationTask {
 	 * @param duration The duration, in milliseconds, of the simulation.
 	 */
 	public DCSimulationTask(String name, long duration) {
-		simulation = new DataCentreSimulation(name);
+		simulation = new Simulation(name);
 		this.duration = duration;
 	}
 	
@@ -58,7 +59,7 @@ public abstract class DCSimulationTask implements SimulationTask {
 	 * 
 	 * @param simulation
 	 */
-	public abstract void setup(DataCentreSimulation simulation);
+	public abstract void setup(Simulation simulation);
 	
 	@Override
 	public final void run() {

@@ -3,40 +3,57 @@ package edu.uwo.csd.dcsim.core;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
+import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.VmExecutionDirector;
+import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.metrics.*;
+import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.logging.*;
 
 import java.util.*;
 import java.io.*;
 
-public abstract class Simulation implements SimulationEventListener {
+/**
+ * Simulation is a simulation of a data centre, which consists of a collection of DataCentres containing Hosts, which
+ * host VMs running Applications. Simulation is the main object that controls the execution of the simulation.
+ * 
+ * All DataCentres in the simulation must be added to this object, as well as all Workload objects feeding applications within the
+ * simulation.
+ * 
+ * @author Michael Tighe
+ *
+ */
+public class Simulation implements SimulationEventListener {
 	
+	//Logging defaults
 	public static final String DEFAULT_LOGGER_CONVERSION_PATTERN = "%-10s %-5p - %m%n";
 	public static final String DEFAULT_LOGGER_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
 	public static final String DEFAULT_LOGGER_FILE_NAME = "dcsim-%n-%d";
 	
+	//Event types
 	public static final int SIMULATION_TERMINATE_EVENT = 1;
 	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
 	public static final int SIMULATION_RUN_MONITORS_EVENT = 3;
 	
+	//directory constants
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
 	private static String OUTPUT_DIRECTORY = "/output";
 	
+	//the name of property in the simulation properties file that defines the precision with which to report metrics
 	private static String METRIC_PRECISION_PROP = "metricPrecision";
 	
-	private static Properties loggerProperties;
+	private static Properties loggerProperties; //properties for logger config
+	protected final Logger logger; //logger
+	private static Properties properties; //simulation properties
 	
-	protected final Logger logger;
-	private static Properties properties;
-	
-	private String name;
-	private PriorityQueue<Event> eventQueue;
-	private long simulationTime; //in milliseconds
-	private long lastUpdate; //in milliseconds
-	private long duration;
+	private String name; 						//name of the simulation
+	private PriorityQueue<Event> eventQueue;	//contains all future events, in order
+	private long simulationTime; 				//current time, in milliseconds
+	private long lastUpdate; 					//in milliseconds
+	private long duration;						//duration of the entire simulation, at which point it terminates
 	private long metricRecordStart;
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
@@ -50,6 +67,11 @@ public abstract class Simulation implements SimulationEventListener {
 	private Map<String, Integer> nextIdMap = new HashMap<String, Integer>();
 	
 	private boolean complete = false;
+	
+	//Datacentre specific variables
+	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>(); //collection of datacentres within the simulation
+	private Set<Workload> workloads = new HashSet<Workload>(); //set of all Workload objects feeding applications in the simulation
+	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector(); //handles running of VMs
 	
 	public static final void initializeLogging() {
 		
@@ -229,9 +251,65 @@ public abstract class Simulation implements SimulationEventListener {
 	
 	
 	
-	public abstract void beginSimulation();
-	public abstract void updateSimulation(long simulationTime);
-	public abstract void completeSimulation(long duration);
+	public void beginSimulation() {
+		logger.info("Starting DCSim");
+		
+		logger.info("Random Seed: " + this.getRandomSeed());
+	}
+	
+public void updateSimulation(long simulationTime) {
+		
+		//retrieve work for the elapsed period since the last update
+		for (Workload workload : workloads)
+			workload.update();
+		
+		//schedule VM execution
+		vmExecutionDirector.execute(getHostList());
+		
+		//update metrics and log info
+		for (DataCentre dc : datacentres) {
+			if (this.isRecordingMetrics())
+				dc.updateMetrics();
+			dc.logInfo();
+		}
+		
+		if (this.isRecordingMetrics()) {	
+			//update metrics tracked by workloads (i.e. SLA)
+			for (Workload workload : workloads)
+				workload.updateMetrics();
+		}
+		
+				
+	}
+
+	public void completeSimulation(long duration) {
+		logger.info("DCSim Simulation Complete");
+		
+		//log simulation time
+		double simTime = this.getDuration();
+		double recordedTime = this.getRecordingDuration();
+		String simUnits = "ms";
+		if (simTime >= 864000000) { //>= 10 days
+			simTime = simTime / 86400000;
+			recordedTime = recordedTime / 86400000;
+			simUnits = " days";
+		} else if (simTime >= 7200000) { //>= 2 hours
+			simTime = simTime / 3600000;
+			recordedTime = recordedTime / 3600000;
+			simUnits = "hrs";
+		} else if (simTime >= 600000) { //>= 2 minutes
+			simTime = simTime / 60000d;
+			recordedTime = recordedTime / 60000d;
+			simUnits = "mins";
+		} else if (simTime >= 10000) { //>= 10 seconds
+			simTime = simTime / 1000d;
+			recordedTime = recordedTime / 1000d;
+			simUnits = "s";
+		}
+		logger.info("Simulation Time: " + simTime + simUnits);
+		logger.info("Recorded Time: " + recordedTime + simUnits);
+	
+	}
 	
 	public final void sendEvent(Event event) {
 		event.setSendOrder(++eventSendCount);
@@ -452,6 +530,54 @@ public abstract class Simulation implements SimulationEventListener {
 			return Utility.roundDouble(value, getMetricPrecision());
 		}
 		return value;
+	}
+	
+	/**
+	 * Add a DataCentre to the simulation
+	 * @param dc
+	 */
+	public void addDatacentre(DataCentre dc) {
+		datacentres.add(dc);
+	}
+	
+	/**
+	 * Add a Workload to the simulation. Note that all Workloads feeding applications
+	 * within the simulation MUST be added to DataCentreSimulation
+	 * @param workload
+	 */
+	public void addWorkload(Workload workload) {
+		workloads.add(workload);
+	}
+	
+	/**
+	 * Remove a Workload from the simulation.
+	 * @param workload
+	 */
+	public void removeWorkload(Workload workload) {
+		workloads.remove(workload);
+	}
+	
+	/**
+	 * Get a list of all of the Hosts within the simulation
+	 * @return
+	 */
+	private ArrayList<Host> getHostList() {
+		
+		int nHosts = 0;
+		for (DataCentre dc : datacentres)
+			nHosts += dc.getHosts().size();
+		
+		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
+		
+		for (DataCentre dc : datacentres) {
+			hosts.addAll(dc.getHosts());
+		}
+		
+		return hosts;
+	}
+
+	public ArrayList<DataCentre> getDataCentres(){
+		return datacentres;
 	}
 	
 }

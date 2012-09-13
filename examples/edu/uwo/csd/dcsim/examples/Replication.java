@@ -48,7 +48,7 @@ public class Replication extends DCSimulationTask {
 	}
 	
 	@Override
-	public void setup(DataCentreSimulation simulation) {
+	public void setup(Simulation simulation) {
 		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
 		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		
@@ -96,7 +96,7 @@ public class Replication extends DCSimulationTask {
 		
 	}
 
-	public static Service createService(DataCentreSimulation simulation, String fileName, long offset, int scale) {
+	public static Service createService(Simulation simulation, String fileName, long offset, int scale) {
 		
 		//create workload (external)
 		Workload workload = new TraceWorkload(simulation, fileName, 2700 * scale, offset); //scale to n replicas

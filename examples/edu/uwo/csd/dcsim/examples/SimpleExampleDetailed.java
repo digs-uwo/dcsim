@@ -57,7 +57,7 @@ public class SimpleExampleDetailed extends DCSimulationTask {
 	}
 
 	@Override
-	public void setup(DataCentreSimulation simulation) {
+	public void setup(Simulation simulation) {
 		
 		/*
 		 * Here we set up the simulation, but we do not run it.

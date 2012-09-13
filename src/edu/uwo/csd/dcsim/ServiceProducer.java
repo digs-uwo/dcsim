@@ -7,6 +7,7 @@ import org.apache.commons.math3.distribution.*;
 import edu.uwo.csd.dcsim.application.Service;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Event;
+import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
 import edu.uwo.csd.dcsim.core.metrics.AggregateMetric;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
@@ -34,23 +35,23 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	int currentRate = -1;
 	long startTime = 0;
 	
-	protected DataCentreSimulation simulation;
+	protected Simulation simulation;
 	
-	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, List<Tuple<Long, Double>> servicesPerHour) {
+	public ServiceProducer(Simulation simulation, DataCentre dcTarget, List<Tuple<Long, Double>> servicesPerHour) {
 		this(simulation, dcTarget, null, servicesPerHour);
 	}
 	
-	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, double servicesPerHour) {
+	public ServiceProducer(Simulation simulation, DataCentre dcTarget, double servicesPerHour) {
 		this(simulation, dcTarget, null, servicesPerHour);
 	}
 	
-	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, List<Tuple<Long, Double>> servicesPerHour) {
+	public ServiceProducer(Simulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, List<Tuple<Long, Double>> servicesPerHour) {
 		this(simulation, dcTarget, lifespanDist, 0);
 		
 		this.servicesPerHour = servicesPerHour;
 	}
 	
-	public ServiceProducer(DataCentreSimulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, double servicesPerHour) {
+	public ServiceProducer(Simulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, double servicesPerHour) {
 		this.dcTarget = dcTarget;
 		this.lifespanDist = lifespanDist;
 		this.simulation = simulation;

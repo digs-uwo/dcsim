@@ -43,7 +43,7 @@ public class StaticPeak extends DCSimulationTask {
 
 
 	@Override
-	public void setup(DataCentreSimulation simulation) {
+	public void setup(Simulation simulation) {
 		DataCentre dc = ExampleHelper.createDataCentre(simulation);
 		simulation.addDatacentre(dc);
 		

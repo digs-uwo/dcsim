@@ -88,7 +88,7 @@ public class ExampleHelper {
 		return hosts;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createVmList(DataCentreSimulation simulation, boolean allocAvg) {
+	public static ArrayList<VMAllocationRequest> createVmList(Simulation simulation, boolean allocAvg) {
 		
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
 		
@@ -118,7 +118,7 @@ public class ExampleHelper {
 	}
 	
 
-	private static Service createService(DataCentreSimulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
+	private static Service createService(Simulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
 		
 		//create workload (external)
 		Workload workload = new TraceWorkload(simulation, fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
