@@ -5,11 +5,13 @@ import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.VmExecutionDirector;
+import edu.uwo.csd.dcsim.VmExecutionOrderComparator;
 import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.logging.*;
+import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 import java.util.*;
 import java.io.*;
@@ -160,6 +162,141 @@ public class Simulation implements SimulationEventListener {
 		
 	}
 	
+	//****************
+	
+	private ArrayList<VMAllocation> buildVmList(ArrayList<Host> hosts) {
+		ArrayList<VMAllocation> vmList = new ArrayList<VMAllocation>();
+		
+		for (Host host : hosts) {
+			vmList.addAll(host.getVMAllocations());
+		}
+		Collections.sort(vmList, new VmExecutionOrderComparator());
+		
+		return vmList;
+	}
+	
+	//THIS WILL BE THE FINAL run() METHOD
+	public final Collection<Metric> run(long duration, long metricRecordStart) {
+		
+		//ensure this simulation hasn't been run yet
+		if (complete)
+			throw new IllegalStateException("Simulation has already been run");
+		
+		//Initialize
+		ArrayList<Host> hosts = getHostList();
+		
+		Event e;
+		
+		//configure simulation duration
+		this.duration = duration;
+		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
+		
+		if (metricRecordStart > 0) {
+			recordingMetrics = false;
+			this.metricRecordStart = metricRecordStart;
+			sendEvent(new Event(Simulation.SIMULATION_RECORD_METRICS_EVENT, metricRecordStart, this, this));
+		} else {
+			recordingMetrics = true;
+		}
+		
+		logger.info("Starting DCSim");
+		logger.info("Random Seed: " + this.getRandomSeed());
+		
+		//main event loop
+		while (!eventQueue.isEmpty() && simulationTime < duration) {
+			//peak at next event
+			e = eventQueue.peek();
+			
+			//make sure that the event is in the future
+			if (e.getTime() < simulationTime)
+				throw new IllegalStateException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
+			
+			if (e.getTime() == simulationTime)
+				throw new IllegalStateException("Encountered event with time == current simulation time when advance in time was expected. This should never occur.");
+			
+			//Simulation time is advancing
+			
+			//inform metrics of new time interval
+			for (Metric metric : this.metrics.values())
+				metric.startTimeInterval();
+			
+			//schedule/allocate resources
+			scheduleResources(hosts);
+			
+			//revise/amend
+			postScheduling(hosts);
+			
+			//get the next event, which may have changed during the revise step
+			e = eventQueue.peek();
+			
+			//advance to time e.getTime()
+			
+			//run monitors
+			if (monitors.size() > 0) {
+				long nextMonitor = duration;
+				for (Monitor monitor : monitors) {
+					//run the monitors, keep track of the next time a monitor is scheduled to run
+					long nextExec = monitor.run();
+					if (nextExec < nextMonitor)
+						nextMonitor = nextExec;
+				}
+				//trigger an event to ensure that any monitors that must run do so
+				sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
+			}
+			
+			//execute current events
+			while (!eventQueue.isEmpty() && (eventQueue.peek().getTime() == simulationTime)) {
+				e = eventQueue.poll();
+				
+				e.getTarget().handleEvent(e);
+			}
+			
+			//inform metrics of completed time interval
+			for (Metric metric : this.metrics.values())
+				metric.completeTimeInterval();
+
+		}
+		
+		//Simulation is now completed
+		
+		completeSimulation(duration);
+		
+		logger.info("Completed simulation " + name);
+		
+		complete = true;
+		
+		//wrap result in new Collection so that Collection is modifiable, as modifying the values() collection of a HashMap directly breaks things.
+		Vector<Metric> result = new Vector<Metric>(metrics.values());
+		Collections.sort(result, new MetricAlphaComparator());
+		
+		return result;
+		
+	}
+
+	private void scheduleResources(ArrayList<Host> hosts) {
+
+		//retrieve ordered list of vm allocations
+		ArrayList<VMAllocation> vmList = buildVmList(hosts);
+		
+		//reset scheduled resources on vms
+		for (VMAllocation vmAlloc : vmList) {
+			
+		}
+		
+		//reset resources on hosts
+		
+		//run host priv domains
+		
+		//schedule resources to vms in order, in rounds until all complete
+		
+	}
+	
+	private void postScheduling(ArrayList<Host> hosts) {
+		
+	}
+	
+	//****************
+	
 	public final Collection<Metric> run(long duration) {
 		return run(duration, 0);
 	}
@@ -248,16 +385,9 @@ public class Simulation implements SimulationEventListener {
 		
 		return result;
 	}
+
 	
-	
-	
-	public void beginSimulation() {
-		logger.info("Starting DCSim");
-		
-		logger.info("Random Seed: " + this.getRandomSeed());
-	}
-	
-public void updateSimulation(long simulationTime) {
+	public void updateSimulation(long simulationTime) {
 		
 		//retrieve work for the elapsed period since the last update
 		for (Workload workload : workloads)

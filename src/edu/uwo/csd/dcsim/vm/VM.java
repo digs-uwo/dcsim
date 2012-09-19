@@ -42,6 +42,23 @@ public class VM implements SimulationEventListener {
 		vmAllocation = null;
 	}
 	
+	
+	//************************
+	VirtualResources resourcesScheduled;
+	
+	public void resetResourceScheduling() {
+		resourcesScheduled = new VirtualResources();
+		
+		resourcesAvailable.setBandwidth(vmAllocation.getBandwidth());
+		resourcesAvailable.setMemory(vmAllocation.getMemory());
+		resourcesAvailable.setStorage(vmAllocation.getStorage());
+		
+	}
+	
+	
+	//************************
+	
+	
 	public void prepareExecution() {
 		resourcesAvailable = new VirtualResources();
 		
