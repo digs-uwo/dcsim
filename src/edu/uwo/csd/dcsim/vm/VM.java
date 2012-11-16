@@ -44,17 +44,19 @@ public class VM implements SimulationEventListener {
 	
 	
 	//************************
-	VirtualResources resourcesScheduled;
+	private VirtualResources resourcesScheduled = new VirtualResources(); //the resources scheduled and available to the VM
 	
-	public void resetResourceScheduling() {
-		resourcesScheduled = new VirtualResources();
-		
-		resourcesAvailable.setBandwidth(vmAllocation.getBandwidth());
-		resourcesAvailable.setMemory(vmAllocation.getMemory());
-		resourcesAvailable.setStorage(vmAllocation.getStorage());
-		
+	public void setResourcesScheduled(VirtualResources resourcesScheduled) {
+		this.resourcesScheduled = resourcesScheduled;
 	}
 	
+	public VirtualResources getResourcesScheduled() {
+		return resourcesScheduled;
+	}
+	
+	public int getMaxCpu() {
+		return vmDescription.getCores() * vmAllocation.getHost().getCoreCapacity();
+	}
 	
 	//************************
 	

@@ -10,6 +10,8 @@ import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.host.scheduler.CpuScheduler;
+import edu.uwo.csd.dcsim.host.scheduler.ResourceScheduler;
 import edu.uwo.csd.dcsim.logging.*;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
 
@@ -230,6 +232,7 @@ public class Simulation implements SimulationEventListener {
 			e = eventQueue.peek();
 			
 			//advance to time e.getTime()
+			advanceSimulation(hosts);
 			
 			//run monitors
 			if (monitors.size() > 0) {
@@ -277,21 +280,61 @@ public class Simulation implements SimulationEventListener {
 
 		//retrieve ordered list of vm allocations
 		ArrayList<VMAllocation> vmList = buildVmList(hosts);
-		
-		//reset scheduled resources on vms
-		for (VMAllocation vmAlloc : vmList) {
+
+		//initialize resource scheduling
+		for (Host host : hosts) {
 			
+			//initialize scheduling (resets resources scheduled resources to VMs)
+			host.getResourceScheduler().initScheduling();
+			
+			//schedule the privileged domain (it takes priority over other VMs)
+			host.getResourceScheduler().schedulePrivDomain();
 		}
 		
-		//reset resources on hosts
-		
-		//run host priv domains
-		
 		//schedule resources to vms in order, in rounds until all complete
+		HashSet<VMAllocation> completedVms = new HashSet<VMAllocation>(); //set of VMs that have completed execution
+		boolean done = false; //true while execution is not complete
 		
+		do {
+			done = true; //start by assuming done
+		
+			//Execute a round of scheduling
+			
+			//instruct resource schedulers that a round is beginning
+			for (Host host : hosts) {
+				//only schedule if the host is 'ON'
+				if (host.getState() == Host.HostState.ON) {
+					host.getResourceScheduler().beginRound();
+				}
+			}
+			
+			//execute VMs, in order
+			for (VMAllocation vmAllocation : vmList) {
+				//if the VM has not be executed, the VM Allocation actually contains a VM, and the host is ON
+				if (!completedVms.contains(vmAllocation) && vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) {					
+					//if the resource scheduler has not indicated that is is COMPLETE (i.e. out of resources)
+					if (vmAllocation.getHost().getResourceScheduler().getState() != ResourceScheduler.ResourceSchedulerState.COMPLETE) {
+						//schedule resources for the VM
+						if (vmAllocation.getHost().getResourceScheduler().scheduleVM(vmAllocation)) {
+							//returned true = VM requires more resource to meet incoming work
+							done = false; //not done yet
+						} else {
+							//returned false = VM is done (no more work to schedule)
+							completedVms.add(vmAllocation);
+						}
+					}
+				}
+			}
+			
+		} while (!done); //if not done, execute another round
+			
 	}
 	
 	private void postScheduling(ArrayList<Host> hosts) {
+		
+	}
+	
+	private void advanceSimulation(ArrayList<Host> hosts) {
 		
 	}
 	

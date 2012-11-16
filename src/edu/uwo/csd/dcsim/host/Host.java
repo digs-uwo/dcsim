@@ -11,7 +11,7 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.power.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
-import edu.uwo.csd.dcsim.host.scheduler.CpuScheduler;
+import edu.uwo.csd.dcsim.host.scheduler.*;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -56,11 +56,12 @@ public final class Host implements SimulationEventListener {
 	private int bandwidth; //in KB
 	private long storage; //in MB
 	
-	private CpuManager cpuManager;
+	private CpuManager cpuManager; 
 	private MemoryManager memoryManager;
 	private BandwidthManager bandwidthManager;
 	private StorageManager storageManager;
-	private CpuScheduler cpuScheduler;
+	private CpuScheduler cpuScheduler; //TODO remove
+	private ResourceScheduler resourceScheduler;
 	private HostPowerModel powerModel;
 	
 	private ArrayList<VMAllocation> vmAllocations = new ArrayList<VMAllocation>();
@@ -101,9 +102,10 @@ public final class Host implements SimulationEventListener {
 		setMemoryManager(builder.memoryManagerFactory.newInstance());
 		setBandwidthManager(builder.bandwidthManagerFactory.newInstance());
 		setStorageManager(builder.storageManagerFactory.newInstance());
-		setCpuScheduler(builder.cpuSchedulerFactory.newInstance());
+		setCpuScheduler(builder.cpuSchedulerFactory.newInstance()); //TODO remove
 		setHostPowerModel(builder.powerModel);
-					
+		setResourceScheduler(builder.resourceScheduler);
+		
 		/*
 		 * Create and allocate privileged domain
 		 */
@@ -155,6 +157,8 @@ public final class Host implements SimulationEventListener {
 		private ObjectFactory<? extends StorageManager> storageManagerFactory = null;
 		
 		private ObjectFactory<? extends CpuScheduler> cpuSchedulerFactory = null; 
+		
+		private ResourceScheduler resourceScheduler = new ResourceScheduler(); //TODO change to a factory
 		
 		private HostPowerModel powerModel = null;
 		
@@ -752,7 +756,9 @@ public final class Host implements SimulationEventListener {
 	
 	public StorageManager getStorageManager() { 	return storageManager; }
 	
-	public CpuScheduler getCpuScheduler() { 	return cpuScheduler; }
+	public CpuScheduler getCpuScheduler() { 	return cpuScheduler; } //TODO remove
+	
+	public ResourceScheduler getResourceScheduler() { return resourceScheduler; } 
 	
 	public void setCpuManager(CpuManager cpuManager) {
 		this.cpuManager = cpuManager;
@@ -777,6 +783,11 @@ public final class Host implements SimulationEventListener {
 	public void setCpuScheduler(CpuScheduler cpuScheduler) {
 		this.cpuScheduler = cpuScheduler;
 		cpuScheduler.setHost(this);
+	}
+	
+	public void setResourceScheduler(ResourceScheduler resourceScheduler) {
+		this.resourceScheduler = resourceScheduler;
+		resourceScheduler.setHost(this);
 	}
 	
 	public ArrayList<VMAllocation> getVMAllocations() { return vmAllocations;	}
