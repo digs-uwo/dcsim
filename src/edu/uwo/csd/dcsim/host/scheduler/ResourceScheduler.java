@@ -14,6 +14,9 @@ public class ResourceScheduler {
 	
 	public enum ResourceSchedulerState {READY, COMPLETE;}
 	
+	/**
+	 * Initialize scheduling, including resetting scheduled resources from last time interval.
+	 */
 	public void initScheduling() {
 		
 		VirtualResources resourcesScheduled = new VirtualResources();
