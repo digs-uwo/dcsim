@@ -34,8 +34,8 @@ public class RandomWorkload extends Workload {
 	}
 	
 	@Override
-	protected double retrievePendingWork() {
-		return workLevel * simulation.getElapsedSeconds();
+	protected double getCurrentWorkLevel() {
+		return workLevel;
 	}
 
 	@Override

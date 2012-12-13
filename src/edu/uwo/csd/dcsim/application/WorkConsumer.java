@@ -13,6 +13,6 @@ public interface WorkConsumer {
 	 * 
 	 * @param work
 	 */
-	public void addWork(double work);
+	public void setWorkLevel(double work);
 	
 }

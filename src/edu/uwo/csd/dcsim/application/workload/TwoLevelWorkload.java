@@ -25,8 +25,8 @@ public class TwoLevelWorkload extends Workload {
 	}
 	
 	@Override
-	protected double retrievePendingWork() {
-		return workPerSecond * ((simulation.getSimulationTime() - simulation.getLastUpdate()) / 1000.0);
+	protected double getCurrentWorkLevel() {
+		return workPerSecond;
 	}
 
 	@Override

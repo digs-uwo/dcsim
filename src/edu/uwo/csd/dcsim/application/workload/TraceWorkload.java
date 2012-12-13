@@ -48,8 +48,8 @@ public class TraceWorkload extends Workload {
 	}
 	
 	@Override
-	protected double retrievePendingWork() {
-		return workloadTrace.getValues().get(currentPosition) * scaleFactor * ((simulation.getElapsedTime()) / 1000.0);
+	protected double getCurrentWorkLevel() {
+		return workloadTrace.getValues().get(currentPosition) * scaleFactor;
 	}
 
 	@Override

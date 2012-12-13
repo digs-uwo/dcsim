@@ -35,10 +35,9 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	/**
 	 * Record work completed by the Application(s)
 	 */
-	public void addWork(double work) {
+	public void setWorkLevel(double work) {
 		if (simulation.isRecordingMetrics()) {
-			completedWork += work;
-			completedWork = Utility.roundDouble(completedWork); //correct for precision errors by rounding
+			completedWork = work;
 		}
 	}
 
@@ -46,7 +45,7 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	 * Get work awaiting processing
 	 * @return
 	 */
-	protected abstract double retrievePendingWork(); 
+	protected abstract double getCurrentWorkLevel(); 
 	
 	/**
 	 * Update the amount of work that must be processed in the current interval of time being simulated
@@ -54,18 +53,17 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	public void update() {
 		
 		//ensure that new work is only calculated once per simulation time interval 
-		if (workTarget != null && simulation.getLastUpdate() < simulation.getSimulationTime()) {
-			double pendingWork = retrievePendingWork();
-			pendingWork = Utility.roundDouble(pendingWork); //correct for precision errors by rounding
+		if (workTarget != null) {
+			double currentWorkLevel = getCurrentWorkLevel();
+			currentWorkLevel = Utility.roundDouble(currentWorkLevel); //correct for precision errors by rounding
 
 			if (simulation.isRecordingMetrics()) {
-				totalWork += pendingWork;
-				totalWork = Utility.roundDouble(totalWork); //correct for precision errors by rounding
+				totalWork += currentWorkLevel;
 			}
 			
-			workTarget.addWork(pendingWork);
+			workTarget.setWorkLevel(currentWorkLevel);
 			
-			currentWork = pendingWork;			
+			currentWork = currentWorkLevel;			
 		}
 	}
 	
@@ -73,6 +71,8 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	 * Update metric values
 	 */
 	public void updateMetrics() {
+		
+		//TODO this is where we calculate the total work done over the interval
 		
 		/*
 		 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
