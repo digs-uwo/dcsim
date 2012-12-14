@@ -39,6 +39,7 @@ public class InteractiveApplication extends Application {
 	private double bwPerWork; //the amount of bandwdith required to complete 1 work
 	private int memory; //fixed memory usage
 	private long storage; //fixed storage usage
+
 	
 	/**
 	 * Create a new InteractiveApplication
@@ -72,6 +73,25 @@ public class InteractiveApplication extends Application {
 		overhead = new VirtualResources();
 		overhead.setCpu(cpuOverhead);
 	}
+	
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	public VirtualResources getResourcesRequested() {
+		VirtualResources resourcesRequested = new VirtualResources();
+		resourcesRequested.setMemory(memory);
+		resourcesRequested.setStorage(storage);
+		resourcesRequested.setBandwidth(0); //TODO change bandwidth usage to a static amount
+		
+		//TODO need to get current workload level from application tier
+		
+		return resourcesRequested;
+	}
+	
+	public void updateScheduledResources(VirtualResources resourcesScheduled) {
+		
+	}
+	
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
 	@Override
 	public void prepareExecution() {

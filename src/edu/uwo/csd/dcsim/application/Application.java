@@ -43,6 +43,19 @@ public abstract class Application {
 		this.vm = vm;
 	}
 	
+	
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	//new stuff
+	
+	public abstract VirtualResources getResourcesRequested();
+	
+	public abstract void updateScheduledResources(VirtualResources resourcesScheduled);
+	
+	//TODO something like public abstract void execute(duration)
+	
+	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>?
+	
+	
 	/**
 	 * Called once at the beginning of VM execution. Use to set up object for execution 
 	 */

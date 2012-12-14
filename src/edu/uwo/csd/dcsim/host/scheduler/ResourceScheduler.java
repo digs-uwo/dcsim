@@ -64,17 +64,48 @@ public class ResourceScheduler {
 		//computer shortcuts such as a round share limit for each VM
 	}
 	
+	/**
+	 * 
+	 * @param vmAlloc
+	 * @return true, if the VM required more resource during this scheduling round, false otherwise
+	 */
 	public boolean scheduleVM(VMAllocation vmAlloc) {
 		//NOTE since we are running CPU as an int here, we need to make sure that no VM is starved, which really shouldn't be a problem, but think about it
 		
-		//get the requested CPU from the VM
+		//get the requested and scheduled CPU from the VM
+		VirtualResources requestedResources = vmAlloc.getVm().getResourcesRequested();
+		VirtualResources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
 		
 		//if the VM requires no more CPU than already scheduled, then we can return false
-		
+		if (requestedResources.getCpu() <= scheduledResources.getCpu()) {
+			return false;
+		}
+				
 		//try to give as much as we can, up to any predetermined limit for the round and no more than remaining CPU
+		int additionalCpu = (int)Math.ceil(requestedResources.getCpu() - scheduledResources.getCpu()); //TODO should this be cast to int? Should virtual resources be int instead of double?
 		
-		//subtract from remaining CPU
+		//if there is more CPU required, and we have some left
+		if (additionalCpu > 0 && remainingCpu > 0) {
+			//add either the required additional cpu or the amount we have left, whichever is smaller
+			int cpuToAdd = Math.min(additionalCpu, remainingCpu);
+			
+			//add the cpu to the scheduled resources of the vm
+			scheduledResources.setCpu(scheduledResources.getCpu() + cpuToAdd);
+			
+			//update the scheduling calculations with the new resource amount
+			vmAlloc.getVm().updateScheduling();
+		
+			//subtract from remainingCpu
+			remainingCpu -= cpuToAdd;
+		}
+		
 		//if no CPU left, change the state to COMPLETE
+		if (remainingCpu == 0)
+			state = ResourceSchedulerState.COMPLETE;
+		
+		//Note that even if additionalCPU is now zero, we don't return false unless no addition CPU was scheduled during this round
+	
+		return true;
 	}
 	
 	public void setHost(Host host) {
