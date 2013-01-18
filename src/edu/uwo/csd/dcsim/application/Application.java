@@ -9,7 +9,7 @@ import edu.uwo.csd.dcsim.vm.*;
  * @author Michael Tighe
  *
  */
-public abstract class Application {
+public abstract class Application implements WorkProducer {
 
 	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
 	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
@@ -55,28 +55,28 @@ public abstract class Application {
 	
 	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>?
 	
-	
-	/**
-	 * Called once at the beginning of VM execution. Use to set up object for execution 
-	 */
-	public abstract void prepareExecution();
-	
-	/**
-	 * Update the resources required by this Application to fully meet its workload
-	 */
-	public abstract void updateResourceDemand();
-	
-	/**
-	 * Run this Application with the specified amount of available resources
-	 * @param resourcesAvailable The resources that may be consumed by the Application
-	 * @return
-	 */
-	public abstract VirtualResources execute(VirtualResources resourcesAvailable);
-
-	/**
-	 * Called once at the end of VM execution
-	 */
-	public abstract void completeExecution();
+//	
+//	/**
+//	 * Called once at the beginning of VM execution. Use to set up object for execution 
+//	 */
+//	public abstract void prepareExecution();
+//	
+//	/**
+//	 * Update the resources required by this Application to fully meet its workload
+//	 */
+//	public abstract void updateResourceDemand();
+//	
+//	/**
+//	 * Run this Application with the specified amount of available resources
+//	 * @param resourcesAvailable The resources that may be consumed by the Application
+//	 * @return
+//	 */
+//	public abstract VirtualResources execute(VirtualResources resourcesAvailable);
+//
+//	/**
+//	 * Called once at the end of VM execution
+//	 */
+//	public abstract void completeExecution();
 	
 	/**
 	 * Get the percentage of incoming work to this application for which SLA is violated

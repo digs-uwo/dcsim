@@ -31,12 +31,12 @@ public interface ApplicationFactory {
 	public void stopApplication(Application application);
 	
 	/**
-	 * Get the height of Applications created by this Factory. Height refers to the number of other Applications
-	 * this Application depends on. A higher height indicates that the Application depends on relatively fewer other
-	 * Applications compared to others within the same Service. The Application with the highest height in a set of 
+	 * Get the depth of Applications created by this Factory. Depth refers to the number of other Applications
+	 * this Application depends on. A lower depth indicates that the Application depends on relatively fewer other
+	 * Applications compared to others within the same Service. The Application with the lowest depth in a set of 
 	 * dependant Applications depends on no other Application, and receives its work directly from the Workload.
 	 * @return
 	 */
-	public int getHeight();
+	public int getDepth();
 	
 }

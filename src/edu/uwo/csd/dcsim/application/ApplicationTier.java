@@ -14,12 +14,11 @@ import edu.uwo.csd.dcsim.core.Simulation;
  * @author Michael Tighe
  *
  */
-public abstract class ApplicationTier implements WorkConsumer, ApplicationFactory {
+public abstract class ApplicationTier implements WorkProducer, ApplicationFactory {
 
-	private WorkConsumer workTarget; //the consumer to send completed work to
+	private WorkProducer workSource;
 	private LoadBalancer loadBalancer; //handles balancing load between Applications in the tier
 	private ArrayList<Application> applications = new ArrayList<Application>(); //the set of applications in the tier
-	private double incomingWork = 0; //used in the case of no load balancer is present
 
 	/**
 	 * Create an Application instance for this tier
@@ -61,15 +60,12 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 	protected abstract Application instantiateApplication(Simulation simulation);
 
 	@Override
-	public int getHeight() {
-		int height = 1;
-		
-		WorkConsumer child = workTarget;
-		while (child instanceof ApplicationTier) {
-			++height;
-			child = ((ApplicationTier)child).getWorkTarget();
+	public int getDepth() {
+		if (workSource instanceof ApplicationTier) {
+			return ((ApplicationTier)workSource).getDepth() + 1;
+		} else {
+			return 0;
 		}
-		return height;
 	}
 	
 	/**
@@ -77,13 +73,11 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 	 * @param application
 	 * @return
 	 */
-	public double retrieveWork(Application application) {
+	public double getWorkLevel(Application application) {
 		if (loadBalancer != null) {
-			return loadBalancer.retrieveWork(application);
+			return loadBalancer.getWorkLevel(application);
 		} else {
-			double work = incomingWork;
-			incomingWork = 0;
-			return work;
+			return workSource.getWorkOutputLevel();
 		}
 	}
 
@@ -113,29 +107,23 @@ public abstract class ApplicationTier implements WorkConsumer, ApplicationFactor
 	}
 	
 	/**
-	 * Get the target for completed work
+	 * Get the source of incoming work
 	 * @return
 	 */
-	public WorkConsumer getWorkTarget() {
-		return workTarget;
+	public WorkProducer getWorkSource() {
+		return workSource;
 	}
-	
-	/**
-	 * Set the target for completed work
-	 * @param workTarget
-	 */
-	public void setWorkTarget(WorkConsumer workTarget) {
-		this.workTarget = workTarget;
-	}
-	
+
 	@Override
-	public void addWork(double work) {
-		//add incoming work to the load balancer, if present. Otherwise, add to incomingWork
-		if (loadBalancer != null) {
-			loadBalancer.addWork(work);
-		} else {
-			incomingWork += work;
+	public double getWorkOutputLevel() {
+		//total all work output from applications in this tier
+		double output = 0;
+		
+		for (Application application : applications) {
+			output += application.getWorkOutputLevel();
 		}
+		
+		return output;
 	}
 	
 }

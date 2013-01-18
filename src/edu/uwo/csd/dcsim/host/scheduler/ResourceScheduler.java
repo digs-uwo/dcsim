@@ -103,7 +103,7 @@ public class ResourceScheduler {
 		if (remainingCpu == 0)
 			state = ResourceSchedulerState.COMPLETE;
 		
-		//Note that even if additionalCPU is now zero, we don't return false unless no addition CPU was scheduled during this round
+		//Note that even if additionalCPU is now zero, we don't return false unless no additional CPU was scheduled during this round
 	
 		return true;
 	}

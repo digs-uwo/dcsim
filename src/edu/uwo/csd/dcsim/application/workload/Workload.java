@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim.application.workload;
 
 import edu.uwo.csd.dcsim.application.Application;
-import edu.uwo.csd.dcsim.application.WorkConsumer;
+import edu.uwo.csd.dcsim.application.WorkProducer;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
@@ -12,15 +12,15 @@ import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
  * @author Michael Tighe
  *
  */
-public abstract class Workload implements SimulationEventListener, WorkConsumer {
+public abstract class Workload implements SimulationEventListener, WorkProducer {
 	
 	public static final int WORKLOAD_UPDATE_WORKLEVEL_EVENT = 1;
 	
 	protected Simulation simulation;
 	private double totalWork = 0;
 	private double completedWork = 0;
-	private double currentWork = 0;
-	private WorkConsumer workTarget;
+	private double currentWorkLevel = 0;
+	private WorkProducer workSource; //final work producer that completes the work produced by this workload
 
 	public Workload(Simulation simulation) {
 		
@@ -31,16 +31,6 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, simulation.getSimulationTime(), this, this));
 	}
 	
-	@Override
-	/**
-	 * Record work completed by the Application(s)
-	 */
-	public void setWorkLevel(double work) {
-		if (simulation.isRecordingMetrics()) {
-			completedWork = work;
-		}
-	}
-
 	/**
 	 * Get work awaiting processing
 	 * @return
@@ -53,18 +43,13 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	public void update() {
 		
 		//ensure that new work is only calculated once per simulation time interval 
-		if (workTarget != null) {
-			double currentWorkLevel = getCurrentWorkLevel();
-			currentWorkLevel = Utility.roundDouble(currentWorkLevel); //correct for precision errors by rounding
+		currentWorkLevel = getCurrentWorkLevel();
+		currentWorkLevel = Utility.roundDouble(currentWorkLevel); //correct for precision errors by rounding TODO still necessary?
 
-			if (simulation.isRecordingMetrics()) {
-				totalWork += currentWorkLevel;
-			}
-			
-			workTarget.setWorkLevel(currentWorkLevel);
-			
-			currentWork = currentWorkLevel;			
-		}
+//		if (simulation.isRecordingMetrics()) {
+//			totalWork += currentWorkLevel;
+//		}
+		
 	}
 	
 	/**
@@ -78,9 +63,9 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 		 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
 		 * more than once to the total (thus incorrectly reducing the SLA violation value)
 		 */
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(currentWork);
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(currentWork);
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(currentWork);
+//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(currentWork);
+//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(currentWork);
+//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(currentWork);
 	}
 	
 	/**
@@ -105,29 +90,10 @@ public abstract class Workload implements SimulationEventListener, WorkConsumer 
 	public double getCompletedWork() {
 		return completedWork;
 	}
-	
-	/**
-	 * Get the target that this Workload submits work to
-	 * @return
-	 */
-	public WorkConsumer getWorkTarget() {
-		return workTarget;
-	}
-	
-	/**
-	 * Set the target that this Workload submits work to
-	 * @param workTarget
-	 */
-	public void setWorkTarget(WorkConsumer workTarget) {
-		this.workTarget = workTarget;
-	}
-	
-	/**
-	 * Get the current amount of work
-	 * @return
-	 */
-	public double getCurrentWork() {
-		return currentWork;
+
+	@Override
+	public double getWorkOutputLevel() {
+		return currentWorkLevel;
 	}
 	
 	@Override

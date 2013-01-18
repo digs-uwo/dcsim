@@ -35,6 +35,8 @@ public class InteractiveApplication extends Application {
 	private double migrationPenalty = 0; //the current SLA penalty due to migration
 	private double totalMigrationPenalty = 0; //the total SLA penalty due to migration during the simulation
 	
+	private double workOutputLevel =  0;
+	
 	private double cpuPerWork; //the amount of CPU required to complete 1 work
 	private double bwPerWork; //the amount of bandwdith required to complete 1 work
 	private int memory; //fixed memory usage
@@ -82,171 +84,187 @@ public class InteractiveApplication extends Application {
 		resourcesRequested.setStorage(storage);
 		resourcesRequested.setBandwidth(0); //TODO change bandwidth usage to a static amount
 		
-		//TODO need to get current workload level from application tier
+		//get current workload level from application tier and calculate CPU requirements
+		double workLevel = applicationTier.getWorkLevel(this);
+		resourcesRequested.setCpu(workLevel * cpuPerWork);
 		
 		return resourcesRequested;
 	}
 	
+	/**
+	 * calculates work output level based on given scheduled resources
+	 * TODO rename?
+	 */
 	public void updateScheduledResources(VirtualResources resourcesScheduled) {
-		
+		//check that memory, storage and bandwidth meet required minimum
+		if (resourcesScheduled.getMemory() <= memory ||
+				resourcesScheduled.getStorage() <= storage ||
+				resourcesScheduled.getBandwidth() <= 0) { //TODO change to static amount
+			workOutputLevel = 0;
+		} else {
+			//we have enough memory, storage and bandwidth, check cpu
+			workOutputLevel = resourcesScheduled.getCpu() / cpuPerWork;
+		}
 	}
+	
+	//something like execute. Remember to include the overhead values
 	
 	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	
-	@Override
-	public void prepareExecution() {
-		//reset the resource demand and consumption values for the current interval
-		resourcesDemanded = new VirtualResources();
-		resourcesUsed = new VirtualResources();
-		
-		//calculate overhead for scheduling period
-		overheadRemaining = new VirtualResources();
-		
-		overheadRemaining.setCpu(overhead.getCpu() * simulation.getElapsedSeconds());
-		overheadRemaining.setBandwidth(overhead.getBandwidth() * simulation.getElapsedSeconds());
-		overheadRemaining.setMemory(overhead.getMemory());
-		overheadRemaining.setStorage(overhead.getStorage());
-		
-		//application overhead is included in resourceDemand
-		resourcesDemanded = resourcesDemanded.add(overheadRemaining);
-		
-		//set up sla metrics
-		incomingWork = 0;
-		slaViolatedWork = 0;
-		migrationPenalty = 0;
-	}
-
-	@Override
-	public void updateResourceDemand() {
-		//retrieve incoming work
-		double incomingWork = applicationTier.retrieveWork(this);
-		workRemaining += incomingWork;
-		this.incomingWork += incomingWork;
-		
-		//if there is incoming work, calculate the resources required to perform it and add it to resourceDemand
-		if (incomingWork > 0) {
-			resourcesDemanded.setCpu(resourcesDemanded.getCpu() + (incomingWork * cpuPerWork));
-			resourcesDemanded.setBandwidth(resourcesDemanded.getBandwidth() + (incomingWork * bwPerWork));
-			resourcesDemanded.setMemory(memory);
-			resourcesDemanded.setStorage(storage);
-		}
-	}
-	
-	@Override
-	public VirtualResources execute(VirtualResources resourcesAvailable) {
-
-		VirtualResources resourcesConsumed = new VirtualResources();
-		
-		//first ensure that all remaining overhead for the elapsed period has been processed
-		if (overheadRemaining.getCpu() > 0) {
-			if (resourcesAvailable.getCpu() > overheadRemaining.getCpu()) {
-				//we have enough cpu to complete processing the overhead
-				resourcesAvailable.setCpu(resourcesAvailable.getCpu() - overheadRemaining.getCpu());
-				resourcesConsumed.setCpu(overheadRemaining.getCpu());
-				overheadRemaining.setCpu(0);
-			} else {
-				//we do not have enough cpu to complete processing the overhead
-				overheadRemaining.setCpu(overheadRemaining.getCpu() - resourcesAvailable.getCpu());
-				resourcesConsumed.setCpu(resourcesAvailable.getCpu());
-				resourcesAvailable.setCpu(0);
-			}
-		}
-		if (overheadRemaining.getBandwidth() > 0) {
-			if (resourcesAvailable.getBandwidth() > overheadRemaining.getBandwidth()) {
-				//we have enough bandwidth to complete processing the overhead
-				resourcesAvailable.setBandwidth(resourcesAvailable.getBandwidth() - overheadRemaining.getBandwidth());
-				resourcesConsumed.setBandwidth(overheadRemaining.getBandwidth());
-				overheadRemaining.setBandwidth(0);
-			} else {
-				//we do not have enough bandwidth to complete processing the overhead
-				overheadRemaining.setBandwidth(overheadRemaining.getBandwidth() - resourcesAvailable.getBandwidth());
-				resourcesConsumed.setBandwidth(resourcesAvailable.getBandwidth());
-				resourcesAvailable.setBandwidth(0);
-			}
-		}
-		
-		resourcesConsumed.setMemory(overheadRemaining.getMemory());
-		resourcesConsumed.setStorage(overheadRemaining.getStorage());
-		
-		//check minimum memory and storage. If not met, assume the application does not run. TODO is this correct? Should we use what we can? How would this affect application performance?
-		if (resourcesAvailable.getMemory() < overheadRemaining.getMemory() || resourcesAvailable.getStorage() < overheadRemaining.getStorage()) {
-			simulation.getLogger().info("Application has insufficient memory or storage to meet overhead requirements");
-			return new VirtualResources(); //no resources consumed
-		}
-		
-		/* 
-		 * Process actual work
-		 * 
-		 * total work completed depends on CPU and BW. Calculate the
-		 * amount of work possible for each assuming the other is infinite,
-		 * and the minimum of the two is the amount of work completed
-		 */
-		
-		double cpuWork, bwWork;
-		
-		if (cpuPerWork != 0)
-			cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
-		else
-			cpuWork = Double.MAX_VALUE;
-		
-		if (bwPerWork != 0)
-			bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
-		else
-			bwWork = Double.MAX_VALUE;
-		
-		double workCompleted = Math.min(cpuWork, bwWork);
-		workCompleted = Math.min(workCompleted, workRemaining);
-		
-		if (workCompleted > workRemaining)
-			throw new IllegalStateException("Application class " + this.getClass().getName() + " performed more work than was available to perform. Programming error.");
-		
-		applicationTier.getWorkTarget().addWork(workCompleted);
-		workRemaining -= workCompleted;
-	
-		//compute total consumed resources
-		resourcesConsumed.setCpu(resourcesConsumed.getCpu() + (workCompleted * cpuPerWork));
-		resourcesConsumed.setBandwidth(resourcesConsumed.getBandwidth() + (workCompleted * bwPerWork));
-		resourcesConsumed.setMemory(memory);
-		resourcesConsumed.setStorage(storage);
-		
-		//add resourcesConsumed to resourcesInUse, which is keeping track of all resources used during this time interval
-		resourcesUsed = resourcesUsed.add(resourcesConsumed);
-		
-		return resourcesConsumed;
-	}
-
-
-	@Override
-	public void completeExecution() {
-		
-		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
-		resourceDemand = new VirtualResources();
-		resourceDemand.setCpu(resourcesDemanded.getCpu() / (simulation.getElapsedSeconds()));
-		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (simulation.getElapsedSeconds()));
-		resourceDemand.setMemory(resourcesDemanded.getMemory());
-		resourceDemand.setStorage(resourcesDemanded.getStorage());
-		
-		resourceInUse = new VirtualResources();
-		resourceInUse.setCpu(resourcesUsed.getCpu() / (simulation.getElapsedSeconds()));
-		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (simulation.getElapsedSeconds()));
-		resourceInUse.setMemory(resourcesUsed.getMemory());
-		resourceInUse.setStorage(resourcesUsed.getStorage());
-		
-		slaViolatedWork = workRemaining;
-		
-		//add a migration penalty, if the VM is migrating
-		if (vm.isMigrating()) {
-			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
-			slaViolatedWork += migrationPenalty;
-		}
-		
-		totalIncomingWork += incomingWork;
-		totalSlaViolatedWork += slaViolatedWork;
-		totalMigrationPenalty += migrationPenalty;
-		
-		//clear work remaining (i.e. drop requests that could not be fulfilled)
-		workRemaining = 0;
-	}
+//	@Override
+//	public void prepareExecution() {
+//		//reset the resource demand and consumption values for the current interval
+//		resourcesDemanded = new VirtualResources();
+//		resourcesUsed = new VirtualResources();
+//		
+//		//calculate overhead for scheduling period
+//		overheadRemaining = new VirtualResources();
+//		
+//		overheadRemaining.setCpu(overhead.getCpu() * simulation.getElapsedSeconds());
+//		overheadRemaining.setBandwidth(overhead.getBandwidth() * simulation.getElapsedSeconds());
+//		overheadRemaining.setMemory(overhead.getMemory());
+//		overheadRemaining.setStorage(overhead.getStorage());
+//		
+//		//application overhead is included in resourceDemand
+//		resourcesDemanded = resourcesDemanded.add(overheadRemaining);
+//		
+//		//set up sla metrics
+//		incomingWork = 0;
+//		slaViolatedWork = 0;
+//		migrationPenalty = 0;
+//	}
+//
+//	@Override
+//	public void updateResourceDemand() {
+//		//retrieve incoming work
+//		double incomingWork = applicationTier.retrieveWork(this);
+//		workRemaining += incomingWork;
+//		this.incomingWork += incomingWork;
+//		
+//		//if there is incoming work, calculate the resources required to perform it and add it to resourceDemand
+//		if (incomingWork > 0) {
+//			resourcesDemanded.setCpu(resourcesDemanded.getCpu() + (incomingWork * cpuPerWork));
+//			resourcesDemanded.setBandwidth(resourcesDemanded.getBandwidth() + (incomingWork * bwPerWork));
+//			resourcesDemanded.setMemory(memory);
+//			resourcesDemanded.setStorage(storage);
+//		}
+//	}
+//	
+//	@Override
+//	public VirtualResources execute(VirtualResources resourcesAvailable) {
+//
+//		VirtualResources resourcesConsumed = new VirtualResources();
+//		
+//		//first ensure that all remaining overhead for the elapsed period has been processed
+//		if (overheadRemaining.getCpu() > 0) {
+//			if (resourcesAvailable.getCpu() > overheadRemaining.getCpu()) {
+//				//we have enough cpu to complete processing the overhead
+//				resourcesAvailable.setCpu(resourcesAvailable.getCpu() - overheadRemaining.getCpu());
+//				resourcesConsumed.setCpu(overheadRemaining.getCpu());
+//				overheadRemaining.setCpu(0);
+//			} else {
+//				//we do not have enough cpu to complete processing the overhead
+//				overheadRemaining.setCpu(overheadRemaining.getCpu() - resourcesAvailable.getCpu());
+//				resourcesConsumed.setCpu(resourcesAvailable.getCpu());
+//				resourcesAvailable.setCpu(0);
+//			}
+//		}
+//		if (overheadRemaining.getBandwidth() > 0) {
+//			if (resourcesAvailable.getBandwidth() > overheadRemaining.getBandwidth()) {
+//				//we have enough bandwidth to complete processing the overhead
+//				resourcesAvailable.setBandwidth(resourcesAvailable.getBandwidth() - overheadRemaining.getBandwidth());
+//				resourcesConsumed.setBandwidth(overheadRemaining.getBandwidth());
+//				overheadRemaining.setBandwidth(0);
+//			} else {
+//				//we do not have enough bandwidth to complete processing the overhead
+//				overheadRemaining.setBandwidth(overheadRemaining.getBandwidth() - resourcesAvailable.getBandwidth());
+//				resourcesConsumed.setBandwidth(resourcesAvailable.getBandwidth());
+//				resourcesAvailable.setBandwidth(0);
+//			}
+//		}
+//		
+//		resourcesConsumed.setMemory(overheadRemaining.getMemory());
+//		resourcesConsumed.setStorage(overheadRemaining.getStorage());
+//		
+//		//check minimum memory and storage. If not met, assume the application does not run. TODO is this correct? Should we use what we can? How would this affect application performance?
+//		if (resourcesAvailable.getMemory() < overheadRemaining.getMemory() || resourcesAvailable.getStorage() < overheadRemaining.getStorage()) {
+//			simulation.getLogger().info("Application has insufficient memory or storage to meet overhead requirements");
+//			return new VirtualResources(); //no resources consumed
+//		}
+//		
+//		/* 
+//		 * Process actual work
+//		 * 
+//		 * total work completed depends on CPU and BW. Calculate the
+//		 * amount of work possible for each assuming the other is infinite,
+//		 * and the minimum of the two is the amount of work completed
+//		 */
+//		
+//		double cpuWork, bwWork;
+//		
+//		if (cpuPerWork != 0)
+//			cpuWork = resourcesAvailable.getCpu() / cpuPerWork;
+//		else
+//			cpuWork = Double.MAX_VALUE;
+//		
+//		if (bwPerWork != 0)
+//			bwWork = resourcesAvailable.getBandwidth() / bwPerWork;
+//		else
+//			bwWork = Double.MAX_VALUE;
+//		
+//		double workCompleted = Math.min(cpuWork, bwWork);
+//		workCompleted = Math.min(workCompleted, workRemaining);
+//		
+//		if (workCompleted > workRemaining)
+//			throw new IllegalStateException("Application class " + this.getClass().getName() + " performed more work than was available to perform. Programming error.");
+//		
+//		applicationTier.getWorkTarget().addWork(workCompleted);
+//		workRemaining -= workCompleted;
+//	
+//		//compute total consumed resources
+//		resourcesConsumed.setCpu(resourcesConsumed.getCpu() + (workCompleted * cpuPerWork));
+//		resourcesConsumed.setBandwidth(resourcesConsumed.getBandwidth() + (workCompleted * bwPerWork));
+//		resourcesConsumed.setMemory(memory);
+//		resourcesConsumed.setStorage(storage);
+//		
+//		//add resourcesConsumed to resourcesInUse, which is keeping track of all resources used during this time interval
+//		resourcesUsed = resourcesUsed.add(resourcesConsumed);
+//		
+//		return resourcesConsumed;
+//	}
+//
+//
+//	@Override
+//	public void completeExecution() {
+//		
+//		//convert resourceDemand and resourceInUse to a 'resource per second' value by dividing by seconds elapsed in time interval
+//		resourceDemand = new VirtualResources();
+//		resourceDemand.setCpu(resourcesDemanded.getCpu() / (simulation.getElapsedSeconds()));
+//		resourceDemand.setBandwidth(resourcesDemanded.getBandwidth() / (simulation.getElapsedSeconds()));
+//		resourceDemand.setMemory(resourcesDemanded.getMemory());
+//		resourceDemand.setStorage(resourcesDemanded.getStorage());
+//		
+//		resourceInUse = new VirtualResources();
+//		resourceInUse.setCpu(resourcesUsed.getCpu() / (simulation.getElapsedSeconds()));
+//		resourceInUse.setBandwidth(resourcesUsed.getBandwidth() / (simulation.getElapsedSeconds()));
+//		resourceInUse.setMemory(resourcesUsed.getMemory());
+//		resourceInUse.setStorage(resourcesUsed.getStorage());
+//		
+//		slaViolatedWork = workRemaining;
+//		
+//		//add a migration penalty, if the VM is migrating
+//		if (vm.isMigrating()) {
+//			migrationPenalty += (incomingWork - workRemaining) * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
+//			slaViolatedWork += migrationPenalty;
+//		}
+//		
+//		totalIncomingWork += incomingWork;
+//		totalSlaViolatedWork += slaViolatedWork;
+//		totalMigrationPenalty += migrationPenalty;
+//		
+//		//clear work remaining (i.e. drop requests that could not be fulfilled)
+//		workRemaining = 0;
+//	}
 	
 	@Override
 	public void updateMetrics() {
@@ -343,6 +361,11 @@ public class InteractiveApplication extends Application {
 	
 	public double getWork(){
 		return incomingWork;
+	}
+
+	@Override
+	public double getWorkOutputLevel() {
+		return workOutputLevel;
 	}
 	
 }

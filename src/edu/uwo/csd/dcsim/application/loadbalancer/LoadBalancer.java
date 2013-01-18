@@ -14,34 +14,26 @@ import edu.uwo.csd.dcsim.application.ApplicationTier;
 public abstract class LoadBalancer {
 
 	ApplicationTier applicationTier;
-	Map<Application, Double> applicationWorkPending;
-	float incomingWork;
+	Map<Application, Double> applicationWorkLevel;
 	
 	public LoadBalancer() {
-		applicationWorkPending = new HashMap<Application, Double>();
-		incomingWork = 0;
+		applicationWorkLevel = new HashMap<Application, Double>();
 	}
 	
-	public void addWork(double work) {
-		/**queue incoming work. Delay distributing it to applications until an application
-		requests work, in order to reduce calls to distributeWork()
-		*/
-		incomingWork += work;
-	}
+	public abstract Map<Application, Double> distributeWork(double work);
 	
-	public abstract Map<Application, Double> distributeWork(double work, Map<Application, Double> applicationWorkPending);
-	
-	public double retrieveWork(Application application) {
-		//distribute any queued incoming work
+	public double getWorkLevel(Application application) {
 		
-		applicationWorkPending = distributeWork(incomingWork, applicationWorkPending);
-		incomingWork = 0;
+		double workLevel = applicationTier.getWorkSource().getWorkOutputLevel();
 		
-		if (!applicationWorkPending.containsKey(application))
-			throw new RuntimeException("Application not found in load balancer pending work");
+		//calculate work distribution
+		applicationWorkLevel = distributeWork(workLevel);
 		
-		double out = applicationWorkPending.get(application);
-		applicationWorkPending.remove(application);
+		if (!applicationWorkLevel.containsKey(application))
+			throw new RuntimeException("Application not found in load balancer");
+		
+		double out = applicationWorkLevel.get(application);
+
 		return out;
 	}
 	
