@@ -11,9 +11,10 @@ import edu.uwo.csd.dcsim.vm.*;
  */
 public abstract class Application implements WorkProducer {
 
-	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
-	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
-	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; //name of the metric colleciton SLA violation due to migration overhead
+	//TODO do something with this
+//	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
+//	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
+//	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; //name of the metric colleciton SLA violation due to migration overhead
 	
 	protected VM vm; //the VM on which this application is running
 	protected Simulation simulation; //the simulation this Application is running within
@@ -43,119 +44,24 @@ public abstract class Application implements WorkProducer {
 		this.vm = vm;
 	}
 	
-	
-	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	//new stuff
-	
-	public abstract VirtualResources getResourcesRequested();
-	
-	public abstract void updateScheduledResources(VirtualResources resourcesScheduled);
-	
-	//TODO something like public abstract void execute(duration)
-	
-	//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>?
-	
-//	
-//	/**
-//	 * Called once at the beginning of VM execution. Use to set up object for execution 
-//	 */
-//	public abstract void prepareExecution();
-//	
-//	/**
-//	 * Update the resources required by this Application to fully meet its workload
-//	 */
-//	public abstract void updateResourceDemand();
-//	
-//	/**
-//	 * Run this Application with the specified amount of available resources
-//	 * @param resourcesAvailable The resources that may be consumed by the Application
-//	 * @return
-//	 */
-//	public abstract VirtualResources execute(VirtualResources resourcesAvailable);
-//
-//	/**
-//	 * Called once at the end of VM execution
-//	 */
-//	public abstract void completeExecution();
-	
 	/**
-	 * Get the percentage of incoming work to this application for which SLA is violated
-	 * at the current simulation time
+	 * Get the current amount of resource required based on the work level from tha application source
 	 * @return
 	 */
-	public abstract double getSLAViolation();
+	public abstract VirtualResources getResourcesRequired();
 	
 	/**
-	 * Get the percentage of incoming work to this application for which SLA has been violated
-	 * since the simulation began
-	 * @return
+	 * Schedule resources and update the work output level of the application
+	 * @param resourcesScheduled
 	 */
-	public abstract double getTotalSLAViolation();
+	public abstract void scheduleResources(VirtualResources resourcesScheduled);
 	
 	/**
-	 * Get the amount of work (in units of work) for which SLA is violated at the current
-	 * simulation time
-	 * @return
+	 * Executes the application up to the current simulation time
 	 */
-	public abstract double getSLAViolatedWork();
+	public abstract void execute();
 	
-	/**
-	 * Get the amount of work (in units of work) for which SLA has been violated since
-	 * the simulation began
-	 * @return
-	 */
-	public abstract double getTotalSLAViolatedWork();
-	
-	/**
-	 * Get the percentage of incoming work to this application for which SLA is violated
-	 * due to VM migration involving this application at the current simulation time 
-	 * @return
-	 */
-	public abstract double getMigrationPenalty();
-	
-	/**
-	 * Get the percentage of incoming work to this application for which SLA has been violated
-	 * due to VM migration involving this application since the simulation began
-	 * @return
-	 */
-	public abstract double getTotalMigrationPenalty();
-	
-	/**
-	 * Get the Applications current demand for resources
-	 * @return
-	 */
-	public abstract VirtualResources getResourceDemand();
-	
-	/**
-	 * Get the Applications current amount of resource in use
-	 * @return
-	 */
-	public abstract VirtualResources getResourceInUse();
-	
-	/**
-	 * Get the incoming work to the application
-	 * @return
-	 */
-	public abstract double getIncomingWork();
-	
-	/**
-	 * Get the total incoming work for the entire simulation
-	 * @return
-	 */
-	public abstract double getTotalIncomingWork();
-	
-	/**
-	 * Get the total resources demanded by this Application during the simulation
-	 * @return
-	 */
-	public abstract VirtualResources getTotalResourceDemand();
-	
-	/**
-	 * Get the total resources used by this Application during the simulation
-	 * @return
-	 */
-	public abstract VirtualResources getTotalResourceUsed();
-	
+
 	/**
 	 * Update simulation metrics
 	 */

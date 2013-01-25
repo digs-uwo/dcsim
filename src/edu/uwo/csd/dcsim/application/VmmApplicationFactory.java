@@ -15,11 +15,6 @@ public class VmmApplicationFactory implements ApplicationFactory {
 	}
 
 	@Override
-	public int getHeight() {
-		return Integer.MAX_VALUE;
-	}
-
-	@Override
 	public void startApplication(Application application) {
 		//nothing to do
 	}
@@ -27,6 +22,12 @@ public class VmmApplicationFactory implements ApplicationFactory {
 	@Override
 	public void stopApplication(Application application) {
 		//nothing to do
+	}
+
+	@Override
+	public int getDepth() {
+		//depth of this application is always 0, as it will never be part of a multi-tiered application
+		return 0;
 	}
 
 }

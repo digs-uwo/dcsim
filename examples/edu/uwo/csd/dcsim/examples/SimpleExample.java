@@ -9,6 +9,7 @@ import edu.uwo.csd.dcsim.application.Service;
 import edu.uwo.csd.dcsim.application.Services;
 import edu.uwo.csd.dcsim.application.workload.TraceWorkload;
 import edu.uwo.csd.dcsim.application.workload.Workload;
+import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
@@ -38,7 +39,7 @@ public class SimpleExample extends DCSimulationTask {
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
 		//DCSimulationTask task = new SimpleExample("simple", 86400000);
-		DCSimulationTask task = new SimpleExample("simple", 1000000);
+		DCSimulationTask task = new SimpleExample("simple", SimTime.minutes(10));
 		
 		//run the simulation
 		task.run();
@@ -103,8 +104,7 @@ public class SimpleExample extends DCSimulationTask {
 				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-				.storageManagerFactory(new SimpleStorageManagerFactory())
-				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+				.storageManagerFactory(new SimpleStorageManagerFactory());
 		
 		//Instantiate the Host
 		Host host = proLiantDL160G5E5420.build();
@@ -135,7 +135,7 @@ public class SimpleExample extends DCSimulationTask {
 		 * the tier has a minimum of 1 application (VM), and an unlimited maximum. These values are to be used by ManagementPolicies, and will not automatically
 		 * have any effect.
 		 */
-		Service service = Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 1, 300, 1, Integer.MAX_VALUE); 
+		Service service = Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE); 
 		
 		/*
 		 * Now we create a VMAllocationRequest to submit to the DataCentre. A VMAllocationRequest represents a request for a Host to allocate

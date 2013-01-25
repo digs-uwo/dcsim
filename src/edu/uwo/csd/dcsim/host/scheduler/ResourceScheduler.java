@@ -13,38 +13,38 @@ public class ResourceScheduler {
 	protected Simulation simulation;
 	
 	public enum ResourceSchedulerState {READY, COMPLETE;}
-	
+		
 	/**
 	 * Initialize scheduling, including resetting scheduled resources from last time interval.
 	 */
 	public void initScheduling() {
 		
-		VirtualResources resourcesScheduled = new VirtualResources();
+		VirtualResources scheduledResources = new VirtualResources();
 		
 		//reset the scheduled resources of the privileged domain
 		VMAllocation privAlloc = host.getPrivDomainAllocation();
 		
-		resourcesScheduled.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
+		scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
 		
-		//at present, all other resources are scheduled their full allocation
-		resourcesScheduled.setBandwidth(privAlloc.getBandwidth());
-		resourcesScheduled.setMemory(privAlloc.getMemory());
-		resourcesScheduled.setStorage(privAlloc.getStorage());
+		//at present, all other resources are allocated their full allocation
+		scheduledResources.setBandwidth(privAlloc.getBandwidth());
+		scheduledResources.setMemory(privAlloc.getMemory());
+		scheduledResources.setStorage(privAlloc.getStorage());
 		
-		privAlloc.getVm().setResourcesScheduled(resourcesScheduled);
+		privAlloc.getVm().scheduleResources(scheduledResources);
 		
 		//for each VM in the host, reset the resources that are current scheduled for its use
 		for (VMAllocation vmAlloc : host.getVMAllocations()) {
-			resourcesScheduled = new VirtualResources();
+			scheduledResources = new VirtualResources();
 			
-			resourcesScheduled.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
+			scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
 			
 			//at present, all other resources are scheduled their full allocation
-			resourcesScheduled.setBandwidth(vmAlloc.getBandwidth());
-			resourcesScheduled.setMemory(vmAlloc.getMemory());
-			resourcesScheduled.setStorage(vmAlloc.getStorage());
+			scheduledResources.setBandwidth(vmAlloc.getBandwidth());
+			scheduledResources.setMemory(vmAlloc.getMemory());
+			scheduledResources.setStorage(vmAlloc.getStorage());
 			
-			vmAlloc.getVm().setResourcesScheduled(resourcesScheduled);
+			vmAlloc.getVm().scheduleResources(scheduledResources);
 		}
 		
 		//set the remaining CPU to the total CPU available
@@ -61,7 +61,7 @@ public class ResourceScheduler {
 	}
 	
 	public void beginRound() {
-		//computer shortcuts such as a round share limit for each VM
+		//compute shortcuts such as a round share limit for each VM
 	}
 	
 	/**
@@ -73,27 +73,28 @@ public class ResourceScheduler {
 		//NOTE since we are running CPU as an int here, we need to make sure that no VM is starved, which really shouldn't be a problem, but think about it
 		
 		//get the requested and scheduled CPU from the VM
-		VirtualResources requestedResources = vmAlloc.getVm().getResourcesRequested();
+		VirtualResources requiredResources = vmAlloc.getVm().getResourcesRequired();
 		VirtualResources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
 		
 		//if the VM requires no more CPU than already scheduled, then we can return false
-		if (requestedResources.getCpu() <= scheduledResources.getCpu()) {
+		if (requiredResources.getCpu() <= scheduledResources.getCpu()) {
 			return false;
 		}
 				
 		//try to give as much as we can, up to any predetermined limit for the round and no more than remaining CPU
-		int additionalCpu = (int)Math.ceil(requestedResources.getCpu() - scheduledResources.getCpu()); //TODO should this be cast to int? Should virtual resources be int instead of double?
+		//TODO set round limit/shares system for CPU
+		int additionalCpu = (int)Math.ceil(requiredResources.getCpu() - scheduledResources.getCpu()); //TODO should this be cast to int? Should virtual resources be int instead of double?
 		
 		//if there is more CPU required, and we have some left
 		if (additionalCpu > 0 && remainingCpu > 0) {
 			//add either the required additional cpu or the amount we have left, whichever is smaller
 			int cpuToAdd = Math.min(additionalCpu, remainingCpu);
-			
+
 			//add the cpu to the scheduled resources of the vm
 			scheduledResources.setCpu(scheduledResources.getCpu() + cpuToAdd);
 			
-			//update the scheduling calculations with the new resource amount
-			vmAlloc.getVm().updateScheduling();
+			//allocate new resource amount
+			vmAlloc.getVm().scheduleResources(scheduledResources);
 		
 			//subtract from remainingCpu
 			remainingCpu -= cpuToAdd;

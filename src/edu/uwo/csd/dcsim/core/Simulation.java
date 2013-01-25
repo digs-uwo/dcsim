@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import edu.uwo.csd.dcsim.DataCentre;
-import edu.uwo.csd.dcsim.VmExecutionDirector;
 import edu.uwo.csd.dcsim.VmExecutionOrderComparator;
 import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
@@ -75,7 +74,6 @@ public class Simulation implements SimulationEventListener {
 	//Datacentre specific variables
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>(); //collection of datacentres within the simulation
 	private Set<Workload> workloads = new HashSet<Workload>(); //set of all Workload objects feeding applications in the simulation
-	VmExecutionDirector vmExecutionDirector = new VmExecutionDirector(); //handles running of VMs
 	
 	public static final void initializeLogging() {
 		
@@ -163,9 +161,7 @@ public class Simulation implements SimulationEventListener {
 		setRandomSeed(new Random().nextLong());
 		
 	}
-	
-	//****************
-	
+
 	private ArrayList<VMAllocation> buildVmList(ArrayList<Host> hosts) {
 		ArrayList<VMAllocation> vmList = new ArrayList<VMAllocation>();
 		
@@ -177,7 +173,6 @@ public class Simulation implements SimulationEventListener {
 		return vmList;
 	}
 	
-	//THIS WILL BE THE FINAL run() METHOD
 	public final Collection<Metric> run(long duration, long metricRecordStart) {
 		
 		//ensure this simulation hasn't been run yet
@@ -213,7 +208,7 @@ public class Simulation implements SimulationEventListener {
 			if (e.getTime() < simulationTime)
 				throw new IllegalStateException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
 			
-			if (e.getTime() == simulationTime)
+			if (e.getTime() == simulationTime && e.getTime() != 0)
 				throw new IllegalStateException("Encountered event with time == current simulation time when advance in time was expected. This should never occur.");
 			
 			//Simulation time is advancing
@@ -232,6 +227,8 @@ public class Simulation implements SimulationEventListener {
 			e = eventQueue.peek();
 			
 			//advance to time e.getTime()
+			lastUpdate = simulationTime;
+			simulationTime = e.getTime();
 			advanceSimulation(hosts);
 			
 			//run monitors
@@ -257,6 +254,19 @@ public class Simulation implements SimulationEventListener {
 			//inform metrics of completed time interval
 			for (Metric metric : this.metrics.values())
 				metric.completeTimeInterval();
+			
+			//update metrics and log info
+			for (DataCentre dc : datacentres) {
+				if (this.isRecordingMetrics())
+					dc.updateMetrics();
+				dc.logInfo();
+			}
+			
+			if (this.isRecordingMetrics()) {	
+				//update metrics tracked by workloads (i.e. SLA)
+				for (Workload workload : workloads)
+					workload.updateMetrics();
+			}
 
 		}
 		
@@ -334,127 +344,21 @@ public class Simulation implements SimulationEventListener {
 		
 	}
 	
+	/**
+	 * Run all applications up to current simulation time
+	 * 
+	 * @param hosts
+	 */
 	private void advanceSimulation(ArrayList<Host> hosts) {
 		
-	}
-	
-	//****************
-	
-	public final Collection<Metric> run(long duration) {
-		return run(duration, 0);
-	}
-	
-	public final Collection<Metric> run(long duration, long metricRecordStart) {
-		
-		if (complete)
-			throw new IllegalStateException("Simulation has already been run");
-		
-		Event e;
-		
-		//configure simulation duration
-		this.duration = duration;
-		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
-		
-		if (metricRecordStart > 0) {
-			recordingMetrics = false;
-			this.metricRecordStart = metricRecordStart;
-			sendEvent(new Event(Simulation.SIMULATION_RECORD_METRICS_EVENT, metricRecordStart, this, this));
-		} else {
-			recordingMetrics = true;
-		}
-		
-		logger.info("Starting simulation " + name);
-		
-		beginSimulation();
-		
-		while (!eventQueue.isEmpty() && simulationTime < duration) {
-			e = eventQueue.poll();
-			
-			if (e.getTime() >= simulationTime) {
-
-				//check if simulationTime is advancing
-				if (simulationTime != e.getTime()) {
-					
-					if (simulationTime != 0) {
-						//inform metrics that this time interval update is complete
-						for (Metric metric : this.metrics.values()) {
-							metric.completeTimeInterval();
-						}
-					}
-					
-					lastUpdate = simulationTime;
-					simulationTime = e.getTime();
-					
-					//inform metrics that we are starting a new time interval
-					for (Metric metric : this.metrics.values())
-						metric.startTimeInterval();
-					
-					//update the simulation
-					updateSimulation(simulationTime);
-
-					//run monitors
-					if (monitors.size() > 0) {
-						long nextMonitor = duration;
-						for (Monitor monitor : monitors) {
-							long nextExec = monitor.run();
-							if (nextExec < nextMonitor)
-								nextMonitor = nextExec;
-						}
-						sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
-					}
-					
-				}
-				
-				e.getTarget().handleEvent(e);
-			} else {
-				throw new RuntimeException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
+		//execute all applications up to the current simulation time
+		for (Host host : hosts) {
+			for (VMAllocation vmAlloc : host.getVMAllocations()) {
+				vmAlloc.getVm().getApplication().execute();
 			}
 		}
-		
-		//inform metrics that this time interval update is complete
-		for (Metric metric : this.metrics.values()) {
-			metric.completeTimeInterval();
-		}
-		
-		completeSimulation(duration);
-		
-		logger.info("Completed simulation " + name);
-		
-		complete = true;
-		
-		//wrap result in new Collection so that Collection is modifyable, as modifying the values() collection of a HashMap directly breaks things.
-		Vector<Metric> result = new Vector<Metric>(metrics.values());
-		Collections.sort(result, new MetricAlphaComparator());
-		
-		return result;
 	}
-
 	
-	public void updateSimulation(long simulationTime) {
-		
-		//retrieve work for the elapsed period since the last update
-		for (Workload workload : workloads)
-			workload.update();
-		
-		//schedule VM execution
-		vmExecutionDirector.execute(getHostList());
-		
-		//update metrics and log info
-		for (DataCentre dc : datacentres) {
-			if (this.isRecordingMetrics())
-				dc.updateMetrics();
-			dc.logInfo();
-		}
-		
-		if (this.isRecordingMetrics()) {	
-			//update metrics tracked by workloads (i.e. SLA)
-			for (Workload workload : workloads)
-				workload.updateMetrics();
-		}
-		
-				
-	}
-
 	public void completeSimulation(long duration) {
 		logger.info("DCSim Simulation Complete");
 		

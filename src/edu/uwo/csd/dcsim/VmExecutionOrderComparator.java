@@ -14,8 +14,8 @@ public class VmExecutionOrderComparator implements Comparator<VMAllocation> {
 
 	@Override
 	public int compare(VMAllocation arg0, VMAllocation arg1) {
-		//descending order
-		return arg1.getVMDescription().getApplicationFactory().getHeight() - arg0.getVMDescription().getApplicationFactory().getHeight();			
+		//ascending order
+		return arg0.getVMDescription().getApplicationFactory().getDepth() - arg1.getVMDescription().getApplicationFactory().getDepth();			
 	}
 
 }

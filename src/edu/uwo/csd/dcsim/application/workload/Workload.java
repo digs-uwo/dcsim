@@ -19,8 +19,7 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	protected Simulation simulation;
 	private double totalWork = 0;
 	private double completedWork = 0;
-	private double currentWorkLevel = 0;
-	private WorkProducer workSource; //final work producer that completes the work produced by this workload
+	private WorkProducer completedWorkSource; //final work producer that completes the work produced by this workload
 
 	public Workload(Simulation simulation) {
 		
@@ -36,21 +35,6 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	 * @return
 	 */
 	protected abstract double getCurrentWorkLevel(); 
-	
-	/**
-	 * Update the amount of work that must be processed in the current interval of time being simulated
-	 */
-	public void update() {
-		
-		//ensure that new work is only calculated once per simulation time interval 
-		currentWorkLevel = getCurrentWorkLevel();
-		currentWorkLevel = Utility.roundDouble(currentWorkLevel); //correct for precision errors by rounding TODO still necessary?
-
-//		if (simulation.isRecordingMetrics()) {
-//			totalWork += currentWorkLevel;
-//		}
-		
-	}
 	
 	/**
 	 * Update metric values
@@ -93,7 +77,11 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 
 	@Override
 	public double getWorkOutputLevel() {
-		return currentWorkLevel;
+		return getCurrentWorkLevel();
+	}
+	
+	public void setCompletedWorkSource(WorkProducer completedWorkSource) {
+		this.completedWorkSource = completedWorkSource;
 	}
 	
 	@Override

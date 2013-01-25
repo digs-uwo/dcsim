@@ -54,11 +54,17 @@ public class ServiceBuilder implements ObjectBuilder<Service> {
 		Service service = new Service();
 		service.setWorkload(workload);
 		
-		workload.setWorkTarget(tiers.get(0).getApplicationTier());
-		for (int i = 1; i < tiers.size(); ++i) {
-			tiers.get(i - 1).getApplicationTier().setWorkTarget(tiers.get(i).getApplicationTier());
+		//link workload and tiers, starting with workload
+		WorkProducer source = workload;
+		for (Service.ServiceTier tier : tiers) {
+			//set each tier to get work from the previous source (workload for first tier, previous tier for others)
+			tier.getApplicationTier().setWorkSource(source);
+			
+			//set the source for the next tier
+			source = tier.getApplicationTier();
 		}
-		tiers.get(tiers.size() - 1).getApplicationTier().setWorkTarget(workload);
+		//set the workload to get completed work from the last tier
+		workload.setCompletedWorkSource(tiers.get(tiers.size() - 1).getApplicationTier());
 		
 		for (Service.ServiceTier tier : tiers)
 			service.addServiceTier(tier);

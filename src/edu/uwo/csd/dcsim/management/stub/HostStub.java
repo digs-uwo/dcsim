@@ -33,7 +33,7 @@ public class HostStub {
 	public HostStub(Host host) {
 		this.host = host;
 		
-		vmmCpuInUse = host.getPrivDomainAllocation().getVm().getResourcesInUse().getCpu();
+		vmmCpuInUse = host.getPrivDomainAllocation().getVm().getResourcesScheduled().getCpu();
 		vmmCpuAlloc = host.getPrivDomainAllocation().getCpu();
 		
 		incomingMigrationCount = host.getMigratingIn().size();
@@ -44,7 +44,7 @@ public class HostStub {
 				if (!host.isMigrating(vmAllocation.getVm()) && !host.isPendingMigration(vmAllocation.getVm())) {
 					vms.add(new VmStub(vmAllocation.getVm(), this));
 				} else {
-					outgoingVMCpuUse += vmAllocation.getVm().getResourcesInUse().getCpu();
+					outgoingVMCpuUse += vmAllocation.getVm().getResourcesScheduled().getCpu();
 				}
 			} else {
 				emptyVMAllocCpu += vmAllocation.getCpu();

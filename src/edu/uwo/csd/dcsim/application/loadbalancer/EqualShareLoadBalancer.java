@@ -18,6 +18,7 @@ public class EqualShareLoadBalancer extends LoadBalancer {
 	@Override
 	public Map<Application, Double> distributeWork(double work) {
 		double workPerApp;
+
 		Map<Application, Double> applicationWorkLevel = new HashMap<Application, Double>();
 		
 		ArrayList<Application> applications = this.getApplicationTier().getApplications();

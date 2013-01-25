@@ -25,7 +25,7 @@ public abstract class LoadBalancer {
 	public double getWorkLevel(Application application) {
 		
 		double workLevel = applicationTier.getWorkSource().getWorkOutputLevel();
-		
+
 		//calculate work distribution
 		applicationWorkLevel = distributeWork(workLevel);
 		

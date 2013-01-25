@@ -32,10 +32,10 @@ public final class Services {
 	 */
 	public static Service singleTierInteractiveService(Workload workload, 
 			int cores, int coreCapacity, int memory, int bandwidth, long storage, 
-			double cpuPerWork, double bwPerWork, double cpuOverhead, 
+			double cpuPerWork, double cpuOverhead, 
 			int tierMin, int tierMax) {
 		
-		InteractiveApplicationTier appTier = new InteractiveApplicationTier(memory, storage, cpuPerWork, bwPerWork, cpuOverhead);
+		InteractiveApplicationTier appTier = new InteractiveApplicationTier(memory, bandwidth, storage, cpuPerWork, cpuOverhead);
 		appTier.setLoadBalancer(new EqualShareLoadBalancer());
 		VMDescription vmDescription = new VMDescription(cores, coreCapacity, memory, bandwidth, storage, appTier);
 		

@@ -114,6 +114,10 @@ public abstract class ApplicationTier implements WorkProducer, ApplicationFactor
 		return workSource;
 	}
 
+	public void setWorkSource(WorkProducer workSource) {
+		this.workSource = workSource;
+	}
+	
 	@Override
 	public double getWorkOutputLevel() {
 		//total all work output from applications in this tier

@@ -25,7 +25,7 @@ public class VmStub {
 	}
 	
 	public double getCpuInUse() {
-		return vm.getResourcesInUse().getCpu();
+		return vm.getResourcesScheduled().getCpu();
 	}
 	
 	public double getCpuAlloc() {
@@ -33,7 +33,7 @@ public class VmStub {
 	}
 
 	public double getBandwidthInUse() {
-		return vm.getResourcesInUse().getBandwidth();
+		return vm.getResourcesScheduled().getBandwidth();
 	}
 	
 	public int getBandwidthAlloc() {
@@ -41,7 +41,7 @@ public class VmStub {
 	}
 	
 	public int getMemoryInUse() {
-		return vm.getResourcesInUse().getMemory();
+		return vm.getResourcesScheduled().getMemory();
 	}
 	
 	public int getMemoryAlloc() {
@@ -49,7 +49,7 @@ public class VmStub {
 	}
 	
 	public long getStorageInUse() {
-		return vm.getResourcesInUse().getStorage();
+		return vm.getResourcesScheduled().getStorage();
 	}
 	
 	public long getStorageAlloc() {

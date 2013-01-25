@@ -60,7 +60,6 @@ public final class Host implements SimulationEventListener {
 	private MemoryManager memoryManager;
 	private BandwidthManager bandwidthManager;
 	private StorageManager storageManager;
-	private CpuScheduler cpuScheduler; //TODO remove
 	private ResourceScheduler resourceScheduler;
 	private HostPowerModel powerModel;
 	
@@ -102,9 +101,10 @@ public final class Host implements SimulationEventListener {
 		setMemoryManager(builder.memoryManagerFactory.newInstance());
 		setBandwidthManager(builder.bandwidthManagerFactory.newInstance());
 		setStorageManager(builder.storageManagerFactory.newInstance());
-		setCpuScheduler(builder.cpuSchedulerFactory.newInstance()); //TODO remove
 		setHostPowerModel(builder.powerModel);
 		setResourceScheduler(builder.resourceScheduler);
+		
+		resourceScheduler.setHost(this);
 		
 		/*
 		 * Create and allocate privileged domain
@@ -155,8 +155,6 @@ public final class Host implements SimulationEventListener {
 		private ObjectFactory<? extends MemoryManager> memoryManagerFactory = null;
 		private ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory = null;
 		private ObjectFactory<? extends StorageManager> storageManagerFactory = null;
-		
-		private ObjectFactory<? extends CpuScheduler> cpuSchedulerFactory = null; 
 		
 		private ResourceScheduler resourceScheduler = new ResourceScheduler(); //TODO change to a factory
 		
@@ -210,11 +208,6 @@ public final class Host implements SimulationEventListener {
 			return this;
 		}
 		
-		public Builder cpuSchedulerFactory(ObjectFactory<? extends CpuScheduler> cpuSchedulerFactory) {
-			this.cpuSchedulerFactory = cpuSchedulerFactory;
-			return this;
-		}
-		
 		public Builder powerModel(HostPowerModel powerModel) {
 			this.powerModel = powerModel;
 			return this;
@@ -238,8 +231,6 @@ public final class Host implements SimulationEventListener {
 				throw new IllegalStateException("Must specify Memory Manager factory before building Host");
 			if (storageManagerFactory == null)
 				throw new IllegalStateException("Must specify Storage Manager factory before building Host");
-			if (cpuSchedulerFactory == null)
-				throw new IllegalStateException("Must specify CPU Scheduler factory before building Host");
 			if (powerModel == null)
 				throw new IllegalStateException("Must specify power model before building Host");
 			
@@ -481,7 +472,7 @@ public final class Host implements SimulationEventListener {
 			throw new RuntimeException("Privileged Domain has no bandwidth available for migration");
 		
 		//for now, assume 1/4 of bandwidth available to VMM is used for each migration... TODO calculate this properly!
-		long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesInUse().getMemory() * 1024) / ((double)privDomainAllocation.getBandwidth() / 4)) * 1000);
+		long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesScheduled().getMemory() * 1024) / ((double)privDomainAllocation.getBandwidth() / 4)) * 1000);
 
 		//send migration completion message
 		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
@@ -756,8 +747,6 @@ public final class Host implements SimulationEventListener {
 	
 	public StorageManager getStorageManager() { 	return storageManager; }
 	
-	public CpuScheduler getCpuScheduler() { 	return cpuScheduler; } //TODO remove
-	
 	public ResourceScheduler getResourceScheduler() { return resourceScheduler; } 
 	
 	public void setCpuManager(CpuManager cpuManager) {
@@ -778,11 +767,6 @@ public final class Host implements SimulationEventListener {
 	public void setStorageManager(StorageManager storageManager) {
 		this.storageManager = storageManager;
 		storageManager.setHost(this);
-	}
-	
-	public void setCpuScheduler(CpuScheduler cpuScheduler) {
-		this.cpuScheduler = cpuScheduler;
-		cpuScheduler.setHost(this);
 	}
 	
 	public void setResourceScheduler(ResourceScheduler resourceScheduler) {
