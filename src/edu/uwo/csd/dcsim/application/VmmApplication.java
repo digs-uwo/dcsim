@@ -2,8 +2,8 @@ package edu.uwo.csd.dcsim.application;
 
 import java.util.ArrayList;
 
-import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -14,7 +14,7 @@ import edu.uwo.csd.dcsim.vm.*;
 public class VmmApplication extends Application {
 
 	private ArrayList<VM> migratingVms = new ArrayList<VM>();
-	private VirtualResources resourcesScheduled = new VirtualResources();
+	private Resources resourcesScheduled = new Resources();
 	
 	protected double cpuOverhead = 300; //fixed cpu overhead
 	
@@ -32,8 +32,8 @@ public class VmmApplication extends Application {
 
 	
 	@Override
-	public VirtualResources calculateResourcesRequired() {
-		VirtualResources resourcesRequired = new VirtualResources();
+	public Resources calculateResourcesRequired() {
+		Resources resourcesRequired = new Resources();
 		resourcesRequired.setMemory(0);
 		resourcesRequired.setStorage(0);
 		
@@ -54,7 +54,7 @@ public class VmmApplication extends Application {
 	}
 
 	@Override
-	public void scheduleResources(VirtualResources resourcesScheduled) {
+	public void scheduleResources(Resources resourcesScheduled) {
 		// TODO not sure if we need to do anything here...
 		this.resourcesScheduled = resourcesScheduled;
 	}
@@ -63,7 +63,7 @@ public class VmmApplication extends Application {
 	public void execute() {
 		//ensure that we have enough resources... for now, halt the simulation if insufficient resources were scheduled
 		//TODO is there anything else to do here?
-		VirtualResources resourcesRequired = getResourcesRequired();
+		Resources resourcesRequired = getResourcesRequired();
 		
 		if (resourcesScheduled.getCpu() < resourcesRequired.getCpu()
 				|| resourcesScheduled.getBandwidth() < resourcesRequired.getBandwidth()) {

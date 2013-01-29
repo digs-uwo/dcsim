@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
-import edu.uwo.csd.dcsim.vm.VirtualResources;
+import edu.uwo.csd.dcsim.host.Resources;
 
 /**
  * Represents an Application that operates in an interactive, request/reply manner, such as a web server. Incoming work
@@ -23,6 +23,11 @@ public class InteractiveApplication extends Application {
 	private long storage; //fixed storage usage
 	private double cpuOverhead;
 
+	double workLevel = 0;
+	
+	private double slaUnderprovisionRate;
+	private double slaMigrationPenaltyRate;
+	
 	private double totalIncomingWork = 0;
 	private double totalSLAViolatedWork = 0;
 	
@@ -51,14 +56,14 @@ public class InteractiveApplication extends Application {
 	}
 
 	@Override
-	protected VirtualResources calculateResourcesRequired() {
-		VirtualResources resourcesRequired = new VirtualResources();
+	protected Resources calculateResourcesRequired() {
+		Resources resourcesRequired = new Resources();
 		resourcesRequired.setMemory(memory);
 		resourcesRequired.setStorage(storage);
 		resourcesRequired.setBandwidth(bandwidth);
 		
 		//get current workload level from application tier and calculate CPU requirements
-		double workLevel = applicationTier.getWorkLevel(this);
+		workLevel = applicationTier.getWorkLevel(this);
 		
 		//calculate cpu required
 		double cpuRequired = workLevel * cpuPerWork + cpuOverhead;
@@ -73,12 +78,16 @@ public class InteractiveApplication extends Application {
 	 * TODO rename?
 	 */
 	@Override
-	public void scheduleResources(VirtualResources resourcesScheduled) {
+	public void scheduleResources(Resources resourcesScheduled) {
 		//check that memory, storage and bandwidth meet required minimum
 		if (resourcesScheduled.getMemory() < memory ||
 				resourcesScheduled.getStorage() < storage ||
 						resourcesScheduled.getBandwidth() < bandwidth) {
 			workOutputLevel = 0;
+			
+			//since we are not performing any work due to insufficient resources, all incoming work is sla violated
+			slaUnderprovisionRate = workLevel;
+			slaMigrationPenaltyRate = 0;
 		} else {
 			//we have enough memory, storage and bandwidth
 			
@@ -87,6 +96,14 @@ public class InteractiveApplication extends Application {
 			
 			//then divide by the amount of cpu required for each unit of work
 			workOutputLevel = cpuAvailableForWork / cpuPerWork;
+			
+			//calculate sla violation and migration penalty
+			slaUnderprovisionRate = workLevel - workOutputLevel;
+			
+			//calculate migration penalty as a percentage (configurable) of the completed work
+			if (vm.isMigrating()) {
+				slaMigrationPenaltyRate = workOutputLevel * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
+			}
 		}
 	}
 	
@@ -100,9 +117,8 @@ public class InteractiveApplication extends Application {
 	
 	@Override
 	public void updateMetrics() {
-		double workLevel = applicationTier.getWorkLevel(this);
-		double slavUnderprovision = (workLevel - workOutputLevel) * simulation.getElapsedSeconds();
-		double slavMig = 0; //TODO add this feature
+		double slavUnderprovision = slaUnderprovisionRate * simulation.getElapsedSeconds();
+		double slavMig = slaMigrationPenaltyRate * simulation.getElapsedSeconds();
 
 		//TODO perhaps only calculate migration overhead here, move underprovision to Workload, as if no applications are attached to a workload, then no SLA violation is added, even though no work is being performed
 		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addSlaVWork(slavUnderprovision + slavMig);

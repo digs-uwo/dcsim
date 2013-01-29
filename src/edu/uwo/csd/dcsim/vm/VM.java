@@ -4,6 +4,7 @@ import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.VmCountMetric;
+import edu.uwo.csd.dcsim.host.Resources;
 
 /**
  * Represents a Virtual Machine, running an Application. Must be contained within a VMAllocation on a Host
@@ -22,7 +23,7 @@ public class VM implements SimulationEventListener {
 	
 	Application application;
 	
-	protected VirtualResources resourcesScheduled = new VirtualResources();
+	protected Resources resourcesScheduled = new Resources();
 	
 	public VM(Simulation simulation, VMDescription vmDescription, Application application) {
 		this.simulation = simulation;
@@ -38,8 +39,8 @@ public class VM implements SimulationEventListener {
 		application.updateResourceRequirements();
 	}
 	
-	public VirtualResources getResourcesRequired() {
-		VirtualResources required = application.getResourcesRequired();
+	public Resources getResourcesRequired() {
+		Resources required = application.getResourcesRequired();
 		
 		//cap CPU request at max CPU
 		required.setCpu(Math.min(required.getCpu(), getMaxCpu()));
@@ -47,14 +48,14 @@ public class VM implements SimulationEventListener {
 		return required;
 	}
 	
-	public VirtualResources getResourcesScheduled() {
+	public Resources getResourcesScheduled() {
 		
 		//TODO return a copy? make VirtualResources immutable?
 		
 		return resourcesScheduled;
 	}
 	
-	public void scheduleResources(VirtualResources resources) {
+	public void scheduleResources(Resources resources) {
 		
 		//double check that we are not trying to schedule more than maxCpu
 		if (resources.getCpu() > getMaxCpu()) {

@@ -26,12 +26,12 @@ public class VMAllocation {
 		vm = null;
 	}
 	
-	public VirtualResources getResourcesInUse() {
+	public Resources getResourcesInUse() {
 		if (vm != null) {
 			//return vm.getResourcesInUse();
 			return vm.getResourcesScheduled(); //TODO should there be a resourcesInUse? or is resourcesScheduled sufficient?
 		} else {
-			return new VirtualResources(); //if no VM, return new VirtualResources indicating 0 resources in use
+			return new Resources(); //if no VM, return new VirtualResources indicating 0 resources in use
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -17,7 +18,7 @@ public abstract class Application implements WorkProducer {
 	
 	protected VM vm; //the VM on which this application is running
 	protected Simulation simulation; //the simulation this Application is running within
-	protected VirtualResources resourcesRequired;
+	protected Resources resourcesRequired;
 	
 	/**
 	 * Create a new Application, attached to the specified Simulation
@@ -26,7 +27,7 @@ public abstract class Application implements WorkProducer {
 	 */
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
-		this.resourcesRequired = new VirtualResources();
+		this.resourcesRequired = new Resources();
 	}
 	
 	/**
@@ -49,14 +50,14 @@ public abstract class Application implements WorkProducer {
 	 * Get the current amount of resource required based on the work level from tha application source
 	 * @return
 	 */
-	public final VirtualResources getResourcesRequired() {
+	public final Resources getResourcesRequired() {
 		return resourcesRequired;
 	}
 	
 	/**
 	 * Update the required resources based on current work levels
 	 */
-	protected abstract VirtualResources calculateResourcesRequired();
+	protected abstract Resources calculateResourcesRequired();
 	
 	public final void updateResourceRequirements() {
 		resourcesRequired = calculateResourcesRequired();
@@ -66,7 +67,7 @@ public abstract class Application implements WorkProducer {
 	 * Schedule resources and update the work output level of the application
 	 * @param resourcesScheduled
 	 */
-	public abstract void scheduleResources(VirtualResources resourcesScheduled);
+	public abstract void scheduleResources(Resources resourcesScheduled);
 	
 	/**
 	 * Executes the application up to the current simulation time

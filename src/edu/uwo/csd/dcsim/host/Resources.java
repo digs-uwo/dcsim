@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim.vm;
+package edu.uwo.csd.dcsim.host;
 
 /**
  * Represents a set of resources
@@ -6,16 +6,16 @@ package edu.uwo.csd.dcsim.vm;
  * @author Michael Tighe
  *
  */
-public class VirtualResources {
+public class Resources {
 	
 	private double cpu = 0;
 	private int memory = 0;
 	private double bandwidth = 0;
 	private long storage = 0;
 
-	public VirtualResources add(VirtualResources v2) {
+	public Resources add(Resources v2) {
 		
-		VirtualResources sum = new VirtualResources();
+		Resources sum = new Resources();
 		
 		/* 
 		 * CPU and Bandwidth values are summed
@@ -32,9 +32,9 @@ public class VirtualResources {
 		return sum;
 	}
 	
-	public VirtualResources subtract(VirtualResources v2) {
+	public Resources subtract(Resources v2) {
 			
-		VirtualResources difference = new VirtualResources();
+		Resources difference = new Resources();
 		
 		/* 
 		 * CPU and Bandwidth values are summed

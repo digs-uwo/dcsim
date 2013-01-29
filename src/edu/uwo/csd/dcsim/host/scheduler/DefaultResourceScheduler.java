@@ -1,7 +1,7 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
+import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
-import edu.uwo.csd.dcsim.vm.VirtualResources;
 
 public class DefaultResourceScheduler extends ResourceScheduler {
 
@@ -21,8 +21,8 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	
 	public void schedulePrivDomain() {
 		//allocate all of the required cpu
-		VirtualResources requiredResources = host.getPrivDomainAllocation().getVm().getResourcesRequired();
-		VirtualResources scheduledResources = host.getPrivDomainAllocation().getVm().getResourcesScheduled();
+		Resources requiredResources = host.getPrivDomainAllocation().getVm().getResourcesRequired();
+		Resources scheduledResources = host.getPrivDomainAllocation().getVm().getResourcesScheduled();
 		
 		int requiredCpu = (int)Math.ceil(requiredResources.getCpu());
 		
@@ -52,8 +52,8 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 		//NOTE since we are running CPU as an int here, we need to make sure that no VM is starved, which really shouldn't be a problem, but think about it
 		
 		//get the requested and scheduled CPU from the VM
-		VirtualResources requiredResources = vmAlloc.getVm().getResourcesRequired();
-		VirtualResources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
+		Resources requiredResources = vmAlloc.getVm().getResourcesRequired();
+		Resources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
 		
 		//if the VM requires no more CPU than already scheduled, then we can return false
 		if (requiredResources.getCpu() <= scheduledResources.getCpu()) {

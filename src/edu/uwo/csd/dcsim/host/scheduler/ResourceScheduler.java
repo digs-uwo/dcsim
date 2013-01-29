@@ -1,8 +1,8 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
-import edu.uwo.csd.dcsim.vm.VirtualResources;
 
 public abstract class ResourceScheduler {
 
@@ -17,7 +17,7 @@ public abstract class ResourceScheduler {
 	 */
 	public final void initScheduling() {
 		
-		VirtualResources scheduledResources = new VirtualResources();
+		Resources scheduledResources = new Resources();
 		
 		//reset the scheduled resources of the privileged domain
 		VMAllocation privAlloc = host.getPrivDomainAllocation();
@@ -35,7 +35,7 @@ public abstract class ResourceScheduler {
 		for (VMAllocation vmAlloc : host.getVMAllocations()) {
 			//if the vm allocation actually contains a VM (in the case of a migrating in VM, it might not)
 			if (vmAlloc.getVm() != null) {
-				scheduledResources = new VirtualResources();
+				scheduledResources = new Resources();
 				
 				scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
 				
