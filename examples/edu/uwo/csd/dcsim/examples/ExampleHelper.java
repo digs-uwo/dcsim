@@ -67,14 +67,14 @@ public class ExampleHelper {
 					.memoryManagerFactory(new SimpleMemoryManagerFactory())
 					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 					.storageManagerFactory(new SimpleStorageManagerFactory())
-					.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+					.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 			
 			Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
 					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
 					.memoryManagerFactory(new SimpleMemoryManagerFactory())
 					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 					.storageManagerFactory(new SimpleStorageManagerFactory())
-					.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+					.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 			
 			if (i % 2 == 1) {
 				host = proLiantDL360G5E5450.build();
@@ -128,7 +128,7 @@ public class ExampleHelper {
 		int bandwidth = 12800; //100 Mb/s
 		long storage = 1024; //1GB
 
-		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, CPU_OVERHEAD, 1, Integer.MAX_VALUE); 
+		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, CPU_OVERHEAD, 1, Integer.MAX_VALUE); 
 		
 		return service;
 

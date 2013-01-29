@@ -1,23 +1,21 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
-import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
 import edu.uwo.csd.dcsim.vm.VirtualResources;
 
-public class ResourceScheduler {
+public abstract class ResourceScheduler {
 
 	protected Host host;
 	private ResourceSchedulerState state;
 	private int remainingCpu;
-	protected Simulation simulation;
-	
+		
 	public enum ResourceSchedulerState {READY, COMPLETE;}
 		
 	/**
 	 * Initialize scheduling, including resetting scheduled resources from last time interval.
 	 */
-	public void initScheduling() {
+	public final void initScheduling() {
 		
 		VirtualResources scheduledResources = new VirtualResources();
 		
@@ -52,61 +50,28 @@ public class ResourceScheduler {
 		
 		//indicate that the resource scheduler is ready to schedule resources
 		state = ResourceSchedulerState.READY;
+		
+		beginScheduling();
 	}
 	
-	public void schedulePrivDomain() {
-		//need to get a CPU request from priv domain
-		
-		//allocate all of the request
-	}
+	protected abstract void beginScheduling();
+	public abstract void schedulePrivDomain();
+	public abstract void beginRound();
+	public abstract boolean scheduleVM(VMAllocation vmAlloc);
 	
-	public void beginRound() {
-		//compute shortcuts such as a round share limit for each VM
-	}
-	
-	/**
-	 * 
-	 * @param vmAlloc
-	 * @return true, if the VM required more resource during this scheduling round, false otherwise
-	 */
-	public boolean scheduleVM(VMAllocation vmAlloc) {
-		//NOTE since we are running CPU as an int here, we need to make sure that no VM is starved, which really shouldn't be a problem, but think about it
+	protected final void scheduleCpu(int cpu) {
+		remainingCpu -= cpu;
 		
-		//get the requested and scheduled CPU from the VM
-		VirtualResources requiredResources = vmAlloc.getVm().getResourcesRequired();
-		VirtualResources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
-		
-		//if the VM requires no more CPU than already scheduled, then we can return false
-		if (requiredResources.getCpu() <= scheduledResources.getCpu()) {
-			return false;
-		}
-				
-		//try to give as much as we can, up to any predetermined limit for the round and no more than remaining CPU
-		//TODO set round limit/shares system for CPU
-		int additionalCpu = (int)Math.ceil(requiredResources.getCpu() - scheduledResources.getCpu()); //TODO should this be cast to int? Should virtual resources be int instead of double?
-		
-		//if there is more CPU required, and we have some left
-		if (additionalCpu > 0 && remainingCpu > 0) {
-			//add either the required additional cpu or the amount we have left, whichever is smaller
-			int cpuToAdd = Math.min(additionalCpu, remainingCpu);
-
-			//add the cpu to the scheduled resources of the vm
-			scheduledResources.setCpu(scheduledResources.getCpu() + cpuToAdd);
-			
-			//allocate new resource amount
-			vmAlloc.getVm().scheduleResources(scheduledResources);
-		
-			//subtract from remainingCpu
-			remainingCpu -= cpuToAdd;
-		}
-		
-		//if no CPU left, change the state to COMPLETE
-		if (remainingCpu == 0)
+		if (remainingCpu <= 0) {
 			state = ResourceSchedulerState.COMPLETE;
-		
-		//Note that even if additionalCPU is now zero, we don't return false unless no additional CPU was scheduled during this round
+		}
+
+		if (remainingCpu < 0)
+			throw new RuntimeException("Resource Scheduler on Host #" + host.getId() + " used more CPU than available");
+	}
 	
-		return true;
+	protected int getRemainingCpu() {
+		return remainingCpu;
 	}
 	
 	public void setHost(Host host) {

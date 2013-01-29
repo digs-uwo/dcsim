@@ -32,7 +32,7 @@ public class VmmApplication extends Application {
 
 	
 	@Override
-	public VirtualResources getResourcesRequired() {
+	public VirtualResources calculateResourcesRequired() {
 		VirtualResources resourcesRequired = new VirtualResources();
 		resourcesRequired.setMemory(0);
 		resourcesRequired.setStorage(0);
@@ -81,7 +81,5 @@ public class VmmApplication extends Application {
 		// there is no work output
 		return 0;
 	}
-
-
 
 }

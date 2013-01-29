@@ -18,7 +18,7 @@ public class PrivDomainVM extends VM {
 	}
 
 	@Override
-	public void logInfo() {
+	public void logState() {
 		simulation.getLogger().debug("PRIV  CPU[" + Utility.roundDouble(resourcesScheduled.getCpu(), 2) + 
 				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "] " + 

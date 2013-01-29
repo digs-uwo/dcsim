@@ -112,7 +112,7 @@ public class Replication extends DCSimulationTask {
 		//Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300, scale, Integer.MAX_VALUE);  
 
 		//Create a service that has a minimum of 1 VM and can scale up indefinitely
-		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 0, 300, 1, Integer.MAX_VALUE); 
+		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, 300, 1, Integer.MAX_VALUE); 
 
 		return service;
 
@@ -127,7 +127,7 @@ public class Replication extends DCSimulationTask {
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 				.storageManagerFactory(new SimpleStorageManagerFactory())
-				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 		
 		for (int i = 0; i < nHosts; ++i) {						
 			hosts.add(proLiantDL360G5E5450.build());

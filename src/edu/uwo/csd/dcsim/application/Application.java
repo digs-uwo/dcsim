@@ -18,6 +18,7 @@ public abstract class Application implements WorkProducer {
 	
 	protected VM vm; //the VM on which this application is running
 	protected Simulation simulation; //the simulation this Application is running within
+	protected VirtualResources resourcesRequired;
 	
 	/**
 	 * Create a new Application, attached to the specified Simulation
@@ -26,6 +27,7 @@ public abstract class Application implements WorkProducer {
 	 */
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
+		this.resourcesRequired = new VirtualResources();
 	}
 	
 	/**
@@ -48,7 +50,18 @@ public abstract class Application implements WorkProducer {
 	 * Get the current amount of resource required based on the work level from tha application source
 	 * @return
 	 */
-	public abstract VirtualResources getResourcesRequired();
+	public final VirtualResources getResourcesRequired() {
+		return resourcesRequired;
+	}
+	
+	/**
+	 * Update the required resources based on current work levels
+	 */
+	protected abstract VirtualResources calculateResourcesRequired();
+	
+	public final void updateResourceRequirements() {
+		resourcesRequired = calculateResourcesRequired();
+	}
 	
 	/**
 	 * Schedule resources and update the work output level of the application

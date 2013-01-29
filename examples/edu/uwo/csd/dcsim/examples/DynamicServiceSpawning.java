@@ -16,7 +16,7 @@ import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
-import edu.uwo.csd.dcsim.host.scheduler.FairShareCpuSchedulerFactory;
+import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 
 public class DynamicServiceSpawning extends DCSimulationTask {
@@ -58,7 +58,7 @@ public class DynamicServiceSpawning extends DCSimulationTask {
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 				.storageManagerFactory(new SimpleStorageManagerFactory())
-				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation));
+				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 		
 		//add 10 hosts
 		for (int i = 0; i < 10; ++i) {
@@ -96,7 +96,7 @@ public class DynamicServiceSpawning extends DCSimulationTask {
 				Workload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, 0);
 				simulation.addWorkload(workload);
 				
-				return Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 1, 300, 1, Integer.MAX_VALUE);
+				return Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
 			}
 			
 		};

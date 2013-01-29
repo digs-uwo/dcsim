@@ -49,7 +49,7 @@ public class InteractiveApplication extends Application {
 	}
 
 	@Override
-	public VirtualResources getResourcesRequired() {
+	protected VirtualResources calculateResourcesRequired() {
 		VirtualResources resourcesRequired = new VirtualResources();
 		resourcesRequired.setMemory(memory);
 		resourcesRequired.setStorage(storage);

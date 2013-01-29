@@ -12,7 +12,7 @@ import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.power.LinearHostPowerModel;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
-import edu.uwo.csd.dcsim.host.scheduler.FairShareCpuSchedulerFactory;
+import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
@@ -98,7 +98,7 @@ public class SimpleExampleDetailed extends DCSimulationTask {
 				.memoryManagerFactory(new SimpleMemoryManagerFactory())
 				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
 				.storageManagerFactory(new SimpleStorageManagerFactory())
-				.cpuSchedulerFactory(new FairShareCpuSchedulerFactory(simulation))
+				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory())
 				.powerModel(new LinearHostPowerModel(150, 300))
 				.build();
 		
@@ -130,11 +130,11 @@ public class SimpleExampleDetailed extends DCSimulationTask {
 		InteractiveApplicationTier appTier = new InteractiveApplicationTier(1024, 1024, 1, 1, 300);
 		
 		/*
-		 * We need to configure the workload to send work to our application tier, and for the tier to send completed work
+		 * We need to configure the application tier to get work from the workload, and for the workload to get completed work from the tier
 		 * back to the workload.
 		 */
-		workload.setWorkTarget(appTier);
-		appTier.setWorkTarget(workload);
+		appTier.setWorkSource(workload);
+		workload.setCompletedWorkSource(appTier);
 		
 		/*
 		 * Now, we must create a VMDescription which describe the properties of the VM we want to create. We create a VM that 

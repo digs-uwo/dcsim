@@ -34,6 +34,10 @@ public class VM implements SimulationEventListener {
 		vmAllocation = null;
 	}
 	
+	public void updateResourceRequirements() {
+		application.updateResourceRequirements();
+	}
+	
 	public VirtualResources getResourcesRequired() {
 		VirtualResources required = application.getResourcesRequired();
 		
@@ -80,7 +84,7 @@ public class VM implements SimulationEventListener {
 		application.updateMetrics();
 	}
 	
-	public void logInfo() {
+	public void logState() {
 		simulation.getLogger().debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesScheduled.getCpu(), 2) + 
 				"/" + vmAllocation.getCpu() + 
 				"/" + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "] " + 

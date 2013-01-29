@@ -9,7 +9,6 @@ import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.host.scheduler.CpuScheduler;
 import edu.uwo.csd.dcsim.host.scheduler.ResourceScheduler;
 import edu.uwo.csd.dcsim.logging.*;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
@@ -220,6 +219,11 @@ public class Simulation implements SimulationEventListener {
 			//schedule/allocate resources
 			scheduleResources(hosts);
 			
+			//log current state
+			for (DataCentre dc : datacentres) {
+				dc.logState();			
+			}
+			
 			//revise/amend
 			postScheduling(hosts);
 			
@@ -230,6 +234,8 @@ public class Simulation implements SimulationEventListener {
 			lastUpdate = simulationTime;
 			simulationTime = e.getTime();
 			advanceSimulation(hosts);
+			
+			//TODO perform metric calculation here?
 			
 			//run monitors
 			if (monitors.size() > 0) {
@@ -259,7 +265,7 @@ public class Simulation implements SimulationEventListener {
 			for (DataCentre dc : datacentres) {
 				if (this.isRecordingMetrics())
 					dc.updateMetrics();
-				dc.logInfo();
+				//dc.logInfo();
 			}
 			
 			if (this.isRecordingMetrics()) {	
@@ -324,6 +330,9 @@ public class Simulation implements SimulationEventListener {
 				if (!completedVms.contains(vmAllocation) && vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) {					
 					//if the resource scheduler has not indicated that is is COMPLETE (i.e. out of resources)
 					if (vmAllocation.getHost().getResourceScheduler().getState() != ResourceScheduler.ResourceSchedulerState.COMPLETE) {
+						//update the resource requirements of this VM
+						vmAllocation.getVm().updateResourceRequirements();
+						
 						//schedule resources for the VM
 						if (vmAllocation.getHost().getResourceScheduler().scheduleVM(vmAllocation)) {
 							//returned true = VM requires more resource to meet incoming work

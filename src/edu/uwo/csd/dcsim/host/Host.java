@@ -102,7 +102,7 @@ public final class Host implements SimulationEventListener {
 		setBandwidthManager(builder.bandwidthManagerFactory.newInstance());
 		setStorageManager(builder.storageManagerFactory.newInstance());
 		setHostPowerModel(builder.powerModel);
-		setResourceScheduler(builder.resourceScheduler);
+		setResourceScheduler(builder.resourceSchedulerFactory.newInstance());
 		
 		resourceScheduler.setHost(this);
 		
@@ -155,8 +155,7 @@ public final class Host implements SimulationEventListener {
 		private ObjectFactory<? extends MemoryManager> memoryManagerFactory = null;
 		private ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory = null;
 		private ObjectFactory<? extends StorageManager> storageManagerFactory = null;
-		
-		private ResourceScheduler resourceScheduler = new ResourceScheduler(); //TODO change to a factory
+		private ObjectFactory<? extends ResourceScheduler> resourceSchedulerFactory = null;
 		
 		private HostPowerModel powerModel = null;
 		
@@ -208,6 +207,11 @@ public final class Host implements SimulationEventListener {
 			return this;
 		}
 		
+		public Builder resourceSchedulerFactory(ObjectFactory<? extends ResourceScheduler> resourceSchedulerFactory) {
+			this.resourceSchedulerFactory = resourceSchedulerFactory;
+			return this;
+		}
+		
 		public Builder powerModel(HostPowerModel powerModel) {
 			this.powerModel = powerModel;
 			return this;
@@ -231,6 +235,8 @@ public final class Host implements SimulationEventListener {
 				throw new IllegalStateException("Must specify Memory Manager factory before building Host");
 			if (storageManagerFactory == null)
 				throw new IllegalStateException("Must specify Storage Manager factory before building Host");
+			if (resourceSchedulerFactory == null)
+				throw new IllegalStateException("Must specify Resource Scheduler factory before building Host");
 			if (powerModel == null)
 				throw new IllegalStateException("Must specify power model before building Host");
 			
@@ -651,24 +657,24 @@ public final class Host implements SimulationEventListener {
 	/*
 	 * Output Host data to the log
 	 */
-	public void logInfo() {
+	public void logState() {
 
 		if (simulation.getLogger().isDebugEnabled()) {
 			if (state == HostState.ON) {
 				simulation.getLogger().debug("Host #" + getId() + 
-						" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getAllocatedCpu() + "/" + cpuManager.getTotalCpu() + "] " +
+						" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getTotalCpu() + "] " +
 						" BW[" + bandwidthManager.getAllocatedBandwidth() + "/" + bandwidthManager.getTotalBandwidth() + "] " +
 						" MEM[" + memoryManager.getAllocatedMemory() + "/" + memoryManager.getTotalMemory() + "] " +
 						" STORAGE[" + storageManager.getAllocatedStorage() + "/" + storageManager.getTotalStorage() + "] " +
 						"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
-				privDomainAllocation.getVm().logInfo();
+				privDomainAllocation.getVm().logState();
 			} else {
 				simulation.getLogger().debug("Host #" + getId() + " " + state);
 			}
 			
 			for (VMAllocation vmAllocation : vmAllocations) {
 				if (vmAllocation.getVm() != null) {
-					vmAllocation.getVm().logInfo();
+					vmAllocation.getVm().logState();
 				} else {
 					simulation.getLogger().debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
 				}

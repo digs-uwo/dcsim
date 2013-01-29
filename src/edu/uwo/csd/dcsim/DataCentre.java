@@ -100,11 +100,11 @@ public class DataCentre implements SimulationEventListener {
 	}
 	
 	/**
-	 * Log information about the DataCentre
+	 * Log state of the DataCentre
 	 */
-	public void logInfo() {
+	public void logState() {
 		for (Host host : hosts) {
-			host.logInfo();
+			host.logState();
 		}
 	}
 	
