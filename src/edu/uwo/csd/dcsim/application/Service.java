@@ -40,18 +40,16 @@ public class Service {
 	 * @return
 	 */
 	public double getSLAViolation() {
-//		double sla = 0;
-//		for (ServiceTier tier : tiers) {
-//			for (Application app : tier.getApplications()) {
-//				sla += app.getSLAViolatedWork();
-//			}
-//		}
-//		
-//		sla = sla / workload.getCurrentWork();
-//		
-//		return sla;
+		double sla = 0;
+		for (ServiceTier tier : tiers) {
+			for (Application app : tier.getApplications()) {
+				sla += app.getSLAUnderprovisionRate() + app.getSLAMigrationPenaltyRate();
+			}
+		}
 		
-		return 0; //TODO fix
+		sla = sla / workload.getWorkOutputLevel();
+		
+		return sla;
 	}
 	
 	/**
@@ -59,18 +57,16 @@ public class Service {
 	 * @return
 	 */
 	public double getTotalSLAViolation() {
-//		double sla = 0;
-//		for (ServiceTier tier : tiers) {
-//			for (Application app : tier.getApplications()) {
-//				sla += app.getTotalSLAViolatedWork();
-//			}
-//		}
-//		
-//		sla = sla / workload.getTotalWork();
-//		
-//		return sla;
+		double sla = 0;
+		for (ServiceTier tier : tiers) {
+			for (Application app : tier.getApplications()) {
+				sla += app.getTotalSLAViolatedWork();
+			}
+		}
 		
-		return 0; //TODO fix
+		sla = sla / workload.getTotalWork();
+		
+		return sla;
 	}
 	
 	public boolean canShutdown() {

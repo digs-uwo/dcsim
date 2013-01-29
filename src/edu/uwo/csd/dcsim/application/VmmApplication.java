@@ -42,7 +42,7 @@ public class VmmApplication extends Application {
 		
 		//calculate cpu and bandwidth requirements for migrating VMs
 		//TODO this needs to consider the number of migrating VMs and the bandwidth available on the management network link
-		for (VM migrating : migratingVms) {
+		for (@SuppressWarnings("unused") VM migrating : migratingVms) {
 			cpuRequired += 100; //TODO change to percentage of VM CPU utilization?
 			bandwidthRequired += 100; //TODO depends on available bandwidth?
 		}
@@ -84,13 +84,26 @@ public class VmmApplication extends Application {
 
 	@Override
 	public double getTotalIncomingWork() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
 	public double getTotalSLAViolatedWork() {
-		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Resources getResourcesInUse() {
+		return resourcesScheduled;
+	}
+
+	@Override
+	public double getSLAUnderprovisionRate() {
+		return 0;
+	}
+
+	@Override
+	public double getSLAMigrationPenaltyRate() {
 		return 0;
 	}
 

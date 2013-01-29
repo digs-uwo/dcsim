@@ -80,6 +80,10 @@ public abstract class Application implements WorkProducer {
 	 */
 	public abstract void updateMetrics();
 	
+	public abstract Resources getResourcesInUse();
+	
+	public abstract double getSLAUnderprovisionRate();
+	public abstract double getSLAMigrationPenaltyRate();
 	public abstract double getTotalIncomingWork();
 	public abstract double getTotalSLAViolatedWork();
 	

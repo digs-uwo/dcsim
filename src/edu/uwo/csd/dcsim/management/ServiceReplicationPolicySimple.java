@@ -33,7 +33,7 @@ public class ServiceReplicationPolicySimple implements Daemon {
 			for (ServiceTier tier : service.getServiceTiers()) {
 				double avgUtil = 0;
 				for (Application application : tier.getApplications()) {
-					avgUtil += application.getResourceInUse().getCpu() / tier.getVMDescription().getCpu();
+					avgUtil += application.getResourcesInUse().getCpu() / tier.getVMDescription().getCpu();
 				}
 				avgUtil = avgUtil / tier.getApplications().size();
 				

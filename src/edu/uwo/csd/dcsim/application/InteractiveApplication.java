@@ -25,6 +25,8 @@ public class InteractiveApplication extends Application {
 
 	double workLevel = 0;
 	
+	private Resources resourcesInUse = new Resources();
+	
 	private double slaUnderprovisionRate;
 	private double slaMigrationPenaltyRate;
 	
@@ -79,6 +81,9 @@ public class InteractiveApplication extends Application {
 	 */
 	@Override
 	public void scheduleResources(Resources resourcesScheduled) {
+		
+		resourcesInUse = resourcesScheduled;
+		
 		//check that memory, storage and bandwidth meet required minimum
 		if (resourcesScheduled.getMemory() < memory ||
 				resourcesScheduled.getStorage() < storage ||
@@ -139,6 +144,21 @@ public class InteractiveApplication extends Application {
 	@Override
 	public double getTotalSLAViolatedWork() {
 		return totalSLAViolatedWork;
+	}
+
+	@Override
+	public Resources getResourcesInUse() {
+		return resourcesInUse;
+	}
+
+	@Override
+	public double getSLAUnderprovisionRate() {
+		return slaUnderprovisionRate;
+	}
+
+	@Override
+	public double getSLAMigrationPenaltyRate() {
+		return slaMigrationPenaltyRate;
 	}
 
 	
