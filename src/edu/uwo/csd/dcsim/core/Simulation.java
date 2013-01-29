@@ -219,11 +219,6 @@ public class Simulation implements SimulationEventListener {
 			//schedule/allocate resources
 			scheduleResources(hosts);
 			
-			//log current state
-			for (DataCentre dc : datacentres) {
-				dc.logState();			
-			}
-			
 			//revise/amend
 			postScheduling(hosts);
 			
@@ -235,7 +230,28 @@ public class Simulation implements SimulationEventListener {
 			simulationTime = e.getTime();
 			advanceSimulation(hosts);
 			
+			//log current state
+			for (DataCentre dc : datacentres) {
+				dc.logState();			
+			}
+			
 			//TODO perform metric calculation here?
+			//inform metrics of completed time interval
+			for (Metric metric : this.metrics.values())
+				metric.completeTimeInterval();
+			
+			if (this.isRecordingMetrics()) {	
+				//update data centre/host/vm metrics
+				for (DataCentre dc : datacentres) {
+					dc.updateMetrics();
+				}
+				
+				//update metrics tracked by workloads (i.e. SLA)
+				for (Workload workload : workloads)
+					workload.updateMetrics();
+			}
+			
+			
 			
 			//run monitors
 			if (monitors.size() > 0) {
@@ -256,24 +272,6 @@ public class Simulation implements SimulationEventListener {
 				
 				e.getTarget().handleEvent(e);
 			}
-			
-			//inform metrics of completed time interval
-			for (Metric metric : this.metrics.values())
-				metric.completeTimeInterval();
-			
-			//update metrics and log info
-			for (DataCentre dc : datacentres) {
-				if (this.isRecordingMetrics())
-					dc.updateMetrics();
-				//dc.logInfo();
-			}
-			
-			if (this.isRecordingMetrics()) {	
-				//update metrics tracked by workloads (i.e. SLA)
-				for (Workload workload : workloads)
-					workload.updateMetrics();
-			}
-
 		}
 		
 		//Simulation is now completed
@@ -304,6 +302,7 @@ public class Simulation implements SimulationEventListener {
 			host.getResourceScheduler().initScheduling();
 			
 			//schedule the privileged domain (it takes priority over other VMs)
+			host.getPrivDomainAllocation().getVm().updateResourceRequirements();
 			host.getResourceScheduler().schedulePrivDomain();
 		}
 		
@@ -363,8 +362,15 @@ public class Simulation implements SimulationEventListener {
 		//execute all applications up to the current simulation time
 		for (Host host : hosts) {
 			for (VMAllocation vmAlloc : host.getVMAllocations()) {
-				vmAlloc.getVm().getApplication().execute();
+				if (vmAlloc.getVm() != null) {
+					vmAlloc.getVm().getApplication().execute();
+				}
 			}
+		}
+		
+		//update workloads
+		for (Workload workload : workloads) {
+			workload.advanceToCurrentTime();
 		}
 	}
 	

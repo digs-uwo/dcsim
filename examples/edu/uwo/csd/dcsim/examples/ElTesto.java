@@ -14,6 +14,7 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.HostModels;
+import edu.uwo.csd.dcsim.host.Host.HostState;
 import edu.uwo.csd.dcsim.host.resourcemanager.OversubscribingCpuManagerFactory;
 import edu.uwo.csd.dcsim.host.resourcemanager.SimpleBandwidthManagerFactory;
 import edu.uwo.csd.dcsim.host.resourcemanager.SimpleMemoryManagerFactory;
@@ -39,7 +40,7 @@ public class ElTesto extends DCSimulationTask {
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
 		//DCSimulationTask task = new SimpleExample("simple", 86400000);
-		DCSimulationTask task = new ElTesto("simple", SimTime.minutes(10));
+		DCSimulationTask task = new ElTesto("simple", SimTime.minutes(20));
 		
 		//run the simulation
 		task.run();
@@ -107,16 +108,15 @@ public class ElTesto extends DCSimulationTask {
 				.storageManagerFactory(new SimpleStorageManagerFactory())
 				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 		
-		//Instantiate the Host
 		Host host = proLiantDL160G5E5420.build();
-		
-		//Add the Host to the DataCentre
+		host.setState(HostState.ON);
 		dc.addHost(host);
+		//dc.addHost(proLiantDL160G5E5420.build());
 		
 
 		//VM #1
 		//Workload workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
-		Workload workload = new TwoLevelWorkload(simulation, 1000, 2000, 200000);
+		Workload workload = new TwoLevelWorkload(simulation, 6720, 6720, 200000);
 		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
 
 		Service service = Services.singleTierInteractiveService(workload, 2, 500, 1024, 12800, 1024, 1, 60, 1, Integer.MAX_VALUE); 
@@ -128,15 +128,15 @@ public class ElTesto extends DCSimulationTask {
 		
 		//VM #2
 		//workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
-		workload = new TwoLevelWorkload(simulation, 1000, 2000, 400000);
-		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
-
-		service = Services.singleTierInteractiveService(workload, 2, 500, 1024, 12800, 1024, 1, 60, 1, Integer.MAX_VALUE); 
-
-		vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
-		
-
-		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
+//		workload = new TwoLevelWorkload(simulation, 1000, 2000, 400000);
+//		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
+//
+//		service = Services.singleTierInteractiveService(workload, 2, 500, 1024, 12800, 1024, 1, 60, 1, Integer.MAX_VALUE); 
+//
+//		vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
+//		
+//
+//		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
 		
 		
 		/*
@@ -150,9 +150,9 @@ public class ElTesto extends DCSimulationTask {
 		 * implements the Daemon interface. We create a DaemonScheduler to run the daemon on a fixed interval. Finally, we start the daemon
 		 * at the specified simulation time. 
 		 */
-//		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
-//		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
-//		daemon.start(600000);
+		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
+		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
+		daemon.start(600000);
 		
 		/*
 		 * The simulation is now ready. It will be executed when the run() method is called externally.

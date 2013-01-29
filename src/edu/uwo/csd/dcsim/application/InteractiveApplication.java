@@ -23,6 +23,8 @@ public class InteractiveApplication extends Application {
 	private long storage; //fixed storage usage
 	private double cpuOverhead;
 
+	private double totalIncomingWork = 0;
+	private double totalSLAViolatedWork = 0;
 	
 	/**
 	 * Create a new InteractiveApplication
@@ -73,9 +75,9 @@ public class InteractiveApplication extends Application {
 	@Override
 	public void scheduleResources(VirtualResources resourcesScheduled) {
 		//check that memory, storage and bandwidth meet required minimum
-		if (resourcesScheduled.getMemory() <= memory ||
-				resourcesScheduled.getStorage() <= storage ||
-						resourcesScheduled.getBandwidth() <= bandwidth) {
+		if (resourcesScheduled.getMemory() < memory ||
+				resourcesScheduled.getStorage() < storage ||
+						resourcesScheduled.getBandwidth() < bandwidth) {
 			workOutputLevel = 0;
 		} else {
 			//we have enough memory, storage and bandwidth
@@ -91,19 +93,36 @@ public class InteractiveApplication extends Application {
 	@Override
 	public void execute() {
 		//record work completed, total incoming, and total sla violation
+		double workLevel = applicationTier.getWorkLevel(this);
+		totalIncomingWork += workLevel * simulation.getElapsedSeconds();
+		totalSLAViolatedWork += (workLevel - workOutputLevel) * simulation.getElapsedSeconds();
 	}
-	
-	//TODO need SLA violation reporting metrics - SLA violation, SLA underprovision, SLA migration overhead
-
 	
 	@Override
 	public void updateMetrics() {
+		double workLevel = applicationTier.getWorkLevel(this);
+		double slavUnderprovision = (workLevel - workOutputLevel) * simulation.getElapsedSeconds();
+		double slavMig = 0; //TODO add this feature
 
+		//TODO perhaps only calculate migration overhead here, move underprovision to Workload, as if no applications are attached to a workload, then no SLA violation is added, even though no work is being performed
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addSlaVWork(slavUnderprovision + slavMig);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addSlaVWork(slavUnderprovision);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addSlaVWork(slavMig);
 	}
 
 	@Override
 	public double getWorkOutputLevel() {
 		return workOutputLevel;
+	}
+
+	@Override
+	public double getTotalIncomingWork() {
+		return totalIncomingWork;
+	}
+
+	@Override
+	public double getTotalSLAViolatedWork() {
+		return totalSLAViolatedWork;
 	}
 
 	

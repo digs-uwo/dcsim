@@ -24,7 +24,7 @@ public abstract class ResourceScheduler {
 		
 		scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
 		
-		//at present, all other resources are allocated their full allocation
+		//at present, all other resources are allocated their full allocation. In the future, this could (should?) be moved into the subclasses
 		scheduledResources.setBandwidth(privAlloc.getBandwidth());
 		scheduledResources.setMemory(privAlloc.getMemory());
 		scheduledResources.setStorage(privAlloc.getStorage());
@@ -33,16 +33,19 @@ public abstract class ResourceScheduler {
 		
 		//for each VM in the host, reset the resources that are current scheduled for its use
 		for (VMAllocation vmAlloc : host.getVMAllocations()) {
-			scheduledResources = new VirtualResources();
-			
-			scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
-			
-			//at present, all other resources are scheduled their full allocation
-			scheduledResources.setBandwidth(vmAlloc.getBandwidth());
-			scheduledResources.setMemory(vmAlloc.getMemory());
-			scheduledResources.setStorage(vmAlloc.getStorage());
-			
-			vmAlloc.getVm().scheduleResources(scheduledResources);
+			//if the vm allocation actually contains a VM (in the case of a migrating in VM, it might not)
+			if (vmAlloc.getVm() != null) {
+				scheduledResources = new VirtualResources();
+				
+				scheduledResources.setCpu(0); //set CPU to 0, as this will be scheduled in rounds later
+				
+				//at present, all other resources are scheduled their full allocation
+				scheduledResources.setBandwidth(vmAlloc.getBandwidth());
+				scheduledResources.setMemory(vmAlloc.getMemory());
+				scheduledResources.setStorage(vmAlloc.getStorage());
+				
+				vmAlloc.getVm().scheduleResources(scheduledResources);
+			}
 		}
 		
 		//set the remaining CPU to the total CPU available

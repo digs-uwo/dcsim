@@ -11,10 +11,9 @@ import edu.uwo.csd.dcsim.vm.*;
  */
 public abstract class Application implements WorkProducer {
 
-	//TODO do something with this
-//	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
-//	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
-//	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; //name of the metric colleciton SLA violation due to migration overhead
+	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
+	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
+	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; //name of the metric collection SLA violation due to migration overhead
 	
 	protected VM vm; //the VM on which this application is running
 	protected Simulation simulation; //the simulation this Application is running within
@@ -79,6 +78,9 @@ public abstract class Application implements WorkProducer {
 	 * Update simulation metrics
 	 */
 	public abstract void updateMetrics();
+	
+	public abstract double getTotalIncomingWork();
+	public abstract double getTotalSLAViolatedWork();
 	
 	
 }

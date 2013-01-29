@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim.application.workload;
 
 import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.application.WorkProducer;
-import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 
@@ -36,20 +35,30 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	 */
 	protected abstract double getCurrentWorkLevel(); 
 	
+	public void advanceToCurrentTime() {
+		//this is where we record the total work done over the interval
+		double completedWorkLevel = 0;
+		if (completedWorkSource != null) {
+			completedWorkLevel = completedWorkSource.getWorkOutputLevel();
+		}
+		
+		totalWork += getCurrentWorkLevel() * simulation.getElapsedSeconds();
+		completedWork += completedWorkLevel * simulation.getElapsedSeconds();
+	}
+	
 	/**
 	 * Update metric values
 	 */
 	public void updateMetrics() {
-		
-		//TODO this is where we calculate the total work done over the interval
-		
 		/*
 		 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
 		 * more than once to the total (thus incorrectly reducing the SLA violation value)
 		 */
-//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(currentWork);
-//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(currentWork);
-//		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(currentWork);
+		double work = getCurrentWorkLevel() * simulation.getElapsedSeconds();
+		
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(work);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(work);
+		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(work);
 	}
 	
 	/**

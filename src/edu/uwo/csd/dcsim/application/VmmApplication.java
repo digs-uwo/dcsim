@@ -82,4 +82,16 @@ public class VmmApplication extends Application {
 		return 0;
 	}
 
+	@Override
+	public double getTotalIncomingWork() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public double getTotalSLAViolatedWork() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

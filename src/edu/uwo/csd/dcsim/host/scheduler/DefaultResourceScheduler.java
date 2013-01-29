@@ -20,9 +20,22 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	}
 	
 	public void schedulePrivDomain() {
-		//need to get a CPU request from priv domain
+		//allocate all of the required cpu
+		VirtualResources requiredResources = host.getPrivDomainAllocation().getVm().getResourcesRequired();
+		VirtualResources scheduledResources = host.getPrivDomainAllocation().getVm().getResourcesScheduled();
 		
-		//allocate all of the request
+		int requiredCpu = (int)Math.ceil(requiredResources.getCpu());
+		
+		//we always want to schedule the priv domain all it requires first, and there should be sufficient CPU to handle it. If not, kill the simulation. 
+		if (requiredCpu > getRemainingCpu()) {
+			throw new RuntimeException("Insufficient resources to run privileged domain on host #" + host.getId());
+		}
+		
+		scheduledResources.setCpu(requiredCpu);
+		
+		host.getPrivDomainAllocation().getVm().scheduleResources(scheduledResources);
+		
+		scheduleCpu(requiredCpu);
 	}
 	
 	public void beginRound() {
