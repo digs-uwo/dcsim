@@ -115,8 +115,8 @@ public class ElTesto extends DCSimulationTask {
 		
 
 		//VM #1
-		//Workload workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
-		Workload workload = new TwoLevelWorkload(simulation, 1000, 2000, 200000);
+		Workload workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
+		//Workload workload = new TwoLevelWorkload(simulation, 1000, 2000, 200000);
 		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
 
 		Service service = Services.singleTierInteractiveService(workload, 2, 500, 1024, 12800, 1024, 1, 60, 1, Integer.MAX_VALUE); 
@@ -127,8 +127,8 @@ public class ElTesto extends DCSimulationTask {
 		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
 		
 		//VM #2
-		//workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
-		workload = new TwoLevelWorkload(simulation, 1000, 2000, 400000);
+		workload = new TraceWorkload(simulation, "traces/clarknet", 1800, 0);
+		//workload = new TwoLevelWorkload(simulation, 1000, 2000, 400000);
 		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
 
 		service = Services.singleTierInteractiveService(workload, 2, 500, 1024, 12800, 1024, 1, 60, 1, Integer.MAX_VALUE); 
