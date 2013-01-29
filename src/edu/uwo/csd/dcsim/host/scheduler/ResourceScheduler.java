@@ -62,7 +62,7 @@ public abstract class ResourceScheduler {
 	public abstract void beginRound();
 	public abstract boolean scheduleVM(VMAllocation vmAlloc);
 	
-	protected final void scheduleCpu(int cpu) {
+	protected final void scheduleCpu(double cpu) {
 		remainingCpu -= cpu;
 		
 		if (remainingCpu <= 0) {

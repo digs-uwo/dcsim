@@ -5,7 +5,7 @@ import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 public class DefaultResourceScheduler extends ResourceScheduler {
 
-	private int roundCpuShare;
+	private double roundCpuShare;
 	private int nVms; 
 	
 	public enum ResourceSchedulerState {READY, COMPLETE;}
@@ -39,7 +39,16 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	}
 	
 	public void beginRound() {
-		roundCpuShare = getRemainingCpu() / nVms;
+		if (nVms > 1) {
+			roundCpuShare = getRemainingCpu() / nVms;
+			
+			//put a lower limit on the round share to avoid scheduling very small amounts
+			if (roundCpuShare < 1)
+				roundCpuShare = 1;
+			
+		} else {
+			roundCpuShare = 0; //irrelevant value, as there are no VMs which will execute
+		}
 	}
 	
 	/**
@@ -62,7 +71,7 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 		}
 				
 		//try to give as much as we can, up to any predetermined limit for the round and no more than remaining CPU
-		int additionalCpu = (int)Math.ceil(requiredResources.getCpu() - scheduledResources.getCpu()); //TODO should this be cast to int? Should virtual resources be int instead of double?
+		double additionalCpu = requiredResources.getCpu() - scheduledResources.getCpu();
 		
 		//cap additionalCpu at the round share
 		additionalCpu = Math.min(additionalCpu, roundCpuShare);
@@ -70,7 +79,7 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 		//if there is more CPU required, and we have some left
 		if (additionalCpu > 0 && getRemainingCpu() > 0) {
 			//add either the required additional cpu or the amount we have left, whichever is smaller
-			int cpuToAdd = Math.min(additionalCpu, getRemainingCpu());
+			double cpuToAdd = Math.min(additionalCpu, getRemainingCpu());
 
 			//add the cpu to the scheduled resources of the vm
 			scheduledResources.setCpu(scheduledResources.getCpu() + cpuToAdd);

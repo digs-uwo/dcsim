@@ -210,60 +210,62 @@ public class Simulation implements SimulationEventListener {
 			if (e.getTime() == simulationTime && e.getTime() != 0)
 				throw new IllegalStateException("Encountered event with time == current simulation time when advance in time was expected. This should never occur.");
 			
-			//Simulation time is advancing
-			
-			//inform metrics of new time interval
-			for (Metric metric : this.metrics.values())
-				metric.startTimeInterval();
-			
-			//schedule/allocate resources
-			scheduleResources(hosts);
-			
-			//revise/amend
-			postScheduling(hosts);
-			
-			//get the next event, which may have changed during the revise step
-			e = eventQueue.peek();
-			
-			//advance to time e.getTime()
-			lastUpdate = simulationTime;
-			simulationTime = e.getTime();
-			advanceSimulation(hosts);
-			
-			//log current state
-			for (DataCentre dc : datacentres) {
-				dc.logState();			
-			}
-			
-			//TODO perform metric calculation here?
-			//inform metrics of completed time interval
-			for (Metric metric : this.metrics.values())
-				metric.completeTimeInterval();
-			
-			if (this.isRecordingMetrics()) {	
-				//update data centre/host/vm metrics
+			//ensure that we are not at time 0. If we are, we do not need to advance the simulation yet, only run events
+			if (e.getTime() != 0) {
+				//Simulation time is advancing
+				
+				//inform metrics of new time interval
+				for (Metric metric : this.metrics.values())
+					metric.startTimeInterval();
+				
+				//schedule/allocate resources
+				scheduleResources(hosts);
+				
+				//revise/amend
+				postScheduling(hosts);
+				
+				//get the next event, which may have changed during the revise step
+				e = eventQueue.peek();
+				
+				//advance to time e.getTime()
+				lastUpdate = simulationTime;
+				simulationTime = e.getTime();
+				advanceSimulation(hosts);
+				
+				//log current state
 				for (DataCentre dc : datacentres) {
-					dc.updateMetrics();
+					dc.logState();			
 				}
 				
-				//update metrics tracked by workloads (i.e. SLA)
-				for (Workload workload : workloads)
-					workload.updateMetrics();
-			}
-			
-			
-			
-			//run monitors
-			if (monitors.size() > 0) {
-				long nextMonitor = duration;
-				for (Monitor monitor : monitors) {
-					//run the monitors, keep track of the next time a monitor is scheduled to run
-					long nextExec = monitor.run();
-					if (nextExec < nextMonitor)
-						nextMonitor = nextExec;
+				//TODO perform metric calculation here?
+				//inform metrics of completed time interval
+				for (Metric metric : this.metrics.values())
+					metric.completeTimeInterval();
+				
+				if (this.isRecordingMetrics()) {	
+					//update data centre/host/vm metrics
+					for (DataCentre dc : datacentres) {
+						dc.updateMetrics();
+					}
+					
+					//update metrics tracked by workloads (i.e. SLA)
+					for (Workload workload : workloads)
+						workload.updateMetrics();
 				}
-				//trigger an event to ensure that any monitors that must run do so
-				sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
+
+				//run monitors
+				if (monitors.size() > 0) {
+					long nextMonitor = duration;
+					for (Monitor monitor : monitors) {
+						//run the monitors, keep track of the next time a monitor is scheduled to run
+						long nextExec = monitor.run();
+						if (nextExec < nextMonitor)
+							nextMonitor = nextExec;
+					}
+					//trigger an event to ensure that any monitors that must run do so
+					sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
+				}
+				
 			}
 			
 			//execute current events
