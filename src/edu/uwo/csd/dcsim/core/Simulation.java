@@ -236,12 +236,7 @@ public class Simulation implements SimulationEventListener {
 				for (DataCentre dc : datacentres) {
 					dc.logState();			
 				}
-				
-				//TODO perform metric calculation here?
-				//inform metrics of completed time interval
-				for (Metric metric : this.metrics.values())
-					metric.completeTimeInterval();
-				
+
 				if (this.isRecordingMetrics()) {	
 					//update data centre/host/vm metrics
 					for (DataCentre dc : datacentres) {
@@ -252,6 +247,10 @@ public class Simulation implements SimulationEventListener {
 					for (Workload workload : workloads)
 						workload.updateMetrics();
 				}
+				
+				//inform metrics of completed time interval
+				for (Metric metric : this.metrics.values())
+					metric.completeTimeInterval();
 
 				//run monitors
 				if (monitors.size() > 0) {
