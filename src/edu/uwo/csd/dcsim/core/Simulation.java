@@ -202,7 +202,7 @@ public class Simulation implements SimulationEventListener {
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			//peak at next event
 			e = eventQueue.peek();
-			
+						
 			//make sure that the event is in the future
 			if (e.getTime() < simulationTime)
 				throw new IllegalStateException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
@@ -220,7 +220,7 @@ public class Simulation implements SimulationEventListener {
 				
 				//schedule/allocate resources
 				scheduleResources(hosts);
-				
+
 				//revise/amend
 				postScheduling(hosts);
 				
@@ -267,13 +267,14 @@ public class Simulation implements SimulationEventListener {
 				}
 				
 			}
-			
+
 			//execute current events
 			while (!eventQueue.isEmpty() && (eventQueue.peek().getTime() == simulationTime)) {
 				e = eventQueue.poll();
 				
 				e.getTarget().handleEvent(e);
 			}
+			
 		}
 		
 		//Simulation is now completed
@@ -292,8 +293,7 @@ public class Simulation implements SimulationEventListener {
 		
 	}
 
-	private void scheduleResources(ArrayList<Host> hosts) {
-
+	private void scheduleResources(ArrayList<Host> hosts) {		
 		//retrieve ordered list of vm allocations
 		ArrayList<VMAllocation> vmList = buildVmList(hosts);
 
@@ -347,7 +347,7 @@ public class Simulation implements SimulationEventListener {
 			}
 			
 		} while (!done); //if not done, execute another round
-			
+
 	}
 	
 	private void postScheduling(ArrayList<Host> hosts) {
@@ -360,7 +360,6 @@ public class Simulation implements SimulationEventListener {
 	 * @param hosts
 	 */
 	private void advanceSimulation(ArrayList<Host> hosts) {
-		
 		//execute all applications up to the current simulation time
 		for (Host host : hosts) {
 			for (VMAllocation vmAlloc : host.getVMAllocations()) {
@@ -374,6 +373,7 @@ public class Simulation implements SimulationEventListener {
 		for (Workload workload : workloads) {
 			workload.advanceToCurrentTime();
 		}
+
 	}
 	
 	public void completeSimulation(long duration) {

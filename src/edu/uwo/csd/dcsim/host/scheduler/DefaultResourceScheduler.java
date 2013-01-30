@@ -39,7 +39,7 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	}
 	
 	public void beginRound() {
-		if (nVms > 1) {
+		if (nVms > 0) {
 			roundCpuShare = getRemainingCpu() / nVms;
 			
 			//put a lower limit on the round share to avoid scheduling very small amounts

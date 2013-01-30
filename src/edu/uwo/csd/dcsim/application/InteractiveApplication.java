@@ -108,6 +108,8 @@ public class InteractiveApplication extends Application {
 			//calculate migration penalty as a percentage (configurable) of the completed work
 			if (vm.isMigrating()) {
 				slaMigrationPenaltyRate = workOutputLevel * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
+			} else {
+				slaMigrationPenaltyRate = 0;
 			}
 		}
 	}
