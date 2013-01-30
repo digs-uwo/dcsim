@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
+import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
 
@@ -7,6 +8,7 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 
 	private double roundCpuShare;
 	private int nVms; 
+	private double minShare;
 	
 	public enum ResourceSchedulerState {READY, COMPLETE;}
 		
@@ -17,6 +19,10 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	public void beginScheduling() {
 		//set the number of VMs to schedule
 		nVms = host.getVMAllocations().size();
+		
+		if (nVms > 0) {
+			minShare = 1.0d / nVms; //use 1.0d to ensure the calculate returns a double, not an int
+		}
 	}
 	
 	public void schedulePrivDomain() {
@@ -41,10 +47,11 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	public void beginRound() {
 		if (nVms > 0) {
 			roundCpuShare = getRemainingCpu() / nVms;
+			roundCpuShare = Utility.roundDouble(roundCpuShare); //round off double precision problems
 			
 			//put a lower limit on the round share to avoid scheduling very small amounts
-			if (roundCpuShare < 1)
-				roundCpuShare = 1;
+			if (roundCpuShare < minShare)
+				roundCpuShare = minShare;
 			
 		} else {
 			roundCpuShare = 0; //irrelevant value, as there are no VMs which will execute
@@ -58,8 +65,6 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	 */
 	@Override
 	public boolean scheduleVM(VMAllocation vmAlloc) {
-		//NOTE since we are running CPU as an int here, we need to make sure that no VM is starved, which really shouldn't be a problem, but think about it
-		
 		//get the requested and scheduled CPU from the VM
 		Resources requiredResources = vmAlloc.getVm().getResourcesRequired();
 		Resources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
@@ -75,7 +80,8 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 		
 		//cap additionalCpu at the round share
 		additionalCpu = Math.min(additionalCpu, roundCpuShare);
-		
+		additionalCpu = Math.min(additionalCpu, getRemainingCpu()); //overcome rounding errors that allow sightly more CPU to be used than available
+
 		//if there is more CPU required, and we have some left
 		if (additionalCpu > 0 && getRemainingCpu() > 0) {
 			//add either the required additional cpu or the amount we have left, whichever is smaller
