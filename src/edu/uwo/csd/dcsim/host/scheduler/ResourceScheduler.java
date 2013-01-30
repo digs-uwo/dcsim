@@ -8,7 +8,7 @@ public abstract class ResourceScheduler {
 
 	protected Host host;
 	private ResourceSchedulerState state;
-	private int remainingCpu;
+	private double remainingCpu;
 		
 	public enum ResourceSchedulerState {READY, COMPLETE;}
 		
@@ -64,7 +64,7 @@ public abstract class ResourceScheduler {
 	
 	protected final void scheduleCpu(double cpu) {
 		remainingCpu -= cpu;
-		
+
 		if (remainingCpu <= 0) {
 			state = ResourceSchedulerState.COMPLETE;
 		}
@@ -73,7 +73,7 @@ public abstract class ResourceScheduler {
 			throw new RuntimeException("Resource Scheduler on Host #" + host.getId() + " used more CPU than available");
 	}
 	
-	protected int getRemainingCpu() {
+	protected double getRemainingCpu() {
 		return remainingCpu;
 	}
 	

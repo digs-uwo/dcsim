@@ -1,6 +1,5 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
-import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.vm.VMAllocation;
 
@@ -30,7 +29,7 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 		Resources requiredResources = host.getPrivDomainAllocation().getVm().getResourcesRequired();
 		Resources scheduledResources = host.getPrivDomainAllocation().getVm().getResourcesScheduled();
 		
-		int requiredCpu = (int)Math.ceil(requiredResources.getCpu());
+		double requiredCpu = requiredResources.getCpu();
 		
 		//we always want to schedule the priv domain all it requires first, and there should be sufficient CPU to handle it. If not, kill the simulation. 
 		if (requiredCpu > getRemainingCpu()) {
@@ -47,7 +46,6 @@ public class DefaultResourceScheduler extends ResourceScheduler {
 	public void beginRound() {
 		if (nVms > 0) {
 			roundCpuShare = getRemainingCpu() / nVms;
-			roundCpuShare = Utility.roundDouble(roundCpuShare); //round off double precision problems
 			
 			//put a lower limit on the round share to avoid scheduling very small amounts
 			if (roundCpuShare < minShare)
