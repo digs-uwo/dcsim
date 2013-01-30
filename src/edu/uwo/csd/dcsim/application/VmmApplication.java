@@ -42,8 +42,8 @@ public class VmmApplication extends Application {
 		
 		//calculate cpu and bandwidth requirements for migrating VMs
 		//TODO this needs to consider the number of migrating VMs and the bandwidth available on the management network link
-		for (@SuppressWarnings("unused") VM migrating : migratingVms) {
-			cpuRequired += 100; //TODO change to percentage of VM CPU utilization?
+		for (VM migrating : migratingVms) {
+			cpuRequired += migrating.getResourcesScheduled().getCpu() * 0.1; //TODO is there something more accurate than this?
 			bandwidthRequired += 100; //TODO depends on available bandwidth?
 		}
 		
