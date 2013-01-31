@@ -68,12 +68,17 @@ public abstract class Application implements WorkProducer {
 	 * @param resourcesScheduled
 	 */
 	public abstract void scheduleResources(Resources resourcesScheduled);
+
+	/**
+	 * Called after scheduling but before advancing to the next simulation time (executing), offering
+	 * an opportunity to trigger future events
+	 */
+	public abstract void postScheduling();
 	
 	/**
 	 * Executes the application up to the current simulation time
 	 */
 	public abstract void execute();
-	
 
 	/**
 	 * Update simulation metrics

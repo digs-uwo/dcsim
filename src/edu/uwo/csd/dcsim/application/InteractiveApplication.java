@@ -115,6 +115,11 @@ public class InteractiveApplication extends Application {
 	}
 	
 	@Override
+	public void postScheduling() {
+		//nothing to do
+	}
+	
+	@Override
 	public void execute() {
 		//record work completed, total incoming, and total sla violation
 		double workLevel = applicationTier.getWorkLevel(this);
@@ -162,6 +167,8 @@ public class InteractiveApplication extends Application {
 	public double getSLAMigrationPenaltyRate() {
 		return slaMigrationPenaltyRate;
 	}
+
+
 
 	
 	

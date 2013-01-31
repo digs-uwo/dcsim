@@ -58,6 +58,11 @@ public class VmmApplication extends Application {
 		// TODO not sure if we need to do anything here...
 		this.resourcesScheduled = resourcesScheduled;
 	}
+	
+	@Override
+	public void postScheduling() {
+		//TODO this is where we will calculate VM migration times based on available bandwidth and trigger/update migration completion events
+	}
 
 	@Override
 	public void execute() {

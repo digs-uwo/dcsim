@@ -66,6 +66,10 @@ public class VM implements SimulationEventListener {
 		application.scheduleResources(resources);
 	}
 	
+	public void postScheduling() {
+		application.postScheduling();
+	}
+	
 	public int getMaxCpu() {
 		return vmDescription.getCores() * vmAllocation.getHost().getCoreCapacity();
 	}
