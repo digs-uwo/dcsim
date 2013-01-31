@@ -15,7 +15,7 @@ import edu.uwo.csd.dcsim.host.scheduler.*;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
-public class Replication extends DCSimulationTask {
+public class Replication extends SimulationTask {
 	
 	private static Logger logger = Logger.getLogger(Replication.class);
 	
@@ -23,8 +23,8 @@ public class Replication extends DCSimulationTask {
 		
 		Simulation.initializeLogging();
 		
-		Collection<DCSimulationTask> completedTasks;
-		SimulationExecutor<DCSimulationTask> executor = new SimulationExecutor<DCSimulationTask>();
+		Collection<SimulationTask> completedTasks;
+		SimulationExecutor executor = new SimulationExecutor();
 		
 		executor.addTask(new Replication("replication-1", 1088501048448116498l));
 //		executor.addTask(new Replication("replication-2", 3081198553457496232l));

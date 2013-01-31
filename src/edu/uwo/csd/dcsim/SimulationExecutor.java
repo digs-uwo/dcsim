@@ -12,17 +12,17 @@ import org.apache.log4j.Logger;
  * @author Michael Tighe
  *
  */
-public class SimulationExecutor<T extends SimulationTask> {
+public class SimulationExecutor {
 
 	private static Logger logger = Logger.getLogger(SimulationExecutor.class);
 	
-	private ArrayList<T> tasks = new ArrayList<T>(); //the tasks to execute
+	private ArrayList<SimulationTask> tasks = new ArrayList<SimulationTask>(); //the tasks to execute
 	
 	/**
 	 * Add a task to the Collection of tasks to execute
 	 * @param task
 	 */
-	public void addTask(T task) {
+	public void addTask(SimulationTask task) {
 		tasks.add(task);
 	}
 	
@@ -30,7 +30,7 @@ public class SimulationExecutor<T extends SimulationTask> {
 	 * Add a collection of tasks to execute
 	 * @param tasks
 	 */
-	public void addTasks(Collection<T> taskCollection) {
+	public void addTasks(Collection<SimulationTask> taskCollection) {
 		tasks.addAll(taskCollection);
 	}
 	
@@ -39,15 +39,15 @@ public class SimulationExecutor<T extends SimulationTask> {
 	 * 
 	 * @return
 	 */
-	public Collection<T> execute() {
+	public Collection<SimulationTask> execute() {
 		return execute(Executors.newCachedThreadPool());
 	}
 	
-	public Collection<T> execute(int nThreads) {
+	public Collection<SimulationTask> execute(int nThreads) {
 		return execute(Executors.newFixedThreadPool(nThreads));
 	}
 	
-	private Collection<T> execute(ExecutorService executorService) {
+	private Collection<SimulationTask> execute(ExecutorService executorService) {
 		
 		long startTime = System.currentTimeMillis();
 		

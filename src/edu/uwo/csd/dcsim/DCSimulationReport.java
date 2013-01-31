@@ -13,14 +13,14 @@ public class DCSimulationReport {
 	private static Logger logger = Logger.getLogger(DCSimulationReport.class);
 	
 	private String name;
-	private List<? extends SimulationTask> tasks;
+	private List<SimulationTask> tasks;
 	private Map<String, DescriptiveStatistics> metricStats = new HashMap<String, DescriptiveStatistics>();
 	
-	public DCSimulationReport(ArrayList<? extends SimulationTask> tasks) {
+	public DCSimulationReport(ArrayList<SimulationTask> tasks) {
 		this(tasks.get(0).getName(), tasks);
 	}
 	
-	public DCSimulationReport(String name, ArrayList<? extends SimulationTask> tasks) {
+	public DCSimulationReport(String name, ArrayList<SimulationTask> tasks) {
 		this.tasks = tasks;
 		this.name = name;
 		

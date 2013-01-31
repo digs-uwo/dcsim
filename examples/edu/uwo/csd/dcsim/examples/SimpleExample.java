@@ -27,7 +27,7 @@ import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
  * @author Michael Tighe
  *
  */
-public class SimpleExample extends DCSimulationTask {
+public class SimpleExample extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(SimpleExample.class);
 	
@@ -38,7 +38,7 @@ public class SimpleExample extends DCSimulationTask {
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
 		//DCSimulationTask task = new SimpleExample("simple", 86400000);
-		DCSimulationTask task = new SimpleExample("simple", SimTime.minutes(10));
+		SimulationTask task = new SimpleExample("simple", SimTime.minutes(10));
 		
 		//run the simulation
 		task.run();
@@ -52,7 +52,7 @@ public class SimpleExample extends DCSimulationTask {
 		}
 		
 		//write the metric values to a trace file
-		DCSimulationTraceWriter traceWriter = new DCSimulationTraceWriter(task);
+		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
 		traceWriter.writeTrace();
 		
 	}

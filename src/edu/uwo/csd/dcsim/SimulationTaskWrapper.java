@@ -2,41 +2,38 @@ package edu.uwo.csd.dcsim;
 
 import java.util.Collection;
 
+import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 
 /**
- * DCSimulationTaskWrapper wraps a simulation task for execute in order to act as the sole reference to the task, allowing
+ * SimulationTaskWrapper wraps a simulation task for execute in order to act as the sole reference to the task, allowing
  * task memory to be freed once it has been run.
  * @author Michael Tighe
  *
  */
-public class DCSimulationTaskWrapper implements SimulationTask {
+public class SimulationTaskWrapper extends SimulationTask {
 
-	String name;
-	long randomSeed;
 	SimulationTask task;
 	Collection<Metric> results = null;
 	
-	public DCSimulationTaskWrapper(SimulationTask task) {
+	public SimulationTaskWrapper(SimulationTask task) {
+		super(task.getName(), task.getDuration());
 		this.task = task;
-		this.name = task.getName();
-		this.randomSeed = task.getRandomSeed();
 	}
 	
 	@Override
 	public String getName() {
-		return name;
+		return task.getName();
 	}
 
 	@Override
 	public long getRandomSeed() {
-		return randomSeed;
+		return task.getRandomSeed();
 	}
 
 	@Override
 	public void setRandomSeed(long seed) {
 		if (task != null) {
-			randomSeed = seed;
 			task.setRandomSeed(seed);
 		} else {
 			throw new IllegalStateException("Attempted to set the random seed of a DCSimulationTaskWrapper that contains no task (or is complete)");
@@ -72,6 +69,11 @@ public class DCSimulationTaskWrapper implements SimulationTask {
 			throw new IllegalStateException("Attempted to get results from DCSimulationTaskWrapper which has not executed a task");
 		
 		return results;
+	}
+
+	@Override
+	public void setup(Simulation simulation) {
+		// nothing to do
 	}
 
 	

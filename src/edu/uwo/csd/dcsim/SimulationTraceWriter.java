@@ -8,13 +8,13 @@ import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.core.metrics.Metric.MetricRecord;
 
-public class DCSimulationTraceWriter {
+public class SimulationTraceWriter {
 
-	private static Logger logger = Logger.getLogger(DCSimulationTraceWriter.class);
+	private static Logger logger = Logger.getLogger(SimulationTraceWriter.class);
 	
-	private DCSimulationTask task;
+	private SimulationTask task;
 	
-	public DCSimulationTraceWriter(DCSimulationTask task) {
+	public SimulationTraceWriter(SimulationTask task) {
 		this.task = task;
 	}
 	

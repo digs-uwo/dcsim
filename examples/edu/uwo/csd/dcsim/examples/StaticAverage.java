@@ -9,7 +9,7 @@ import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.vm.*;
 
-public class StaticAverage extends DCSimulationTask {
+public class StaticAverage extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(StaticAverage.class);
 	
@@ -17,8 +17,8 @@ public class StaticAverage extends DCSimulationTask {
 		
 		Simulation.initializeLogging();
 
-		Collection<DCSimulationTask> completedTasks;
-		SimulationExecutor<DCSimulationTask> executor = new SimulationExecutor<DCSimulationTask>();
+		Collection<SimulationTask> completedTasks;
+		SimulationExecutor executor = new SimulationExecutor();
 		
 		executor.addTask(new StaticAverage("staticavg-1", 1088501048448116498l));
 //		executor.addTask(new StaticAverage("staticavg-2", 3081198553457496232l));

@@ -10,7 +10,7 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
-public class DynamicManagement extends DCSimulationTask {
+public class DynamicManagement extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(DynamicManagement.class);
 	
@@ -18,8 +18,8 @@ public class DynamicManagement extends DCSimulationTask {
 		
 		Simulation.initializeLogging();
 		
-		Collection<DCSimulationTask> completedTasks;
-		SimulationExecutor<DCSimulationTask> executor = new SimulationExecutor<DCSimulationTask>();
+		Collection<SimulationTask> completedTasks;
+		SimulationExecutor executor = new SimulationExecutor();
 		
 		executor.addTask(new DynamicManagement("dynamic-1", 1088501048448116498l));
 //		executor.addTask(new DynamicManagement("dynamic-2", 3081198553457496232l));
@@ -29,11 +29,11 @@ public class DynamicManagement extends DCSimulationTask {
 		
 		completedTasks = executor.execute();
 		
-		for(DCSimulationTask task : completedTasks) {
+		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
 			ExampleHelper.printMetrics(task.getResults());
 			
-			DCSimulationTraceWriter traceWriter = new DCSimulationTraceWriter(task);
+			SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
 			traceWriter.writeTrace();
 		}
 

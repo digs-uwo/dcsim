@@ -19,14 +19,14 @@ import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 
-public class DynamicServiceSpawning extends DCSimulationTask {
+public class DynamicServiceSpawning extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(DynamicServiceSpawning.class);
 	
 	public static void main(String args[]) {
 		Simulation.initializeLogging();
 		
-		DCSimulationTask task = new DynamicServiceSpawning("dynamic-service-spawn", 86400000);
+		SimulationTask task = new DynamicServiceSpawning("dynamic-service-spawn", 86400000);
 		
 		task.run();
 		

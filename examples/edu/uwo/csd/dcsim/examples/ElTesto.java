@@ -29,7 +29,7 @@ import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
  * @author Michael Tighe
  *
  */
-public class ElTesto extends DCSimulationTask {
+public class ElTesto extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(ElTesto.class);
 	
@@ -40,7 +40,7 @@ public class ElTesto extends DCSimulationTask {
 		
 		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
 		//DCSimulationTask task = new SimpleExample("simple", 86400000);
-		DCSimulationTask task = new ElTesto("simple", SimTime.minutes(20));
+		SimulationTask task = new ElTesto("simple", SimTime.minutes(20));
 		
 		//run the simulation
 		task.run();
@@ -54,7 +54,7 @@ public class ElTesto extends DCSimulationTask {
 		}
 		
 		//write the metric values to a trace file
-		DCSimulationTraceWriter traceWriter = new DCSimulationTraceWriter(task);
+		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
 		traceWriter.writeTrace();
 		
 	}
