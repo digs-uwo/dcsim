@@ -51,7 +51,7 @@ public class DefaultResourceManager extends ResourceManager {
 		
 		if (hasCapacity(vmAllocationRequest)) {
 			vmAllocation.setCpu(vmAllocationRequest.getCpu());
-			vmAllocation.setMemory(vmAllocationRequest.getCpu());
+			vmAllocation.setMemory(vmAllocationRequest.getMemory());
 			vmAllocation.setBandwidth(vmAllocationRequest.getBandwidth());
 			vmAllocation.setStorage(vmAllocationRequest.getStorage());
 			

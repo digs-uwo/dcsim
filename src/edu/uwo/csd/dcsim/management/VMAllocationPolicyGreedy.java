@@ -117,7 +117,7 @@ public class VMAllocationPolicyGreedy implements Daemon {
 		ArrayList<HostStub> usedSources = new ArrayList<HostStub>();
 		
 		for (HostStub source : sources) {
-			
+
 			//ensure that this source host has not been used as a target for relocation
 			if (!usedTargets.contains(source)) {
 				 
@@ -133,7 +133,7 @@ public class VMAllocationPolicyGreedy implements Daemon {
 									target.hasCapacity(vm) &&														//target has capacity
 									 ((target.getCpuInUse(vm)) / target.getTotalCpu()) <= targetThreshold &&	//target will still not be stressed
 									 target.getHost().isCapable(vm.getVM().getVMDescription())) {				//target is capable
-								 
+
 								 source.migrate(vm, target);
 								 migrationList.add(new MigrationAction(source, target, vm));
 
