@@ -83,9 +83,9 @@ public class DCUtilizationMonitor extends Monitor {
 				hostUtil.put(host,  new DescriptiveStatistics());
 			}
 			
-			hostUtil.get(host).addValue(host.getCpuManager().getCpuInUse());
+			hostUtil.get(host).addValue(host.getResourceManager().getCpuInUse());
 			
-			util += host.getCpuManager().getCpuInUse();
+			util += host.getResourceManager().getCpuInUse();
 			
 			//get VM SLA values
 			for (VMAllocation vmAlloc : host.getVMAllocations()) {							

@@ -93,7 +93,7 @@ public class DataCentre implements SimulationEventListener {
 		for (Host host : hosts) {
 			host.updateMetrics();
 			
-			dcUtilMetric.addHostUse(host.getCpuManager().getCpuInUse(), host.getTotalCpu());
+			dcUtilMetric.addHostUse(host.getResourceManager().getCpuInUse(), host.getTotalCpu());
 		}
 		
 		OptimalPowerRatioMetric.getMetric(simulation, OPTIMAL_POWER_RATIO_METRIC).update(hosts);

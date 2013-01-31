@@ -48,10 +48,8 @@ public class VMPlacementPolicyMBFD extends VMPlacementPolicy {
 			for (Host host : datacentre.getHosts()) {
 				//if host has enough resource for VM
 				if (host.isCapable(vmAllocationRequest.getVMDescription()) &&
-						host.getMemoryManager().hasCapacity(vmAllocationRequest)
-						&& host.getBandwidthManager().hasCapacity(vmAllocationRequest)
-						&& host.getStorageManager().hasCapacity(vmAllocationRequest)
-						&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpu()) {
+						host.getResourceManager().hasCapacity(vmAllocationRequest)
+						&& host.getResourceManager().getAvailableCPUAllocation() >= vmAllocationRequest.getCpu()) {
 					
 					//power = estimate power
 					double power = estimatePower(host, vmAllocationRequest);

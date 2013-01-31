@@ -91,7 +91,7 @@ public abstract class VMRelocationPolicyGreedy implements Daemon {
 		ArrayList<Host> hostList = dc.getHosts();
 		
 		for (Host host : hostList) {
-			double cpuUtilization = host.getCpuManager().getCpuUtilization();
+			double cpuUtilization = host.getResourceManager().getCpuUtilization();
 			
 			if (host.getVMAllocations().size() == 0) {
 				empty.add(new HostStub(host));
@@ -125,7 +125,7 @@ public abstract class VMRelocationPolicyGreedy implements Daemon {
 				avgCpuInUse += x;
 			}
 			avgCpuInUse = avgCpuInUse / this.utilizationMonitor.getWindowSize();
-			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getCpuManager().getTotalCpu());
+			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getResourceManager().getTotalCpu());
 			
 			if (host.getVMAllocations().size() == 0) {
 				empty.add(new HostStub(host));

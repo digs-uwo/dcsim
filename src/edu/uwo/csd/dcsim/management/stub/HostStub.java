@@ -88,7 +88,7 @@ public class HostStub {
 	}
 	
 	public double getTotalCpu() {
-		return host.getCpuManager().getTotalCpu();
+		return host.getResourceManager().getTotalCpu();
 	}
 	
 	public double getUnusedCpu() {

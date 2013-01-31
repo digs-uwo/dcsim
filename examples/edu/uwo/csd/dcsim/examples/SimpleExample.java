@@ -14,10 +14,8 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.HostModels;
-import edu.uwo.csd.dcsim.host.resourcemanager.OversubscribingCpuManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleBandwidthManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleMemoryManagerFactory;
-import edu.uwo.csd.dcsim.host.resourcemanager.SimpleStorageManagerFactory;
+import edu.uwo.csd.dcsim.host.resourcemanager.DefaultResourceManagerFactory;
+import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
@@ -88,22 +86,14 @@ public class SimpleExample extends SimulationTask {
 		 * Create a Host to add to the DataCentre. For this example, we will create a single Host, using
 		 * a factory method in the HostModels class to create a prebuilt host model. This returns
 		 * a Host.Builder object, which has been partially initialized with the properties of the Host. We
-		 * still must add resource managers and a CPU scheduler. This is done by adding factories for the
-		 * resource managers. We add simple managers for all resources, except for CPU, for which we 
-		 * add the Oversubscribing manager. Simple managers allocate a fixed amount of resources up to
-		 * the maximum resource available. The Oversubscribing manager allocates any amount of CPU resources,
-		 * even if the allocated amount exceeds the actual Host capacity.
-		 * 
-		 * We add the FairShareCpuScheduler to the host, which gives each VM a chance to use an equal amount of CPU on the Host. This
-		 * does not mean that each VM will use an equal amount, as it may not require it. In this case, another VM may use the leftover
-		 * CPU.
+		 * still must add the resource manager and resource scheduler. This is done by adding factories for the
+		 * resource manager and scheduler. We add the default manager and scheduler, which creates an oversubscribes
+		 * CPU and schedules it fairly to all running VMs.
 		 */
 		
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
-				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
-				.memoryManagerFactory(new SimpleMemoryManagerFactory())
-				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-				.storageManagerFactory(new SimpleStorageManagerFactory());
+				.resourceManagerFactory(new DefaultResourceManagerFactory())
+				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 		
 		//Instantiate the Host
 		Host host = proLiantDL160G5E5420.build();

@@ -63,14 +63,12 @@ public class VMPlacementPolicyFFD extends VMPlacementPolicy {
 	private Host findTargetHost(VMAllocationRequest vmAllocationRequest, ArrayList<Host> sortedHosts) {
 
 		for (Host host : sortedHosts) {
-			/* check allocations individually in order to override the CPU Manager's hasCapacity method to
+			/* check CPU allocation separately in order to override the CPU Manager's hasCapacity method to
 			 * for the CPU Manager to NOT oversubscribe the initial vm placement
 			 */
 			if (host.isCapable(vmAllocationRequest.getVMDescription())
-					&& host.getMemoryManager().hasCapacity(vmAllocationRequest)
-					&& host.getBandwidthManager().hasCapacity(vmAllocationRequest)
-					&& host.getStorageManager().hasCapacity(vmAllocationRequest)
-					&& host.getCpuManager().getAvailableAllocation() >= vmAllocationRequest.getCpu()) {
+					&& host.getResourceManager().hasCapacity(vmAllocationRequest)
+					&& host.getResourceManager().getAvailableCPUAllocation() >= vmAllocationRequest.getCpu()) {
 				return host;
 			}
 		}

@@ -4,32 +4,28 @@ import java.util.Collection;
 
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.vm.*;
+import edu.uwo.csd.dcsim.vm.VMAllocation;
+import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VMDescription;
 
-/**
- * CpuManager is responsible for allocation and deallocation of CPU resources on a Host, as well as reporting on utilization. 
- * 
- * @author Michael Tighe
- *
- */
-public abstract class CpuManager {
+public abstract class ResourceManager {
 
-	protected Host host; //the host that this CpuManager is managing resources for
+	protected Host host; //the host that this ResourceManager is managing
 	
 	/**
-	 * Get the Host that this CpuManager is managing CPU the resources of
+	 * Get the Host that this ResourceManager is managing CPU the resources of
 	 * @return Host
 	 */
 	public final Host getHost() { 	return host; }
 	
 	/**
-	 * Set the Host that this CpuManager is managing the resources of
+	 * Set the Host that this ResourceManager is managing the resources of
 	 * @param host
 	 */
 	public final void setHost(Host host) { this.host = host; }
 	
 	/*
-	 * Physical CPU related methods
+	 * CPU
 	 */
 	
 	/**
@@ -68,10 +64,6 @@ public abstract class CpuManager {
 	 */
 	public final double getUnusedCpu() { return getTotalCpu() - getCpuUtilization(); }
 	
-	/*
-	 * CPU Allocation methods
-	 */
-	
 	/**
 	 * Get the total amount of CPU that has been allocated. This value may be larger than the physical CPU
 	 * capacity due to oversubscription, but will always be <= the total allocation size
@@ -80,7 +72,10 @@ public abstract class CpuManager {
 	public final int getAllocatedCpu() {
 		int allocatedCpu = 0;
 		
-		if (host.getPrivDomainAllocation() != null) {
+		if (host.getPrivDomainAllocation() != null) {	
+			/*
+			 * CPU Allocation methods
+			 */
 			allocatedCpu += host.getPrivDomainAllocation().getCpu();
 		}
 		
@@ -96,7 +91,113 @@ public abstract class CpuManager {
 	 * @return
 	 */
 	public final int getAvailableCPUAllocation() { return getTotalCpu() - getAllocatedCpu(); }
+	
+	
+	/*
+	 * Memory
+	 */
+	
+	/**
+	 * Get the amount of memory that has been allocated
+	 * @return
+	 */
+	public final int getAllocatedMemory() {
+		int memory = 0;
 		
+		if (host.getPrivDomainAllocation() != null) {
+			memory += host.getPrivDomainAllocation().getMemory();
+		}
+		
+		for (VMAllocation vmAllocation : host.getVMAllocations()) {
+			memory += vmAllocation.getMemory();
+		}
+		return memory;
+	}
+	
+	/**
+	 * Get the amount of memory still available to be allocated
+	 * @return
+	 */
+	public final int getAvailableMemory() { return getTotalMemory() - getAllocatedMemory(); }
+	
+	/**
+	 * Get the total amount of memory on the Host
+	 * @return
+	 */
+	public final int getTotalMemory() { return getHost().getMemory(); }
+	
+	
+	/*
+	 * Bandwidth
+	 */
+	
+	/**
+	 * Get the total bandwidth available on the host
+	 * @return
+	 */
+	public final int getTotalBandwidth() { 	return getHost().getBandwidth(); }
+	
+	/**
+	 * Get the amount of bandwidth that has been allocated to VMs
+	 * @return
+	 */
+	public final int getAllocatedBandwidth() {
+		int bandwidth = 0;
+		
+		if (host.getPrivDomainAllocation() != null) {
+			bandwidth += host.getPrivDomainAllocation().getBandwidth();
+		}
+		
+		for (VMAllocation allocation : host.getVMAllocations()) {
+			bandwidth += allocation.getBandwidth();
+		}
+		return bandwidth;
+	}
+	
+	/**
+	 * Get the amount of bandwidth still available to be allocated
+	 * @return
+	 */
+	public final int getAvailableBandwidth() { return getTotalBandwidth() - getAllocatedBandwidth(); }
+	
+	
+	/*
+	 * Storage
+	 */
+	
+	/**
+	 * Get the total amount of storage on the Host
+	 * @return
+	 */
+	public final long getTotalStorage() { return getHost().getStorage(); }
+	
+	/**
+	 * Get the amount of storage that has been allocated to VMs	
+	 * @return
+	 */
+	public final long getAllocatedStorage() {
+		long storage = 0;
+		
+		if (host.getPrivDomainAllocation() != null)
+			storage += host.getPrivDomainAllocation().getStorage();
+		
+		for (VMAllocation vmAllocation : host.getVMAllocations()) {
+			storage += vmAllocation.getStorage();
+		}
+		return storage;
+	}
+	
+	/**
+	 * Get the amount of storage still available to be allocated to VMs
+	 * @return
+	 */
+	public final long getAvailableStorage() { return getTotalStorage() - getAllocatedStorage(); }
+	
+	
+	/*
+	 * Capability and Capacity checks
+	 */
+	
 	/**
 	 * Verify whether this Host possesses the required capabilities to Host a VM with the specified
 	 * VMDescription. Does not consider current allocation of other VMs running on the host.
@@ -109,16 +210,27 @@ public abstract class CpuManager {
 			return false;
 		if (vmDescription.getCoreCapacity() > this.getHost().getCoreCapacity())
 			return false;
-				
+		
+		//check total memory
+		if (vmDescription.getMemory() > getTotalMemory())
+			return false;
+		
+		//check total bandwidth
+		if (vmDescription.getBandwidth() > getTotalBandwidth())
+			return false;
+		
+		//check total storage
+		if (vmDescription.getStorage() > getTotalStorage())
+			return false;
+		
 		return true;
 	}
 	
 	/**
-	 * Determine if the Host has enough remaining capacity to host a VM or set of VMs requiring the specified amount of cpu.
-	 * @param cpu
+	 * Determine if the Host has enough remaining capacity to host a VM or set of VMs requiring the specified amount of resource.
 	 * @return
 	 */
-	public abstract boolean hasCapacity(int cpu);
+	public abstract boolean hasCapacity(int cpu, int memory, int bandwidth, long storage);
 	
 	/**
 	 * Determine if the Host has enough remaining capacity to host the VM.
@@ -152,6 +264,6 @@ public abstract class CpuManager {
 	 * Allocate resources to the privileged domain
 	 * @param privDomainAllocation
 	 */
-	public abstract void allocatePrivDomain(VMAllocation privDomainAllocation, int allocation);
+	public abstract void allocatePrivDomain(VMAllocation privDomainAllocation, int cpu, int memory, int bandwidth, long storage);
 	
 }

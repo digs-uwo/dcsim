@@ -14,12 +14,12 @@ public class SimpleCpuManager extends CpuManager {
 	
 	@Override
 	public boolean hasCapacity(int cpu) {
-		return cpu <= getAvailableAllocation();
+		return cpu <= getAvailableCPUAllocation();
 	}
 	
 	@Override
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return vmAllocationRequest.getCpu() <= this.getAvailableAllocation();
+		return vmAllocationRequest.getCpu() <= this.getAvailableCPUAllocation();
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class SimpleCpuManager extends CpuManager {
 		for (VMAllocationRequest allocationRequest : vmAllocationRequests)
 			totalAlloc += allocationRequest.getCpu();
 		
-		return totalAlloc <= this.getAvailableAllocation();
+		return totalAlloc <= this.getAvailableCPUAllocation();
 	}
 	
 	@Override

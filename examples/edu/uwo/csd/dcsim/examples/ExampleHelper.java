@@ -63,17 +63,11 @@ public class ExampleHelper {
 			Host host;
 			
 			Host.Builder proLiantDL360G5E5450 = HostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
-					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
-					.memoryManagerFactory(new SimpleMemoryManagerFactory())
-					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-					.storageManagerFactory(new SimpleStorageManagerFactory())
+					.resourceManagerFactory(new DefaultResourceManagerFactory())
 					.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 			
 			Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
-					.cpuManagerFactory(new OversubscribingCpuManagerFactory())
-					.memoryManagerFactory(new SimpleMemoryManagerFactory())
-					.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-					.storageManagerFactory(new SimpleStorageManagerFactory())
+					.resourceManagerFactory(new DefaultResourceManagerFactory())
 					.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 			
 			if (i % 2 == 1) {

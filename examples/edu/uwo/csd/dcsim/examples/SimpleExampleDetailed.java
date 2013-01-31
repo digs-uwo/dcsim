@@ -82,22 +82,13 @@ public class SimpleExampleDetailed extends SimulationTask {
 		/*
 		 * Create a Host to add to the DataCentre. For this example, we will create a single Host using the Host.Builder class.
 		 * 
-		 * We add simple managers for all resources, except for CPU, for which we 
-		 * add the Oversubscribing manager. Simple managers allocate a fixed amount of resources up to
-		 * the maximum resource available. The Oversubscribing manager allocates any amount of CPU resources,
-		 * even if the allocated amount exceeds the actual Host capacity.
-		 * 
-		 * We add the FairShareCpuScheduler to the host, which gives each VM a chance to use an equal amount of CPU on the Host. This
-		 * does not mean that each VM will use an equal amount, as it may not require it. In this case, another VM may use the leftover
-		 * CPU.
+		 * We add the default manager and scheduler, which creates an oversubscribes
+		 * CPU and schedules it fairly to all running VMs.
 		 */
 		
 		Host host = new Host.Builder(simulation).nCpu(2).nCores(4).coreCapacity(2500).memory(16384).bandwidth(1310720).storage(36864)
 				.privCpu(500).privBandwidth(131072)
-				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
-				.memoryManagerFactory(new SimpleMemoryManagerFactory())
-				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-				.storageManagerFactory(new SimpleStorageManagerFactory())
+				.resourceManagerFactory(new DefaultResourceManagerFactory())
 				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory())
 				.powerModel(new LinearHostPowerModel(150, 300))
 				.build();
