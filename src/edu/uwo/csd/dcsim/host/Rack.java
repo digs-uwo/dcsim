@@ -6,9 +6,8 @@ import edu.uwo.csd.dcsim.common.*;
 import edu.uwo.csd.dcsim.core.*;
 
 /**
- * A Rack within a DataCentre. Hosts a collection of blades or servers and two 
- * switches (one for the regular communications network and the other for the 
- * management network).
+ * A rack within a data centre. Hosts a collection of blades or servers and two
+ * switches (data and management networks, respectively).
  * 
  * @author Gaston Keller
  *
@@ -26,7 +25,7 @@ public final class Rack implements SimulationEventListener {
 	
 	private ArrayList<Host> hosts = null;						// List of hosts.
 	
-	//private Switch netSwitch = new Switch();					// Communications network switch.
+	//private Switch dataSwitch = new Switch();					// Data network switch.
 	//private Switch mgmtSwitch = new Switch();					// Management network switch.
 	
 	// Do we want a _state_ attribute ???
@@ -40,7 +39,7 @@ public final class Rack implements SimulationEventListener {
 		this.nSlots = builder.nSlots;
 		this.nHosts = builder.nHosts;
 		
-		hosts = new ArrayList<Host>(nHosts);
+		this.hosts = new ArrayList<Host>(nHosts);
 		for (int i = 0; i < nHosts; i++) {
 			this.hosts.add(builder.hostBuilder.build());
 		}
@@ -115,7 +114,7 @@ public final class Rack implements SimulationEventListener {
 	
 	public ArrayList<Host> getHosts() { return hosts; }
 	
-	//public Switch getNetSwitch() { return newSwitch; }
+	//public Switch getDataSwitch() { return dataSwitch; }
 	
 	//public Switch getMgmtSwitch() { return mgmtSwitch; }
 
