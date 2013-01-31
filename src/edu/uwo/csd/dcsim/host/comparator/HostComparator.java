@@ -43,7 +43,7 @@ public enum HostComparator implements Comparator<Host> {
 	},
 	CPU_UTIL {
 		public int compare(Host o1, Host o2) {
-			double compare = o1.getCpuManager().getCpuUtilization() - o2.getCpuManager().getCpuUtilization(); 
+			double compare = o1.getResourceManager().getCpuUtilization() - o2.getResourceManager().getCpuUtilization(); 
 			if (compare < 0)
 				return -1;
 			else if (compare > 0)
@@ -53,7 +53,7 @@ public enum HostComparator implements Comparator<Host> {
 	},
 	CPU_IN_USE {
 		public int compare(Host o1, Host o2) {
-			double compare = o1.getCpuManager().getCpuInUse() - o2.getCpuManager().getCpuInUse(); 
+			double compare = o1.getResourceManager().getCpuInUse() - o2.getResourceManager().getCpuInUse(); 
 			if (compare < 0)
 				return -1;
 			else if (compare > 0)

@@ -56,10 +56,7 @@ public final class Host implements SimulationEventListener {
 	private int bandwidth; //in KB
 	private long storage; //in MB
 	
-	private CpuManager cpuManager; 
-	private MemoryManager memoryManager;
-	private BandwidthManager bandwidthManager;
-	private StorageManager storageManager;
+	private ResourceManager resourceManager;
 	private ResourceScheduler resourceScheduler;
 	private HostPowerModel powerModel;
 	
@@ -97,10 +94,7 @@ public final class Host implements SimulationEventListener {
 		this.bandwidth = builder.bandwidth;
 		this.storage = builder.storage;
 		
-		setCpuManager(builder.cpuManagerFactory.newInstance());
-		setMemoryManager(builder.memoryManagerFactory.newInstance());
-		setBandwidthManager(builder.bandwidthManagerFactory.newInstance());
-		setStorageManager(builder.storageManagerFactory.newInstance());
+		setResourceManager(builder.resourceManagerFactory.newInstance());
 		setHostPowerModel(builder.powerModel);
 		setResourceScheduler(builder.resourceSchedulerFactory.newInstance());
 		
@@ -117,10 +111,7 @@ public final class Host implements SimulationEventListener {
 		privDomainAllocation = new VMAllocation(privDomainDescription, this);
 		
 		//request allocations from resource managers. Each manager determines how much resource to allocate
-		cpuManager.allocatePrivDomain(privDomainAllocation, builder.privCpu);
-		memoryManager.allocatePrivDomain(privDomainAllocation, builder.privMemory);
-		bandwidthManager.allocatePrivDomain(privDomainAllocation, builder.privBandwidth);
-		storageManager.allocatePrivDomain(privDomainAllocation, builder.privStorage);
+		resourceManager.allocatePrivDomain(privDomainAllocation, builder.privCpu, builder.privMemory, builder.privBandwidth, builder.privStorage);
 
 		PrivDomainVM privVM = new PrivDomainVM(simulation, privDomainDescription, privDomainDescription.getApplicationFactory().createApplication(simulation));
 		privDomainAllocation.attachVm(privVM);
@@ -151,10 +142,7 @@ public final class Host implements SimulationEventListener {
 		private int privBandwidth = 0;
 		private long privStorage = 0;
 		
-		private ObjectFactory<? extends CpuManager> cpuManagerFactory = null;
-		private ObjectFactory<? extends MemoryManager> memoryManagerFactory = null;
-		private ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory = null;
-		private ObjectFactory<? extends StorageManager> storageManagerFactory = null;
+		private ObjectFactory<? extends ResourceManager> resourceManagerFactory = null;
 		private ObjectFactory<? extends ResourceScheduler> resourceSchedulerFactory = null;
 		
 		private HostPowerModel powerModel = null;
@@ -187,23 +175,8 @@ public final class Host implements SimulationEventListener {
 		
 		public Builder privStorage(long val) {this.privStorage = val; return this;}
 		
-		public Builder cpuManagerFactory(ObjectFactory<? extends CpuManager> cpuManagerFactory) {
-			this.cpuManagerFactory = cpuManagerFactory;
-			return this;
-		}
-		
-		public Builder memoryManagerFactory(ObjectFactory<? extends MemoryManager> memoryManagerFactory) {
-			this.memoryManagerFactory = memoryManagerFactory;
-			return this;
-		}
-		
-		public Builder bandwidthManagerFactory(ObjectFactory<? extends BandwidthManager> bandwidthManagerFactory) {
-			this.bandwidthManagerFactory = bandwidthManagerFactory;
-			return this;
-		}
-		
-		public Builder storageManagerFactory(ObjectFactory<? extends StorageManager> storageManagerFactory) {
-			this.storageManagerFactory = storageManagerFactory;
+		public Builder resourceManagerFactory(ObjectFactory<? extends ResourceManager> resourceManagerFactory) {
+			this.resourceManagerFactory = resourceManagerFactory;
 			return this;
 		}
 		
@@ -227,14 +200,8 @@ public final class Host implements SimulationEventListener {
 			
 			if (nCpu == -1 || nCores == -1 || coreCapacity == -1 || memory == -1 || bandwidth == -1 || storage == -1)
 				throw new IllegalStateException("Must specific Host resources before building Host");
-			if (cpuManagerFactory == null)
-				throw new IllegalStateException("Must specify CPU Manager factory before building Host");
-			if (bandwidthManagerFactory == null)
-				throw new IllegalStateException("Must specify Bandwidth Manager factory before building Host");
-			if (memoryManagerFactory == null)
-				throw new IllegalStateException("Must specify Memory Manager factory before building Host");
-			if (storageManagerFactory == null)
-				throw new IllegalStateException("Must specify Storage Manager factory before building Host");
+			if (resourceManagerFactory == null)
+				throw new IllegalStateException("Must specify Resource Manager factory before building Host");
 			if (resourceSchedulerFactory == null)
 				throw new IllegalStateException("Must specify Resource Scheduler factory before building Host");
 			if (powerModel == null)
@@ -313,7 +280,7 @@ public final class Host implements SimulationEventListener {
 	 */
 	
 	public double getCurrentPowerConsumption() {
-		return powerModel.getPowerConsumption(state, getCpuManager().getCpuUtilization());
+		return powerModel.getPowerConsumption(state, getResourceManager().getCpuUtilization());
 	}
 	
 
@@ -346,53 +313,29 @@ public final class Host implements SimulationEventListener {
 
 	
 	public boolean isCapable(VMDescription vmDescription) {
-		return cpuManager.isCapable(vmDescription) && 
-				memoryManager.isCapable(vmDescription) &&	
-				bandwidthManager.isCapable(vmDescription) && 
-				storageManager.isCapable(vmDescription);
+		return resourceManager.isCapable(vmDescription);
 	}
 	
 	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
-		return cpuManager.hasCapacity(vmAllocationRequest) &&
-				memoryManager.hasCapacity(vmAllocationRequest) &&
-				bandwidthManager.hasCapacity(vmAllocationRequest) &&
-				storageManager.hasCapacity(vmAllocationRequest);
+		return resourceManager.hasCapacity(vmAllocationRequest);
 	}
 	
 	public boolean hasCapacity(ArrayList<VMAllocationRequest> vmAllocationRequests) {
-		return cpuManager.hasCapacity(vmAllocationRequests) &&
-				memoryManager.hasCapacity(vmAllocationRequests) &&
-				bandwidthManager.hasCapacity(vmAllocationRequests) &&
-				storageManager.hasCapacity(vmAllocationRequests);
+		return resourceManager.hasCapacity(vmAllocationRequests);
 	}
 	
 	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) throws AllocationFailedException {
 		VMAllocation vmAllocation = new VMAllocation(vmAllocationRequest.getVMDescription(), this);
 		
-		//allocate CPU
-		if (!cpuManager.allocateResource(vmAllocationRequest, vmAllocation))
-			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on CPU");
-		
-		//allocate memory
-		if (!memoryManager.allocateResource(vmAllocationRequest, vmAllocation))
-			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on memory");
-		
-		//allocate bandwidth
-		if (!bandwidthManager.allocateResource(vmAllocationRequest, vmAllocation))
-			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on bandwidth");
-		
-		//allocate storage
-		if (!storageManager.allocateResource(vmAllocationRequest, vmAllocation))
-			throw new AllocationFailedException("Allocation on host #" + getId() + " failed on storage");
+		//allocate resources
+		if (!resourceManager.allocateResource(vmAllocationRequest, vmAllocation))
+			throw new AllocationFailedException("Allocation on host #" + getId() + " failed");
 		
 		return vmAllocation;
 	}
 	
 	public void deallocate(VMAllocation vmAllocation) {
-		cpuManager.deallocateResource(vmAllocation);
-		memoryManager.deallocateResource(vmAllocation);
-		bandwidthManager.deallocateResource(vmAllocation);
-		storageManager.deallocateResource(vmAllocation);
+		resourceManager.deallocateResource(vmAllocation);
 		
 		vmAllocations.remove(vmAllocation);
 	}
@@ -662,10 +605,10 @@ public final class Host implements SimulationEventListener {
 		if (simulation.getLogger().isDebugEnabled()) {
 			if (state == HostState.ON) {
 				simulation.getLogger().debug("Host #" + getId() + 
-						" CPU[" + (int)Math.round(cpuManager.getCpuInUse()) + "/" + cpuManager.getTotalCpu() + "] " +
-						" BW[" + bandwidthManager.getAllocatedBandwidth() + "/" + bandwidthManager.getTotalBandwidth() + "] " +
-						" MEM[" + memoryManager.getAllocatedMemory() + "/" + memoryManager.getTotalMemory() + "] " +
-						" STORAGE[" + storageManager.getAllocatedStorage() + "/" + storageManager.getTotalStorage() + "] " +
+						" CPU[" + (int)Math.round(resourceManager.getCpuInUse()) + "/" + resourceManager.getTotalCpu() + "] " +
+						" BW[" + resourceManager.getAllocatedBandwidth() + "/" + resourceManager.getTotalBandwidth() + "] " +
+						" MEM[" + resourceManager.getAllocatedMemory() + "/" + resourceManager.getTotalMemory() + "] " +
+						" STORAGE[" + resourceManager.getAllocatedStorage() + "/" + resourceManager.getTotalStorage() + "] " +
 						"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
 				privDomainAllocation.getVm().logState();
 			} else {
@@ -684,16 +627,16 @@ public final class Host implements SimulationEventListener {
 	
 	public void updateMetrics() {
 		
-		if (getCpuManager().getCpuUtilization() > 1)
-			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));
+		if (getResourceManager().getCpuUtilization() > 1)
+			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getResourceManager().getCpuUtilization() * 100));
 	
-		if (getCpuManager().getCpuUtilization() < 0)
-			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getCpuManager().getCpuUtilization() * 100));	
+		if (getResourceManager().getCpuUtilization() < 0)
+			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getResourceManager().getCpuUtilization() * 100));	
 		
 		
 		if (state == HostState.ON) {
 			
-			HostAvgCpuUtilMetric.getMetric(simulation, AVERAGE_UTILIZATION_METRIC).addHostUtilization(getCpuManager().getCpuUtilization());
+			HostAvgCpuUtilMetric.getMetric(simulation, AVERAGE_UTILIZATION_METRIC).addHostUtilization(getResourceManager().getCpuUtilization());
 			ActiveHostMetric.getMetric(simulation, ACTIVE_HOST_METRIC).incrementHostCount();
 			MaxMetric.getMetric(simulation, MAX_ACTIVE_METRIC).incrementCount();
 			MinMetric.getMetric(simulation, MIN_ACTIVE_METRIC).incrementCount();
@@ -703,10 +646,10 @@ public final class Host implements SimulationEventListener {
 		
 		//Power metrics
 		PowerMetric.getMetric(simulation, POWER_CONSUMPTION_METRIC).addHostPowerConsumption(getCurrentPowerConsumption());
-		PowerEfficiencyMetric.getMetric(simulation, POWER_EFFICIENCY_METRIC).addHostInfo(getCpuManager().getCpuInUse(), getCurrentPowerConsumption());
+		PowerEfficiencyMetric.getMetric(simulation, POWER_EFFICIENCY_METRIC).addHostInfo(getResourceManager().getCpuInUse(), getCurrentPowerConsumption());
 		
 		//DataCentre utilization metric
-		DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC).addHostUse(getCpuManager().getCpuInUse(), getTotalCpu());
+		DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC).addHostUse(getResourceManager().getCpuInUse(), getTotalCpu());
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null)
@@ -744,35 +687,14 @@ public final class Host implements SimulationEventListener {
 	public HostState getState() { return state; }
 	
 	public void setState(HostState state) { this.state = state; }
-	
-	public CpuManager getCpuManager() { 	return cpuManager;	}
-	
-	public MemoryManager getMemoryManager() { return memoryManager;}
-	
-	public BandwidthManager getBandwidthManager() { return bandwidthManager; }
-	
-	public StorageManager getStorageManager() { 	return storageManager; }
+		
+	public ResourceManager getResourceManager() {	return resourceManager;	 }
 	
 	public ResourceScheduler getResourceScheduler() { return resourceScheduler; } 
-	
-	public void setCpuManager(CpuManager cpuManager) {
-		this.cpuManager = cpuManager;
-		cpuManager.setHost(this);
-	}
 		
-	public void setMemoryManager(MemoryManager memoryManager) {
-		this.memoryManager = memoryManager;
-		memoryManager.setHost(this);
-	}
-	
-	public void setBandwidthManager(BandwidthManager bandwidthManager) {
-		this.bandwidthManager = bandwidthManager;
-		bandwidthManager.setHost(this);
-	}
-	
-	public void setStorageManager(StorageManager storageManager) {
-		this.storageManager = storageManager;
-		storageManager.setHost(this);
+	public void setResourceManager(ResourceManager resourceManager) {
+		this.resourceManager = resourceManager;
+		resourceManager.setHost(this);
 	}
 	
 	public void setResourceScheduler(ResourceScheduler resourceScheduler) {

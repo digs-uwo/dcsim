@@ -52,7 +52,7 @@ public class VMConsolidationPolicySimple implements Daemon {
 			}
 			avgCpuInUse = avgCpuInUse / this.utilizationMonitor.getWindowSize();
 			
-			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getCpuManager().getTotalCpu());
+			double avgCpuUtilization = Utility.roundDouble(avgCpuInUse / host.getResourceManager().getTotalCpu());
 			
 			if (host.getVMAllocations().size() == 0) {
 				empty.add(new HostStub(host));

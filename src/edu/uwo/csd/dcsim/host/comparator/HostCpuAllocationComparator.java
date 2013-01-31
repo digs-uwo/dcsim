@@ -14,7 +14,7 @@ public class HostCpuAllocationComparator implements Comparator<Host>  {
 
 	@Override
 	public int compare(Host arg0, Host arg1) {
-		double compare = arg0.getCpuManager().getAllocatedCpu() - arg1.getCpuManager().getAllocatedCpu(); 
+		double compare = arg0.getResourceManager().getAllocatedCpu() - arg1.getResourceManager().getAllocatedCpu(); 
 		if (compare < 0)
 			return -1;
 		else if (compare > 0)

@@ -123,10 +123,7 @@ public class Replication extends SimulationTask {
 		ArrayList<Host> hosts = new ArrayList<Host>(nHosts);
 		
 		Host.Builder proLiantDL360G5E5450 = HostModels.ProLiantDL360G5E5450(simulation).privCpu(500).privBandwidth(131072)
-				.cpuManagerFactory(new OversubscribingCpuManagerFactory())
-				.memoryManagerFactory(new SimpleMemoryManagerFactory())
-				.bandwidthManagerFactory(new SimpleBandwidthManagerFactory())
-				.storageManagerFactory(new SimpleStorageManagerFactory())
+				.resourceManagerFactory(new DefaultResourceManagerFactory())
 				.resourceSchedulerFactory(new DefaultResourceSchedulerFactory());
 		
 		for (int i = 0; i < nHosts; ++i) {						

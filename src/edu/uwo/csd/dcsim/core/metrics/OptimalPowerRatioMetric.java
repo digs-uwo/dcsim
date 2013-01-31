@@ -24,10 +24,10 @@ public class OptimalPowerRatioMetric extends Metric {
 	public void update(ArrayList<Host> hosts) {
 		
 		for (Host host : hosts) {
-			currentCpuInUse += host.getCpuManager().getCpuInUse();
+			currentCpuInUse += host.getResourceManager().getCpuInUse();
 			currentPowerConsumption += host.getCurrentPowerConsumption();
 			
-			totalCpuUsed += host.getCpuManager().getCpuInUse() * simulation.getElapsedSeconds();
+			totalCpuUsed += host.getResourceManager().getCpuInUse() * simulation.getElapsedSeconds();
 			totalPowerConsumed += host.getCurrentPowerConsumption() * simulation.getElapsedSeconds();
 		}
 		
