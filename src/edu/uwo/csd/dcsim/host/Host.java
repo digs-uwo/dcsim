@@ -622,6 +622,17 @@ public final class Host implements SimulationEventListener {
 					simulation.getLogger().debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
 				}
 			}
+			
+			//VISUALIZATION TOOL OUTPUT TODO REMOVE
+//			simulation.getLogger().debug(",#h," + getId() + "," + state + "," + (int)Math.round(resourceManager.getCpuInUse()) + "," +
+//					resourceManager.getAllocatedBandwidth() + "," + resourceManager.getAllocatedMemory() + "," + resourceManager.getAllocatedStorage() + "," + 
+//					Utility.roundDouble(this.getCurrentPowerConsumption(), 2));
+//			privDomainAllocation.getVm().logState();
+//			
+//			for (VMAllocation vmAllocation : vmAllocations) {
+//				if (vmAllocation.getVm() != null)
+//					vmAllocation.getVm().logState();
+//			}
 		}
 	}
 	

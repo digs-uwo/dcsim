@@ -100,6 +100,14 @@ public class VM implements SimulationEventListener {
 				"/" + vmAllocation.getMemory() + "] " +
 				"STORAGE[" + resourcesScheduled.getStorage() + 
 				"/" + vmAllocation.getStorage() + "]");
+		
+		//VISUALIZATION TOOL OUTPUT TODO REMOVE
+//		simulation.getLogger().debug(",#v," + getId() + "," + vmAllocation.getHost().getId() + "," + 
+//				Utility.roundDouble(resourcesScheduled.getCpu(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "," + 
+//				Utility.roundDouble(resourcesScheduled.getBandwidth(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getBandwidth(), 2) + "," + 
+//				resourcesScheduled.getMemory() + "," + vmAllocation.getMemory() + "," +
+//				resourcesScheduled.getStorage() + "," + vmAllocation.getStorage());
+		
 	}
 	
 	public boolean isMigrating() {
