@@ -231,11 +231,6 @@ public class Simulation implements SimulationEventListener {
 				lastUpdate = simulationTime;
 				simulationTime = e.getTime();
 				advanceSimulation(hosts);
-				
-				//log current state
-				for (DataCentre dc : datacentres) {
-					dc.logState();			
-				}
 
 				if (this.isRecordingMetrics()) {	
 					//update data centre/host/vm metrics
@@ -267,6 +262,11 @@ public class Simulation implements SimulationEventListener {
 				
 			}
 
+			//log current state
+			for (DataCentre dc : datacentres) {
+				dc.logState();			
+			}
+			
 			//execute current events
 			while (!eventQueue.isEmpty() && (eventQueue.peek().getTime() == simulationTime)) {
 				e = eventQueue.poll();
