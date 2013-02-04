@@ -7,6 +7,7 @@ import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.VmExecutionOrderComparator;
 import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.Utility;
+import edu.uwo.csd.dcsim.core.events.*;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.scheduler.ResourceScheduler;
@@ -32,11 +33,6 @@ public class Simulation implements SimulationEventListener {
 	public static final String DEFAULT_LOGGER_CONVERSION_PATTERN = "%-10s %-5p - %m%n";
 	public static final String DEFAULT_LOGGER_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
 	public static final String DEFAULT_LOGGER_FILE_NAME = "dcsim-%n-%d";
-	
-	//Event types
-	public static final int SIMULATION_TERMINATE_EVENT = 1;
-	public static final int SIMULATION_RECORD_METRICS_EVENT = 2;
-	public static final int SIMULATION_RUN_MONITORS_EVENT = 3;
 	
 	//directory constants
 	private static String homeDirectory = null;
@@ -185,12 +181,12 @@ public class Simulation implements SimulationEventListener {
 		
 		//configure simulation duration
 		this.duration = duration;
-		sendEvent(new Event(Simulation.SIMULATION_TERMINATE_EVENT, duration, this, this)); //this event runs at the last possible time in the simulation to ensure simulation updates
+		sendEvent(new TerminateSimulationEvent(this), duration); //this event runs at the last possible time in the simulation to ensure simulation updates
 		
 		if (metricRecordStart > 0) {
 			recordingMetrics = false;
 			this.metricRecordStart = metricRecordStart;
-			sendEvent(new Event(Simulation.SIMULATION_RECORD_METRICS_EVENT, metricRecordStart, this, this));
+			sendEvent(new RecordMetricsEvent(this), metricRecordStart);
 		} else {
 			recordingMetrics = true;
 		}
@@ -205,7 +201,7 @@ public class Simulation implements SimulationEventListener {
 						
 			//make sure that the event is in the future
 			if (e.getTime() < simulationTime)
-				throw new IllegalStateException("Encountered event (" + e.getType() + ") with time < current simulation time from class " + e.getSource().getClass().toString());
+				throw new IllegalStateException("Encountered event (" + e.getClass() + ") with time < current simulation time");
 			
 			if (e.getTime() == simulationTime && e.getTime() != 0)
 				throw new IllegalStateException("Encountered event with time == current simulation time when advance in time was expected. This should never occur.");
@@ -262,7 +258,7 @@ public class Simulation implements SimulationEventListener {
 							nextMonitor = nextExec;
 					}
 					//trigger an event to ensure that any monitors that must run do so
-					sendEvent(new Event(Simulation.SIMULATION_RUN_MONITORS_EVENT, nextMonitor, this, this));
+					sendEvent(new RunMonitorsEvent(this), nextMonitor);
 				}
 				
 			}
@@ -271,7 +267,10 @@ public class Simulation implements SimulationEventListener {
 			while (!eventQueue.isEmpty() && (eventQueue.peek().getTime() == simulationTime)) {
 				e = eventQueue.poll();
 				
-				e.getTarget().handleEvent(e);
+				e.getTarget().handleEvent(e);	//the target handles the event
+				e.postExecute();				//run any additional logic required by the event
+				e.log();						//log event
+				e.triggerCallback();			//trigger any objects awaiting a post-event callback
 			}
 			
 		}
@@ -404,28 +403,30 @@ public class Simulation implements SimulationEventListener {
 	
 	}
 	
-	public final void sendEvent(Event event) {
+	public final void sendEvent(Event event, long time) {
+		event.initialize(this);
 		event.setSendOrder(++eventSendCount);
+		event.setTime(time);
 		eventQueue.add(event);
+	}
+	
+	public final void sendEvent(Event event) {
+		sendEvent(event, getSimulationTime());
 	}
 	
 	@Override
 	public final void handleEvent(Event e) {
-		switch (e.getType()) {
-			case Simulation.SIMULATION_TERMINATE_EVENT:
-				//Do nothing. This ensures that the simulation is fully up-to-date upon termination.
-				logger.debug("Terminating Simulation");
-				break;
-			case Simulation.SIMULATION_RECORD_METRICS_EVENT:
-				logger.debug("Metric recording started");
-				recordingMetrics = true;
-				break;
-			case Simulation.SIMULATION_RUN_MONITORS_EVENT:
-				//Do nothing. This ensures that monitors are run in the case that no other event is scheduled.
-				break;
-			default:
-				throw new RuntimeException("Simulation received unknown event type");
+		
+		if (e instanceof TerminateSimulationEvent) {
+			//nothing to do, just let the simulation terminate
+		} else if (e instanceof RecordMetricsEvent) {
+			recordingMetrics = true;
+		} else if (e instanceof RunMonitorsEvent) {
+			//nothing to do, this will ensure that the simulation processes the monitors in case no other event is scheduled
+		} else {
+			throw new RuntimeException("Simulation received unknown event type");
 		}
+
 	}
 	
 	public final Logger getLogger() {

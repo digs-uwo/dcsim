@@ -9,6 +9,8 @@ import edu.uwo.csd.dcsim.common.ObjectFactory;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.*;
+import edu.uwo.csd.dcsim.host.events.*;
+import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.host.power.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.*;
@@ -21,21 +23,6 @@ import edu.uwo.csd.dcsim.vm.*;
  *
  */
 public final class Host implements SimulationEventListener {
-	
-	/**
-	 * Event types for events that Host receives
-	 */
-	public static final int HOST_SUBMIT_VM_EVENT = 1;
-	
-	public static final int HOST_POWER_ON_EVENT = 2;
-	public static final int HOST_POWER_OFF_EVENT = 3;
-	public static final int HOST_SUSPEND_EVENT = 4;
-	public static final int HOST_COMPLETE_POWER_ON_EVENT = 5;
-	public static final int HOST_COMPLETE_SUSPEND_EVENT = 6;
-	public static final int HOST_COMPLETE_POWER_OFF_EVENT = 7;
-	
-	public static final int HOST_MIGRATE_EVENT = 8;
-	public static final int HOST_MIGRATE_COMPLETE_EVENT = 9;
 	
 	public static final String ACTIVE_HOST_METRIC = "activeHosts";
 	public static final String MIN_ACTIVE_METRIC = "minActiveHosts";
@@ -218,60 +205,76 @@ public final class Host implements SimulationEventListener {
 		/**if the Host is in the process of powering on, queue any received events. This effectively
 		 * simulates the event sender retrying until the host has powered on, in a simplified fashion.
 		 */
-		if (state == Host.HostState.POWERING_ON && e.getType() != HOST_COMPLETE_POWER_ON_EVENT) {
+		
+		//determine if we should queue the event (all events except the POWER_ON completion event are queued
+		boolean queueEvent = false; //assume no queuing
+		if (state == Host.HostState.POWERING_ON) {
+			//the host is powering on, so assume queuing
+			queueEvent = true;
+			
+			if (e instanceof PowerStateEvent) {
+				PowerStateEvent powerEvent = (PowerStateEvent)e;
+				if (powerEvent.getPowerState() == PowerStateEvent.PowerState.POWER_ON &&
+						powerEvent.isComplete()) {
+					queueEvent = false; //this is the event that will complete the host POWER_ON operation, let it through (do not queue)
+				}
+			}
+		}
+		
+		//if the event should be queued, do so
+		if (queueEvent) {
 			powerOnEventQueue.add(e);
 			
-			if (e.getType() == Host.HOST_MIGRATE_EVENT) {
-				Host source = (Host)e.getData().get("source");
-				VM vm = (VM)e.getData().get("vm");
-				source.markVmForMigration(vm);
+			//if the queued event is for migration, inform the source of the pending migration
+			if (e instanceof MigrateVmEvent) {
+				MigrateVmEvent migrateEvent = (MigrateVmEvent)e;			
+				migrateEvent.getSource().markVmForMigration(migrateEvent.getVM());
 			}
 			
 			return;
 		}
-		
-		VMAllocationRequest vmAllocationRequest;
-		VMAllocation vmAllocation;
-		VM vm;
-		Host source;
-		
-		switch (e.getType()) {
-			case Host.HOST_SUBMIT_VM_EVENT:
-				vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
-				submitVM(vmAllocationRequest);
-				break;
-			case Host.HOST_POWER_ON_EVENT:
-				powerOn();
-				break;
-			case Host.HOST_COMPLETE_POWER_ON_EVENT:
-				completePowerOn();
-				break;
-			case Host.HOST_POWER_OFF_EVENT:
-				powerOff();
-				break;
-			case Host.HOST_COMPLETE_POWER_OFF_EVENT:
-				completePowerOff();
-				break;
-			case Host.HOST_SUSPEND_EVENT:
-				suspend();
-				break;
-			case Host.HOST_COMPLETE_SUSPEND_EVENT:
-				completeSuspend();
-				break;
-			case Host.HOST_MIGRATE_EVENT:
-				vmAllocationRequest = (VMAllocationRequest)e.getData().get("vmAllocationRequest");
-				vm = (VM)e.getData().get("vm");
-				source = (Host)e.getData().get("source");
-				this.migrateIn(vmAllocationRequest, vm, source);
-				break;
-			case Host.HOST_MIGRATE_COMPLETE_EVENT:
-				vmAllocation = (VMAllocation)e.getData().get("vmAllocation");
-				vm = (VM)e.getData().get("vm");
-				source = (Host)e.getData().get("source");
-				this.completeMigrationIn(vmAllocation, vm, source);
-				break;
-			default:
-				throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getType());
+
+		if (e instanceof SubmitVmEvent) {
+			//Submit VM Event, trigger a new VM to be allocated to this host
+			
+			SubmitVmEvent submitEvent = (SubmitVmEvent)e;
+			submitVM(submitEvent.getRequest());
+		} else if (e instanceof PowerStateEvent) {
+			//PowerStateEvent, indicating that the host must change power state
+			
+			PowerStateEvent powerEvent = (PowerStateEvent)e;
+			if (powerEvent.getPowerState() == PowerState.POWER_ON) {
+				if (powerEvent.isComplete()) {
+					completePowerOn();
+				} else {
+					powerOn();
+				}
+			} else if (powerEvent.getPowerState() == PowerState.POWER_OFF) {
+				if (powerEvent.isComplete()) {
+					completePowerOff();
+				} else {
+					powerOff();
+				}
+			} else if (powerEvent.getPowerState() == PowerState.SUSPEND) {
+				if (powerEvent.isComplete()) {
+					completeSuspend();
+				} else {
+					suspend();
+				}
+			}
+		} else if (e instanceof MigrateVmEvent) {
+			//MigrateVmEvent, triggering a VM migration to this host
+			
+			MigrateVmEvent migrateEvent = (MigrateVmEvent)e;
+			if (migrateEvent.isComplete()) {
+				this.completeMigrationIn(migrateEvent.getVMAllocation(), migrateEvent.getVM(), migrateEvent.getSource());
+			} else {
+				this.migrateIn(migrateEvent.getVMAllocationRequest(), migrateEvent.getVM(), migrateEvent.getSource());
+			}
+			
+		} else {
+			//unknown event
+			throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getClass());
 		}
 	}
 	
@@ -352,14 +355,9 @@ public final class Host implements SimulationEventListener {
 	 * @param source The host running the VM to be migrated. Note that this may be different than the Event source, since a third entity may trigger the migration.
 	 */
 	public void sendMigrationEvent(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
-		Event e = new Event(Host.HOST_MIGRATE_EVENT, 
-				simulation.getSimulationTime(),
-				source, 
-				this);
-		e.getData().put("vmAllocationRequest", vmAllocationRequest);
-		e.getData().put("vm", vm);
-		e.getData().put("source", source);
-		simulation.sendEvent(e);
+		
+		simulation.sendEvent(new MigrateVmEvent(source, this, vmAllocationRequest, vm));
+
 	}
 	
 	private void markVmForMigration(VM vm) {
@@ -385,7 +383,7 @@ public final class Host implements SimulationEventListener {
 	 * @param source
 	 */
 	private void migrateIn(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
-		
+
 		//verify source
 		if (vm.getVMAllocation().getHost() != source)
 			throw new IllegalStateException("Migration failed: Source (host #" + source.getId() + ") does not match VM (#" + 
@@ -422,23 +420,20 @@ public final class Host implements SimulationEventListener {
 		
 		//for now, assume 1/4 of bandwidth available to VMM is used for each migration... TODO calculate this properly!
 		long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesScheduled().getMemory() * 1024) / ((double)privDomainAllocation.getBandwidth() / 4)) * 1000);
-
+	
 		//send migration completion message
-		Event e = new Event(Host.HOST_MIGRATE_COMPLETE_EVENT,
-				simulation.getSimulationTime() + timeToMigrate,
-				this, this);
-		e.getData().put("vmAllocation", newAllocation);
-		e.getData().put("vm", vm);
-		e.getData().put("source", source);
-		simulation.sendEvent(e);
+		simulation.sendEvent(new MigrateVmEvent(source, this, newAllocation, vm), simulation.getSimulationTime() + timeToMigrate);
+		
 	}
 	
 	private void migrateOut(VM vm) {
 		//get the allocation for this vm
 		VMAllocation vmAllocation = vm.getVMAllocation();
 		
-		if (migratingOut.contains(vmAllocation))
+		if (migratingOut.contains(vmAllocation)) {
+			System.out.println("?");
 			throw new IllegalStateException("Migrate out failed: VM #" + vm.getId() + " is already migrating out of Host #" + getId() + ".");
+		}
 		
 		migratingOut.add(vmAllocation);
 		
@@ -459,7 +454,7 @@ public final class Host implements SimulationEventListener {
 	 * @param source
 	 */
 	private void completeMigrationIn(VMAllocation vmAllocation, VM vm, Host source) {
-		
+
 		//first, inform the source host the the VM has completed migrating out
 		source.completeMigrationOut(vm);
 		
@@ -505,10 +500,8 @@ public final class Host implements SimulationEventListener {
 		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
 			long delay = Long.parseLong(Simulation.getProperty("hostSuspendDelay"));
-			simulation.sendEvent(
-					new Event(Host.HOST_COMPLETE_SUSPEND_EVENT,
-							simulation.getSimulationTime() + delay,
-							this, this));
+			
+			simulation.sendEvent(new PowerStateEvent(this, PowerState.SUSPEND, true), simulation.getSimulationTime() + delay);
 		}
 	}
 	
@@ -521,10 +514,9 @@ public final class Host implements SimulationEventListener {
 			} else {
 				state = HostState.POWERING_OFF;
 				long delay = Long.parseLong(Simulation.getProperty("hostPowerOffDelay"));
-				simulation.sendEvent(
-						new Event(Host.HOST_COMPLETE_POWER_OFF_EVENT,
-								simulation.getSimulationTime() + delay,
-								this, this));
+				
+				simulation.sendEvent(new PowerStateEvent(this, PowerState.POWER_OFF, true), simulation.getSimulationTime() + delay);
+				
 				powerOffAfterMigrations = false;
 			}
 		}
@@ -554,10 +546,7 @@ public final class Host implements SimulationEventListener {
 					break;
 			}
 			
-			simulation.sendEvent(
-				new Event(Host.HOST_COMPLETE_POWER_ON_EVENT,
-						simulation.getSimulationTime() + delay,
-						this, this));
+			simulation.sendEvent(new PowerStateEvent(this, PowerState.POWER_ON, true), simulation.getSimulationTime() + delay);
 			
 			state = HostState.POWERING_ON;
 		}

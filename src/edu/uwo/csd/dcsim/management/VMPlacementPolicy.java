@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.*;
+import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
+import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.vm.*;
 
 public abstract class VMPlacementPolicy implements SimulationEventListener {
@@ -49,12 +51,7 @@ public abstract class VMPlacementPolicy implements SimulationEventListener {
 		
 		//if the host is not ON or POWERING_ON, then send an event to power on the host
 		if (host.getState() != Host.HostState.ON && host.getState() != Host.HostState.POWERING_ON) {
-			simulation.sendEvent(
-					new Event(Host.HOST_POWER_ON_EVENT,
-							simulation.getSimulationTime(),
-							this,
-							host)
-					);
+			simulation.sendEvent(new PowerStateEvent(host, PowerState.POWER_ON));
 		}
 		
 		//if the host is set to shutdown upon completion of outgoing migrations, cancel this shutdown

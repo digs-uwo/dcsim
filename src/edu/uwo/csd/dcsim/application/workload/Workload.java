@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.application.workload;
 import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.application.WorkProducer;
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.core.events.DaemonRunEvent;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 
 /**
@@ -12,8 +13,6 @@ import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
  *
  */
 public abstract class Workload implements SimulationEventListener, WorkProducer {
-	
-	public static final int WORKLOAD_UPDATE_WORKLEVEL_EVENT = 1;
 	
 	protected Simulation simulation;
 	private double totalWork = 0;
@@ -25,8 +24,7 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 		this.simulation = simulation;
 		
 		//schedule initial update event
-		simulation.sendEvent(
-				new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, simulation.getSimulationTime(), this, this));
+		simulation.sendEvent(new DaemonRunEvent(this));
 	}
 	
 	/**
@@ -95,11 +93,10 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	
 	@Override
 	public void handleEvent(Event e) {
-		if (e.getType() == Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT) {
+		if (e instanceof DaemonRunEvent) {
 			long nextEventTime = updateWorkLevel();
 			if (nextEventTime > simulation.getSimulationTime()) {
-				simulation.sendEvent(
-						new Event(Workload.WORKLOAD_UPDATE_WORKLEVEL_EVENT, nextEventTime, this, this));
+				simulation.sendEvent(new DaemonRunEvent(this), nextEventTime);
 			}
 		}
 	}

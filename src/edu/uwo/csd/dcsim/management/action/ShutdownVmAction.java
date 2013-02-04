@@ -3,6 +3,8 @@ package edu.uwo.csd.dcsim.management.action;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.ActionCountMetric;
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
+import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class ShutdownVmAction implements ManagementAction {
@@ -36,12 +38,7 @@ public class ShutdownVmAction implements ManagementAction {
 		
 		//if the host will no longer contain any VMs, instruct it to shut down
 		if (host.getVMAllocations().size() == 0) {
-			simulation.sendEvent(
-					new Event(Host.HOST_POWER_OFF_EVENT,
-							simulation.getSimulationTime(),
-							triggeringEntity,
-							host)
-					);
+			simulation.sendEvent(new PowerStateEvent(host, PowerState.POWER_OFF));
 		}
 	}
 	

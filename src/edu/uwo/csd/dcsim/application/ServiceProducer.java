@@ -1,14 +1,16 @@
-package edu.uwo.csd.dcsim;
+package edu.uwo.csd.dcsim.application;
 
 import java.util.*;
 
 import org.apache.commons.math3.distribution.*;
 
-import edu.uwo.csd.dcsim.application.Service;
+import edu.uwo.csd.dcsim.DataCentre;
+import edu.uwo.csd.dcsim.application.events.*;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
+import edu.uwo.csd.dcsim.core.events.DaemonRunEvent;
 import edu.uwo.csd.dcsim.core.metrics.AggregateMetric;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
@@ -21,9 +23,6 @@ import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
  */
 public abstract class ServiceProducer implements SimulationEventListener {
 
-	private final static int SPAWN_SERVICE_EVENT = 1;
-	private final static int SHUTDOWN_SERVICE_EVENT = 2;
-	private final static int RATE_CHANGE_EVENT = 3;
 	private final static String SPAWN_COUNT_METRIC = "servicesSpawned";
 	private final static String PLACEMENT_FAIL_METRIC = "servicePlacementsFailed";
 	private final static String SHUTDOWN_COUNT_METRIC = "servicesEnded";
@@ -82,7 +81,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		
 		long nextEvent = (servicesPerHour.get((currentRate + 1) % servicesPerHour.size()).a) + startTime;
 				
-		simulation.sendEvent(new Event(RATE_CHANGE_EVENT, nextEvent, this, this));
+		simulation.sendEvent(new DaemonRunEvent(this), nextEvent);
 	}
 	
 	public abstract Service buildService();
@@ -102,9 +101,8 @@ public abstract class ServiceProducer implements SimulationEventListener {
 			//send event to trigger service shutdown on lifespan + currentTime
 			if (lifespanDist != null) {
 				long lifeSpan = (long)Math.round(lifespanDist.sample());
-				Event shutdownEvent = new Event(SHUTDOWN_SERVICE_EVENT, simulation.getSimulationTime() + lifeSpan, this, this);
-				shutdownEvent.getData().put("service", service);
-				simulation.sendEvent(shutdownEvent);
+				
+				simulation.sendEvent(new ShutdownServiceEvent(this, service), simulation.getSimulationTime() + lifeSpan);
 			}
 			
 		} else {
@@ -132,9 +130,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		 */
 		else {
 			long delay = (long)Math.round(simulation.getRandom().nextDouble() * 30000 + 15000);
-			Event shutdownEvent = new Event(SHUTDOWN_SERVICE_EVENT, simulation.getSimulationTime() + delay, this, this);
-			shutdownEvent.getData().put("service", service);
-			simulation.sendEvent(shutdownEvent);
+			simulation.sendEvent(new ShutdownServiceEvent(this, service), simulation.getSimulationTime() + delay);
 		}
 
 	}
@@ -150,28 +146,27 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		if (!(arrivalDist.getMean() == Double.POSITIVE_INFINITY)) {
 			long nextSpawn =  simulation.getSimulationTime() + (long)Math.round(arrivalDist.sample());
 			
-			Event spawnEvent = new Event(SPAWN_SERVICE_EVENT, nextSpawn, this, this);
-			spawnEvent.getData().put("currentRate", new Integer(currentRate));
-			simulation.sendEvent(spawnEvent);
+			simulation.sendEvent(new SpawnServiceEvent(this, currentRate), nextSpawn);
 		}
 	}
 
 	
 	@Override
 	public final void handleEvent(Event e) {
-		if (e.getType() == SPAWN_SERVICE_EVENT) {
+		if (e instanceof SpawnServiceEvent) {
 			/*
 			 * We must verify that this event was sent during the current rate, otherwise we may have two separate "threads" of
 			 * service spawning events
 			 */
-			int rate = (Integer)e.getData().get("currentRate"); 
-			if (rate == currentRate) {
+			SpawnServiceEvent spawnEvent = (SpawnServiceEvent)e; 
+			if (spawnEvent.getCurrentRate() == currentRate) {
 				spawnService();
 				sendNextSpawnEvent();
 			}
-		} else if (e.getType() == SHUTDOWN_SERVICE_EVENT) {
-			shutdownService((Service)e.getData().get("service"));
-		} else if (e.getType() == RATE_CHANGE_EVENT) {
+		} else if (e instanceof ShutdownServiceEvent) {
+			ShutdownServiceEvent shutdownEvent = (ShutdownServiceEvent)e;
+			shutdownService(shutdownEvent.getService());
+		} else if (e instanceof DaemonRunEvent) {
 			int previousRate = currentRate;
 			currentRate = (currentRate + 1) % servicesPerHour.size();
 			

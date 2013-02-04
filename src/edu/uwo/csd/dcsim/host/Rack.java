@@ -13,9 +13,6 @@ import edu.uwo.csd.dcsim.core.*;
  *
  */
 public final class Rack implements SimulationEventListener {
-
-	// List of events that the rack can receive.
-	// ...
 	
 	private Simulation simulation;
 	
@@ -96,12 +93,6 @@ public final class Rack implements SimulationEventListener {
 	@Override
 	public void handleEvent(Event e) {
 		// TODO Auto-generated method stub
-		
-		switch (e.getType()) {
-			//case:
-			default:
-				throw new RuntimeException("Rack #" + getId() + " received unknown event type "+ e.getType());
-		}
 	}
 	
 	// Accessor and mutator methods.

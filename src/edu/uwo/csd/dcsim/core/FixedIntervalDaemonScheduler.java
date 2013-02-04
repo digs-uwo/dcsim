@@ -1,8 +1,8 @@
 package edu.uwo.csd.dcsim.core;
 
+import edu.uwo.csd.dcsim.core.events.DaemonRunEvent;
+
 public class FixedIntervalDaemonScheduler implements DaemonScheduler, SimulationEventListener {
-	
-	public static final int DAEMON_RUN_EVENT = 1;
 	
 	long frequency;
 	protected Simulation simulation;
@@ -23,7 +23,7 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	public final void start(long time) {
 		running = true;
 		daemon.onStart(simulation);
-		simulation.sendEvent(new Event(DAEMON_RUN_EVENT, time, this, this));
+		simulation.sendEvent(new DaemonRunEvent(this), time);
 	}
 	
 	public final void stop() {
@@ -37,11 +37,11 @@ public class FixedIntervalDaemonScheduler implements DaemonScheduler, Simulation
 	
 	@Override
 	public final void handleEvent(Event e) {
-		if (e.getType() == DAEMON_RUN_EVENT) {
+		if (e instanceof DaemonRunEvent) {
 			if (running) {
 				if (enabled)
 					daemon.run(simulation);
-				simulation.sendEvent(new Event(DAEMON_RUN_EVENT, getNextRunTime(), this, this));
+				simulation.sendEvent(new DaemonRunEvent(this), getNextRunTime());
 			}
 		}
 	}
