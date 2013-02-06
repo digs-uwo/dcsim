@@ -8,8 +8,8 @@ public abstract class Policy {
 
 	private boolean enabled = true;
 	
-	//public abstract List<Event type? + Message type?> getTriggerEvents();
-	
+	//public abstract void enactPolicy(AutonomicManager context); //possibly required for initial setup TODO remove if not used
+	public abstract List<Event> getTriggerEvents();
 	public abstract boolean evaluateConditions(Event event, AutonomicManager context);
 	public abstract void execute(Event event, AutonomicManager context);
 	

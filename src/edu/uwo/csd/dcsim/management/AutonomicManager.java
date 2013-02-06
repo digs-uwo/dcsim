@@ -26,9 +26,14 @@ public abstract class AutonomicManager implements SimulationEventListener {
 	@Override
 	public void handleEvent(Event e) {
 		//for each policy
+		for (Policy policy : policies) {
 			//if enabled && triggered by this event
-				//if checkConditions == true
-					//execute policy
+			if (policy.isEnabled() && policy.getTriggerEvents().contains(e.getClass())) {
+			//if checkConditions == true
+				//execute policy
+			}
+		}
+			
 	}
 
 }
