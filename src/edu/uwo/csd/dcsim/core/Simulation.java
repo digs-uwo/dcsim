@@ -414,6 +414,10 @@ public class Simulation implements SimulationEventListener {
 		sendEvent(event, getSimulationTime());
 	}
 	
+	public final void dequeueEvent(Event event) {
+		eventQueue.remove(event);
+	}
+	
 	@Override
 	public final void handleEvent(Event e) {
 		
