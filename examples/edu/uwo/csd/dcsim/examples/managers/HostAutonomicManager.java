@@ -1,22 +1,20 @@
 package edu.uwo.csd.dcsim.examples.managers;
 
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.host.*;
 
 public class HostAutonomicManager extends AutonomicManager {
 
+	private Host host;
 	private AutonomicManager parentManager;
 	
-	public HostAutonomicManager() {
-
+	public HostAutonomicManager(Host host, AutonomicManager parentManager) {
+		this.host = host;
+		this.parentManager = parentManager;
 	}
 	
-	public void installPolicy(HostPolicy policy) {
-		super.installPolicy(policy);
-	}
-	
-	
-	public void uninstallPolicy(HostPolicy policy) {
-		super.uninstallPolicy(policy);
+	public Host getHost() {
+		return host;
 	}
 	
 	public AutonomicManager getParentManager() {

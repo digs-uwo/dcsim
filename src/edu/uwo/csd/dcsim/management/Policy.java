@@ -10,8 +10,8 @@ public abstract class Policy<T extends AutonomicManager> {
 	
 	//public abstract void enactPolicy(AutonomicManager context); //possibly required for initial setup TODO remove if not used
 	public abstract List<Class <? extends Event>> getTriggerEvents();
-	public abstract boolean evaluateConditions(Event event, T context);
-	public abstract void execute(Event event, T context);
+	public abstract boolean evaluateConditions(Event event, T context, Simulation simulation);
+	public abstract void execute(Event event, T context, Simulation simulation);
 	
 	public boolean isEnabled() {
 		return enabled;

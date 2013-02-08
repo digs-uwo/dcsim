@@ -72,4 +72,8 @@ public abstract class Event {
 		return sendOrder;
 	}
 	
+	public Simulation getSimulation() {
+		return simulation;
+	}
+	
 }

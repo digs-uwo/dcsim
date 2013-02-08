@@ -64,7 +64,9 @@ public class AutonomicManagement extends SimulationTask {
 		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		simulation.addDatacentre(dc);
 		
-
+		DataCentreManager dcAM = new DataCentreManager();
+		dcAM.installPolicy(new HostStatePolicy());
+		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
 				.resourceManagerFactory(new DefaultResourceManagerFactory())
@@ -75,8 +77,10 @@ public class AutonomicManagement extends SimulationTask {
 		for (int i = 0; i < N_HOSTS; ++i) {
 			host = proLiantDL160G5E5420.build();
 			
-//			HostAutonomicManager hostAm = new HostAutonomicManager(new SimpleAutonomicManager());
-//			hostAm.installPolicy(new TestPolicy());
+			HostAutonomicManager hostAM = new HostAutonomicManager(host, dcAM);
+			hostAM.installPolicy(new HostMonitoringPolicy());
+			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.hours(1));
+			event.start();
 			
 			dc.addHost(host);
 		}
@@ -98,13 +102,8 @@ public class AutonomicManagement extends SimulationTask {
 		//submit the VMs to the datacentre for placement
 		vmPlacementPolicy.submitVMs(vmList);
 		
-		//create host autonomic manager
-		HostAutonomicManager hostAM = new HostAutonomicManager();
-		hostAM.installPolicy(new TestPolicy());
 		
-		//test repeating event
-		ConsolidateEvent event = new ConsolidateEvent(simulation, hostAM, SimTime.hours(1));
-		event.start();
+		
 		
 	}
 
