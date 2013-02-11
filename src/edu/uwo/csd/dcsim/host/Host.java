@@ -43,6 +43,9 @@ public final class Host implements SimulationEventListener {
 	private int bandwidth; //in KB
 	private long storage; //in MB
 	
+	private NetworkCard dataNetworkCard;
+	private NetworkCard mgmtNetworkCard;
+	
 	private ResourceManager resourceManager;
 	private ResourceScheduler resourceScheduler;
 	private HostPowerModel powerModel;
@@ -687,6 +690,14 @@ public final class Host implements SimulationEventListener {
 	public HostState getState() { return state; }
 	
 	public void setState(HostState state) { this.state = state; }
+	
+	public NetworkCard getDataNetworkCard() { return dataNetworkCard; }
+	
+	public void setDataNetworkCard(NetworkCard dataNetworkCard) { this.dataNetworkCard = dataNetworkCard; }
+	
+	public NetworkCard getMgmtNetworkCard() { return mgmtNetworkCard; }
+	
+	public void setMgmtNetworkCard(NetworkCard mgmtNetworkCard) { this.mgmtNetworkCard = mgmtNetworkCard; }
 		
 	public ResourceManager getResourceManager() {	return resourceManager;	 }
 	

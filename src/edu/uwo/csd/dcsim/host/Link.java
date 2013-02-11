@@ -2,15 +2,16 @@ package edu.uwo.csd.dcsim.host;
 
 /**
  * A network link within a data centre. It connects two instances of 
- * NetworkingElement.
+ * NetworkingElement. Its bandwidth is defined at creation time, taking the 
+ * minimum bandwidth of the two Networking Elements it connects.
  * 
  * @author Gaston Keller
  *
  */
 public class Link {
 
-	private int bw = 0; 			// in KB
-	private int bwInUse = 0; 		// in KB
+	private int bandwidth = 0; 				// in KB
+	private int bandwidthInUse = 0; 		// in KB
 	
 	// Links can be Host-Switch or Switch-Switch.
 	private final NetworkingElement endpointA;
@@ -19,19 +20,19 @@ public class Link {
 	/**
 	 * Creates an instance of Link.
 	 */
-	public Link(int bw, NetworkingElement endpointOne, NetworkingElement endpointTwo) {
-		this.bw = bw;
+	public Link(NetworkingElement endpointOne, NetworkingElement endpointTwo) {
 		this.endpointA = endpointOne;
 		this.endpointB = endpointTwo;
+		this.bandwidth = Math.min(endpointOne.getBandwidth(), endpointTwo.getBandwidth());
 	}
 	
 	// Accessor and mutator methods.
 	
-	public int getBw() { return bw;	}
+	public int getBandwidth() { return bandwidth; }
 	
-	public int getBwInUse() { return bwInUse; }
+	public int getBandwidthInUse() { return bandwidthInUse; }
 	
-	public void setBwInUse(int bwInUse) { this.bwInUse = bwInUse; }
+	public void setBandwidthInUse(int bandwidthInUse) { this.bandwidthInUse = bandwidthInUse; }
 	
 	public NetworkingElement getEndpointOne() { return endpointA; }
 	

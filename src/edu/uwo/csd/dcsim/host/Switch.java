@@ -10,6 +10,7 @@ import java.util.ArrayList;
  */
 public class Switch implements NetworkingElement {
 
+	private int bandwidth = 0; 			// in KB
 	private int nPorts = 0;
 	private int power = 0;
 	
@@ -19,13 +20,16 @@ public class Switch implements NetworkingElement {
 	/**
 	 * Creates an instance of Switch.
 	 */
-	public Switch(int ports, int power) {
+	public Switch(int bandwidth, int ports, int power) {
+		this.bandwidth = bandwidth;
 		this.nPorts = ports;
 		this.power = power;
 		this.ports = new ArrayList<Link>(ports);
 	}
 	
 	// Accessor and mutator methods.
+	
+	public int getBandwidth() { return bandwidth; }
 	
 	public int getPortCount() { return nPorts; }
 	
