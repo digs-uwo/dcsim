@@ -62,6 +62,12 @@ public final class Cluster implements SimulationEventListener {
 			this.racks.add(rack);
 		}
 		
+		// TODO Connect switches (in both networks)
+		
+		// Are we connecting the switches (in both networks) to each other 
+		// (mesh topology), or are we adding a central, higher-level switch to 
+		// which all other switches are connected (star topology)?		
+		
 		// Set default state.
 		//state = RackState.OFF;
 	}

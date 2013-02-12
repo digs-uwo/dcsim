@@ -12,6 +12,10 @@ import edu.uwo.csd.dcsim.management.*;
 /**
  * Represents a single simulated DataCentre, which consists of a set of Host machines.
  * 
+ * Represents a single simulated data centre, which consists of a set of 
+ * Clusters, connected through two central switches (data and management 
+ * networks, respectively).
+ * 
  * @author Michael Tighe
  *
  */
@@ -24,6 +28,11 @@ public class DataCentre implements SimulationEventListener {
 	VMPlacementPolicy vmPlacementPolicy; //the placement policy for this datacentre
 	Simulation simulation;
 	
+	private ArrayList<Cluster> clusters = null;				// Clusters in this data centre.
+	
+	private Switch dataNetworkSwitch = null;				// Data network switch.
+	private Switch mgmtNetworkSwitch = null;				// Management network switch.
+	
 	/**
 	 * Creates a new DataCentre, specifying the VMPlacementPolicy that will be used
 	 * to place VMs in the DataCentre
@@ -35,6 +44,16 @@ public class DataCentre implements SimulationEventListener {
 		
 		this.vmPlacementPolicy = vmPlacementPolicy;
 		vmPlacementPolicy.setDataCentre(this);
+	}
+	
+	/**
+	 * Creates an instance of DataCentre.
+	 */
+	public DataCentre(Simulation simulation, SwitchFactory switchFactory) {
+		this.simulation = simulation;
+		this.dataNetworkSwitch = switchFactory.newInstance();
+		this.mgmtNetworkSwitch = switchFactory.newInstance();
+		this.clusters = new ArrayList<Cluster>();
 	}
 	
 	/**
@@ -114,5 +133,32 @@ public class DataCentre implements SimulationEventListener {
 			power += host.getCurrentPowerConsumption();
 		return power;
 	}
+	
+	/**
+	 * Adds a cluster to the data centre, connecting it to both data and 
+	 * management networks.
+	 */
+	public void addCluster(Cluster cluster) {
+		// TODO Connect cluster to networks.
+		// If clusters have two layers of network (lower layer and central 
+		// switch), here we have to connect the clusters' central switch to 
+		// the corresponding data centre's switch.
+		// Otherwise, we have to create a central switch for the cluster and 
+		// connect that switch to the data centre's switch.
+		
+		// Set Data Network.
+		// ...
+		
+		// Set Management Network.
+		// ...
+		
+		clusters.add(cluster);
+	}
+	
+	public ArrayList<Cluster> getClusters() { return clusters; }
+	
+	public Switch getDataNetworkSwitch() { return dataNetworkSwitch; }
+	
+	public Switch getMgmtNetworkSwitch() { return mgmtNetworkSwitch; }
 	
 }
