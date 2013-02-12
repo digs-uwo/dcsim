@@ -84,6 +84,9 @@ public final class Host implements SimulationEventListener {
 		this.bandwidth = builder.bandwidth;
 		this.storage = builder.storage;
 		
+		this.dataNetworkCard = new NetworkCard(this.bandwidth);
+		this.mgmtNetworkCard = new NetworkCard(this.bandwidth);
+		
 		setResourceManager(builder.resourceManagerFactory.newInstance());
 		setHostPowerModel(builder.powerModel);
 		setResourceScheduler(builder.resourceSchedulerFactory.newInstance());
