@@ -20,10 +20,10 @@ public final class Rack implements SimulationEventListener {
 	private int nSlots = 0;				// Number of hosts that can be hosted in the rack.
 	private int nHosts = 0;				// Number of hosts actually hosted in the rack.
 	
-	private ArrayList<Host> hosts = null;						// List of hosts.
+	private ArrayList<Host> hosts = null;					// List of hosts.
 	
-	//private Switch dataSwitch = new Switch();					// Data network switch.
-	//private Switch mgmtSwitch = new Switch();					// Management network switch.
+	private Switch dataNetworkSwitch = null;				// Data network switch.
+	private Switch mgmtNetworkSwitch = null;				// Management network switch.
 	
 	// Do we want a _state_ attribute ???
 	
@@ -36,9 +36,26 @@ public final class Rack implements SimulationEventListener {
 		this.nSlots = builder.nSlots;
 		this.nHosts = builder.nHosts;
 		
+		this.dataNetworkSwitch = builder.switchFactory.newInstance();
+		this.mgmtNetworkSwitch = builder.switchFactory.newInstance();
+		
 		this.hosts = new ArrayList<Host>(nHosts);
 		for (int i = 0; i < nHosts; i++) {
-			this.hosts.add(builder.hostBuilder.build());
+			Host host = builder.hostBuilder.build();
+			
+			// Set Data Network.
+			NetworkCard networkCard = host.getDataNetworkCard();
+			Link link = new Link(networkCard, dataNetworkSwitch);
+			networkCard.setLink(link);
+			dataNetworkSwitch.addPort(link);
+			
+			// Set Management Network.
+			networkCard = host.getMgmtNetworkCard();
+			link = new Link(networkCard, mgmtNetworkSwitch);
+			networkCard.setLink(link);
+			mgmtNetworkSwitch.addPort(link);
+			
+			this.hosts.add(host);
 		}
 		
 		// Set default state.
@@ -59,6 +76,7 @@ public final class Rack implements SimulationEventListener {
 		private int nHosts = 0;
 		
 		private Host.Builder hostBuilder = null;
+		private SwitchFactory switchFactory = null;
 		
 		public Builder(Simulation simulation) {
 			if (simulation == null)
@@ -75,6 +93,11 @@ public final class Rack implements SimulationEventListener {
 			return this;
 		}
 		
+		public Builder switchFactory(SwitchFactory switchFactory) {
+			this.switchFactory = switchFactory;
+			return this;
+		}
+		
 		@Override
 		public Rack build() {
 			
@@ -84,6 +107,8 @@ public final class Rack implements SimulationEventListener {
 				throw new IllegalStateException("Number of hosts exceeds Rack's slot capacity.");
 			if (hostBuilder == null)
 				throw new IllegalStateException("Must specify Host builder before building Rack.");
+			if (switchFactory == null)
+				throw new IllegalStateException("Must specify Switch factory before building Rack.");
 			
 			return new Rack(this);
 		}
@@ -105,8 +130,8 @@ public final class Rack implements SimulationEventListener {
 	
 	public ArrayList<Host> getHosts() { return hosts; }
 	
-	//public Switch getDataSwitch() { return dataSwitch; }
+	public Switch getDataNetworkSwitch() { return dataNetworkSwitch; }
 	
-	//public Switch getMgmtSwitch() { return mgmtSwitch; }
+	public Switch getMgmtNetworkSwitch() { return mgmtNetworkSwitch; }
 
 }
