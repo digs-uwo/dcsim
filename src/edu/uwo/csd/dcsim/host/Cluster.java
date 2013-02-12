@@ -18,11 +18,12 @@ public final class Cluster implements SimulationEventListener {
 	
 	private int id = 0;
 	private int nRacks = 0;				// Number of racks in the cluster.
+	private int nSwitches = 0;			// Number of switches in the cluster.
 	
 	private ArrayList<Rack> racks = null;						// List of racks.
 	
-	//private ArrayList<Switch> dataNet = new ArrayList<Switch>();					// Data network switches.
-	//private ArrayList<Switch> mgmtNet = new ArrayList<Switch>();					// Management network switches.
+	private ArrayList<Switch> dataSwitches = null;				// Data network switches.
+	private ArrayList<Switch> mgmtSwitches = null;				// Management network switches.
 	
 	// Do we want a _state_ attribute ???
 	
@@ -33,10 +34,32 @@ public final class Cluster implements SimulationEventListener {
 		this.id = simulation.nextId(Cluster.class.toString());
 		
 		this.nRacks = builder.nRacks;
+		this.nSwitches = builder.nSwitches;
+		
+		this.dataSwitches = new ArrayList<Switch>(nSwitches);
+		this.mgmtSwitches = new ArrayList<Switch>(nSwitches);
+		for (int i = 0; i < nSwitches; i++) {
+			this.dataSwitches.add(builder.switchFactory.newInstance());
+			this.mgmtSwitches.add(builder.switchFactory.newInstance());
+		}
 		
 		this.racks = new ArrayList<Rack>(nRacks);
 		for (int i = 0; i < nRacks; i++) {
-			this.racks.add(builder.rackBuilder.build());
+			Rack rack = builder.rackBuilder.build();
+			
+			// Set Data Network.
+			Switch rackSwitch = rack.getDataNetworkSwitch();
+			Link link = new Link(rackSwitch, dataSwitches.get(i % nSwitches));
+			rackSwitch.setUpLink(link);
+			dataSwitches.get(i % nSwitches).addPort(link);
+			
+			// Set Management Network.
+			rackSwitch = rack.getMgmtNetworkSwitch();
+			link = new Link(rackSwitch, mgmtSwitches.get(i % nSwitches));
+			rackSwitch.setUpLink(link);
+			mgmtSwitches.get(i % nSwitches).addPort(link);
+			
+			this.racks.add(rack);
 		}
 		
 		// Set default state.
@@ -54,8 +77,10 @@ public final class Cluster implements SimulationEventListener {
 		private final Simulation simulation;
 		
 		private int nRacks = 0;
+		private int nSwitches = 0;
 		
 		private Rack.Builder rackBuilder = null;
+		private SwitchFactory switchFactory = null;
 		
 		public Builder(Simulation simulation) {
 			if (simulation == null)
@@ -63,20 +88,29 @@ public final class Cluster implements SimulationEventListener {
 			this.simulation = simulation;
 		}
 		
-		public Builder nRacks(int val) {this.nRacks = val; return this;}
+		public Builder nRacks(int val) { this.nRacks = val; return this; }
+		
+		public Builder nSwitches(int val) { this.nSwitches = val; return this; }
 		
 		public Builder rackBuilder(Rack.Builder rackBuilder) {
 			this.rackBuilder = rackBuilder;
 			return this;
 		}
 		
+		public Builder switchFactory(SwitchFactory switchFactory) {
+			this.switchFactory = switchFactory;
+			return this;
+		}
+		
 		@Override
 		public Cluster build() {
 			
-			if (nRacks == 0)
-				throw new IllegalStateException("Must specify number of racks before building Cluster.");
+			if (nRacks == 0 || nSwitches == 0)
+				throw new IllegalStateException("Must specify number of racks and switches before building Cluster.");
 			if (rackBuilder == null)
 				throw new IllegalStateException("Must specify Rack builder before building Cluster.");
+			if (switchFactory == null)
+				throw new IllegalStateException("Must specify Switch factory before building Cluster.");
 			
 			return new Cluster(this);
 		}
@@ -94,10 +128,12 @@ public final class Cluster implements SimulationEventListener {
 	
 	public int getRackCount() { return nRacks; }
 	
+	public int getSwitchCount() { return nSwitches; }
+	
 	public ArrayList<Rack> getRacks() { return racks; }
 	
-	//public ArrayList<Switch> getDataNet() { return dataNet; }
+	public ArrayList<Switch> getDataSwitches() { return dataSwitches; }
 	
-	//public ArrayList<Switch> getMgmtNet() { return mgmtNet; }
+	public ArrayList<Switch> getMgmtSwitches() { return mgmtSwitches; }
 	
 }
