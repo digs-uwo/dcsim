@@ -64,8 +64,15 @@ public class AutonomicManagement extends SimulationTask {
 		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		simulation.addDatacentre(dc);
 		
-		DataCentreManager dcAM = new DataCentreManager();
+		DataCentreAutonomicManager dcAM = new DataCentreAutonomicManager();
 		dcAM.installPolicy(new HostStatePolicy());
+		dcAM.installPolicy(new RelocationPolicy());
+		dcAM.installPolicy(new ConsolidationPolicy());
+		
+		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(2));
+		relocateEvent.start(1);
+		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(4));
+		consolidateEvent.start(2);
 		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
