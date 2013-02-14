@@ -139,18 +139,17 @@ public class DataCentre implements SimulationEventListener {
 	 * management networks.
 	 */
 	public void addCluster(Cluster cluster) {
-		// TODO Connect cluster to networks.
-		// If clusters have two layers of network (lower layer and central 
-		// switch), here we have to connect the clusters' central switch to 
-		// the corresponding data centre's switch.
-		// Otherwise, we have to create a central switch for the cluster and 
-		// connect that switch to the data centre's switch.
-		
 		// Set Data Network.
-		// ...
+		Switch clusterSwitch = cluster.getMainDataSwitch();
+		Link link = new Link(clusterSwitch, dataNetworkSwitch);
+		clusterSwitch.setUpLink(link);
+		dataNetworkSwitch.addPort(link);
 		
 		// Set Management Network.
-		// ...
+		clusterSwitch = cluster.getMainMgmtSwitch();
+		link = new Link(clusterSwitch, mgmtNetworkSwitch);
+		clusterSwitch.setUpLink(link);
+		mgmtNetworkSwitch.addPort(link);
 		
 		clusters.add(cluster);
 	}

@@ -25,6 +25,9 @@ public final class Cluster implements SimulationEventListener {
 	private ArrayList<Switch> dataSwitches = null;				// Data network switches.
 	private ArrayList<Switch> mgmtSwitches = null;				// Management network switches.
 	
+	private Switch mainDataSwitch = null;						// Data network main (top-level) switch.
+	private Switch mainMgmtSwitch = null;						// Management network main (top-level) switch.
+	
 	// Do we want a _state_ attribute ???
 	
 	private Cluster(Builder builder) {
@@ -62,11 +65,34 @@ public final class Cluster implements SimulationEventListener {
 			this.racks.add(rack);
 		}
 		
-		// TODO Connect switches (in both networks)
+		// Complete network(s) layout.
+		// If there is only one switch, identify it as main (top-level) for 
+		// the network.
+		// Otherwise, add a central, higher-level switch and connect all other 
+		// switches to it -- star topology.
 		
-		// Are we connecting the switches (in both networks) to each other 
-		// (mesh topology), or are we adding a central, higher-level switch to 
-		// which all other switches are connected (star topology)?		
+		if (nSwitches == 1) {
+			mainDataSwitch = dataSwitches.get(0);
+			mainMgmtSwitch = mgmtSwitches.get(0);
+		}
+		else {
+			mainDataSwitch = builder.switchFactory.newInstance();
+			mainMgmtSwitch = builder.switchFactory.newInstance();
+			
+			for (int i = 0; i < nSwitches; i++) {
+				// Set Data Network.
+				Switch aSwitch = dataSwitches.get(i);
+				Link link = new Link(aSwitch, mainDataSwitch);
+				aSwitch.setUpLink(link);
+				mainDataSwitch.addPort(link);
+				
+				// Set Management Network.
+				aSwitch = mgmtSwitches.get(i);
+				link = new Link(aSwitch, mainMgmtSwitch);
+				aSwitch.setUpLink(link);
+				mainMgmtSwitch.addPort(link);
+			}
+		}
 		
 		// Set default state.
 		//state = RackState.OFF;
@@ -141,5 +167,9 @@ public final class Cluster implements SimulationEventListener {
 	public ArrayList<Switch> getDataSwitches() { return dataSwitches; }
 	
 	public ArrayList<Switch> getMgmtSwitches() { return mgmtSwitches; }
+	
+	public Switch getMainDataSwitch() {	return mainDataSwitch; }
+	
+	public Switch getMainMgmtSwitch() {	return mainMgmtSwitch; }
 	
 }
