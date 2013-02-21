@@ -3,11 +3,8 @@ package edu.uwo.csd.dcsim.examples.managers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
-import edu.uwo.csd.dcsim.core.Event;
-import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -18,40 +15,25 @@ import edu.uwo.csd.dcsim.management.action.MigrationAction;
  * @author Michael Tighe
  *
  */
-public class ConsolidationPolicy extends Policy<DataCentreAutonomicManager> {
+public class ConsolidationPolicy extends Policy {
 
-	ArrayList<Class<? extends Event>> triggerEvents = new ArrayList<Class<? extends Event>>();
-	
 	double lowerThreshold;
 	double upperThreshold;
 	double targetUtilization;
 	
 	public ConsolidationPolicy(double lowerThreshold, double upperThreshold, double targetUtilization) {
-		triggerEvents.add(ConsolidateEvent.class);
+		super(HostPoolManager.class);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
 		this.targetUtilization = targetUtilization;
 	}
 	
-	@Override
-	public List<Class<? extends Event>> getTriggerEvents() {
-		return triggerEvents;
-	}
+	public void execute(ConsolidateEvent event) {
 
-	@Override
-	public boolean evaluateConditions(Event event, DataCentreAutonomicManager context,
-			Simulation simulation) {
-
-		return true;
-	}
-
-	@Override
-	public void execute(Event event, DataCentreAutonomicManager context,
-			Simulation simulation) {
-
+		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
 		
-		Map<Integer, ArrayList<HostStatus>> hosts = context.getHostStatus();
+		Map<Integer, ArrayList<HostStatus>> hosts = hostPool.getHostStatus();
 		
 		ArrayList<HostStatus> stressed = new ArrayList<HostStatus>();
 		ArrayList<HostStatus> partiallyUtilized = new ArrayList<HostStatus>();
@@ -91,9 +73,9 @@ public class ConsolidationPolicy extends Policy<DataCentreAutonomicManager> {
 							//in classifyHosts() we have made copies of all host and vm status objects
 							source.migrate(vm, target);
 							 
-							migrations.add(new MigrationAction(context.getHost(source.getId()), 
-									context.getHost(target.getId()), 
-									context.getHost(source.getId()).getVMAllocation(vm.getId()).getVm()));
+							migrations.add(new MigrationAction(hostPool.getHost(source.getId()), 
+									hostPool.getHost(target.getId()), 
+									hostPool.getHost(source.getId()).getVMAllocation(vm.getId()).getVm()));
 							 
 							usedTargets.add(target);
 							usedSources.add(source);

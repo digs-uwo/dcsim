@@ -2,18 +2,22 @@ package edu.uwo.csd.dcsim.examples.managers;
 
 import java.util.*;
 
-import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
 
-public class DataCentreAutonomicManager extends AutonomicManager {
+public class HostPoolManager {
 
-	DataCentre dc;
-	private Map<Integer, Host> hostMap;	 //store hosts in a Map, as most uses will be to lookup individual hosts
+	private Map<Integer, Host> hostMap = new HashMap<Integer, Host>();	 //store hosts in a Map, as most uses will be to lookup individual hosts
 	private Map<Integer, ArrayList<HostStatus>> hostStatus = new HashMap<Integer, ArrayList<HostStatus>>();
 	
-	public DataCentreAutonomicManager(DataCentre dc) {
-		this.dc = dc;
+	public void addHosts(List<Host> hosts) {
+		for (Host host : hosts) {
+			addHost(host);
+		}
+	}
+	
+	public void addHost(Host host) {
+		hostMap.put(host.getId(), host);
 	}
 	
 	public Collection<Host> getHosts() {
@@ -21,14 +25,6 @@ public class DataCentreAutonomicManager extends AutonomicManager {
 	}
 	
 	public Host getHost(int id) {
-		
-		if (hostMap == null){
-			this.hostMap = new HashMap<Integer, Host>();
-			
-			for (Host host : dc.getHosts()) {
-				hostMap.put(host.getId(), host);
-			}
-		}
 		return hostMap.get(id);
 	}
 	

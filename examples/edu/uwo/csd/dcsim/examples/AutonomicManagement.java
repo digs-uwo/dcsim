@@ -64,7 +64,8 @@ public class AutonomicManagement extends SimulationTask {
 		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		simulation.addDatacentre(dc);
 		
-		DataCentreAutonomicManager dcAM = new DataCentreAutonomicManager(dc);
+		HostPoolManager hostPool = new HostPoolManager();
+		AutonomicManager dcAM = new AutonomicManager(hostPool);
 		dcAM.installPolicy(new HostStatusPolicy());
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
@@ -84,12 +85,13 @@ public class AutonomicManagement extends SimulationTask {
 		for (int i = 0; i < N_HOSTS; ++i) {
 			host = proLiantDL160G5E5420.build();
 			
-			HostAutonomicManager hostAM = new HostAutonomicManager(host, dcAM);
+			AutonomicManager hostAM = new AutonomicManager(new HostManager(host), new HierarchicalManager(dcAM));
 			hostAM.installPolicy(new HostMonitoringPolicy());
 			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
 			event.start();
 			
 			dc.addHost(host);
+			hostPool.addHost(host); //this is the host pool used by the data centre manager
 		}
 		
 		//Instantiate VMs and submit them to the datacentre
