@@ -13,21 +13,32 @@ public class Resources {
 	private double bandwidth = 0;
 	private long storage = 0;
 
+	public Resources() {
+		//allow default constructor
+	}
+	
+	public Resources(Resources resources) {
+		this(resources.getCpu(), resources.getMemory(), resources.getBandwidth(), resources.getStorage());
+	}
+	
+	public Resources(double cpu, int memory, double bandwidth, long storage) {
+		this.cpu = cpu;
+		this.memory = memory;
+		this.bandwidth = bandwidth;
+		this.storage = storage;
+	}
+	
 	public Resources add(Resources v2) {
 		
 		Resources sum = new Resources();
 		
 		/* 
-		 * CPU and Bandwidth values are summed
+		 * Individual resource values are summed
 		 */
 		sum.setCpu(this.getCpu() + v2.getCpu());
 		sum.setBandwidth(this.getBandwidth() + v2.getBandwidth());
-		
-		/*
-		 * For memory and storage, take the max value
-		 */
-		sum.setMemory(Math.max(this.getMemory(), v2.getMemory()));
-		sum.setStorage(Math.max(this.getStorage(), v2.getStorage()));
+		sum.setMemory(this.getMemory() + v2.getMemory());
+		sum.setStorage(this.getStorage() + v2.getStorage());
 		
 		return sum;
 	}
@@ -37,19 +48,18 @@ public class Resources {
 		Resources difference = new Resources();
 		
 		/* 
-		 * CPU and Bandwidth values are summed
+		 * Individual resource values are substracted
 		 */
 		difference.setCpu(this.getCpu() - v2.getCpu());
 		difference.setBandwidth(this.getBandwidth() - v2.getBandwidth());
-		
-		/*
-		 * For memory and storage, take the max value
-		 * TODO is this correct? Can this even be defined?
-		 */
-		difference.setMemory(Math.max(this.getMemory(), v2.getMemory()));
-		difference.setStorage(Math.max(this.getStorage(), v2.getStorage()));
+		difference.setMemory(this.getMemory() - v2.getMemory());
+		difference.setStorage(this.getStorage() - v2.getStorage());
 		
 		return difference;
+	}
+	
+	public Resources copy() {
+		return new Resources(this);
 	}
 	
 	public double getCpu() {

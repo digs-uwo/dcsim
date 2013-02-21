@@ -7,31 +7,39 @@ import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.management.stub.HostStub;
 import edu.uwo.csd.dcsim.management.stub.VmStub;
+import edu.uwo.csd.dcsim.vm.VM;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
 public class MigrationAction implements ManagementAction {
 	
 	private static final String MIGRATION_COUNT_METRIC = "migrationCount";
 
-	private HostStub source;
-	private HostStub target;
-	private VmStub vm;
-		
+	private Host source;
+	private Host target;
+	private VM vm;
+	
+	//TODO remove, this is legacy code for old management algorithms
 	public MigrationAction(HostStub source, HostStub target, VmStub vm) {
+		this.source = source.getHost();
+		this.target = target.getHost();
+		this.vm = vm.getVM();
+	}
+	
+	public MigrationAction(Host source, Host target, VM vm) {
 		this.source = source;
 		this.target = target;
 		this.vm = vm;
 	}
 	
-	public HostStub getSource() {
+	public Host getSource() {
 		return source;
 	}
 	
-	public HostStub getTarget() {
+	public Host getTarget() {
 		return target;
 	}
 	
-	public VmStub getVm() {
+	public VM getVm() {
 		return vm;
 	}
 	
@@ -40,24 +48,28 @@ public class MigrationAction implements ManagementAction {
 	 * @param triggeringEntity The SimulationEntity (VMRelocationPolicy, VMConsolidiationPolicy, etc.) that is triggering this migration
 	 */
 	public void execute(Simulation simulation, Object triggeringEntity) {
-		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVM().getVMAllocation()); //create allocation request based on current allocation
 		
-		if (target.getHost().getState() != Host.HostState.ON && target.getHost().getState() != Host.HostState.POWERING_ON) {
-			simulation.sendEvent(new PowerStateEvent(target.getHost(), PowerState.POWER_ON));
+		//TODO this should be changed to a message to the hosts AM instructing it to perform a migration... sent to source or target?
+		
+		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVMAllocation()); //create allocation request based on current allocation
+		
+		if (target.getState() != Host.HostState.ON && target.getState() != Host.HostState.POWERING_ON) {
+			simulation.sendEvent(new PowerStateEvent(target, PowerState.POWER_ON));
 		}
 		
-		target.getHost().sendMigrationEvent(vmAllocationRequest, vm.getVM(), source.getHost());
+		target.sendMigrationEvent(vmAllocationRequest, vm, source);
 		
 		if (simulation.isRecordingMetrics()) {
 			ActionCountMetric.getMetric(simulation, MIGRATION_COUNT_METRIC + "-" + triggeringEntity.getClass().getSimpleName()).incrementCount();
 		}
 		
 		//if the source host will no longer contain any VMs, instruct it to shut down
-		if (source.getVms().size() == 0) {
-			simulation.sendEvent(new PowerStateEvent(source.getHost(), PowerState.POWER_OFF));
+		if (source.getVMAllocations().size() == 0) {
+			simulation.sendEvent(new PowerStateEvent(source, PowerState.POWER_OFF));
 		}
 		
-		simulation.getLogger().debug(triggeringEntity.getClass().getName() + " Migrating VM #" + vm.getVM().getId() + " from Host #" + source.getHost().getId() + " to #" + target.getHost().getId());
+		//TODO improve logging output
+		simulation.getLogger().debug(triggeringEntity.getClass().getName() + " Migrating VM #" + vm.getId() + " from Host #" + source.getId() + " to #" + target.getId());
 	}
 	
 }

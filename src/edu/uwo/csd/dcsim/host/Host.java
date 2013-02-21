@@ -718,6 +718,15 @@ public final class Host implements SimulationEventListener {
 	
 	public ArrayList<VMAllocation> getVMAllocations() { return vmAllocations;	}
 	
+	public VMAllocation getVMAllocation(int vmId) {
+		for (VMAllocation vmAlloc : vmAllocations) {
+			if (vmAlloc.getVm() != null && vmAlloc.getVm().getId() == vmId) {
+				return vmAlloc;
+			}
+		}
+		return null;
+	}
+	
 	public VMAllocation getPrivDomainAllocation() { 	return privDomainAllocation; }
 	
 	public ArrayList<VMAllocation> getMigratingIn() { return migratingIn;	}

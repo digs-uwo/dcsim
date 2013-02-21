@@ -24,14 +24,14 @@ public class AutonomicManagement extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(AutonomicManagement.class);
 	
-	private static final int N_HOSTS = 2;
-	private static final int N_VMS = 10;
+	private static final int N_HOSTS = 4;
+	private static final int N_VMS = 20;
 	
 	public static void main(String args[]) {
 		//MUST initialize logging when starting simulations
 		Simulation.initializeLogging();
 		
-		SimulationTask task = new AutonomicManagement("autonomic_management");
+		SimulationTask task = new AutonomicManagement("autonomic_management", 1088501048448116498l);
 		
 		task.run();
 		
@@ -64,15 +64,15 @@ public class AutonomicManagement extends SimulationTask {
 		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
 		simulation.addDatacentre(dc);
 		
-		DataCentreAutonomicManager dcAM = new DataCentreAutonomicManager();
-		dcAM.installPolicy(new HostStatePolicy());
-		dcAM.installPolicy(new RelocationPolicy());
+		DataCentreAutonomicManager dcAM = new DataCentreAutonomicManager(dc);
+		dcAM.installPolicy(new HostStatusPolicy());
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new ConsolidationPolicy());
 		
 		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(2));
-		relocateEvent.start(1);
-		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(4));
-		consolidateEvent.start(2);
+		relocateEvent.start(SimTime.hours(2) + 1);
+//		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(4));
+//		consolidateEvent.start(2);
 		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -86,7 +86,7 @@ public class AutonomicManagement extends SimulationTask {
 			
 			HostAutonomicManager hostAM = new HostAutonomicManager(host, dcAM);
 			hostAM.installPolicy(new HostMonitoringPolicy());
-			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.hours(1));
+			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
 			event.start();
 			
 			dc.addHost(host);
@@ -96,11 +96,11 @@ public class AutonomicManagement extends SimulationTask {
 		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>();
 		for (int i = 0; i < N_VMS; ++i) {
 			//create a new workload for this VM
-			Workload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, 0);
+			Workload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, (int)(simulation.getRandom().nextDouble() * 200000000));
 			simulation.addWorkload(workload);
 			
 			//create the service this VM will be a part of
-			Service service = Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
+			Service service = Services.singleTierInteractiveService(workload, 1, 500, 512, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
 			
 			//create a new VMAllocationRequest using the VMDescription from the service, add it to the vm list
 			vmList.add(new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription()));
