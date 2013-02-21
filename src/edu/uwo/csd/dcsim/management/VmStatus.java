@@ -21,6 +21,14 @@ public class VmStatus {
 		resourcesInUse = vm.getResourcesScheduled().copy();
 	}
 	
+	public VmStatus(VmStatus vm) {
+		timeStamp = vm.timeStamp;
+		id = vm.id;
+		cores = vm.cores;
+		coreCapacity = vm.coreCapacity;
+		resourcesInUse = vm.resourcesInUse.copy();
+	}
+	
 	public Resources getResourcesInUse() {
 		return resourcesInUse;
 	}
@@ -39,6 +47,10 @@ public class VmStatus {
 	
 	public int getCoreCapacity() {
 		return coreCapacity;
+	}
+	
+	public VmStatus copy() {
+		return new VmStatus(this);
 	}
 	
 }

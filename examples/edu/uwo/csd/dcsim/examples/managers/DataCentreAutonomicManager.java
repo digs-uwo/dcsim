@@ -29,10 +29,6 @@ public class DataCentreAutonomicManager extends AutonomicManager {
 				hostMap.put(host.getId(), host);
 			}
 		}
-		
-		if (!hostMap.containsKey(id)) {
-			System.out.println("!!!!!!!!!!!!!!! " + id);
-		}
 		return hostMap.get(id);
 	}
 	

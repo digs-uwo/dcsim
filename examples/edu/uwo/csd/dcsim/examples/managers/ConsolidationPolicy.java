@@ -2,6 +2,7 @@ package edu.uwo.csd.dcsim.examples.managers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +10,14 @@ import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.action.MigrationAction;
 
+/**
+ * Implementation of IM2013 Balanced Consolidation Policy
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class ConsolidationPolicy extends Policy<DataCentreAutonomicManager> {
 
 	ArrayList<Class<? extends Event>> triggerEvents = new ArrayList<Class<? extends Event>>();
@@ -42,62 +50,64 @@ public class ConsolidationPolicy extends Policy<DataCentreAutonomicManager> {
 	public void execute(Event event, DataCentreAutonomicManager context,
 			Simulation simulation) {
 
-//		ArrayList<HostStub> stressed = new ArrayList<HostStub>();
-//		ArrayList<HostStub> partiallyUtilized = new ArrayList<HostStub>();
-//		ArrayList<HostStub> underUtilized = new ArrayList<HostStub>();
-//		ArrayList<HostStub> empty = new ArrayList<HostStub>();
-//		
-//		this.classifyHosts(stressed, partiallyUtilized, underUtilized, empty);
-//		
-//		// Shut down Empty hosts.
-//		for (HostStub host : empty) {
-//			//ensure that the host is not involved in any migrations and is not powering on
-//			if (host.getIncomingMigrationCount() == 0 && host.getOutgoingMigrationCount() == 0 && host.getHost().getState() != HostState.POWERING_ON)
-//				simulation.sendEvent(new Event(Host.HOST_POWER_OFF_EVENT, simulation.getSimulationTime(), this,host.getHost()));
-//		}
-//		
-//		//filter out potential source hosts that have incoming migrations
-//		ArrayList<HostStub> unsortedSources = new ArrayList<HostStub>();
-//		for (HostStub host : underUtilized) {
-//			if (host.getIncomingMigrationCount() == 0)
-//				unsortedSources.add(host);
-//		}
-//		
-//		// Create (sorted) source and target lists.
-//		ArrayList<HostStub> sources = this.orderSourceHosts(unsortedSources);
-//		ArrayList<HostStub> targets = this.orderTargetHosts(partiallyUtilized, underUtilized);
-//		
-//		HashSet<HostStub> usedSources = new HashSet<HostStub>();
-//		HashSet<HostStub> usedTargets = new HashSet<HostStub>();
-//		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
-//		for (HostStub source : sources) {
-//			if (!usedTargets.contains(source)) { 	// Check that the source host hasn't been used as a target.
-//			
-//				ArrayList<VmStub> vmList = this.orderSourceVms(source.getVms());
-//				for (VmStub vm : vmList) {
-//					for (HostStub target : targets) {
-//						 if (source != target &&
-//								 !usedSources.contains(target) &&											// Check that the target host hasn't been used as a source.
-//								 target.hasCapacity(vm) &&													// Target host has capacity.
-//								 (target.getCpuInUse(vm) / target.getTotalCpu()) <= targetUtilization &&	// Target host will not exceed target utilization.
-//								 target.getHost().isCapable(vm.getVM().getVMDescription())) {				// Target host is capable.
-//							 
-//							 source.migrate(vm, target);
-//							 migrations.add(new MigrationAction(source, target, vm));
-//							 
-//							 usedTargets.add(target);
-//							 usedSources.add(source);
-//							 break;
-//						 }
-//					}
-//				}
-//			}
-//		}
-//		
-//		// Trigger migrations.
-//		for (MigrationAction migration : migrations) {
-//			migration.execute(simulation, this);
-//		}
+		
+		Map<Integer, ArrayList<HostStatus>> hosts = context.getHostStatus();
+		
+		ArrayList<HostStatus> stressed = new ArrayList<HostStatus>();
+		ArrayList<HostStatus> partiallyUtilized = new ArrayList<HostStatus>();
+		ArrayList<HostStatus> underUtilized = new ArrayList<HostStatus>();
+		ArrayList<HostStatus> empty = new ArrayList<HostStatus>();
+		
+		classifyHosts(stressed, partiallyUtilized, underUtilized, empty, hosts);
+		
+		//filter out potential source hosts that have incoming migrations
+		ArrayList<HostStatus> unsortedSources = new ArrayList<HostStatus>();
+		for (HostStatus host : underUtilized) {
+			if (host.getIncomingMigrationCount() == 0) {
+				unsortedSources.add(host);
+			}
+		}
+		
+		ArrayList<HostStatus> sources = orderSourceHosts(unsortedSources);
+		ArrayList<HostStatus> targets = orderTargetHosts(partiallyUtilized, underUtilized);
+		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
+		
+		HashSet<HostStatus> usedSources = new HashSet<HostStatus>();
+		HashSet<HostStatus> usedTargets = new HashSet<HostStatus>();
+		
+		for (HostStatus source : sources) {
+			if (!usedTargets.contains(source)) { 	// Check that the source host hasn't been used as a target.
+			
+				ArrayList<VmStatus> vmList = this.orderSourceVms(source.getVms());
+				for (VmStatus vm : vmList) {
+					for (HostStatus target : targets) {
+						if (source != target &&
+								!usedSources.contains(target) &&										//Check that the target host hasn't been used as a source.
+								target.canHostVm(vm) &&														//target has capability and capacity to host VM
+								(target.getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
+								target.getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
+							 
+							//modify host and vm states to indicate the future migration. Note we can do this because
+							//in classifyHosts() we have made copies of all host and vm status objects
+							source.migrate(vm, target);
+							 
+							migrations.add(new MigrationAction(context.getHost(source.getId()), 
+									context.getHost(target.getId()), 
+									context.getHost(source.getId()).getVMAllocation(vm.getId()).getVm()));
+							 
+							usedTargets.add(target);
+							usedSources.add(source);
+							break;
+						 }
+					}
+				}
+			}
+		}
+		
+		// Trigger migrations.
+		for (MigrationAction migration : migrations) {
+			migration.execute(simulation, this);
+		}
 
 	}
 	
@@ -127,15 +137,15 @@ public class ConsolidationPolicy extends Policy<DataCentreAutonomicManager> {
 			
 			double avgCpuUtilization = avgCpuInUse / host.getResourceCapacity().getCpu();
 			
-			//classify hosts
-			if (host.getVmStatusList().size() == 0) {
-				empty.add(host);
+			//classify hosts, add copies of the host so that modifications can be made
+			if (host.getVms().size() == 0) {
+				empty.add(host.copy());
 			} else if (avgCpuUtilization < lowerThreshold) {
-				underUtilized.add(host);
+				underUtilized.add(host.copy());
 			} else if (avgCpuUtilization > upperThreshold) {
-				stressed.add(host);
+				stressed.add(host.copy());
 			} else {
-				partiallyUtilized.add(host);
+				partiallyUtilized.add(host.copy());
 			}
 			
 		}

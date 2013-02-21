@@ -15,6 +15,11 @@ import edu.uwo.csd.dcsim.management.VmStatus;
 import edu.uwo.csd.dcsim.management.VmStatusComparator;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
 
+/**
+ * Implementation of IM2013 Balanced Relocation Policy
+ * @author Michael Tighe
+ *
+ */
 public class RelocationPolicy extends Policy<DataCentreAutonomicManager> {
 
 	ArrayList<Class<? extends Event>> triggerEvents = new ArrayList<Class<? extends Event>>();
@@ -67,7 +72,7 @@ public class RelocationPolicy extends Policy<DataCentreAutonomicManager> {
 		for (HostStatus source : sources) {
 
 			found = false;
-			ArrayList<VmStatus> vmList = orderSourceVms(source.getVmStatusList());
+			ArrayList<VmStatus> vmList = orderSourceVms(source.getVms(), source);
 			
 			// consider each VM within the source host
 			for (VmStatus vm : vmList) {
@@ -79,6 +84,10 @@ public class RelocationPolicy extends Policy<DataCentreAutonomicManager> {
 							(target.getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
 							target.getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
 						
+						//modify host and vm states to indicate the future migration. Note we can do this because
+						//in classifyHosts() we have made copies of all host and vm status objects
+						source.migrate(vm, target);
+
 						migrations.add(new MigrationAction(context.getHost(source.getId()), 
 								context.getHost(target.getId()), 
 								context.getHost(source.getId()).getVMAllocation(vm.getId()).getVm()));
@@ -126,15 +135,15 @@ public class RelocationPolicy extends Policy<DataCentreAutonomicManager> {
 			
 			double avgCpuUtilization = avgCpuInUse / host.getResourceCapacity().getCpu();
 			
-			//classify hosts
-			if (host.getVmStatusList().size() == 0) {
-				empty.add(host);
+			//classify hosts, add copies of the host so that modifications can be made
+			if (host.getVms().size() == 0) {
+				empty.add(host.copy());
 			} else if (avgCpuUtilization < lowerThreshold) {
-				underUtilized.add(host);
+				underUtilized.add(host.copy());
 			} else if (avgCpuUtilization > upperThreshold) {
-				stressed.add(host);
+				stressed.add(host.copy());
 			} else {
-				partiallyUtilized.add(host);
+				partiallyUtilized.add(host.copy());
 			}
 			
 		}
@@ -144,37 +153,61 @@ public class RelocationPolicy extends Policy<DataCentreAutonomicManager> {
 	public ArrayList<HostStatus> orderSourceHosts(ArrayList<HostStatus> stressed) {
 		ArrayList<HostStatus> sorted = new ArrayList<HostStatus>(stressed);
 		
-		Collections.sort(sorted, HostStatusComparator.CPU_IN_USE);
+		// Sort Stressed hosts in decreasing order by CPU utilization.
+		Collections.sort(sorted, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL));
 		Collections.reverse(sorted);
 		
 		return sorted;
 	}
 	
-	public ArrayList<VmStatus> orderSourceVms(ArrayList<VmStatus> sourceVms) {
-		ArrayList<VmStatus> sorted = new ArrayList<VmStatus>(sourceVms);
+	public ArrayList<VmStatus> orderSourceVms(ArrayList<VmStatus> sourceVms, HostStatus source) {
 		
-		Collections.sort(sorted, VmStatusComparator.CPU_IN_USE);
-		Collections.reverse(sorted);
+		ArrayList<VmStatus> sorted = new ArrayList<VmStatus>();
+		
+		// Remove VMs with less CPU load than the CPU load by which the source 
+		// host is stressed.
+		double cpuExcess = source.getResourcesInUse().getCpu() - source.getResourceCapacity().getCpu() * this.upperThreshold;
+		for (VmStatus vm : sourceVms)
+			if (vm.getResourcesInUse().getCpu() >= cpuExcess)
+				sorted.add(vm);
+		
+		if (!sorted.isEmpty())
+			// Sort VMs in increasing order by CPU load.
+			Collections.sort(sorted, VmStatusComparator.getComparator(VmStatusComparator.CPU_IN_USE));
+		else {
+			// Add original list of VMs and sort them in decreasing order by 
+			// CPU load, so as to avoid trying to migrate the smallest VMs 
+			// first (which would not help resolve the stress situation).
+			sorted.addAll(sourceVms);
+			Collections.sort(sorted, VmStatusComparator.getComparator(VmStatusComparator.CPU_IN_USE));
+			Collections.reverse(sorted);
+		}
 		
 		return sorted;
 	}
 	
 	public ArrayList<HostStatus> orderTargetHosts(ArrayList<HostStatus> partiallyUtilized, ArrayList<HostStatus> underUtilized, ArrayList<HostStatus> empty) {
-		ArrayList<HostStatus> sorted = new ArrayList<HostStatus>();
+		ArrayList<HostStatus> targets = new ArrayList<HostStatus>();
 		
-		Collections.sort(underUtilized, HostStatusComparator.CPU_IN_USE);
+		// Sort Partially-utilized hosts in increasing order by 
+		// <CPU utilization, power efficiency>.
+		Collections.sort(partiallyUtilized, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL, HostStatusComparator.EFFICIENCY));
+		
+		// Sort Underutilized hosts in decreasing order by <CPU utilization, 
+		// power efficiency>.
+		Collections.sort(underUtilized, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL, HostStatusComparator.EFFICIENCY));
 		Collections.reverse(underUtilized);
 		
-		Collections.sort(partiallyUtilized, HostStatusComparator.CPU_IN_USE);
-		
-		Collections.sort(empty, HostStatusComparator.PWR_STATE);
+		// Sort Empty hosts in decreasing order by <power efficiency, 
+		// power state>.
+		Collections.sort(empty, HostStatusComparator.getComparator(HostStatusComparator.EFFICIENCY, HostStatusComparator.PWR_STATE));
 		Collections.reverse(empty);
 		
-		sorted.addAll(partiallyUtilized);
-		sorted.addAll(underUtilized);
-		sorted.addAll(empty);
+		targets.addAll(partiallyUtilized);
+		targets.addAll(underUtilized);
+		targets.addAll(empty);
 		
-		return sorted;
+		return targets;
 	}
 	
 }

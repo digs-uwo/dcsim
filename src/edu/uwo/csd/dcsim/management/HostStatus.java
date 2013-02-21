@@ -51,6 +51,60 @@ public class HostStatus {
 		
 	}
 	
+	public HostStatus(HostStatus host) {
+		timeStamp = host.timeStamp;
+		
+		id = host.id;
+		cpus = host.cpus;
+		cores = host.cores;
+		coreCapacity = host.coreCapacity;
+		incomingMigrations = host.incomingMigrations;
+		outgoingMigrations = host.outgoingMigrations;
+		powerEfficiency = host.powerEfficiency;
+		state = host.state;
+		
+		resourceCapacity = host.resourceCapacity.copy();
+		powerConsumption = host.powerConsumption;
+		
+		privDomain = host.privDomain.copy();
+		
+		for (VmStatus vm : host.vms) {
+			vms.add(vm.copy());
+		}
+	}
+	
+	public boolean canHostVm(VmStatus vm) {
+		//verify that this host can host the given vm
+		
+		//check capabilities (e.g. core count, core capacity)
+		if (cpus * cores < vm.cores)
+			return false;
+		if (coreCapacity < vm.getCoreCapacity())
+			return false;
+		
+		//check available resource
+		Resources resourcesInUse = getResourcesInUse();
+		if (resourceCapacity.getCpu() - resourcesInUse.getCpu() < vm.getResourcesInUse().getCpu())
+			return false;
+		if (resourceCapacity.getMemory() - resourcesInUse.getMemory() < vm.getResourcesInUse().getMemory())
+			return false;
+		if (resourceCapacity.getBandwidth() - resourcesInUse.getBandwidth() < vm.getResourcesInUse().getBandwidth())
+			return false;
+		if (resourceCapacity.getStorage() - resourcesInUse.getStorage() < vm.getResourcesInUse().getStorage())
+			return false;
+		
+		
+		return true;
+	}
+	
+	public void migrate(VmStatus vm, HostStatus target) {
+		++outgoingMigrations;
+		
+		vms.remove(vm);
+		target.vms.add(vm);
+		++target.incomingMigrations;
+	}
+	
 	public long getTimeStamp() {
 		return timeStamp;
 	}
@@ -91,7 +145,7 @@ public class HostStatus {
 		return outgoingMigrations;
 	}
 	
-	public ArrayList<VmStatus> getVmStatusList() {
+	public ArrayList<VmStatus> getVms() {
 		return vms;
 	}
 	
@@ -113,28 +167,10 @@ public class HostStatus {
 		return powerConsumption;
 	}
 	
-	public boolean canHostVm(VmStatus vm) {
-		//verify that this host can host the given vm
-		
-		//check capabilities (e.g. core count, core capacity)
-		if (cpus * cores < vm.cores)
-			return false;
-		if (coreCapacity < vm.getCoreCapacity())
-			return false;
-		
-		//check available resource
-		Resources resourcesInUse = getResourcesInUse();
-		if (resourceCapacity.getCpu() - resourcesInUse.getCpu() < vm.getResourcesInUse().getCpu())
-			return false;
-		if (resourceCapacity.getMemory() - resourcesInUse.getMemory() < vm.getResourcesInUse().getMemory())
-			return false;
-		if (resourceCapacity.getBandwidth() - resourcesInUse.getBandwidth() < vm.getResourcesInUse().getBandwidth())
-			return false;
-		if (resourceCapacity.getStorage() - resourcesInUse.getStorage() < vm.getResourcesInUse().getStorage())
-			return false;
-		
-		
-		return true;
+	
+	
+	public HostStatus copy() {
+		return new HostStatus(this);
 	}
 	
 }

@@ -24,8 +24,8 @@ public class AutonomicManagement extends SimulationTask {
 
 	private static Logger logger = Logger.getLogger(AutonomicManagement.class);
 	
-	private static final int N_HOSTS = 4;
-	private static final int N_VMS = 20;
+	private static final int N_HOSTS = 10;
+	private static final int N_VMS = 40;
 	
 	public static void main(String args[]) {
 		//MUST initialize logging when starting simulations
@@ -67,12 +67,12 @@ public class AutonomicManagement extends SimulationTask {
 		DataCentreAutonomicManager dcAM = new DataCentreAutonomicManager(dc);
 		dcAM.installPolicy(new HostStatusPolicy());
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
-		dcAM.installPolicy(new ConsolidationPolicy());
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
 		
-		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(2));
-		relocateEvent.start(SimTime.hours(2) + 1);
-//		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(4));
-//		consolidateEvent.start(2);
+		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
+		relocateEvent.start(SimTime.hours(1) + 1);
+		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
+		consolidateEvent.start(SimTime.hours(3));
 		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -100,7 +100,7 @@ public class AutonomicManagement extends SimulationTask {
 			simulation.addWorkload(workload);
 			
 			//create the service this VM will be a part of
-			Service service = Services.singleTierInteractiveService(workload, 1, 500, 512, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
+			Service service = Services.singleTierInteractiveService(workload, 1, 2500, 512, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
 			
 			//create a new VMAllocationRequest using the VMDescription from the service, add it to the vm list
 			vmList.add(new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription()));
