@@ -29,6 +29,18 @@ public class VmStatus {
 		resourcesInUse = vm.resourcesInUse.copy();
 	}
 	
+	/**
+	 * Creates a "dummy" VM status for a placeholder
+	 * @param cores
+	 * @param coreCapacity
+	 * @param resources
+	 */
+	public VmStatus(int cores, int coreCapacity, Resources resources) {
+		this.cores = cores;
+		this.coreCapacity = coreCapacity;
+		this.resourcesInUse = resources;
+	}
+	
 	public Resources getResourcesInUse() {
 		return resourcesInUse;
 	}

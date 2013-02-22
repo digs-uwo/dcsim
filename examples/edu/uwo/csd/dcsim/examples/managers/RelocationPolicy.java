@@ -63,7 +63,7 @@ public class RelocationPolicy extends Policy {
 				// look for a target host to receive this VM
 				for (HostStatus target : targets) {
 					if (target.getIncomingMigrationCount() < 2 &&										//restrict target incoming migrations to 2 for some reason
-							target.canHostVm(vm) &&														//target has capability and capacity to host VM
+							target.canHost(vm) &&														//target has capability and capacity to host VM
 							(target.getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
 							target.getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
 						
@@ -92,7 +92,7 @@ public class RelocationPolicy extends Policy {
 		}
 	}
 	
-	protected void classifyHosts(ArrayList<HostStatus> stressed, 
+	private void classifyHosts(ArrayList<HostStatus> stressed, 
 			ArrayList<HostStatus> partiallyUtilized, 
 			ArrayList<HostStatus> underUtilized, 
 			ArrayList<HostStatus> empty,

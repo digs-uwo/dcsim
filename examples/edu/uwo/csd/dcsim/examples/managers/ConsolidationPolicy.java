@@ -65,7 +65,7 @@ public class ConsolidationPolicy extends Policy {
 					for (HostStatus target : targets) {
 						if (source != target &&
 								!usedSources.contains(target) &&										//Check that the target host hasn't been used as a source.
-								target.canHostVm(vm) &&														//target has capability and capacity to host VM
+								target.canHost(vm) &&														//target has capability and capacity to host VM
 								(target.getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
 								target.getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
 							 
@@ -93,7 +93,7 @@ public class ConsolidationPolicy extends Policy {
 
 	}
 	
-	protected void classifyHosts(ArrayList<HostStatus> stressed, 
+	private void classifyHosts(ArrayList<HostStatus> stressed, 
 			ArrayList<HostStatus> partiallyUtilized, 
 			ArrayList<HostStatus> underUtilized, 
 			ArrayList<HostStatus> empty,

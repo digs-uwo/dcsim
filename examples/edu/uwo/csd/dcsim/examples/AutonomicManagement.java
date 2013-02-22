@@ -69,6 +69,7 @@ public class AutonomicManagement extends SimulationTask {
 		dcAM.installPolicy(new HostStatusPolicy());
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
 		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
 		relocateEvent.start(SimTime.hours(1) + 1);
@@ -87,6 +88,8 @@ public class AutonomicManagement extends SimulationTask {
 			
 			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
 			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			hostAM.installPolicy(new HostOperationsPolicy());
+			
 			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
 			event.start();
 			
@@ -110,11 +113,7 @@ public class AutonomicManagement extends SimulationTask {
 		}
 		
 		//submit the VMs to the datacentre for placement
-		vmPlacementPolicy.submitVMs(vmList);
-		
-		
-		
-		
+		simulation.sendEvent(new VmPlacementEvent(dcAM, vmList), 1);
 	}
 
 }

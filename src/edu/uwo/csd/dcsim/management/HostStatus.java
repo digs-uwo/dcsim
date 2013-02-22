@@ -16,7 +16,7 @@ public class HostStatus {
 	private int incomingMigrations;
 	private int outgoingMigrations;
 	private double powerEfficiency;
-	Host.HostState state;
+	private Host.HostState state;
 	private Resources resourceCapacity = new Resources();
 
 	private double powerConsumption;
@@ -73,28 +73,36 @@ public class HostStatus {
 		}
 	}
 	
-	public boolean canHostVm(VmStatus vm) {
+	public boolean canHost(VmStatus vm) {
+		return canHost(vm.getCores(), vm.getCoreCapacity(), vm.getResourcesInUse());
+	}
+	
+	public boolean canHost(int reqCores, int reqCoreCapacity, Resources reqResources) {
 		//verify that this host can host the given vm
 		
 		//check capabilities (e.g. core count, core capacity)
-		if (cpus * cores < vm.cores)
+		if (cpus * cores < reqCores)
 			return false;
-		if (coreCapacity < vm.getCoreCapacity())
+		if (coreCapacity < reqCoreCapacity)
 			return false;
 		
 		//check available resource
 		Resources resourcesInUse = getResourcesInUse();
-		if (resourceCapacity.getCpu() - resourcesInUse.getCpu() < vm.getResourcesInUse().getCpu())
+		if (resourceCapacity.getCpu() - resourcesInUse.getCpu() < reqResources.getCpu())
 			return false;
-		if (resourceCapacity.getMemory() - resourcesInUse.getMemory() < vm.getResourcesInUse().getMemory())
+		if (resourceCapacity.getMemory() - resourcesInUse.getMemory() < reqResources.getMemory())
 			return false;
-		if (resourceCapacity.getBandwidth() - resourcesInUse.getBandwidth() < vm.getResourcesInUse().getBandwidth())
+		if (resourceCapacity.getBandwidth() - resourcesInUse.getBandwidth() < reqResources.getBandwidth())
 			return false;
-		if (resourceCapacity.getStorage() - resourcesInUse.getStorage() < vm.getResourcesInUse().getStorage())
+		if (resourceCapacity.getStorage() - resourcesInUse.getStorage() < reqResources.getStorage())
 			return false;
 		
 		
 		return true;
+	}
+	
+	public void instantiateVm(VmStatus vm) {
+		vms.add(vm);
 	}
 	
 	public void migrate(VmStatus vm, HostStatus target) {
