@@ -1,6 +1,9 @@
-package edu.uwo.csd.dcsim.examples.managers;
+package edu.uwo.csd.dcsim.examples.management;
 
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.examples.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.examples.management.events.HostStatusEvent;
 import edu.uwo.csd.dcsim.management.*;
 
 public class HostMonitoringPolicy extends Policy {

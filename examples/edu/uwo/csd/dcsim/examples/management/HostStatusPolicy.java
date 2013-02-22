@@ -1,8 +1,10 @@
-package edu.uwo.csd.dcsim.examples.managers;
+package edu.uwo.csd.dcsim.examples.management;
 
 import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim.core.Event;
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.examples.management.events.HostStatusEvent;
 import edu.uwo.csd.dcsim.management.*;
 
 public class HostStatusPolicy extends Policy {

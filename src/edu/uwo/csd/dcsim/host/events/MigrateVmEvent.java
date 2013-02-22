@@ -56,7 +56,7 @@ public class MigrateVmEvent extends Event {
 		return source;
 	}
 	
-	public Host getTarget() {
+	public Host getTargetHost() {
 		return target;
 	}
 	

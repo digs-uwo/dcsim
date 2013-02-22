@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim.examples.managers;
+package edu.uwo.csd.dcsim.examples.management.capabilities;
 
 import java.util.*;
 

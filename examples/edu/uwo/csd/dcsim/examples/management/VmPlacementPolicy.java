@@ -1,9 +1,12 @@
-package edu.uwo.csd.dcsim.examples.managers;
+package edu.uwo.csd.dcsim.examples.management;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.examples.management.events.InstantiateVmEvent;
+import edu.uwo.csd.dcsim.examples.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent;

@@ -1,10 +1,12 @@
-package edu.uwo.csd.dcsim.examples.managers;
+package edu.uwo.csd.dcsim.examples.management;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -73,9 +75,9 @@ public class ConsolidationPolicy extends Policy {
 							//in classifyHosts() we have made copies of all host and vm status objects
 							source.migrate(vm, target);
 							 
-							migrations.add(new MigrationAction(hostPool.getHost(source.getId()), 
-									hostPool.getHost(target.getId()), 
-									hostPool.getHost(source.getId()).getVMAllocation(vm.getId()).getVm()));
+							migrations.add(new MigrationAction(hostPool.getHostManager(source.getId()),
+									hostPool.getHost(source.getId()),
+									hostPool.getHost(target.getId()), vm.getId()));
 							 
 							usedTargets.add(target);
 							usedSources.add(source);

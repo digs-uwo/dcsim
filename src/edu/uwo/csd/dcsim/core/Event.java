@@ -27,7 +27,7 @@ public abstract class Event {
 		//default behaviour is to do nothing
 	}
 	
-	public void triggerCallback() {
+	public final void triggerCallback() {
 		for (EventCallbackListener listener : callbackListeners) {
 			listener.eventCallback(this);
 		}
@@ -40,7 +40,7 @@ public abstract class Event {
 		//default behaviour is to do nothing
 	}
 	
-	public void initialize(Simulation simulation) {
+	public final void initialize(Simulation simulation) {
 		//only initialize if this is the first time the event has been sent
 		if (this.simulation == null) {
 			this.simulation = simulation;
@@ -48,31 +48,31 @@ public abstract class Event {
 		}
 	}
 	
-	public int getId() {
+	public final int getId() {
 		return id;
 	}
 	
-	public void setTime(long time) {
+	public final void setTime(long time) {
 		this.time = time;
 	}
 	
-	public long getTime() {
+	public final long getTime() {
 		return time;
 	}
 	
-	public SimulationEventListener getTarget() {
+	public final SimulationEventListener getTarget() {
 		return target;
 	}
 	
-	protected void setSendOrder(long sendOrder) {
+	protected final void setSendOrder(long sendOrder) {
 		this.sendOrder = sendOrder;
 	}
 	
-	protected long getSendOrder() {
+	protected final long getSendOrder() {
 		return sendOrder;
 	}
 	
-	public Simulation getSimulation() {
+	public final Simulation getSimulation() {
 		return simulation;
 	}
 	

@@ -13,7 +13,13 @@ import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
-import edu.uwo.csd.dcsim.examples.managers.*;
+import edu.uwo.csd.dcsim.examples.management.*;
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
+import edu.uwo.csd.dcsim.examples.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
+import edu.uwo.csd.dcsim.examples.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.DefaultResourceManagerFactory;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
@@ -25,7 +31,7 @@ public class AutonomicManagement extends SimulationTask {
 	private static Logger logger = Logger.getLogger(AutonomicManagement.class);
 	
 	private static final int N_HOSTS = 10;
-	private static final int N_VMS = 40;
+	private static final int N_VMS = 30;
 	
 	public static void main(String args[]) {
 		//MUST initialize logging when starting simulations
