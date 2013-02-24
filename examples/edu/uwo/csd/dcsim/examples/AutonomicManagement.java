@@ -99,7 +99,7 @@ public class AutonomicManagement extends SimulationTask {
 			hostAM.installPolicy(new HostOperationsPolicy());
 			
 			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
-			event.start();
+			event.start(simulation.getRandom().nextInt(4)); //offset host monitoring start positions => more realistic
 			
 			dc.addHost(host);
 			hostPool.addHost(host, hostAM); //this is the host pool used by the data centre manager
@@ -134,7 +134,8 @@ public class AutonomicManagement extends SimulationTask {
 			
 		});
 		
-		simulation.sendEvent(vmPlacementEvent, 1);
+		simulation.sendEvent(vmPlacementEvent, SimTime.minutes(6));
 	}
 
 }
+
