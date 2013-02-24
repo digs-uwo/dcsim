@@ -9,12 +9,21 @@ import org.apache.log4j.Logger;
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.application.workload.*;
+import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.*;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
+import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
+import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -46,17 +55,22 @@ public class ExampleHelper {
 	
 	private static Logger logger = Logger.getLogger(ExampleHelper.class);
 	
-	public static DataCentre createDataCentre(Simulation simulation) {
+	public static AutonomicManager createDataCentre(Simulation simulation) {
 		//create datacentre
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation); //new VMPlacementPolicyFixedCount(7);
-		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation);
+		simulation.addDatacentre(dc);
 		
-		dc.addHosts(createHosts(simulation));
+		HostPoolManager hostPool = new HostPoolManager();
+		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		dcAM.installPolicy(new HostStatusPolicy(5));
+		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
-		return dc;
+		dc.addHosts(createHosts(simulation, dcAM, hostPool));
+		
+		return dcAM;
 	}
 
-	private static ArrayList<Host> createHosts(Simulation simulation) {
+	private static ArrayList<Host> createHosts(Simulation simulation, AutonomicManager dcAM, HostPoolManager hostPool) {
 		ArrayList<Host> hosts = new ArrayList<Host>();
 		
 		for (int i = 0; i < N_HOSTS; ++i) {
@@ -76,6 +90,16 @@ public class ExampleHelper {
 				host = proLiantDL160G5E5420.build();
 			}
 			
+			host.setState(Host.HostState.OFF); //turn hosts off by default
+			
+			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			hostAM.installPolicy(new HostOperationsPolicy());
+			
+			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes((simulation.getRandom().nextInt(5))));
+			event.start();
+			
+			hostPool.addHost(host, hostAM);
 			hosts.add(host);
 		}
 		
@@ -128,17 +152,24 @@ public class ExampleHelper {
 
 	}
 	
-	public static void placeVms(ArrayList<VMAllocationRequest> vmList, DataCentre dc) {
+	public static void placeVms(ArrayList<VMAllocationRequest> vmList, AutonomicManager dcAM, Simulation simulation) {
 		
-		if (!dc.getVMPlacementPolicy().submitVMs(vmList))
-			throw new RuntimeException("Could not place all VMs");
+		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmList);
 		
-		//turn off hosts with no VMs
-		for (Host host : dc.getHosts()) {
-			if (host.getVMAllocations().size() == 0) {
-				host.setState(Host.HostState.OFF);
+		//ensure that all VMs are placed, or kill the simulation
+		vmPlacementEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				VmPlacementEvent pe = (VmPlacementEvent)e;
+				if (!pe.getFailedRequests().isEmpty()) {
+					throw new RuntimeException("Could not place all VMs " + pe.getFailedRequests().size());
+				}
 			}
-		}
+			
+		});
+		
+		simulation.sendEvent(vmPlacementEvent, SimTime.minutes(5) + 1);
 	}
 	
 	public static void printMetrics(Collection<Metric> metrics) {

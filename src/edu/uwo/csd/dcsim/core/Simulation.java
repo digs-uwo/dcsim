@@ -403,15 +403,17 @@ public class Simulation implements SimulationEventListener {
 	
 	}
 	
-	public final void sendEvent(Event event, long time) {
+	public final long sendEvent(Event event, long time) {
 		event.initialize(this);
 		event.setSendOrder(++eventSendCount);
 		event.setTime(time);
 		eventQueue.add(event);
+		
+		return event.getSendOrder();
 	}
 	
-	public final void sendEvent(Event event) {
-		sendEvent(event, getSimulationTime());
+	public final long sendEvent(Event event) {
+		return sendEvent(event, getSimulationTime());
 	}
 	
 	public final void dequeueEvent(Event event) {

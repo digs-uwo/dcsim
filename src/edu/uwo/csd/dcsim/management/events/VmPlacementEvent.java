@@ -1,9 +1,9 @@
-package edu.uwo.csd.dcsim.examples.management.events;
+package edu.uwo.csd.dcsim.management.events;
 
 import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim.core.Event;
-import edu.uwo.csd.dcsim.core.SimulationEventListener;
+import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
 public class VmPlacementEvent extends Event {
@@ -11,12 +11,12 @@ public class VmPlacementEvent extends Event {
 	private ArrayList<VMAllocationRequest> vmAllocationRequests;
 	private ArrayList<VMAllocationRequest> failedRequests = new ArrayList<VMAllocationRequest>();
 	
-	public VmPlacementEvent(SimulationEventListener target, ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public VmPlacementEvent(AutonomicManager target, ArrayList<VMAllocationRequest> vmAllocationRequests) {
 		super(target);
 		this.vmAllocationRequests = vmAllocationRequests;
 	}	
 	
-	public VmPlacementEvent(SimulationEventListener target, VMAllocationRequest vmAllocationRequest) {
+	public VmPlacementEvent(AutonomicManager target, VMAllocationRequest vmAllocationRequest) {
 		super(target);
 		this.vmAllocationRequests = new ArrayList<VMAllocationRequest>();
 		vmAllocationRequests.add(vmAllocationRequest);

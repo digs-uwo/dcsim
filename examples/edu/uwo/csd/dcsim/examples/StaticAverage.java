@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class StaticAverage extends SimulationTask {
@@ -43,12 +44,11 @@ public class StaticAverage extends SimulationTask {
 
 	@Override
 	public void setup(Simulation simulation) {
-		DataCentre dc = ExampleHelper.createDataCentre(simulation);
-		simulation.addDatacentre(dc);
+		AutonomicManager dcAM = ExampleHelper.createDataCentre(simulation);
 		
 		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, true);
-		
-		ExampleHelper.placeVms(vmList, dc);
+				
+		ExampleHelper.placeVms(vmList, dcAM, simulation);
 	}
 	
 }

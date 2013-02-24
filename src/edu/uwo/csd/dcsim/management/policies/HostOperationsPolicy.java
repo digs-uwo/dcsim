@@ -1,17 +1,19 @@
-package edu.uwo.csd.dcsim.examples.management;
+package edu.uwo.csd.dcsim.management.policies;
 
-import edu.uwo.csd.dcsim.examples.management.capabilities.HostManager;
-import edu.uwo.csd.dcsim.examples.management.events.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.*;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.management.Policy;
+import edu.uwo.csd.dcsim.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
+import edu.uwo.csd.dcsim.management.events.MigrationEvent;
+import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class HostOperationsPolicy extends Policy {
 
 	public HostOperationsPolicy() {
-		super(HostManager.class);
+		addRequiredCapability(HostManager.class);
 	}
 	
 	public void execute(InstantiateVmEvent event) {
@@ -28,6 +30,7 @@ public class HostOperationsPolicy extends Policy {
 		}
 		
 		host.submitVM(event.getVMAllocationRequest());
+		
 	}
 	
 	public void execute(MigrationEvent event) {
@@ -35,6 +38,7 @@ public class HostOperationsPolicy extends Policy {
 		Host host = hostManager.getHost();
 		
 		Host targetHost = event.getTargetHost();
+		
 		VM vm = host.getVMAllocation(event.getVmId()).getVm();
 		
 		//create an allocation request for the target
@@ -50,6 +54,16 @@ public class HostOperationsPolicy extends Policy {
 			}
 		}
 		
+	}
+	
+	public void execute(ShutdownVmEvent event) {
+		HostManager hostManager = manager.getCapability(HostManager.class);
+		Host host = hostManager.getHost();
+		VMAllocation vmAlloc = host.getVMAllocation(event.getVmId());
+		
+		//stop the VM and deallocate it from the host
+		vmAlloc.getVm().stopApplication();
+		host.deallocate(vmAlloc);
 	}
 	
 }

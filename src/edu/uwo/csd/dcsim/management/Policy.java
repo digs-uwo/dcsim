@@ -4,23 +4,21 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
 
 public abstract class Policy {
 
 	public final String EXECUTE_METHOD_NAME = "execute";
 	
 	private boolean enabled = true;
-	private ArrayList<Class<?>> requiredCapabilities = new ArrayList<Class<?>>();
+	private ArrayList<Class<? extends HostCapability>> requiredCapabilities = new ArrayList<Class<? extends HostCapability>>();
 	
 	protected AutonomicManager manager;
 	protected Simulation simulation;
 	
 	private Map<Class<?>, Method> eventMethods = new HashMap<Class<?>, Method>();
 	
-	public Policy(Class<?>... capabilities) {
-		for (Class<?> type : capabilities) {
-			requiredCapabilities.add(type);
-		}
+	public Policy() {
 		
 		//build a map of the available event methods
 		for (Method method : this.getClass().getMethods()) {
@@ -37,9 +35,13 @@ public abstract class Policy {
 		
 	}
 	
+	public void addRequiredCapability(Class<? extends HostCapability> hostCapability) {
+		requiredCapabilities.add(hostCapability);
+	}
+	
 	public boolean checkCapabilities(AutonomicManager m) {
 		
-		for (Class<?> type : requiredCapabilities) {
+		for (Class<? extends HostCapability> type : requiredCapabilities) {
 			if (m.getCapability(type) == null)
 				return false;
 		}

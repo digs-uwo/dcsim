@@ -22,4 +22,24 @@ public final class SimTime {
 		return days(weeks * 7);
 	}
 	
+	public static final double toSeconds(long time) {
+		return time / 1000;
+	}
+	
+	public static final double toMinutes(long time) {
+		return toSeconds(time) / 60;
+	}
+	
+	public static final double toHours(long time) {
+		return toMinutes(time) / 60;
+	}
+	
+	public static final double toDays(long time) {
+		return toHours(time) / 24;
+	}
+	
+	public static final double toWeeks(long time) {
+		return toDays(time) / 7;
+	}
+	
 }

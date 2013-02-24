@@ -10,14 +10,10 @@ public class HostStatus {
 	
 	private long timeStamp;
 	private int id;
-	private int cpus;
-	private int cores;
-	private int coreCapacity;
 	private int incomingMigrations;
 	private int outgoingMigrations;
-	private double powerEfficiency;
+	private ArrayList<VmStatus> migratingInVms = new ArrayList<VmStatus>();
 	private Host.HostState state;
-	private Resources resourceCapacity = new Resources();
 
 	private double powerConsumption;
 	
@@ -29,24 +25,31 @@ public class HostStatus {
 		timeStamp = simulation.getSimulationTime();
 		
 		id = host.getId();
-		cpus = host.getCpuCount();
-		cores = host.getCoreCount();
-		coreCapacity = host.getCoreCapacity();
 		incomingMigrations = host.getMigratingIn().size();
 		outgoingMigrations = host.getMigratingOut().size();
-		powerEfficiency = host.getPowerEfficiency(1);
 		state = host.getState();
-		
-		resourceCapacity.setCpu(host.getTotalCpu());
-		resourceCapacity.setMemory(host.getMemory());
-		resourceCapacity.setBandwidth(host.getBandwidth());
-		resourceCapacity.setStorage(host.getStorage());
+
 		powerConsumption = host.getCurrentPowerConsumption();
 		
 		privDomain = new VmStatus(host.getPrivDomainAllocation().getVm(), simulation);
 		
 		for (VMAllocation vmAlloc : host.getVMAllocations()) {
-			vms.add(new VmStatus(vmAlloc.getVm(), simulation));
+			if (vmAlloc.getVm() != null) {
+				vms.add(new VmStatus(vmAlloc.getVm(), simulation));
+			}
+		}
+		
+		//keep track of resources promised to incoming VMs
+		for (VMAllocation vmAlloc : host.getMigratingIn()) {
+			Resources resources = new Resources();
+			resources.setCpu(vmAlloc.getVMDescription().getCpu());
+			resources.setMemory(vmAlloc.getVMDescription().getMemory());
+			resources.setBandwidth(vmAlloc.getVMDescription().getBandwidth());
+			resources.setStorage(vmAlloc.getVMDescription().getStorage());
+			
+			migratingInVms.add(new VmStatus(vmAlloc.getVMDescription().getCores(),
+					vmAlloc.getVMDescription().getCoreCapacity(),
+					resources));
 		}
 		
 	}
@@ -55,15 +58,10 @@ public class HostStatus {
 		timeStamp = host.timeStamp;
 		
 		id = host.id;
-		cpus = host.cpus;
-		cores = host.cores;
-		coreCapacity = host.coreCapacity;
 		incomingMigrations = host.incomingMigrations;
 		outgoingMigrations = host.outgoingMigrations;
-		powerEfficiency = host.powerEfficiency;
 		state = host.state;
 		
-		resourceCapacity = host.resourceCapacity.copy();
 		powerConsumption = host.powerConsumption;
 		
 		privDomain = host.privDomain.copy();
@@ -71,34 +69,6 @@ public class HostStatus {
 		for (VmStatus vm : host.vms) {
 			vms.add(vm.copy());
 		}
-	}
-	
-	public boolean canHost(VmStatus vm) {
-		return canHost(vm.getCores(), vm.getCoreCapacity(), vm.getResourcesInUse());
-	}
-	
-	public boolean canHost(int reqCores, int reqCoreCapacity, Resources reqResources) {
-		//verify that this host can host the given vm
-		
-		//check capabilities (e.g. core count, core capacity)
-		if (cpus * cores < reqCores)
-			return false;
-		if (coreCapacity < reqCoreCapacity)
-			return false;
-		
-		//check available resource
-		Resources resourcesInUse = getResourcesInUse();
-		if (resourceCapacity.getCpu() - resourcesInUse.getCpu() < reqResources.getCpu())
-			return false;
-		if (resourceCapacity.getMemory() - resourcesInUse.getMemory() < reqResources.getMemory())
-			return false;
-		if (resourceCapacity.getBandwidth() - resourcesInUse.getBandwidth() < reqResources.getBandwidth())
-			return false;
-		if (resourceCapacity.getStorage() - resourcesInUse.getStorage() < reqResources.getStorage())
-			return false;
-		
-		
-		return true;
 	}
 	
 	public void instantiateVm(VmStatus vm) {
@@ -119,22 +89,6 @@ public class HostStatus {
 	
 	public int getId() {
 		return id;
-	}
-	
-	public int getCpuCount() {
-		return cpus;
-	}
-	
-	public int getCoreCount() {
-		return cores;
-	}
-	
-	public int getCoreCapacity() {
-		return coreCapacity;
-	}
-	
-	public double getPowerEfficiency() {
-		return powerEfficiency;
 	}
 	
 	public Host.HostState getState() {
@@ -164,19 +118,18 @@ public class HostStatus {
 			resourcesInUse = resourcesInUse.add(vmStatus.getResourcesInUse());
 		}
 		
+		//add resources promised to incoming VMs
+		for (VmStatus vmStatus : migratingInVms) {
+			resourcesInUse = resourcesInUse.add(vmStatus.getResourcesInUse());
+		}
+		
 		return resourcesInUse;
-	}
-	
-	public Resources getResourceCapacity() {
-		return resourceCapacity;
 	}
 	
 	public double getPowerConsumption() {
 		return powerConsumption;
 	}
-	
-	
-	
+
 	public HostStatus copy() {
 		return new HostStatus(this);
 	}

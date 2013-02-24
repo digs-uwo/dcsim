@@ -7,7 +7,6 @@ import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.DCCpuUtilMetric;
 import edu.uwo.csd.dcsim.core.metrics.OptimalPowerRatioMetric;
 import edu.uwo.csd.dcsim.host.*;
-import edu.uwo.csd.dcsim.management.*;
 
 /**
  * Represents a single simulated DataCentre, which consists of a set of Host machines.
@@ -25,7 +24,6 @@ public class DataCentre implements SimulationEventListener {
 	public static final String OPTIMAL_POWER_RATIO_METRIC = "optimalPowerEfficiencyRatio";
 
 	private ArrayList<Host> hosts; //the hosts in this datacentre
-	VMPlacementPolicy vmPlacementPolicy; //the placement policy for this datacentre
 	Simulation simulation;
 	
 	private ArrayList<Cluster> clusters = null;				// Clusters in this data centre.
@@ -38,12 +36,9 @@ public class DataCentre implements SimulationEventListener {
 	 * to place VMs in the DataCentre
 	 * @param vmPlacementPolicy
 	 */
-	public DataCentre(Simulation simulation, VMPlacementPolicy vmPlacementPolicy) {
+	public DataCentre(Simulation simulation) {
 		hosts = new ArrayList<Host>();
 		this.simulation = simulation;
-		
-		this.vmPlacementPolicy = vmPlacementPolicy;
-		vmPlacementPolicy.setDataCentre(this);
 	}
 	
 	/**
@@ -78,23 +73,6 @@ public class DataCentre implements SimulationEventListener {
 	 */
 	public ArrayList<Host> getHosts() {
 		return hosts;
-	}
-	
-	/**
-	 * Get the VMPlacementPolicy in use by this DataCentre to place new VMs
-	 * @return
-	 */
-	public VMPlacementPolicy getVMPlacementPolicy() {
-		return vmPlacementPolicy;
-	}
-	
-	/**
-	 * Set the VMPlacementPolicy to be used by this DataCentre to place new VMs
-	 * onto Hosts
-	 * @param vmPlacementPolicy
-	 */
-	public void setVMPlacementPolicy(VMPlacementPolicy vmPlacementPolicy) {
-		this.vmPlacementPolicy = vmPlacementPolicy;
 	}
 	
 	@Override

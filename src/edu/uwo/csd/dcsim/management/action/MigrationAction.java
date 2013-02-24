@@ -2,11 +2,11 @@ package edu.uwo.csd.dcsim.management.action;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.ActionCountMetric;
-import edu.uwo.csd.dcsim.examples.management.events.MigrationEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
+import edu.uwo.csd.dcsim.management.events.MigrationEvent;
 
 public class MigrationAction implements ManagementAction {
 	

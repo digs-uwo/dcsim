@@ -14,16 +14,20 @@ import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.*;
-import edu.uwo.csd.dcsim.examples.management.capabilities.HostManager;
-import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
 import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
-import edu.uwo.csd.dcsim.examples.management.events.HostMonitorEvent;
 import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
-import edu.uwo.csd.dcsim.examples.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.DefaultResourceManagerFactory;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
+import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
+import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class AutonomicManagement extends SimulationTask {
@@ -31,7 +35,7 @@ public class AutonomicManagement extends SimulationTask {
 	private static Logger logger = Logger.getLogger(AutonomicManagement.class);
 	
 	private static final int N_HOSTS = 10;
-	private static final int N_VMS = 30;
+	private static final int N_VMS = 40;
 	
 	public static void main(String args[]) {
 		//MUST initialize logging when starting simulations
@@ -64,15 +68,13 @@ public class AutonomicManagement extends SimulationTask {
 
 	@Override
 	public void setup(Simulation simulation) {
-
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
 		
-		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation);
 		simulation.addDatacentre(dc);
 		
 		HostPoolManager hostPool = new HostPoolManager();
 		AutonomicManager dcAM = new AutonomicManager(hostPool);
-		dcAM.installPolicy(new HostStatusPolicy());
+		dcAM.installPolicy(new HostStatusPolicy(5));
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
@@ -80,7 +82,7 @@ public class AutonomicManagement extends SimulationTask {
 		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
 		relocateEvent.start(SimTime.hours(1) + 1);
 		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
-		consolidateEvent.start(SimTime.hours(3));
+		consolidateEvent.start(SimTime.hours(2) + 2);
 		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -100,8 +102,7 @@ public class AutonomicManagement extends SimulationTask {
 			event.start();
 			
 			dc.addHost(host);
-			hostPool.addHost(host); //this is the host pool used by the data centre manager
-			hostPool.addHostManager(host.getId(), hostAM);
+			hostPool.addHost(host, hostAM); //this is the host pool used by the data centre manager
 		}
 		
 		//Instantiate VMs and submit them to the datacentre
@@ -119,7 +120,21 @@ public class AutonomicManagement extends SimulationTask {
 		}
 		
 		//submit the VMs to the datacentre for placement
-		simulation.sendEvent(new VmPlacementEvent(dcAM, vmList), 1);
+		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmList);
+		
+		vmPlacementEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				VmPlacementEvent pe = (VmPlacementEvent)e;
+				if (!pe.getFailedRequests().isEmpty()) {
+					throw new RuntimeException("Could not place all VMs " + pe.getFailedRequests().size());
+				}
+			}
+			
+		});
+		
+		simulation.sendEvent(vmPlacementEvent, 1);
 	}
 
 }

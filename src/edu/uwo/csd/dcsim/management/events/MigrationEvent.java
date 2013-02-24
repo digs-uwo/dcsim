@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim.examples.management.events;
+package edu.uwo.csd.dcsim.management.events;
 
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.host.Host;

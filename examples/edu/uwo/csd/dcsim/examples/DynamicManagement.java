@@ -6,7 +6,12 @@ import java.util.Collection;
 import org.apache.log4j.*;
 
 import edu.uwo.csd.dcsim.*;
+import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
+import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
+import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
+import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
@@ -48,20 +53,19 @@ public class DynamicManagement extends SimulationTask {
 	@Override
 	public void setup(Simulation simulation) {
 		
-		DataCentre dc = ExampleHelper.createDataCentre(simulation);
-		simulation.addDatacentre(dc);
+		AutonomicManager dcAM = ExampleHelper.createDataCentre(simulation);
 		
 		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
 				
-		ExampleHelper.placeVms(vmList, dc);
+		ExampleHelper.placeVms(vmList, dcAM, simulation);
 		
-		/*
-		 * Basic Greedy Relocation & Consolidation together. Relocation same as RelocST03, Consolidation similar but
-		 * evicts ALL VMs from underprovisioned hosts, not 1.
-		 */
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
-		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
-		daemon.start(600000);
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
+		
+		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
+		relocateEvent.start(SimTime.hours(1) + 1);
+		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
+		consolidateEvent.start(SimTime.hours(3));
 	}
 	
 }

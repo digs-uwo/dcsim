@@ -3,7 +3,10 @@ package edu.uwo.csd.dcsim.application;
 import java.util.*;
 
 import edu.uwo.csd.dcsim.application.workload.*;
+import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.management.AutonomicManager;
+import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -34,7 +37,7 @@ public class Service {
 		}
 		return vmList;
 	}
-	
+
 	/**
 	 * Get the percentage of current incoming work to the Service for which SLA is violated
 	 * @return
@@ -83,7 +86,7 @@ public class Service {
 		return true;
 	}
 	
-	public void shutdownService() {
+	public void shutdownService(AutonomicManager target, Simulation simulation) {
 		
 		for (ServiceTier tier : tiers) {
 			for (Application application : new ArrayList<Application>(tier.getApplications())) {
@@ -94,9 +97,7 @@ public class Service {
 				if (vm.isMigrating() || application.getVM().isPendingMigration())
 					throw new RuntimeException("Tried to shutdown migrating VM #" + vm.getId() + ". Operation not allowed in simulation.");
 				
-				host.deallocate(vmAlloc);
-				vm.stopApplication();
-				
+				simulation.sendEvent(new ShutdownVmEvent(target, host.getId(), vm.getId()));				
 			}
 		}
 	}

@@ -1,18 +1,19 @@
 package edu.uwo.csd.dcsim.examples.management;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
-import edu.uwo.csd.dcsim.examples.management.capabilities.HostPoolManager;
 import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.management.HostData;
 import edu.uwo.csd.dcsim.management.HostStatus;
-import edu.uwo.csd.dcsim.management.HostStatusComparator;
+import edu.uwo.csd.dcsim.management.HostDataComparator;
 import edu.uwo.csd.dcsim.management.Policy;
 import edu.uwo.csd.dcsim.management.VmStatus;
 import edu.uwo.csd.dcsim.management.VmStatusComparator;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
+import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 
 /**
  * Implementation of IM2013 Balanced Relocation Policy
@@ -26,7 +27,7 @@ public class RelocationPolicy extends Policy {
 	double targetUtilization;
 	
 	public RelocationPolicy(double lowerThreshold, double upperThreshold, double targetUtilization) {
-		super(HostPoolManager.class);
+		addRequiredCapability(HostPoolManager.class);
 		
 		this.lowerThreshold = lowerThreshold;
 		this.upperThreshold = upperThreshold;
@@ -37,45 +38,55 @@ public class RelocationPolicy extends Policy {
 
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
 		
-		Map<Integer, ArrayList<HostStatus>> hosts = hostPool.getHostStatus();
+		Collection<HostData> hosts = hostPool.getHosts();
+
+		//reset the sandbox host status to the current host status
+		for (HostData host : hosts) {
+			host.resetSandboxStatusToCurrent();
+		}
 		
-		ArrayList<HostStatus> stressed = new ArrayList<HostStatus>();
-		ArrayList<HostStatus> partiallyUtilized = new ArrayList<HostStatus>();
-		ArrayList<HostStatus> underUtilized = new ArrayList<HostStatus>();
-		ArrayList<HostStatus> empty = new ArrayList<HostStatus>();
-		
+		ArrayList<HostData> stressed = new ArrayList<HostData>();
+		ArrayList<HostData> partiallyUtilized = new ArrayList<HostData>();
+		ArrayList<HostData> underUtilized = new ArrayList<HostData>();
+		ArrayList<HostData> empty = new ArrayList<HostData>();
+
 		classifyHosts(stressed, partiallyUtilized, underUtilized, empty, hosts);
-				
-		ArrayList<HostStatus> sources = orderSourceHosts(stressed);
-		ArrayList<HostStatus> targets = orderTargetHosts(partiallyUtilized, underUtilized, empty);
+		
+		ArrayList<HostData> sources = orderSourceHosts(stressed);
+		ArrayList<HostData> targets = orderTargetHosts(partiallyUtilized, underUtilized, empty);
 		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
 		
 		
 		boolean found;
 		
 		// for each source host
-		for (HostStatus source : sources) {
+		for (HostData source : sources) {
 
 			found = false;
-			ArrayList<VmStatus> vmList = orderSourceVms(source.getVms(), source);
+			ArrayList<VmStatus> vmList = orderSourceVms(source.getCurrentStatus().getVms(), source);
 			
 			// consider each VM within the source host
 			for (VmStatus vm : vmList) {
 				
 				// look for a target host to receive this VM
-				for (HostStatus target : targets) {
-					if (target.getIncomingMigrationCount() < 2 &&										//restrict target incoming migrations to 2 for some reason
-							target.canHost(vm) &&														//target has capability and capacity to host VM
-							(target.getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
-							target.getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
+				for (HostData target : targets) {
+					if (target.getSandboxStatus().getIncomingMigrationCount() < 2 &&										//restrict target incoming migrations to 2 for some reason
+							HostData.canHost(vm, target.getSandboxStatus(), target.getHostDescription()) &&					//target has capability and capacity to host VM
+							(target.getSandboxStatus().getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
+							target.getHostDescription().getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
 						
 						//modify host and vm states to indicate the future migration. Note we can do this because
-						//in classifyHosts() we have made copies of all host and vm status objects
-						source.migrate(vm, target);
-
-						migrations.add(new MigrationAction(hostPool.getHostManager(source.getId()),
-								hostPool.getHost(source.getId()),
-								hostPool.getHost(target.getId()), vm.getId()));
+						//we are using the designated 'sandbox' host status
+						source.getSandboxStatus().migrate(vm, target.getSandboxStatus());
+						
+						//invalidate source and target status, as we know them to be incorrect until the next status update arrives
+						source.invalidateStatus(simulation.getSimulationTime());
+						target.invalidateStatus(simulation.getSimulationTime());
+						
+						migrations.add(new MigrationAction(source.getHostManager(),
+								source.getHost(),
+								target.getHost(), 
+								vm.getId()));
 
 						found = true;
 						break;
@@ -94,64 +105,67 @@ public class RelocationPolicy extends Policy {
 		}
 	}
 	
-	private void classifyHosts(ArrayList<HostStatus> stressed, 
-			ArrayList<HostStatus> partiallyUtilized, 
-			ArrayList<HostStatus> underUtilized, 
-			ArrayList<HostStatus> empty,
-			Map<Integer, ArrayList<HostStatus>> hosts) {
+	private void classifyHosts(ArrayList<HostData> stressed, 
+			ArrayList<HostData> partiallyUtilized, 
+			ArrayList<HostData> underUtilized, 
+			ArrayList<HostData> empty,
+			Collection<HostData> hosts) {
 		
-		for (int hostId : hosts.keySet()) {
-			ArrayList<HostStatus> hostStatusList = hosts.get(hostId);
-			HostStatus host = hostStatusList.get(0);
+		for (HostData host : hosts) {
 			
-			// Calculate host's avg CPU utilization in the last window of time
-			double avgCpuInUse = 0;
-			int count = 0;
-			for (HostStatus status : hostStatusList) {
-				//only consider times when the host is powered on TODO should there be events from hosts that are off?
-				if (status.getState() == Host.HostState.ON) {
-					avgCpuInUse += status.getResourcesInUse().getCpu();
-					++count;
+			//filter out hosts with a currently invalid status
+			if (host.isStatusValid()) {
+					
+				// Calculate host's avg CPU utilization in the last window of time
+				double avgCpuInUse = 0;
+				int count = 0;
+				for (HostStatus status : host.getHistory()) {
+					//only consider times when the host is powered on TODO should there be events from hosts that are off?
+					if (status.getState() == Host.HostState.ON) {
+						avgCpuInUse += status.getResourcesInUse().getCpu();
+						++count;
+					}
 				}
-			}
-			if (count != 0) {
-				avgCpuInUse = avgCpuInUse / count;
-			}
+				if (count != 0) {
+					avgCpuInUse = avgCpuInUse / count;
+				}
+				
+				double avgCpuUtilization = avgCpuInUse / host.getHostDescription().getResourceCapacity().getCpu();
+				
+				//classify hosts, add copies of the host so that modifications can be made
+				if (host.getCurrentStatus().getVms().size() == 0) {
+					empty.add(host);
+				} else if (avgCpuUtilization < lowerThreshold) {
+					underUtilized.add(host);
+				} else if (avgCpuUtilization > upperThreshold) {
+					stressed.add(host);
+				} else {
+					partiallyUtilized.add(host);
+				}
 			
-			double avgCpuUtilization = avgCpuInUse / host.getResourceCapacity().getCpu();
-			
-			//classify hosts, add copies of the host so that modifications can be made
-			if (host.getVms().size() == 0) {
-				empty.add(host.copy());
-			} else if (avgCpuUtilization < lowerThreshold) {
-				underUtilized.add(host.copy());
-			} else if (avgCpuUtilization > upperThreshold) {
-				stressed.add(host.copy());
-			} else {
-				partiallyUtilized.add(host.copy());
 			}
 			
 		}
 		
 	}
 	
-	public ArrayList<HostStatus> orderSourceHosts(ArrayList<HostStatus> stressed) {
-		ArrayList<HostStatus> sorted = new ArrayList<HostStatus>(stressed);
+	public ArrayList<HostData> orderSourceHosts(ArrayList<HostData> stressed) {
+		ArrayList<HostData> sorted = new ArrayList<HostData>(stressed);
 		
 		// Sort Stressed hosts in decreasing order by CPU utilization.
-		Collections.sort(sorted, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL));
+		Collections.sort(sorted, HostDataComparator.getComparator(HostDataComparator.CPU_UTIL));
 		Collections.reverse(sorted);
 		
 		return sorted;
 	}
 	
-	public ArrayList<VmStatus> orderSourceVms(ArrayList<VmStatus> sourceVms, HostStatus source) {
+	public ArrayList<VmStatus> orderSourceVms(ArrayList<VmStatus> sourceVms, HostData source) {
 		
 		ArrayList<VmStatus> sorted = new ArrayList<VmStatus>();
 		
 		// Remove VMs with less CPU load than the CPU load by which the source 
 		// host is stressed.
-		double cpuExcess = source.getResourcesInUse().getCpu() - source.getResourceCapacity().getCpu() * this.upperThreshold;
+		double cpuExcess = source.getCurrentStatus().getResourcesInUse().getCpu() - source.getHostDescription().getResourceCapacity().getCpu() * this.upperThreshold;
 		for (VmStatus vm : sourceVms)
 			if (vm.getResourcesInUse().getCpu() >= cpuExcess)
 				sorted.add(vm);
@@ -171,21 +185,21 @@ public class RelocationPolicy extends Policy {
 		return sorted;
 	}
 	
-	public ArrayList<HostStatus> orderTargetHosts(ArrayList<HostStatus> partiallyUtilized, ArrayList<HostStatus> underUtilized, ArrayList<HostStatus> empty) {
-		ArrayList<HostStatus> targets = new ArrayList<HostStatus>();
+	public ArrayList<HostData> orderTargetHosts(ArrayList<HostData> partiallyUtilized, ArrayList<HostData> underUtilized, ArrayList<HostData> empty) {
+		ArrayList<HostData> targets = new ArrayList<HostData>();
 		
 		// Sort Partially-utilized hosts in increasing order by 
 		// <CPU utilization, power efficiency>.
-		Collections.sort(partiallyUtilized, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL, HostStatusComparator.EFFICIENCY));
+		Collections.sort(partiallyUtilized, HostDataComparator.getComparator(HostDataComparator.CPU_UTIL, HostDataComparator.EFFICIENCY));
 		
 		// Sort Underutilized hosts in decreasing order by <CPU utilization, 
 		// power efficiency>.
-		Collections.sort(underUtilized, HostStatusComparator.getComparator(HostStatusComparator.CPU_UTIL, HostStatusComparator.EFFICIENCY));
+		Collections.sort(underUtilized, HostDataComparator.getComparator(HostDataComparator.CPU_UTIL, HostDataComparator.EFFICIENCY));
 		Collections.reverse(underUtilized);
 		
 		// Sort Empty hosts in decreasing order by <power efficiency, 
 		// power state>.
-		Collections.sort(empty, HostStatusComparator.getComparator(HostStatusComparator.EFFICIENCY, HostStatusComparator.PWR_STATE));
+		Collections.sort(empty, HostDataComparator.getComparator(HostDataComparator.EFFICIENCY, HostDataComparator.PWR_STATE));
 		Collections.reverse(empty);
 		
 		targets.addAll(partiallyUtilized);

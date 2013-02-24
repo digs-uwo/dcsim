@@ -1,8 +1,8 @@
-package edu.uwo.csd.dcsim.examples.management.capabilities;
+package edu.uwo.csd.dcsim.management.capabilities;
 
 import edu.uwo.csd.dcsim.host.*;
 
-public class HostManager {
+public class HostManager extends HostCapability {
 
 	private Host host;
 	

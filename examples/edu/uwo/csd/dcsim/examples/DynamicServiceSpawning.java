@@ -9,15 +9,25 @@ import org.apache.log4j.Logger;
 import edu.uwo.csd.dcsim.*;
 import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.application.workload.*;
+import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.common.Tuple;
-import edu.uwo.csd.dcsim.core.DaemonScheduler;
-import edu.uwo.csd.dcsim.core.FixedIntervalDaemonScheduler;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
+import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
+import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
+import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
+import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
+import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
 
 public class DynamicServiceSpawning extends SimulationTask {
 
@@ -26,7 +36,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 	public static void main(String args[]) {
 		Simulation.initializeLogging();
 		
-		SimulationTask task = new DynamicServiceSpawning("dynamic-service-spawn", 86400000);
+		SimulationTask task = new DynamicServiceSpawning("dynamic-service-spawn", -5217230306070299805l);
 		
 		task.run();
 		
@@ -40,17 +50,22 @@ public class DynamicServiceSpawning extends SimulationTask {
 		
 	}
 	
-	public DynamicServiceSpawning(String name, long duration) {
-		super(name, duration);
+	public DynamicServiceSpawning(String name, long randomSeed) {
+		super(name, SimTime.days(1));
+		this.setRandomSeed(randomSeed);
 	}
 
 	@Override
 	public void setup(Simulation simulation) {
 		
 		//create DC
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
-		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation);
 		simulation.addDatacentre(dc);
+		
+		HostPoolManager hostPool = new HostPoolManager();
+		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		dcAM.installPolicy(new HostStatusPolicy(5));
+		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
 		//create Hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -59,7 +74,17 @@ public class DynamicServiceSpawning extends SimulationTask {
 		
 		//add 10 hosts
 		for (int i = 0; i < 10; ++i) {
-			dc.addHost(proLiantDL160G5E5420.build());
+			Host host = proLiantDL160G5E5420.build();  
+			
+			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			hostAM.installPolicy(new HostOperationsPolicy());
+			
+			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
+			event.start();
+			
+			dc.addHost(host);
+			hostPool.addHost(host, hostAM);
 		}
 
 		/*
@@ -86,7 +111,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		 * Simulation superclass), the datacentre to submit Services to, a distribution describing the lifespan of services, and either
 		 * a static rate to create services given in services-per-hour, or a list of (time, rate) tuples.
 		 */
-		ServiceProducer serviceProducer = new ServiceProducer(simulation, dc, new NormalDistribution(14400000, 900000), serviceRates) {
+		ServiceProducer serviceProducer = new ServiceProducer(simulation, dcAM, new NormalDistribution(14400000, 900000), serviceRates) {
 
 			@Override
 			public Service buildService() {
@@ -101,10 +126,14 @@ public class DynamicServiceSpawning extends SimulationTask {
 		//start the ServiceProducer
 		serviceProducer.start();
 		
-		//Add a dynamic management policy to perform relocation and consolidation
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
-		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
-		daemon.start(600000);
+		//Add a dynamic management policies to perform relocation and consolidation
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.8, 0.7));
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.8, 0.7));
+		
+		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
+		relocateEvent.start(SimTime.hours(1) + 1);
+		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
+		consolidateEvent.start(SimTime.hours(2) + 2);
 		
 	}
 

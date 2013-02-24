@@ -12,11 +12,21 @@ import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
+import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
+import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.HostModels;
 import edu.uwo.csd.dcsim.host.resourcemanager.DefaultResourceManagerFactory;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostManager;
+import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
+import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
+import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
+import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
+import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
 /**
@@ -66,29 +76,42 @@ public class SimpleExample extends SimulationTask {
 		 * Here we set up the simulation, but we do not run it.
 		 */
 		
-		/* 
-		 * Create a VMPlacementPolicy for the DataCentre. The VMPlacementPolicy handles placing 
-		 * VMs submitted to the DataCentre on Hosts. We create a VMPlacementPolicyFFD, which implements
-		 * a First Fit Decreasing algorithm for placing VMs. This algorithm attempts to pack VMs on a small
-		 * number of Hosts. 
-		 */
-		VMPlacementPolicy vmPlacementPolicy = new VMPlacementPolicyFFD(simulation);
-		
 		/*
 		 * Create a new DataCenter object
 		 */
-		DataCentre dc = new DataCentre(simulation, vmPlacementPolicy);
+		DataCentre dc = new DataCentre(simulation);
 		
 		//Add the DataCentre to the simulation
 		simulation.addDatacentre(dc);
+		
+		/*
+		 * Create and configure an AutonomicManager to manage the datacentre. This manager just needs to handle
+		 * VM placement. To do this, it needs the HostPoolManager capability to keep track of hosts and host
+		 * status updates (required by the placement policy), as well as a HostStatusPolicy to receive and process 
+		 * host status updates. Finally, it requires the actual VmPlacementPolicy to handle placement.
+		 */
+		
+		//Create the HostPoolManager capability separately, as we need to reference it later to add hosts
+		HostPoolManager hostPool = new HostPoolManager();
+		
+		//Create a new AutonomicManager with this capability
+		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		
+		//Install the HostStatusPolicy and VmPlacementPolicy
+		dcAM.installPolicy(new HostStatusPolicy(5));
+		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85)); //TODO replace with a more basic placement policy
 		
 		/*
 		 * Create a Host to add to the DataCentre. For this example, we will create a single Host, using
 		 * a factory method in the HostModels class to create a prebuilt host model. This returns
 		 * a Host.Builder object, which has been partially initialized with the properties of the Host. We
 		 * still must add the resource manager and resource scheduler. This is done by adding factories for the
-		 * resource manager and scheduler. We add the default manager and scheduler, which creates an oversubscribes
-		 * CPU and schedules it fairly to all running VMs.
+		 * resource manager and scheduler. We add the default manager and scheduler, which oversubscribes CPU
+		 * and distributes it fairly between all VMs.
+		 * 
+		 * Then we must add an AutonomicManager to manage the Host. The main tasks of this manager are to send
+		 * periodic status updates to the datacentre manager, and to handle events for basic host operations such
+		 * as VM instantiation and migration.
 		 */
 		
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -98,9 +121,24 @@ public class SimpleExample extends SimulationTask {
 		//Instantiate the Host
 		Host host = proLiantDL160G5E5420.build();
 		
+		//Create an AutonomicManager for the Host, with the HostManager capability (provides access to the host being managed)
+		AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
+		
+		//Install a HostMonitoringPolicy, which sends status updates to the datacentre manager
+		hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+		
+		//Install a HostOperationsPolicy, which handles basic host operations
+		hostAM.installPolicy(new HostOperationsPolicy());
+		
+		//Setup a repeating event to trigger the HostMonitoringPolicy to send host status 
+		HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
+		event.start(); //start the repeating event at time 0
+		
 		//Add the Host to the DataCentre
 		dc.addHost(host);
 		
+		//Add the Host to the HostPoolManager capability of our datacentre AutonomicManager
+		hostPool.addHost(host, hostAM);
 
 		
 		/*
@@ -135,25 +173,43 @@ public class SimpleExample extends SimulationTask {
 		
 		/*
 		 * Next we submit the VMAllocationRequest to the DataCentre, which will place it on a Host. Since we only have one Host, that is 
-		 * where it will be placed. Note that we can do this before the simulation is run, so that we have an initial placement at the
-		 * beginning of the simulation.
+		 * where it will be placed. This is done by sending a VmPlacmentEvent to the datacentre AutonomicManager.
+		 * Note that we have to delay the placement until time '1', so that the datacentre AutonomicManager has received at least one status
+		 * message from the Hosts.
 		 */
-		dc.getVMPlacementPolicy().submitVM(vmAllocationRequest);
+		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmAllocationRequest); 
+
+		//Ensure that all VMs are placed, or kill the simulation
+		vmPlacementEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				VmPlacementEvent pe = (VmPlacementEvent)e;
+				if (!pe.getFailedRequests().isEmpty()) {
+					throw new RuntimeException("Could not place all VMs " + pe.getFailedRequests().size());
+				}
+			}
+			
+		});
+		
+		//Delay message by '1'
+		simulation.sendEvent(vmPlacementEvent, 1);
 		
 		/*
-		 * At this point we can add Management Policies to the simulation. Since we only have one Host and one VM running, a Management Policy
+		 * At this point we can add Management Policies to AutonomicManagers to perform any other actions we desire. We will add a RelocationPolicy,
+		 * which looks for stressed Hosts and migrations VMs to relieve the stress situation. Since we only have one Host and one VM running, the policy
 		 * won't have anything to do, but we will add one anyways to show how it is done.
 		 * 
-		 * First we need to create the policy. We specify the datacentre which it will manage and the lower, upper, and target
-		 * CPU utilization thresholds. Note that we can create any number of ManagementPolicies that we want.
+		 * First we need to create the policy. We specify the lower, upper, and target CPU utilization thresholds. The RelocationPolicy must be installed
+		 * in an AutonomicManager that has the HostPoolManager capability. Since the datacentre AutonomicManager has this capability, we can install the 
+		 * policy into this AutonomicManager.
 		 * 
-		 * Policies run in the simulation as a 'Daemon', which is simply a piece of code that is executed on a fixed interval. The policy
-		 * implements the Daemon interface. We create a DaemonScheduler to run the daemon on a fixed interval. Finally, we start the daemon
-		 * at the specified simulation time. 
+		 * Finally, we need to create a RelocateEvent, which repeats on a regular interval, to trigger execution of the policy.
 		 */
-		VMAllocationPolicyGreedy vmAllocationPolicyGreedy = new VMAllocationPolicyGreedy(dc, 0.5, 0.85, 0.85);
-		DaemonScheduler daemon = new FixedIntervalDaemonScheduler(simulation, 600000, vmAllocationPolicyGreedy);
-		daemon.start(600000);
+		
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
+		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
+		relocateEvent.start(SimTime.hours(1) + 1);
 		
 		/*
 		 * The simulation is now ready. It will be executed when the run() method is called externally.

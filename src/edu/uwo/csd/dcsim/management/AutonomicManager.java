@@ -6,24 +6,25 @@ import java.util.List;
 import java.util.Map;
 
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
 
 public class AutonomicManager implements SimulationEventListener {
 
 	private ArrayList<Policy> policies = new ArrayList<Policy>();
-	private Map<Class<?>, Object> capabilities = new HashMap<Class<?>, Object>();
+	private Map<Class<? extends HostCapability>, Object> capabilities = new HashMap<Class<? extends HostCapability>, Object>();
 	
-	public AutonomicManager(Object... capabilities) {
-		for (Object o : capabilities) {
-			addCapability(o);
+	public AutonomicManager(HostCapability... capabilities) {
+		for (HostCapability capability : capabilities) {
+			addCapability(capability);
 		}
 	}
 	
-	public void addCapability(Object o) {
-		capabilities.put(o.getClass(), o);
+	public void addCapability(HostCapability capability) {
+		capabilities.put(capability.getClass(), capability);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getCapability(Class<T> type) {
+	public <T extends HostCapability> T getCapability(Class<T> type) {
 		T r = (T)capabilities.get(type);
 		return r;
 	}

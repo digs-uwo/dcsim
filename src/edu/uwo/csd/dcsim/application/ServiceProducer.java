@@ -4,16 +4,17 @@ import java.util.*;
 
 import org.apache.commons.math3.distribution.*;
 
-import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.application.events.*;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Event;
+import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
 import edu.uwo.csd.dcsim.core.events.DaemonRunEvent;
 import edu.uwo.csd.dcsim.core.metrics.AggregateMetric;
+import edu.uwo.csd.dcsim.management.AutonomicManager;
+import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
-
 
 /**
  * The ServiceProducer class generates new Services and submits them to a data centre based on given parameters. 
@@ -27,7 +28,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	private final static String PLACEMENT_FAIL_METRIC = "servicePlacementsFailed";
 	private final static String SHUTDOWN_COUNT_METRIC = "servicesEnded";
 	
-	DataCentre dcTarget;
+	AutonomicManager dcTarget;
 	RealDistribution lifespanDist; //if null, create services that do not stop
 	ExponentialDistribution arrivalDist;
 	List<Tuple<Long, Double>> servicesPerHour;
@@ -36,21 +37,21 @@ public abstract class ServiceProducer implements SimulationEventListener {
 	
 	protected Simulation simulation;
 	
-	public ServiceProducer(Simulation simulation, DataCentre dcTarget, List<Tuple<Long, Double>> servicesPerHour) {
+	public ServiceProducer(Simulation simulation, AutonomicManager dcTarget, List<Tuple<Long, Double>> servicesPerHour) {
 		this(simulation, dcTarget, null, servicesPerHour);
 	}
 	
-	public ServiceProducer(Simulation simulation, DataCentre dcTarget, double servicesPerHour) {
+	public ServiceProducer(Simulation simulation, AutonomicManager dcTarget, double servicesPerHour) {
 		this(simulation, dcTarget, null, servicesPerHour);
 	}
 	
-	public ServiceProducer(Simulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, List<Tuple<Long, Double>> servicesPerHour) {
+	public ServiceProducer(Simulation simulation, AutonomicManager dcTarget, RealDistribution lifespanDist, List<Tuple<Long, Double>> servicesPerHour) {
 		this(simulation, dcTarget, lifespanDist, 0);
 		
 		this.servicesPerHour = servicesPerHour;
 	}
 	
-	public ServiceProducer(Simulation simulation, DataCentre dcTarget, RealDistribution lifespanDist, double servicesPerHour) {
+	public ServiceProducer(Simulation simulation, AutonomicManager dcTarget, RealDistribution lifespanDist, double servicesPerHour) {
 		this.dcTarget = dcTarget;
 		this.lifespanDist = lifespanDist;
 		this.simulation = simulation;
@@ -96,20 +97,13 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		
 		AggregateMetric.getMetric(simulation, SPAWN_COUNT_METRIC).addValue(1);
 		
-		if (dcTarget.getVMPlacementPolicy().submitVMs(vmAllocationRequests)) {
-			
-			//send event to trigger service shutdown on lifespan + currentTime
-			if (lifespanDist != null) {
-				long lifeSpan = (long)Math.round(lifespanDist.sample());
-				
-				simulation.sendEvent(new ShutdownServiceEvent(this, service), simulation.getSimulationTime() + lifeSpan);
-			}
-			
-		} else {
-			simulation.getLogger().debug("Service Placement Failed");
-			AggregateMetric.getMetric(simulation, PLACEMENT_FAIL_METRIC).addValue(1);
-		}
+		VmPlacementEvent placementEvent = new VmPlacementEvent(dcTarget, vmAllocationRequests);
+		
+		//add a callback handler to record placement success/failure
+		placementEvent.addCallbackListener(new ServiceSpawnCallbackHandler(service));
 
+		simulation.sendEvent(placementEvent);
+		
 	}
 	
 	private void shutdownService(Service service) {
@@ -119,7 +113,7 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		
 		//check to see if the service is ready to shutdown (i.e. no VMs are migrating)
 		if (service.canShutdown()) {
-			service.shutdownService();
+			service.shutdownService(dcTarget, simulation);
 			AggregateMetric.getMetric(simulation, SHUTDOWN_COUNT_METRIC).addValue(1);
 			
 			simulation.getLogger().debug("Shutdown Service");
@@ -180,4 +174,30 @@ public abstract class ServiceProducer implements SimulationEventListener {
 		}
 	}
 	
+	public class ServiceSpawnCallbackHandler implements EventCallbackListener {
+
+		private Service service;
+		
+		public ServiceSpawnCallbackHandler(Service service) {
+			this.service = service;
+		}
+		
+		@Override
+		public void eventCallback(Event e) {
+			VmPlacementEvent placementEvent = (VmPlacementEvent)e;
+			
+			if (placementEvent.getFailedRequests().isEmpty()) {
+				//send event to trigger service shutdown on lifespan + currentTime
+				if (lifespanDist != null) {
+					long lifeSpan = (long)Math.round(lifespanDist.sample());
+					
+					simulation.sendEvent(new ShutdownServiceEvent(ServiceProducer.this, service), simulation.getSimulationTime() + lifeSpan);
+				}
+			} else {
+				simulation.getLogger().debug("Service Placement Failed");
+				AggregateMetric.getMetric(simulation, PLACEMENT_FAIL_METRIC).addValue(1);
+			}
+		}
+		
+	}
 }

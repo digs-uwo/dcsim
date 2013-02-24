@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim.examples.management.events;
+package edu.uwo.csd.dcsim.management.events;
 
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
@@ -9,6 +9,7 @@ public class InstantiateVmEvent extends Event {
 
 	private VMAllocationRequest vmAllocationRequest;
 	private VM vm;
+	private boolean failed = false;
 	
 	public InstantiateVmEvent(SimulationEventListener target, VMAllocationRequest vmAllocationRequest) {
 		super(target);
@@ -25,6 +26,14 @@ public class InstantiateVmEvent extends Event {
 	
 	public void setVM(VM vm) {
 		this.vm = vm;
+	}
+	
+	public void setFailed(boolean failed) {
+		this.failed = failed;
+	}
+	
+	public boolean failed() {
+		return failed;
 	}
 
 }

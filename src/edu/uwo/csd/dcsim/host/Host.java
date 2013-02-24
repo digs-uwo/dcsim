@@ -240,12 +240,7 @@ public final class Host implements SimulationEventListener {
 			return;
 		}
 
-		if (e instanceof SubmitVmEvent) {
-			//Submit VM Event, trigger a new VM to be allocated to this host
-			
-			SubmitVmEvent submitEvent = (SubmitVmEvent)e;
-			submitVM(submitEvent.getRequest());
-		} else if (e instanceof PowerStateEvent) {
+		if (e instanceof PowerStateEvent) {
 			//PowerStateEvent, indicating that the host must change power state
 			
 			PowerStateEvent powerEvent = (PowerStateEvent)e;
@@ -306,7 +301,10 @@ public final class Host implements SimulationEventListener {
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
-			throw new RuntimeException("Could not allocate submitted VM", e);
+//			System.out.println("!!!!! ALLOC FAIL - SUBMIT - Host #" + this.getId());
+			throw new RuntimeException("Allocation failed on Host #" + this.getId() + 
+					" VM submission", e);
+			
 		}
 		
 		//add the allocation to the Host list of allocations
@@ -402,8 +400,10 @@ public final class Host implements SimulationEventListener {
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
+//			System.out.println("!!!!! ALLOC FAIL - MIG- Host #" + this.getId());
 			throw new RuntimeException("Allocation failed on Host # " + this.getId() + 
 					" for migrating in VM #" + vm.getId(), e);
+
 		}
 		
 		//add the allocation to the Host list of allocations
