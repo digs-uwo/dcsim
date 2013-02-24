@@ -56,7 +56,9 @@ public class HostData {
 	}
 	
 	public void resetSandboxStatusToCurrent() {
-		this.sandboxStatus = currentStatus.copy();
+		if (currentStatus != null) {
+			this.sandboxStatus = currentStatus.copy();
+		}
 	}
 	
 	public ArrayList<HostStatus> getHistory() {
