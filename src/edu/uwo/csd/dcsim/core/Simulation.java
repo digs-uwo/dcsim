@@ -56,9 +56,7 @@ public class Simulation implements SimulationEventListener {
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
 	protected Map<String, Metric> metrics = new HashMap<String, Metric>();
-	
-	private Vector<Monitor> monitors = new Vector<Monitor>();
-	
+		
 	private Random random;
 	private long randomSeed;
 	
@@ -242,19 +240,6 @@ public class Simulation implements SimulationEventListener {
 				//inform metrics of completed time interval
 				for (Metric metric : this.metrics.values())
 					metric.completeTimeInterval();
-
-				//run monitors
-				if (monitors.size() > 0) {
-					long nextMonitor = duration;
-					for (Monitor monitor : monitors) {
-						//run the monitors, keep track of the next time a monitor is scheduled to run
-						long nextExec = monitor.run();
-						if (nextExec < nextMonitor)
-							nextMonitor = nextExec;
-					}
-					//trigger an event to ensure that any monitors that must run do so
-					sendEvent(new RunMonitorsEvent(this), nextMonitor);
-				}
 				
 			}
 
@@ -487,10 +472,6 @@ public class Simulation implements SimulationEventListener {
 		} else {
 			throw new RuntimeException("Metric " + metric.getName() + " already exists in simulation. Cannot add multiple copies of the same metric to the same simulation.");
 		}
-	}
-	
-	public final void addMonitor(Monitor monitor) {
-		monitors.add(monitor);
 	}
 
 	public final long getSimulationTime() {
