@@ -119,7 +119,7 @@ public class AutonomicManagement extends SimulationTask {
 			
 		});
 		
-		simulation.sendEvent(vmPlacementEvent, SimTime.minutes(6));
+		simulation.sendEvent(vmPlacementEvent, SimTime.minutes(0));
 	}
 
 }

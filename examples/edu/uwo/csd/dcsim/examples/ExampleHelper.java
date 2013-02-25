@@ -167,7 +167,7 @@ public class ExampleHelper {
 			
 		});
 		
-		simulation.sendEvent(vmPlacementEvent, SimTime.minutes(5) + 1);
+		simulation.sendEvent(vmPlacementEvent, 0);
 	}
 	
 	public static void printMetrics(Collection<Metric> metrics) {

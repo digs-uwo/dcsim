@@ -190,8 +190,7 @@ public class SimpleExample extends SimulationTask {
 			
 		});
 		
-		//Delay message by '1'
-		simulation.sendEvent(vmPlacementEvent, 1);
+		simulation.sendEvent(vmPlacementEvent, 0);
 		
 		/*
 		 * At this point we can add Management Policies to AutonomicManagers to perform any other actions we desire. We will add a RelocationPolicy,
