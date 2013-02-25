@@ -26,7 +26,7 @@ public class AutonomicManagement extends SimulationTask {
 	private static Logger logger = Logger.getLogger(AutonomicManagement.class);
 	
 	private static final int N_HOSTS = 10;
-	private static final int N_VMS = 40;
+	private static final int N_VMS = 50;
 	
 	public static void main(String args[]) {
 		//MUST initialize logging when starting simulations
@@ -48,13 +48,13 @@ public class AutonomicManagement extends SimulationTask {
 	}
 	
 	public AutonomicManagement(String name, long randomSeed) {
-		super(name, SimTime.days(1));
+		super(name, SimTime.days(15));
 		this.setRandomSeed(randomSeed);
 		this.setMetricRecordStart(0);
 	}
 	
 	public AutonomicManagement(String name) {
-		super(name, SimTime.days(1));
+		super(name, SimTime.days(5));
 	}
 
 	@Override
@@ -83,6 +83,8 @@ public class AutonomicManagement extends SimulationTask {
 			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
 			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), SimTime.minutes(simulation.getRandom().nextInt(5)));
 			hostAM.installPolicy(new HostOperationsPolicy());
+
+			host.installAutonomicManager(hostAM);
 			
 			dc.addHost(host);
 			hostPool.addHost(host, hostAM); //this is the host pool used by the data centre manager

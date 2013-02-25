@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim.management;
 
 import java.util.ArrayList;
 
-import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.vm.*;
 
@@ -19,10 +18,10 @@ public class HostStatus {
 	
 	VmStatus privDomain;
 	ArrayList<VmStatus> vms = new ArrayList<VmStatus>();
-	
-	public HostStatus(Host host, Simulation simulation) {
 		
-		timeStamp = simulation.getSimulationTime();
+	public HostStatus(Host host, long timeStamp) {
+		
+		this.timeStamp = timeStamp;
 		
 		id = host.getId();
 		incomingMigrations = host.getMigratingIn().size();
@@ -31,11 +30,11 @@ public class HostStatus {
 
 		powerConsumption = host.getCurrentPowerConsumption();
 		
-		privDomain = new VmStatus(host.getPrivDomainAllocation().getVm(), simulation);
+		privDomain = new VmStatus(host.getPrivDomainAllocation().getVm(), timeStamp);
 		
 		for (VMAllocation vmAlloc : host.getVMAllocations()) {
 			if (vmAlloc.getVm() != null) {
-				vms.add(new VmStatus(vmAlloc.getVm(), simulation));
+				vms.add(new VmStatus(vmAlloc.getVm(), timeStamp));
 			}
 		}
 		

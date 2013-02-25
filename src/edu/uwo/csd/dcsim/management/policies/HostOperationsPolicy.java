@@ -15,7 +15,7 @@ public class HostOperationsPolicy extends Policy {
 	public HostOperationsPolicy() {
 		addRequiredCapability(HostManager.class);
 	}
-	
+
 	public void execute(InstantiateVmEvent event) {
 		HostManager hostManager = manager.getCapability(HostManager.class);
 		Host host = hostManager.getHost();
@@ -64,6 +64,24 @@ public class HostOperationsPolicy extends Policy {
 		//stop the VM and deallocate it from the host
 		vmAlloc.getVm().stopApplication();
 		host.deallocate(vmAlloc);
+	}
+
+	@Override
+	public void onInstall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStop() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

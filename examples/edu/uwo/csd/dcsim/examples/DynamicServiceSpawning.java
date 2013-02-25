@@ -77,6 +77,8 @@ public class DynamicServiceSpawning extends SimulationTask {
 			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), 0);
 			hostAM.installPolicy(new HostOperationsPolicy());
 			
+			host.installAutonomicManager(hostAM);
+			
 			dc.addHost(host);
 			hostPool.addHost(host, hostAM);
 		}

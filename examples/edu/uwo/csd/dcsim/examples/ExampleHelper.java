@@ -94,7 +94,9 @@ public class ExampleHelper {
 			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
 			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), SimTime.minutes(simulation.getRandom().nextInt(4)) );
 			hostAM.installPolicy(new HostOperationsPolicy());
-				
+			
+			host.installAutonomicManager(hostAM);
+			
 			hostPool.addHost(host, hostAM);
 			hosts.add(host);
 		}

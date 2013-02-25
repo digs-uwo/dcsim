@@ -12,7 +12,7 @@ public class HostData {
 	
 	private HostStatus currentStatus = null;
 	private HostStatus sandboxStatus = null; //this is a HostStatus variable that can be freely modified for use in policies
-	private boolean statusValid = false; //default to false until first status arrives
+	private boolean statusValid = true;
 	private long invalidationTime = -1;
 	
 	private ArrayList<HostStatus> history = new ArrayList<HostStatus>();
@@ -22,6 +22,9 @@ public class HostData {
 		this.hostManager = hostManager;
 		
 		hostDescription = new HostDescription(host);
+		
+		//initialize currentStatus in order to maintain a status of powered off Hosts
+		currentStatus = new HostStatus(host, 0);
 	}
 	
 	public void addHostStatus(HostStatus hostStatus, int historyWindowSize) {

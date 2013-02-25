@@ -15,12 +15,30 @@ public class HostMonitoringPolicy extends Policy {
 		this.target = target;
 	}
 
+	@Override
+	public void onManagerStop() {
+		//execute the monitor so that a final message is sent indicating that the host is now OFF
+		execute();
+	}
+	
 	public void execute() {		
 		HostManager hostManager = manager.getCapability(HostManager.class);
 		
-		HostStatus hostState = new HostStatus(hostManager.getHost(), simulation);
+		HostStatus hostState = new HostStatus(hostManager.getHost(), simulation.getSimulationTime());
 		
 		simulation.sendEvent(new HostStatusEvent(target, hostState));
+	}
+
+	@Override
+	public void onInstall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStart() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

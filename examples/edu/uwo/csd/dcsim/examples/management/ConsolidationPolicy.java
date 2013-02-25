@@ -192,4 +192,22 @@ public class ConsolidationPolicy extends Policy {
 		return targets;
 	}
 
+	@Override
+	public void onInstall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStop() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

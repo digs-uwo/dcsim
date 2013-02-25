@@ -157,8 +157,9 @@ public class VmPlacementPolicy extends Policy {
 		//if the host is not ON or POWERING_ON, then send an event to power on the host
 		if (host.getCurrentStatus().getState() != Host.HostState.ON && host.getCurrentStatus().getState() != Host.HostState.POWERING_ON) {
 			simulation.sendEvent(new PowerStateEvent(host.getHost(), PowerState.POWER_ON));
+			
 		}
-		
+
 		//send event to host to instantiate VM
 		return simulation.sendEvent(new InstantiateVmEvent(host.getHostManager(), vmAllocationRequest));
 	}
@@ -171,6 +172,24 @@ public class VmPlacementPolicy extends Policy {
 		hostPool.getHost(event.getHostId()).invalidateStatus(simulation.getSimulationTime());
 		
 		simulation.sendEvent(new ShutdownVmEvent(hostManager, event.getHostId(), event.getVmId()));
+	}
+
+	@Override
+	public void onInstall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStop() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

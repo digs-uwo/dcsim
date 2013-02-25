@@ -122,6 +122,10 @@ public class SimpleExampleDetailed extends SimulationTask {
 		//Install a HostOperationsPolicy, which handles basic host operations
 		hostAM.installPolicy(new HostOperationsPolicy());
 		
+		//Optionally, we can "install" the manager into the Host. This ensures that the manager does not run when the host is
+		//not 'ON', and triggers hooks in the manager and policies on power on and off.
+		host.installAutonomicManager(hostAM);
+		
 		//Add the Host to the DataCentre
 		dc.addHost(host);
 		

@@ -17,11 +17,11 @@ public abstract class Policy {
 	protected AutonomicManager manager;
 	protected Simulation simulation;
 	
-	public void addRequiredCapability(Class<? extends HostCapability> hostCapability) {
+	public final void addRequiredCapability(Class<? extends HostCapability> hostCapability) {
 		requiredCapabilities.add(hostCapability);
 	}
 	
-	public boolean checkCapabilities(AutonomicManager m) {
+	public final boolean checkCapabilities(AutonomicManager m) {
 		
 		for (Class<? extends HostCapability> type : requiredCapabilities) {
 			if (m.getCapability(type) == null)
@@ -31,7 +31,7 @@ public abstract class Policy {
 		return true;
 	}
 	
-	public <T extends Event> boolean execute(T e, AutonomicManager manager) {
+	public final <T extends Event> boolean execute(T e, AutonomicManager manager) {
 		
 		//ensure that this policy is currently enabled
 		if (!enabled) {
@@ -83,12 +83,18 @@ public abstract class Policy {
 		
 	}
 	
-	public boolean isEnabled() {
+	public final boolean isEnabled() {
 		return enabled;
 	}
 	
-	public void setEnabled(boolean enabled) {
+	public final void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	
+	public abstract void onInstall();
+	
+	public abstract void onManagerStart();
+	
+	public abstract void onManagerStop();
 	
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
 import edu.uwo.csd.dcsim.management.events.RepeatingPolicyExecutionEvent;
 
@@ -16,6 +17,8 @@ public class AutonomicManager implements SimulationEventListener {
 	private ArrayList<Policy> policies = new ArrayList<Policy>();
 	private Map<Class<? extends HostCapability>, Object> capabilities = new HashMap<Class<? extends HostCapability>, Object>();
 	private Map<RepeatingPolicyExecutionEvent, Policy> policyExecutionEvents = new HashMap<RepeatingPolicyExecutionEvent, Policy>();
+	
+	private Host container = null; //if this AutonomicManager is running within a Host, it is stored here
 	
 	public AutonomicManager(Simulation simulation, HostCapability... capabilities) {
 		this.simulation = simulation;
@@ -27,6 +30,26 @@ public class AutonomicManager implements SimulationEventListener {
 	
 	public void addCapability(HostCapability capability) {
 		capabilities.put(capability.getClass(), capability);
+	}
+	
+	public void setContainer(Host container) {
+		this.container = container;
+	}
+	
+	public Host getContainer() {
+		return container;
+	}
+	
+	public void onContainerStart() {
+		for (Policy policy : policies) {
+			policy.onManagerStart();
+		}
+	}
+	
+	public void onContainerStop() {
+		for (Policy policy : policies) {
+			policy.onManagerStop();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -77,6 +100,12 @@ public class AutonomicManager implements SimulationEventListener {
 	
 	@Override
 	public void handleEvent(Event e) {
+		
+		//first, check if the Host container this manager is running in (if any) is ON
+		if (container != null && !(container.getState() == Host.HostState.ON || container.getState() == Host.HostState.POWERING_ON)) {
+			//if this manager is running in a host, and the host is OFF, then do not process the event
+			return;
+		}
 		
 		//if this is a repeating policy execution event, it is only forwarded to a specific policy
 		if (e instanceof RepeatingPolicyExecutionEvent) {

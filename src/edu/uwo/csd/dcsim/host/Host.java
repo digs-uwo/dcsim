@@ -14,6 +14,7 @@ import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.host.power.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.*;
+import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -59,6 +60,8 @@ public final class Host implements SimulationEventListener {
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	private boolean powerOffAfterMigrations = false;
+	
+	private ArrayList<AutonomicManager> autonomicManagers = new ArrayList<AutonomicManager>();
 	
 	/*
 	 * Simulation metrics
@@ -203,6 +206,20 @@ public final class Host implements SimulationEventListener {
 			return new Host(this);
 		}
 		
+	}
+	
+	public void installAutonomicManager(AutonomicManager manager) {
+		autonomicManagers.add(manager);
+		manager.setContainer(this);
+	}
+	
+	public void uninstallAutonomicManager(AutonomicManager manager) {
+		autonomicManagers.remove(manager);
+		manager.setContainer(null);
+	}
+	
+	public ArrayList<AutonomicManager> getAutonomicManagers() {
+		return autonomicManagers;
 	}
 	
 	@Override
@@ -555,6 +572,11 @@ public final class Host implements SimulationEventListener {
 			simulation.sendEvent(new PowerStateEvent(this, PowerState.POWER_ON, true), simulation.getSimulationTime() + delay);
 			
 			state = HostState.POWERING_ON;
+			
+			//inform any managers that the host is turning on
+			for (AutonomicManager manager : autonomicManagers) {
+				manager.onContainerStart();
+			}
 		}
 	}
 	
@@ -571,10 +593,20 @@ public final class Host implements SimulationEventListener {
 	
 	private void completePowerOff() {
 		state = HostState.OFF;
+		
+		//inform any managers that the host is shutting down
+		for (AutonomicManager manager : autonomicManagers) {
+			manager.onContainerStop();
+		}
 	}
 	
 	private void completeSuspend() {
 		state = HostState.SUSPENDED;
+		
+		//inform any managers that the host is shutting down
+		for (AutonomicManager manager : autonomicManagers) {
+			manager.onContainerStop();
+		}
 	}
 	
 	public void fail() {

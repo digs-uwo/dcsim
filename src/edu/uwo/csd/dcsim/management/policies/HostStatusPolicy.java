@@ -25,4 +25,22 @@ public class HostStatusPolicy extends Policy {
 		hostPool.getHost(event.getHostStatus().getId()).addHostStatus(event.getHostStatus(), windowSize);
 	}
 
+	@Override
+	public void onInstall() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStart() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onManagerStop() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
