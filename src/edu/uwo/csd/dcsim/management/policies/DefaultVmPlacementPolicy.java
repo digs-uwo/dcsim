@@ -1,8 +1,6 @@
 package edu.uwo.csd.dcsim.management.policies;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
@@ -15,83 +13,20 @@ import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 
+/**
+ * DefaultVmPlacementPolicy takes a very basic approach to placement. It simply iterates through the set of hosts, in
+ * no particular order (in the order they were added to the host manager), and places the VM on the first Host it
+ * encounters that has enough capacity.
+ * 
+ * @author Michael Tighe
+ *
+ */
 public class DefaultVmPlacementPolicy extends Policy {
 
-	private double lowerThreshold;
-	private double upperThreshold;
-	private double targetUtilization;
-	
-	public DefaultVmPlacementPolicy(double lowerThreshold, double upperThreshold, double targetUtilization) {
+	public DefaultVmPlacementPolicy() {
 		addRequiredCapability(HostPoolManager.class);
-		
-		this.lowerThreshold = lowerThreshold;
-		this.upperThreshold = upperThreshold;
-		this.targetUtilization = targetUtilization;
 	}
-	
-	private ArrayList<HostData> orderTargetHosts(ArrayList<HostData> partiallyUtilized, 
-			ArrayList<HostData> underUtilized, 
-			ArrayList<HostData> empty) {
 		
-		ArrayList<HostData> targets = new ArrayList<HostData>();
-		
-		// Sort Partially-utilized in increasing order by <CPU utilization,  power efficiency>.
-		Collections.sort(partiallyUtilized, HostDataComparator.getComparator(HostDataComparator.CPU_UTIL, HostDataComparator.EFFICIENCY));
-		
-		// Sort Underutilized hosts in decreasing order by <CPU utilization, power efficiency>.
-		Collections.sort(underUtilized, HostDataComparator.getComparator(HostDataComparator.CPU_UTIL, HostDataComparator.EFFICIENCY));
-		Collections.reverse(underUtilized);
-		
-		// Sort Empty hosts in decreasing order by <power efficiency, power state>.
-		Collections.sort(empty, HostDataComparator.getComparator(HostDataComparator.EFFICIENCY, HostDataComparator.PWR_STATE));
-		Collections.reverse(empty);
-		
-		targets.addAll(partiallyUtilized);
-		targets.addAll(underUtilized);
-		targets.addAll(empty);
-		
-		return targets;
-	}
-	
-	private void classifyHosts(ArrayList<HostData> partiallyUtilized, 
-			ArrayList<HostData> underUtilized, 
-			ArrayList<HostData> empty,
-			Collection<HostData> hosts) {
-		
-		for (HostData host : hosts) {
-			
-			//filter out hosts with a currently invalid status
-			if (host.isStatusValid()) {
-				// Calculate host's avg CPU utilization in the last window of time
-				double avgCpuInUse = 0;
-				int count = 0;
-				for (HostStatus status : host.getHistory()) {
-					//only consider times when the host is powered on TODO should there be events from hosts that are off?
-					if (status.getState() == Host.HostState.ON) {
-						avgCpuInUse += status.getResourcesInUse().getCpu();
-						++count;
-					}
-				}
-				if (count != 0) {
-					avgCpuInUse = avgCpuInUse / count;
-				}
-				
-				double avgCpuUtilization = avgCpuInUse / host.getHostDescription().getResourceCapacity().getCpu();
-				
-				//classify hosts, add copies of the host so that modifications can be made
-				if (host.getCurrentStatus().getVms().size() == 0) {
-					empty.add(host);
-				} else if (avgCpuUtilization < lowerThreshold) {
-					underUtilized.add(host);
-				} else if (avgCpuUtilization <= upperThreshold) {
-					partiallyUtilized.add(host);
-				}
-			}
-			
-		}
-		
-	}
-	
 	public void execute(VmPlacementEvent event) {
 
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
@@ -103,19 +38,12 @@ public class DefaultVmPlacementPolicy extends Policy {
 			host.resetSandboxStatusToCurrent();
 		}
 		
-		// Categorize hosts.
-		ArrayList<HostData> partiallyUtilized = new ArrayList<HostData>();
-		ArrayList<HostData> underUtilized = new ArrayList<HostData>();
-		ArrayList<HostData> empty = new ArrayList<HostData>();
-		
-		this.classifyHosts(partiallyUtilized, underUtilized, empty, hosts);
-		
-		// Create target hosts list.
-		ArrayList<HostData> targets = this.orderTargetHosts(partiallyUtilized, underUtilized, empty);
-
+		//iterate though each VM to place
 		for (VMAllocationRequest vmAllocationRequest : event.getVMAllocationRequests()) {
 			HostData allocatedHost = null;
-			for (HostData target : targets) {
+			
+			//simply iterate through the list of hosts until we find one that has enough capacity for the VM
+			for (HostData target : hosts) {
 				Resources reqResources = new Resources();
 				reqResources.setCpu(vmAllocationRequest.getCpu());
 				reqResources.setMemory(vmAllocationRequest.getMemory());
@@ -126,9 +54,7 @@ public class DefaultVmPlacementPolicy extends Policy {
 						vmAllocationRequest.getVMDescription().getCoreCapacity(), 
 						reqResources,
 						target.getSandboxStatus(),
-						target.getHostDescription()) &&	//target has capability and capacity to host VM
-				 	(target.getSandboxStatus().getResourcesInUse().getCpu() + vmAllocationRequest.getCpu()) / 
-				 	target.getHostDescription().getResourceCapacity().getCpu() <= targetUtilization) {	// target will not exceed target utilization
+						target.getHostDescription())) {	//target has capability and capacity to host VM
 					
 					allocatedHost = target;
 					

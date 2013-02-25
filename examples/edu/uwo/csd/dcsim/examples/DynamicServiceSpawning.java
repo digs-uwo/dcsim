@@ -62,7 +62,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		HostPoolManager hostPool = new HostPoolManager();
 		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new DefaultVmPlacementPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new DefaultVmPlacementPolicy());
 		
 		//create Hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)

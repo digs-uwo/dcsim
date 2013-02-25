@@ -18,6 +18,7 @@ import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.capabilities.*;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
+import edu.uwo.csd.dcsim.management.policies.DefaultVmPlacementPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
@@ -68,7 +69,7 @@ public class AutonomicManagement extends SimulationTask {
 		HostPoolManager hostPool = new HostPoolManager();
 		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new DefaultVmPlacementPolicy());
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85), SimTime.hours(1), SimTime.hours(1) + 1);
 		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85), SimTime.hours(2), SimTime.hours(2) + 2);
 		

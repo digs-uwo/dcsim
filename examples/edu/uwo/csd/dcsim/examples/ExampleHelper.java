@@ -12,6 +12,7 @@ import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
+import edu.uwo.csd.dcsim.examples.management.VmPlacementPolicy;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.*;
@@ -22,7 +23,6 @@ import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
-import edu.uwo.csd.dcsim.management.policies.DefaultVmPlacementPolicy;
 import edu.uwo.csd.dcsim.vm.*;
 
 /**
@@ -62,7 +62,7 @@ public class ExampleHelper {
 		HostPoolManager hostPool = new HostPoolManager();
 		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new DefaultVmPlacementPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
 		dc.addHosts(createHosts(simulation, dcAM, hostPool));
 		

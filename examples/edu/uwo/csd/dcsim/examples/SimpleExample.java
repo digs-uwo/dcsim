@@ -97,7 +97,7 @@ public class SimpleExample extends SimulationTask {
 		
 		//Install the HostStatusPolicy and VmPlacementPolicy
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new DefaultVmPlacementPolicy(0.5, 0.9, 0.85)); //TODO replace with a more basic placement policy
+		dcAM.installPolicy(new DefaultVmPlacementPolicy());
 		
 		/*
 		 * Create a Host to add to the DataCentre. For this example, we will create a single Host, using
