@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.Host;
@@ -17,6 +16,7 @@ public class AutonomicManager implements SimulationEventListener {
 	private ArrayList<Policy> policies = new ArrayList<Policy>();
 	private Map<Class<? extends HostCapability>, Object> capabilities = new HashMap<Class<? extends HostCapability>, Object>();
 	private Map<RepeatingPolicyExecutionEvent, Policy> policyExecutionEvents = new HashMap<RepeatingPolicyExecutionEvent, Policy>();
+	private Map<Policy, RepeatingPolicyExecutionEvent> policyToExectionEvent = new HashMap<Policy, RepeatingPolicyExecutionEvent>();
 	
 	private Host container = null; //if this AutonomicManager is running within a Host, it is stored here
 	
@@ -78,6 +78,7 @@ public class AutonomicManager implements SimulationEventListener {
 		installPolicy(policy);
 		RepeatingPolicyExecutionEvent event = new RepeatingPolicyExecutionEvent(simulation, this, executionInterval);
 		policyExecutionEvents.put(event, policy);
+		policyToExectionEvent.put(policy, event);
 		event.start(startTime);
 	}
 	
@@ -85,17 +86,17 @@ public class AutonomicManager implements SimulationEventListener {
 		policies.remove(policy);
 		
 		//remove policy from list of repeating policy events, if present
-		RepeatingPolicyExecutionEvent key = null;
-		for (Entry<RepeatingPolicyExecutionEvent, Policy> entry : policyExecutionEvents.entrySet()) {
-			if (entry.getValue() == policy) {
-				key = entry.getKey();
-				break;
-			}
+		RepeatingPolicyExecutionEvent event = policyToExectionEvent.get(policy);
+		if (event != null) {
+			event.stop();
+			policyExecutionEvents.remove(event);
+			policyToExectionEvent.remove(policy);
 		}
-		if (key != null) {
-			key.stop(); //stop the event from running
-			policyExecutionEvents.remove(key); //remove it from the map
-		}
+
+	}
+	
+	public RepeatingPolicyExecutionEvent getPolicyExecutionEvent(Policy policy) {
+		return policyToExectionEvent.get(policy);
 	}
 	
 	@Override
