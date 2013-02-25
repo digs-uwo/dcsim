@@ -24,7 +24,7 @@ import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
-import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
+import edu.uwo.csd.dcsim.management.policies.DefaultVmPlacementPolicy;
 
 public class DynamicServiceSpawning extends SimulationTask {
 
@@ -62,7 +62,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		HostPoolManager hostPool = new HostPoolManager();
 		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
+		dcAM.installPolicy(new DefaultVmPlacementPolicy(0.5, 0.9, 0.85));
 		
 		//create Hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)

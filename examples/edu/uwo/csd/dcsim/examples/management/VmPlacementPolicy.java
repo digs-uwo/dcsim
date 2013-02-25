@@ -1,4 +1,4 @@
-package edu.uwo.csd.dcsim.management.policies;
+package edu.uwo.csd.dcsim.examples.management;
 
 import java.util.ArrayList;
 import java.util.Collection;
