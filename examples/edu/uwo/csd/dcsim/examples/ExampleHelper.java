@@ -92,7 +92,7 @@ public class ExampleHelper {
 			host.setState(Host.HostState.OFF); //turn hosts off by default
 			
 			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
-			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), 0);
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), SimTime.minutes(simulation.getRandom().nextInt(4)) );
 			hostAM.installPolicy(new HostOperationsPolicy());
 				
 			hostPool.addHost(host, hostAM);

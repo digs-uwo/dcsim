@@ -81,7 +81,7 @@ public class AutonomicManagement extends SimulationTask {
 			host = proLiantDL160G5E5420.build();
 			
 			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
-			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), simulation.getRandom().nextInt(4));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), SimTime.minutes(simulation.getRandom().nextInt(5)));
 			hostAM.installPolicy(new HostOperationsPolicy());
 			
 			dc.addHost(host);
