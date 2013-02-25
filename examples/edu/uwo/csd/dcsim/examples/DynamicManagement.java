@@ -10,8 +10,6 @@ import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
-import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
-import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.vm.*;
 
@@ -59,13 +57,8 @@ public class DynamicManagement extends SimulationTask {
 				
 		ExampleHelper.placeVms(vmList, dcAM, simulation);
 		
-		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
-		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
-		
-		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
-		relocateEvent.start(SimTime.hours(1) + 1);
-		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
-		consolidateEvent.start(SimTime.hours(3));
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85), SimTime.hours(1), SimTime.hours(1) + 1);
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85), SimTime.hours(2), SimTime.hours(2) + 2);
 	}
 	
 }

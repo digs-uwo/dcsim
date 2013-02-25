@@ -6,28 +6,19 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim.*;
-import edu.uwo.csd.dcsim.application.Service;
-import edu.uwo.csd.dcsim.application.Services;
-import edu.uwo.csd.dcsim.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim.application.workload.Workload;
+import edu.uwo.csd.dcsim.application.*;
+import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.*;
-import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
-import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.DefaultResourceManagerFactory;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
-import edu.uwo.csd.dcsim.management.capabilities.HostManager;
-import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
-import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
+import edu.uwo.csd.dcsim.management.capabilities.*;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
-import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
-import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
-import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
-import edu.uwo.csd.dcsim.management.policies.VmPlacementPolicy;
+import edu.uwo.csd.dcsim.management.policies.*;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class AutonomicManagement extends SimulationTask {
@@ -73,16 +64,11 @@ public class AutonomicManagement extends SimulationTask {
 		simulation.addDatacentre(dc);
 		
 		HostPoolManager hostPool = new HostPoolManager();
-		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
-		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
-		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85));
 		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
-		
-		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
-		relocateEvent.start(SimTime.hours(1) + 1);
-		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
-		consolidateEvent.start(SimTime.hours(2) + 2);
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85), SimTime.hours(1), SimTime.hours(1) + 1);
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.9, 0.85), SimTime.hours(2), SimTime.hours(2) + 2);
 		
 		//create hosts
 		Host.Builder proLiantDL160G5E5420 = HostModels.ProLiantDL160G5E5420(simulation).privCpu(500).privBandwidth(131072)
@@ -94,12 +80,9 @@ public class AutonomicManagement extends SimulationTask {
 		for (int i = 0; i < N_HOSTS; ++i) {
 			host = proLiantDL160G5E5420.build();
 			
-			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
-			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), simulation.getRandom().nextInt(4));
 			hostAM.installPolicy(new HostOperationsPolicy());
-			
-			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
-			event.start(simulation.getRandom().nextInt(4)); //offset host monitoring start positions => more realistic
 			
 			dc.addHost(host);
 			hostPool.addHost(host, hostAM); //this is the host pool used by the data centre manager

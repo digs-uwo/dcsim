@@ -1,15 +1,14 @@
-package edu.uwo.csd.dcsim.examples.management.events;
+package edu.uwo.csd.dcsim.management.events;
 
 import edu.uwo.csd.dcsim.core.RepeatingEvent;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
 
-public class ConsolidateEvent extends RepeatingEvent {
+public class RepeatingPolicyExecutionEvent extends RepeatingEvent {
 
-	public ConsolidateEvent(Simulation simulation,
+	public RepeatingPolicyExecutionEvent(Simulation simulation,
 			SimulationEventListener target, long interval) {
 		super(simulation, target, interval);
-
 	}
 
 }

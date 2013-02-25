@@ -15,15 +15,12 @@ import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
-import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
-import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
 import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
-import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
@@ -63,7 +60,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		simulation.addDatacentre(dc);
 		
 		HostPoolManager hostPool = new HostPoolManager();
-		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
 		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
@@ -76,12 +73,9 @@ public class DynamicServiceSpawning extends SimulationTask {
 		for (int i = 0; i < 10; ++i) {
 			Host host = proLiantDL160G5E5420.build();  
 			
-			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
-			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), 0);
 			hostAM.installPolicy(new HostOperationsPolicy());
-			
-			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
-			event.start();
 			
 			dc.addHost(host);
 			hostPool.addHost(host, hostAM);
@@ -127,13 +121,8 @@ public class DynamicServiceSpawning extends SimulationTask {
 		serviceProducer.start();
 		
 		//Add a dynamic management policies to perform relocation and consolidation
-		dcAM.installPolicy(new RelocationPolicy(0.5, 0.8, 0.7));
-		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.8, 0.7));
-		
-		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
-		relocateEvent.start(SimTime.hours(1) + 1);
-		ConsolidateEvent consolidateEvent = new ConsolidateEvent(simulation, dcAM, SimTime.hours(2));
-		consolidateEvent.start(SimTime.hours(2) + 2);
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.8, 0.7), SimTime.hours(1), SimTime.hours(1) + 1);
+		dcAM.installPolicy(new ConsolidationPolicy(0.5, 0.8, 0.7), SimTime.hours(2), SimTime.hours(2) + 2);
 		
 	}
 

@@ -5,6 +5,7 @@ import java.util.*;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
+import edu.uwo.csd.dcsim.management.events.RepeatingPolicyExecutionEvent;
 
 public abstract class Policy {
 
@@ -15,25 +16,6 @@ public abstract class Policy {
 	
 	protected AutonomicManager manager;
 	protected Simulation simulation;
-	
-	private Map<Class<?>, Method> eventMethods = new HashMap<Class<?>, Method>();
-	
-	public Policy() {
-		
-		//build a map of the available event methods
-		for (Method method : this.getClass().getMethods()) {
-			//check if the method is an "execute" method
-			if (method.getName().equals(EXECUTE_METHOD_NAME)) {
-				Class<?> parameterTypes[] = method.getParameterTypes();
-				//check that there is only one parameter, and that parameter is an Event subclass
-				if (parameterTypes.length == 1 && Event.class.isAssignableFrom(parameterTypes[0].getClass())) {
-					//add to the map
-					eventMethods.put(parameterTypes[0].getClass(), method);
-				}
-			}
-		}
-		
-	}
 	
 	public void addRequiredCapability(Class<? extends HostCapability> hostCapability) {
 		requiredCapabilities.add(hostCapability);
@@ -60,23 +42,34 @@ public abstract class Policy {
 		this.manager = manager;
 		this.simulation = e.getSimulation(); //available through event anyways, but this is a bit more clear
 		
-		//look for an execute method for this event type
+		/*
+		 * Build the list of arguments for the execute method to search for. If the event is a RepeatingPolicyExecutionEvent,
+		 * we want to run the execute() method with no arguments. Otherwise, we add a single argument: the Event.
+		 */
+		Class<?> argsType[] = null;
+		Object args[] = null;
+		if (!(e instanceof RepeatingPolicyExecutionEvent)) {
+			argsType = new Class<?>[1];
+			argsType[0] = e.getClass();
+			
+			args = new Object[1];
+			args[0] = e;
+		}
+		
+	
 		Method m = null;
 		try {
-			m = this.getClass().getMethod(EXECUTE_METHOD_NAME, e.getClass());
+			m = this.getClass().getMethod(EXECUTE_METHOD_NAME, argsType);
 		} catch (SecurityException e1) {
 			throw new RuntimeException(e1);
 		} catch (NoSuchMethodException e1) {
 			return false; //return false if no method present
 		}
 		
-		//lookup the method for this event
-//		Method m = eventMethods.get(e.getClass());
-		
 		//invoke the method
 		if (m != null) {
 			try {
-				m.invoke(this, e);
+				m.invoke(this, args);
 			} catch (IllegalArgumentException e1) {
 				throw new RuntimeException(e1);
 			} catch (IllegalAccessException e1) {

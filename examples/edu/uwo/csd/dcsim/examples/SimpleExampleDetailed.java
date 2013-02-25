@@ -11,7 +11,6 @@ import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
-import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.power.LinearHostPowerModel;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
@@ -19,7 +18,6 @@ import edu.uwo.csd.dcsim.host.scheduler.DefaultResourceSchedulerFactory;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
-import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
@@ -93,7 +91,7 @@ public class SimpleExampleDetailed extends SimulationTask {
 		HostPoolManager hostPool = new HostPoolManager();
 		
 		//Create a new AutonomicManager with this capability
-		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		
 		//Install the HostStatusPolicy and VmPlacementPolicy
 		dcAM.installPolicy(new HostStatusPolicy(5));
@@ -116,17 +114,13 @@ public class SimpleExampleDetailed extends SimulationTask {
 		dc.addHost(host);
 		
 		//Create an AutonomicManager for the Host, with the HostManager capability (provides access to the host being managed)
-		AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
+		AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
 		
-		//Install a HostMonitoringPolicy, which sends status updates to the datacentre manager
-		hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+		//Install a HostMonitoringPolicy, which sends status updates to the datacentre manager, set to execute every 5 minutes
+		hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), 0);
 		
 		//Install a HostOperationsPolicy, which handles basic host operations
 		hostAM.installPolicy(new HostOperationsPolicy());
-		
-		//Setup a repeating event to trigger the HostMonitoringPolicy to send host status 
-		HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes(5));
-		event.start(); //start the repeating event at time 0
 		
 		//Add the Host to the DataCentre
 		dc.addHost(host);
@@ -211,12 +205,11 @@ public class SimpleExampleDetailed extends SimulationTask {
 		 * in an AutonomicManager that has the HostPoolManager capability. Since the datacentre AutonomicManager has this capability, we can install the 
 		 * policy into this AutonomicManager.
 		 * 
-		 * Finally, we need to create a RelocateEvent, which repeats on a regular interval, to trigger execution of the policy.
+		 * We specify that the policy should execute on a regular interval of 1 hour.
 		 */
 		
-		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85));
-		RelocateEvent relocateEvent = new RelocateEvent(simulation, dcAM, SimTime.hours(1));
-		relocateEvent.start(SimTime.hours(1) + 1);
+		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85), SimTime.hours(1), SimTime.hours(1) + 1);
+		
 		/*
 		 * The simulation is now ready. It will be executed when the run() method is called externally.
 		 */

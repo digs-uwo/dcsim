@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
-import edu.uwo.csd.dcsim.examples.management.events.ConsolidateEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
@@ -31,7 +30,7 @@ public class ConsolidationPolicy extends Policy {
 		this.targetUtilization = targetUtilization;
 	}
 	
-	public void execute(ConsolidateEvent event) {
+	public void execute() {
 
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
 		

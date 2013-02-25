@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import edu.uwo.csd.dcsim.examples.management.events.RelocateEvent;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.HostData;
 import edu.uwo.csd.dcsim.management.HostStatus;
@@ -34,7 +33,7 @@ public class RelocationPolicy extends Policy {
 		this.targetUtilization = targetUtilization;
 	}
 	
-	public void execute(RelocateEvent event) {
+	public void execute() {
 
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
 		

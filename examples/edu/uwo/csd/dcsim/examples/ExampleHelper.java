@@ -18,7 +18,6 @@ import edu.uwo.csd.dcsim.host.scheduler.*;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
-import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
@@ -61,7 +60,7 @@ public class ExampleHelper {
 		simulation.addDatacentre(dc);
 		
 		HostPoolManager hostPool = new HostPoolManager();
-		AutonomicManager dcAM = new AutonomicManager(hostPool);
+		AutonomicManager dcAM = new AutonomicManager(simulation, hostPool);
 		dcAM.installPolicy(new HostStatusPolicy(5));
 		dcAM.installPolicy(new VmPlacementPolicy(0.5, 0.9, 0.85));
 		
@@ -92,13 +91,10 @@ public class ExampleHelper {
 			
 			host.setState(Host.HostState.OFF); //turn hosts off by default
 			
-			AutonomicManager hostAM = new AutonomicManager(new HostManager(host));
-			hostAM.installPolicy(new HostMonitoringPolicy(dcAM));
+			AutonomicManager hostAM = new AutonomicManager(simulation, new HostManager(host));
+			hostAM.installPolicy(new HostMonitoringPolicy(dcAM), SimTime.minutes(5), 0);
 			hostAM.installPolicy(new HostOperationsPolicy());
-			
-			HostMonitorEvent event = new HostMonitorEvent(simulation, hostAM, SimTime.minutes((simulation.getRandom().nextInt(5))));
-			event.start();
-			
+				
 			hostPool.addHost(host, hostAM);
 			hosts.add(host);
 		}

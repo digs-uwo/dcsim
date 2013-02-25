@@ -3,7 +3,6 @@ package edu.uwo.csd.dcsim.management.policies;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
 import edu.uwo.csd.dcsim.management.*;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
-import edu.uwo.csd.dcsim.management.events.HostMonitorEvent;
 import edu.uwo.csd.dcsim.management.events.HostStatusEvent;
 
 public class HostMonitoringPolicy extends Policy {
@@ -16,7 +15,7 @@ public class HostMonitoringPolicy extends Policy {
 		this.target = target;
 	}
 
-	public void execute(HostMonitorEvent event) {		
+	public void execute() {		
 		HostManager hostManager = manager.getCapability(HostManager.class);
 		
 		HostStatus hostState = new HostStatus(hostManager.getHost(), simulation);
