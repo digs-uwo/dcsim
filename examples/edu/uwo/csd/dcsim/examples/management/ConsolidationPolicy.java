@@ -104,7 +104,6 @@ public class ConsolidationPolicy extends Policy {
 		for (MigrationAction migration : migrations) {
 			migration.execute(simulation, this);
 		}
-
 	}
 	
 	private void classifyHosts(ArrayList<HostData> stressed, 

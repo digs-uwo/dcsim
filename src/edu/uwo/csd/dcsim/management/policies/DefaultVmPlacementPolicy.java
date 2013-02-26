@@ -72,22 +72,19 @@ public class DefaultVmPlacementPolicy extends Policy {
 			}
 			
 			if (allocatedHost != null) {
-				sendVM(vmAllocationRequest, allocatedHost);
+				//if the host is not ON or POWERING_ON, then send an event to power on the host
+				if (allocatedHost.getCurrentStatus().getState() != Host.HostState.ON && allocatedHost.getCurrentStatus().getState() != Host.HostState.POWERING_ON) {
+					simulation.sendEvent(new PowerStateEvent(allocatedHost.getHost(), PowerState.POWER_ON));
+				}
+				
+				InstantiateVmEvent instantiateEvent = new InstantiateVmEvent(allocatedHost.getHostManager(), vmAllocationRequest);
+				event.addEventInSequence(instantiateEvent);
+				simulation.sendEvent(instantiateEvent);
+				
 			} else {
 				event.addFailedRequest(vmAllocationRequest); //add a failed request to the event for any event callback listeners to check
 			}
 		}
-	}
-	
-	private long sendVM(VMAllocationRequest vmAllocationRequest, HostData host) {
-		//if the host is not ON or POWERING_ON, then send an event to power on the host
-		if (host.getCurrentStatus().getState() != Host.HostState.ON && host.getCurrentStatus().getState() != Host.HostState.POWERING_ON) {
-			simulation.sendEvent(new PowerStateEvent(host.getHost(), PowerState.POWER_ON));
-			
-		}
-
-		//send event to host to instantiate VM
-		return simulation.sendEvent(new InstantiateVmEvent(host.getHostManager(), vmAllocationRequest));
 	}
 	
 	public void execute(ShutdownVmEvent event) {
@@ -97,7 +94,9 @@ public class DefaultVmPlacementPolicy extends Policy {
 		//mark host status as invalid
 		hostPool.getHost(event.getHostId()).invalidateStatus(simulation.getSimulationTime());
 		
-		simulation.sendEvent(new ShutdownVmEvent(hostManager, event.getHostId(), event.getVmId()));
+		ShutdownVmEvent shutdownEvent = new ShutdownVmEvent(hostManager, event.getHostId(), event.getVmId()); 
+		event.addEventInSequence(shutdownEvent);
+		simulation.sendEvent(shutdownEvent);
 	}
 
 	@Override
