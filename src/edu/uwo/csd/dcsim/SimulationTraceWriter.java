@@ -23,7 +23,7 @@ public class SimulationTraceWriter {
 		long startTime = System.currentTimeMillis();
 		
 		try {
-			FileWriter fstream = new FileWriter(Simulation.getOutputDirectory() + "/" + task.getName() + ".simtrace");
+			FileWriter fstream = new FileWriter(Simulation.getLogDirectory() + "/" + task.getName() + ".metrictrace");
 			BufferedWriter out = new BufferedWriter(fstream);
 			
 			for (Metric metric : task.getResults()) {

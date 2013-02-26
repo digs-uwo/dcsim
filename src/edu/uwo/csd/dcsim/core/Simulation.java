@@ -1,7 +1,9 @@
 package edu.uwo.csd.dcsim.core;
 
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.PatternLayout;
 
 import edu.uwo.csd.dcsim.DataCentre;
 import edu.uwo.csd.dcsim.VmExecutionOrderComparator;
@@ -30,21 +32,33 @@ import java.io.*;
 public class Simulation implements SimulationEventListener {
 	
 	//Logging defaults
+	public static final String DEFAULT_CONSOLE_CONVERSION_PATTERN = "%-5p %-50c - %m%n";
+	public static final String DEFAULT_MAINFILE_CONVERSION_PATTERN = "%-5p %-50c - %m%n";
+	public static final String DEFAULT_MAINFILE_FILE_NAME = "main-%d.log";
+	
 	public static final String DEFAULT_LOGGER_CONVERSION_PATTERN = "%-10s %-5p - %m%n";
 	public static final String DEFAULT_LOGGER_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
-	public static final String DEFAULT_LOGGER_FILE_NAME = "dcsim-%n-%d";
+	public static final String DEFAULT_LOGGER_FILE_NAME = "%n-%d.log";
+	
+	//Trace logging defautls
+	public static final String DEFAULT_TRACE_CONVERSION_PATTERN = "%s,%m%n";
+	public static final String DEFAULT_TRACE_DATE_FORMAT = "yyyy_MM_dd'-'HH_mm_ss";
+	public static final String DEFAULT_TRACE_FILE_NAME = "%n-%d.trace";
 	
 	//directory constants
 	private static String homeDirectory = null;
 	private static String LOG_DIRECTORY = "/log";
 	private static String CONFIG_DIRECTORY = "/config";
-	private static String OUTPUT_DIRECTORY = "/output";
 	
 	//the name of property in the simulation properties file that defines the precision with which to report metrics
 	private static String METRIC_PRECISION_PROP = "metricPrecision";
 	
-	private static Properties loggerProperties; //properties for logger config
+	private static ConsoleAppender consoleAppender;
+	private static LogPerRunFileAppender mainFileAppender;
 	protected final Logger logger; //logger
+	protected final Logger traceLogger; //logger for trace file
+	protected boolean enableTrace;
+	
 	private static Properties properties; //simulation properties
 	
 	private String name; 						//name of the simulation
@@ -70,18 +84,48 @@ public class Simulation implements SimulationEventListener {
 	
 	public static final void initializeLogging() {
 		
-		Properties properties = new Properties();
+		PatternLayout consoleLayout = new PatternLayout();
+		consoleLayout.setConversionPattern(DEFAULT_CONSOLE_CONVERSION_PATTERN);
+		consoleAppender = new ConsoleAppender();
+		consoleAppender.setLayout(consoleLayout);
+		consoleAppender.setWriter(new OutputStreamWriter(System.out));
+		consoleAppender.setName("console");
+
+		//configure root logger
+		Logger.getRootLogger().addAppender(consoleAppender);
+		Logger.getRootLogger().setLevel(Level.INFO);
 		
-		try {
-			properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/logger.properties"));
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Logging properties file could not be loaded", e);
-		} catch (IOException e) {
-			throw new RuntimeException("Logging properties file could not be loaded", e);
+		//configure main file root logging
+		boolean enableConsoleLogFile = false;
+		if (getProperties().getProperty("enableConsoleLogFile") != null) {
+			enableConsoleLogFile = Boolean.parseBoolean(getProperties().getProperty("enableConsoleLogFile"));
 		}
 		
-		PropertyConfigurator.configure(properties);
-		loggerProperties = properties;
+		if (enableConsoleLogFile) {
+			PatternLayout consoleFileLayout = new PatternLayout();
+			consoleFileLayout.setConversionPattern(DEFAULT_MAINFILE_CONVERSION_PATTERN);
+			mainFileAppender = new LogPerRunFileAppender();
+			mainFileAppender.setLayout(consoleFileLayout);
+			mainFileAppender.setFile(getLogDirectory() + "/" + DEFAULT_MAINFILE_FILE_NAME);
+			mainFileAppender.setDateFormat(DEFAULT_LOGGER_DATE_FORMAT);
+			mainFileAppender.setName("mainFile");
+			mainFileAppender.activateOptions();
+			
+			Logger.getRootLogger().addAppender(mainFileAppender);
+		}
+		
+//		Properties properties = new Properties();
+//		
+//		try {
+//			properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/logger.properties"));
+//		} catch (FileNotFoundException e) {
+//			throw new RuntimeException("Logging properties file could not be loaded", e);
+//		} catch (IOException e) {
+//			throw new RuntimeException("Logging properties file could not be loaded", e);
+//		}
+//		
+//		PropertyConfigurator.configure(properties);
+//		loggerProperties = properties;
 	}
 	
 	private static final Properties getProperties() {
@@ -116,28 +160,25 @@ public class Simulation implements SimulationEventListener {
 		
 		//configure simulation logger
 		logger = Logger.getLogger("simLogger." + name);
+	
+		Logger.getLogger("simLogger").setAdditivity(false);
+		
+		//default the simLogger to OFF until we attach an appender
+		Logger.getLogger("simLogger").setLevel(Level.OFF);
 		
 		boolean enableFileLogging = true;
+		if (getProperties().getProperty("enableSimulationLogFile") != null) {
+			enableFileLogging = Boolean.parseBoolean(getProperties().getProperty("enableSimulationLogFile"));
+		}
+		
 		String conversionPattern = DEFAULT_LOGGER_CONVERSION_PATTERN;
 		String dateFormat = DEFAULT_LOGGER_DATE_FORMAT;
 		String fileName = DEFAULT_LOGGER_FILE_NAME;
-		
-		if (loggerProperties != null) {
-			if (loggerProperties.getProperty("log4j.logger.simLogger.enableFile") != null) {
-				enableFileLogging = Boolean.parseBoolean(loggerProperties.getProperty("log4j.logger.simLogger.enableFile"));
-			}
-			if (loggerProperties.getProperty("log4j.logger.simLogger.ConversionPattern") != null) {
-				conversionPattern = loggerProperties.getProperty("log4j.logger.simLogger.ConversionPattern");
-			}
-			if (loggerProperties.getProperty("log4j.logger.simLogger.DateFormat") != null) {
-				dateFormat = loggerProperties.getProperty("log4j.logger.simLogger.DateFormat");
-			}
-			if (loggerProperties.getProperty("log4j.logger.simLogger.File") != null) {
-				fileName = loggerProperties.getProperty("log4j.logger.simLogger.File");
-			}
-		}
 
 		if (enableFileLogging) {
+			
+			Logger.getLogger("simLogger").setLevel(Level.DEBUG);
+			
 			SimulationFileAppender simAppender = new SimulationFileAppender();
 			
 			SimulationPatternLayout patternLayout = new SimulationPatternLayout(this);
@@ -148,6 +189,50 @@ public class Simulation implements SimulationEventListener {
 			simAppender.setFile(getLogDirectory() + "/" + fileName);
 			simAppender.activateOptions();
 			logger.addAppender(simAppender);
+		}
+		
+		//if detailedConsole
+		if(getProperties().getProperty("detailedConsole") != null &&
+				Boolean.parseBoolean(getProperties().getProperty("detailedConsole"))) {
+			
+			Logger.getLogger("simLogger").setLevel(Level.DEBUG);			
+			logger.addAppender(consoleAppender);
+			
+			//if outputting console to main file
+			if (getProperties().getProperty("enableConsoleLogFile") != null &&
+					Boolean.parseBoolean(getProperties().getProperty("enableConsoleLogFile")) &&
+					mainFileAppender != null) {
+				logger.addAppender(mainFileAppender);
+			}
+		}
+		
+		//configure simulation trace logger
+		enableTrace = false;
+		if (getProperties().getProperty("enableTrace") != null) {
+			enableTrace = Boolean.parseBoolean(getProperties().getProperty("enableTrace"));
+		}
+
+		//create a logger between root and individual trace loggers with additivity false, to
+		//prevent trace logs from being passed to the root logger
+		Logger.getLogger("traceLogger").setAdditivity(false);
+		
+		traceLogger = Logger.getLogger("traceLogger." + name);
+		if (enableTrace) {
+			traceLogger.setLevel(Level.INFO);
+			
+			SimulationFileAppender simAppender = new SimulationFileAppender();
+			
+			SimulationPatternLayout patternLayout = new SimulationPatternLayout(this);
+			patternLayout.setConversionPattern(DEFAULT_TRACE_CONVERSION_PATTERN);
+			simAppender.setLayout(patternLayout);
+			simAppender.setSimName(name);
+			simAppender.setDateFormat(DEFAULT_TRACE_DATE_FORMAT);
+			simAppender.setFile(getLogDirectory() + "/" + DEFAULT_TRACE_FILE_NAME);
+			simAppender.activateOptions();
+			traceLogger.addAppender(simAppender);
+			
+		} else {
+			traceLogger.setLevel(Level.OFF);
 		}
 		
 		//initialize Random
@@ -424,6 +509,14 @@ public class Simulation implements SimulationEventListener {
 		return logger;
 	}
 	
+	public final Logger getTraceLogger() {
+		return traceLogger;
+	}
+	
+	public final boolean isTraceEnabled() {
+		return enableTrace;
+	}
+	
 	public final int nextId(String name) {
 		int id = 1;
 		
@@ -542,20 +635,7 @@ public class Simulation implements SimulationEventListener {
 	public static final String getConfigDirectory() {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
-	
-	/**
-	 * Get the directory that contains simulation trace files
-	 * @return The directory that contains configuration files.
-	 */
-	public static final String getOutputDirectory() {
-		//ensure directory exists
-		File file = new File(getHomeDirectory() + OUTPUT_DIRECTORY);
-		if (!file.exists())
-			file.mkdir();
 		
-		return getHomeDirectory() + OUTPUT_DIRECTORY;
-	}
-	
 	public static final boolean hasProperty(String name) {
 		if (System.getProperty(name) != null || getProperties().getProperty(name) != null)
 			return true;

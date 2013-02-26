@@ -115,6 +115,17 @@ public final class Host implements SimulationEventListener {
 		//set default state
 		//state = HostState.ON;
 		state = HostState.OFF;
+		
+		//write host description to the trace
+		//FORMAT: 0,#hd,id,cpuCapacity,memCapacity,bwCapacity,storageCapacity,idlePower,peakPower
+		
+		simulation.getTraceLogger().info("#hd," + getId() + "," + this.getTotalCpu() + "," +
+				this.getMemory() + "," + 
+				this.getBandwidth() + "," + 
+				this.getStorage() + "," + 
+				this.getPowerModel().getPowerConsumption(0) + "," +
+				this.getPowerModel().getPowerConsumption(1));
+		
 	}
 	
 	/**
@@ -633,38 +644,34 @@ public final class Host implements SimulationEventListener {
 	 */
 	public void logState() {
 
-		if (simulation.getLogger().isDebugEnabled()) {
-			if (state == HostState.ON) {
-				simulation.getLogger().debug("Host #" + getId() + 
-						" CPU[" + (int)Math.round(resourceManager.getCpuInUse()) + "/" + resourceManager.getTotalCpu() + "] " +
-						" BW[" + resourceManager.getAllocatedBandwidth() + "/" + resourceManager.getTotalBandwidth() + "] " +
-						" MEM[" + resourceManager.getAllocatedMemory() + "/" + resourceManager.getTotalMemory() + "] " +
-						" STORAGE[" + resourceManager.getAllocatedStorage() + "/" + resourceManager.getTotalStorage() + "] " +
-						"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
-				privDomainAllocation.getVm().logState();
-			} else {
-				simulation.getLogger().debug("Host #" + getId() + " " + state);
-			}
-			
-			for (VMAllocation vmAllocation : vmAllocations) {
-				if (vmAllocation.getVm() != null) {
-					vmAllocation.getVm().logState();
-				} else {
-					simulation.getLogger().debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
-				}
-			}
-			
-			//VISUALIZATION TOOL OUTPUT TODO REMOVE
-//			simulation.getLogger().debug(",#h," + getId() + "," + state + "," + (int)Math.round(resourceManager.getCpuInUse()) + "," +
-//					resourceManager.getAllocatedBandwidth() + "," + resourceManager.getAllocatedMemory() + "," + resourceManager.getAllocatedStorage() + "," + 
-//					Utility.roundDouble(this.getCurrentPowerConsumption(), 2));
-//			privDomainAllocation.getVm().logState();
-//			
-//			for (VMAllocation vmAllocation : vmAllocations) {
-//				if (vmAllocation.getVm() != null)
-//					vmAllocation.getVm().logState();
-//			}
+		if (state == HostState.ON) {
+			//logger output (human readable) 
+			simulation.getLogger().debug("Host #" + getId() + 
+					" CPU[" + (int)Math.round(resourceManager.getCpuInUse()) + "/" + resourceManager.getTotalCpu() + "] " +
+					" BW[" + resourceManager.getAllocatedBandwidth() + "/" + resourceManager.getTotalBandwidth() + "] " +
+					" MEM[" + resourceManager.getAllocatedMemory() + "/" + resourceManager.getTotalMemory() + "] " +
+					" STORAGE[" + resourceManager.getAllocatedStorage() + "/" + resourceManager.getTotalStorage() + "] " +
+					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");	
+		} else {
+			simulation.getLogger().debug("Host #" + getId() + " " + state);
 		}
+		
+		//trace output
+		simulation.getTraceLogger().info("#h," + getId() + "," + state + "," + (int)Math.round(resourceManager.getCpuInUse()) + "," +
+				resourceManager.getAllocatedBandwidth() + "," + resourceManager.getAllocatedMemory() + "," + resourceManager.getAllocatedStorage() + "," + 
+				Utility.roundDouble(this.getCurrentPowerConsumption(), 2));
+		
+		//log priv domain
+		privDomainAllocation.getVm().logState();
+		
+		for (VMAllocation vmAllocation : vmAllocations) {
+			if (vmAllocation.getVm() != null) {
+				vmAllocation.getVm().logState();
+			} else {
+				simulation.getLogger().debug("Empty Allocation CPU[" + vmAllocation.getCpu() + "]");
+			}
+		}
+		
 	}
 	
 	public void updateMetrics() {

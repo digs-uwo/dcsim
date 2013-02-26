@@ -4,6 +4,7 @@ import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.core.metrics.VmCountMetric;
+import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
 
 /**
@@ -90,23 +91,25 @@ public class VM implements SimulationEventListener {
 	}
 	
 	public void logState() {
-		simulation.getLogger().debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesScheduled.getCpu(), 2) + 
-				"/" + vmAllocation.getCpu() + 
-				"/" + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "] " + 
-				"BW[" + Utility.roundDouble(resourcesScheduled.getBandwidth(), 2) + 
-				"/" + vmAllocation.getBandwidth() + 
-				"/" + Utility.roundDouble(application.getResourcesRequired().getBandwidth(), 2) + "] " + 
-				"MEM[" + resourcesScheduled.getMemory() + 
-				"/" + vmAllocation.getMemory() + "] " +
-				"STORAGE[" + resourcesScheduled.getStorage() + 
-				"/" + vmAllocation.getStorage() + "]");
+		if (getVMAllocation().getHost().getState() == Host.HostState.ON) {
+			simulation.getLogger().debug("VM #" + getId() + " CPU[" + Utility.roundDouble(resourcesScheduled.getCpu(), 2) + 
+					"/" + vmAllocation.getCpu() + 
+					"/" + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "] " + 
+					"BW[" + Utility.roundDouble(resourcesScheduled.getBandwidth(), 2) + 
+					"/" + vmAllocation.getBandwidth() + 
+					"/" + Utility.roundDouble(application.getResourcesRequired().getBandwidth(), 2) + "] " + 
+					"MEM[" + resourcesScheduled.getMemory() + 
+					"/" + vmAllocation.getMemory() + "] " +
+					"STORAGE[" + resourcesScheduled.getStorage() + 
+					"/" + vmAllocation.getStorage() + "]");
+		}
 		
-		//VISUALIZATION TOOL OUTPUT TODO REMOVE
-//		simulation.getLogger().debug(",#v," + getId() + "," + vmAllocation.getHost().getId() + "," + 
-//				Utility.roundDouble(resourcesScheduled.getCpu(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "," + 
-//				Utility.roundDouble(resourcesScheduled.getBandwidth(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getBandwidth(), 2) + "," + 
-//				resourcesScheduled.getMemory() + "," + vmAllocation.getMemory() + "," +
-//				resourcesScheduled.getStorage() + "," + vmAllocation.getStorage());
+		//trace output
+		simulation.getTraceLogger().info("#v," + getId() + "," + vmAllocation.getHost().getId() + "," + 
+				Utility.roundDouble(resourcesScheduled.getCpu(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getCpu(), 2) + "," + 
+				Utility.roundDouble(resourcesScheduled.getBandwidth(), 2) + "," + Utility.roundDouble(application.getResourcesRequired().getBandwidth(), 2) + "," + 
+				resourcesScheduled.getMemory() + "," + vmAllocation.getMemory() + "," +
+				resourcesScheduled.getStorage() + "," + vmAllocation.getStorage());
 		
 	}
 	

@@ -46,12 +46,12 @@ public class AutonomicManagement extends SimulationTask {
 		}
 		
 		//write the metric values to a trace file
-		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
-		traceWriter.writeTrace();
+//		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
+//		traceWriter.writeTrace();
 	}
 	
 	public AutonomicManagement(String name, long randomSeed) {
-		super(name, SimTime.days(15));
+		super(name, SimTime.days(1));
 		this.setRandomSeed(randomSeed);
 		this.setMetricRecordStart(0);
 	}
