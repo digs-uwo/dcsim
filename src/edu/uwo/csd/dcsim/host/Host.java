@@ -59,7 +59,7 @@ public final class Host implements SimulationEventListener {
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
-	private boolean powerOffAfterMigrations = false;
+	private PowerStateEvent powerOffAfterMigrations = null;
 	
 	private ArrayList<AutonomicManager> autonomicManagers = new ArrayList<AutonomicManager>();
 	
@@ -265,19 +265,19 @@ public final class Host implements SimulationEventListener {
 				if (powerEvent.isComplete()) {
 					completePowerOn();
 				} else {
-					powerOn();
+					powerOn(powerEvent);
 				}
 			} else if (powerEvent.getPowerState() == PowerState.POWER_OFF) {
 				if (powerEvent.isComplete()) {
 					completePowerOff();
 				} else {
-					powerOff();
+					powerOff(powerEvent);
 				}
 			} else if (powerEvent.getPowerState() == PowerState.SUSPEND) {
 				if (powerEvent.isComplete()) {
 					completeSuspend();
 				} else {
-					suspend();
+					suspend(powerEvent);
 				}
 			}
 		} else if (e instanceof MigrateVmEvent) {
@@ -507,8 +507,8 @@ public final class Host implements SimulationEventListener {
 				
 		simulation.getLogger().debug("Host #" + this.getId() + " deallocated migrating out VM #" + vm.getId());
 		
-		if (powerOffAfterMigrations && migratingOut.isEmpty() && pendingOutgoingMigrations.isEmpty())
-			powerOff();
+		if ((powerOffAfterMigrations != null) && migratingOut.isEmpty() && pendingOutgoingMigrations.isEmpty())
+			powerOff(powerOffAfterMigrations);
 
 	}
 	
@@ -516,33 +516,37 @@ public final class Host implements SimulationEventListener {
 	 * HOST STATE OPERATIONS
 	 */
 	
-	public void suspend() {
+	public void suspend(PowerStateEvent event) {
 		if (state != HostState.SUSPENDED && state != HostState.SUSPENDING) {
 			state = HostState.SUSPENDING;
 			long delay = Long.parseLong(Simulation.getProperty("hostSuspendDelay"));
 			
-			simulation.sendEvent(new PowerStateEvent(this, PowerState.SUSPEND, true), simulation.getSimulationTime() + delay);
+			PowerStateEvent completeEvent = new PowerStateEvent(this, PowerState.SUSPEND, true);
+			event.addEventInSequence(completeEvent);
+			simulation.sendEvent(completeEvent, simulation.getSimulationTime() + delay);
 		}
 	}
 	
-	public void powerOff() {
+	public void powerOff(PowerStateEvent event) {
 		if (state != HostState.OFF && state != HostState.POWERING_OFF) {
 			
 			if (migratingOut.size() != 0) {
 				//if migrations are in progress, power off after they are complete
-				powerOffAfterMigrations = true;
+				powerOffAfterMigrations = event;
 			} else {
 				state = HostState.POWERING_OFF;
 				long delay = Long.parseLong(Simulation.getProperty("hostPowerOffDelay"));
 				
-				simulation.sendEvent(new PowerStateEvent(this, PowerState.POWER_OFF, true), simulation.getSimulationTime() + delay);
+				PowerStateEvent completeEvent = new PowerStateEvent(this, PowerState.POWER_OFF, true);
+				event.addEventInSequence(completeEvent);
+				simulation.sendEvent(completeEvent, simulation.getSimulationTime() + delay);
 				
-				powerOffAfterMigrations = false;
+				powerOffAfterMigrations = null;
 			}
 		}
 	}
 	
-	public void powerOn() {
+	public void powerOn(PowerStateEvent event) {
 		if (state != HostState.ON && state != HostState.POWERING_ON) {
 			
 			long delay = 0;
@@ -566,7 +570,9 @@ public final class Host implements SimulationEventListener {
 					break;
 			}
 			
-			simulation.sendEvent(new PowerStateEvent(this, PowerState.POWER_ON, true), simulation.getSimulationTime() + delay);
+			PowerStateEvent completeEvent = new PowerStateEvent(this, PowerState.POWER_ON, true);
+			event.addEventInSequence(completeEvent);
+			simulation.sendEvent(completeEvent, simulation.getSimulationTime() + delay);
 			
 			state = HostState.POWERING_ON;
 			
@@ -614,7 +620,8 @@ public final class Host implements SimulationEventListener {
 	 * If the Host is set to shutdown upon completion its current set of migrations, cancel this shutdown and remain ON.
 	 */
 	public void cancelPendingShutdown() {
-		powerOffAfterMigrations = false;
+		powerOffAfterMigrations.cancelEventInSequence();
+		powerOffAfterMigrations = null;
 	}
 	
 	
@@ -774,6 +781,6 @@ public final class Host implements SimulationEventListener {
 	
 	public double getAverageUtilization() { return utilizationSum / timeActive; }
 	
-	public boolean isShutdownPending() {	return powerOffAfterMigrations; }
+	public boolean isShutdownPending() {	return powerOffAfterMigrations != null; }
 
 }

@@ -40,6 +40,13 @@ public abstract class Event {
 		});
 	}
 	
+	public final void cancelEventInSequence() {
+		waitOnNextEvent = false;
+		postExecute();
+		log();
+		triggerCallback();
+	}
+	
 	/**
 	 * Provides a hook to run any additional code after the event has been triggered and handled.
 	 */

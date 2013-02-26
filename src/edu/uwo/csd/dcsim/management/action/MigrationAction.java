@@ -50,8 +50,6 @@ public class MigrationAction implements ManagementAction {
 			simulation.sendEvent(new PowerStateEvent(target, PowerState.POWER_ON));
 		}
 		
-		System.out.println(simulation.getSimulationTime() + " - VM# " + vmId + " Mig Started");
-		
 		//send migration event to source
 		MigrationEvent migEvent = new MigrationEvent(sourceHostManager, target, vmId, true);
 		simulation.sendEvent(migEvent);
