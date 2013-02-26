@@ -285,9 +285,9 @@ public final class Host implements SimulationEventListener {
 			
 			MigrateVmEvent migrateEvent = (MigrateVmEvent)e;
 			if (migrateEvent.isComplete()) {
-				this.completeMigrationIn(migrateEvent.getVMAllocation(), migrateEvent.getVM(), migrateEvent.getSource());
+				this.completeMigrationIn(migrateEvent);
 			} else {
-				this.migrateIn(migrateEvent.getVMAllocationRequest(), migrateEvent.getVM(), migrateEvent.getSource());
+				this.migrateIn(migrateEvent);
 			}
 			
 		} else {
@@ -368,19 +368,6 @@ public final class Host implements SimulationEventListener {
 	 * MIGRATION
 	 */
 	
-	/**
-	 * A helper function which creates a migration event and send it to this host. To be called by another host or management entity
-	 * that wishes to migrate a VM to this host.
-	 * @param vmAllocationRequest
-	 * @param vm
-	 * @param source The host running the VM to be migrated. Note that this may be different than the Event source, since a third entity may trigger the migration.
-	 */
-	public void sendMigrationEvent(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
-		
-		simulation.sendEvent(new MigrateVmEvent(source, this, vmAllocationRequest, vm));
-
-	}
-	
 	private void markVmForMigration(VM vm) {
 		if (!vmAllocations.contains(vm.getVMAllocation()))
 				throw new IllegalStateException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
@@ -403,8 +390,12 @@ public final class Host implements SimulationEventListener {
 	 * @param vm
 	 * @param source
 	 */
-	private void migrateIn(VMAllocationRequest vmAllocationRequest, VM vm, Host source) {
+	private void migrateIn(MigrateVmEvent event) {
 
+		VMAllocationRequest vmAllocationRequest = event.getVMAllocationRequest();
+		VM vm = event.getVM();
+		Host source = event.getSource();
+		
 		//verify source
 		if (vm.getVMAllocation().getHost() != source)
 			throw new IllegalStateException("Migration failed: Source (host #" + source.getId() + ") does not match VM (#" + 
@@ -445,7 +436,9 @@ public final class Host implements SimulationEventListener {
 		long timeToMigrate = (long)Math.ceil((((double)vm.getResourcesScheduled().getMemory() * 1024) / ((double)privDomainAllocation.getBandwidth() / 4)) * 1000);
 	
 		//send migration completion message
-		simulation.sendEvent(new MigrateVmEvent(source, this, newAllocation, vm), simulation.getSimulationTime() + timeToMigrate);
+		MigrateVmEvent migCompleteEvent = new MigrateVmEvent(source, this, newAllocation, vm);
+		event.addEventInSequence(migCompleteEvent); //defer completion of the original event until the MigrateVmEvent is complete
+		simulation.sendEvent(migCompleteEvent, simulation.getSimulationTime() + timeToMigrate);
 		
 	}
 	
@@ -476,7 +469,11 @@ public final class Host implements SimulationEventListener {
 	 * @param vm
 	 * @param source
 	 */
-	private void completeMigrationIn(VMAllocation vmAllocation, VM vm, Host source) {
+	private void completeMigrationIn(MigrateVmEvent event) {
+
+		VMAllocation vmAllocation = event.getVMAllocation();
+		VM vm = event.getVM();
+		Host source = event.getSource();
 
 		//first, inform the source host the the VM has completed migrating out
 		source.completeMigrationOut(vm);

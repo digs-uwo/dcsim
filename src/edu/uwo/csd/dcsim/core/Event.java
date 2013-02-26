@@ -11,25 +11,55 @@ public abstract class Event {
 	private long sendOrder;
 	private ArrayList<EventCallbackListener> callbackListeners = new ArrayList<EventCallbackListener>();
 	
+	private boolean waitOnNextEvent = false; //true if we are waiting for another event to run
+	
 	public Event(SimulationEventListener target) {
 		this.target = target;
 	}
 	
-	public Event addCallbackListener(EventCallbackListener listener) {
+	public final Event addCallbackListener(EventCallbackListener listener) {
 		callbackListeners.add(listener);
 		return this;
+	}
+	
+	public final void addEventInSequence(Event nextEvent) {
+		//flag that we are waiting to trigger postExecute, log, and callbackListeners until the next event is done
+		waitOnNextEvent = true;
+		
+		//add a listener to trigger methods once the next event completes. This can cause a cascade back through several sequenced events.
+		nextEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				waitOnNextEvent = false;
+				postExecute();
+				log();
+				triggerCallback();
+			}
+			
+		});
 	}
 	
 	/**
 	 * Provides a hook to run any additional code after the event has been triggered and handled.
 	 */
 	public void postExecute() {
-		//default behaviour is to do nothing
+		//default behaviour is to do nothing, designed to be overridden
 	}
 	
+	public final void triggerPostExecute() {
+		if (!waitOnNextEvent) {
+			postExecute();
+		}
+	}
+	
+	
+	
 	public final void triggerCallback() {
-		for (EventCallbackListener listener : callbackListeners) {
-			listener.eventCallback(this);
+		if (!waitOnNextEvent) {
+			for (EventCallbackListener listener : callbackListeners) {
+				listener.eventCallback(this);
+			}
 		}
 	}
 	
@@ -38,6 +68,12 @@ public abstract class Event {
 	 */
 	public void log() {
 		//default behaviour is to do nothing
+	}
+	
+	public void triggerLog() {
+		if(!waitOnNextEvent) {
+			log();
+		}
 	}
 	
 	public final void initialize(Simulation simulation) {

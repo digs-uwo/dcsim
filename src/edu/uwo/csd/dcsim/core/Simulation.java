@@ -253,8 +253,8 @@ public class Simulation implements SimulationEventListener {
 				e = eventQueue.poll();
 				
 				e.getTarget().handleEvent(e);	//the target handles the event
-				e.postExecute();				//run any additional logic required by the event
-				e.log();						//log event
+				e.triggerPostExecute();				//run any additional logic required by the event
+				e.triggerLog();						//log event
 				e.triggerCallback();			//trigger any objects awaiting a post-event callback
 			}
 			

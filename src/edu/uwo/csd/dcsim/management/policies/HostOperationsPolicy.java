@@ -45,7 +45,9 @@ public class HostOperationsPolicy extends Policy {
 		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(vm.getVMAllocation());
 		
 		//trigger migration in target host
-		targetHost.sendMigrationEvent(vmAllocationRequest, vm, host);
+		MigrateVmEvent migEvent = new MigrateVmEvent(host, targetHost, vmAllocationRequest, vm);
+		event.addEventInSequence(migEvent); //defer completion of the original event until the MigrateVmEvent is complete
+		simulation.sendEvent(migEvent);
 		
 		if (event.shutdownIfEmpty()) {
 			//check if there is only one VM left (vm has not started migrating yet, so it is still present)
