@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim.common;
 
+import edu.uwo.csd.dcsim.core.Simulation;
+
 public final class SimTime {
 
 	public static final long seconds(long seconds) {
@@ -42,4 +44,22 @@ public final class SimTime {
 		return toDays(time) / 7;
 	}
 	
+	public static final String toHumanReadable(long time) {
+		if (time < seconds(1)) {
+			//output as ms
+			return time + "ms";
+		} else if (time < minutes(2)) {
+			//output as seconds
+			return Simulation.roundToMetricPrecision(toSeconds(time)) + "s";
+		} else if (time < hours(2)) {
+			//output as minutes
+			return Simulation.roundToMetricPrecision(toMinutes(time)) + " min";
+		} else if (time < days(2)) {
+			//output as hours
+			return Simulation.roundToMetricPrecision(toHours(time)) + "hrs";
+		} else {
+			//output as days
+			return Simulation.roundToMetricPrecision(toDays(time)) + " days";
+		}
+	}
 }

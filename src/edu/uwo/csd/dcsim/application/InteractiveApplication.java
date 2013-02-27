@@ -1,6 +1,9 @@
 package edu.uwo.csd.dcsim.application;
 
+import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
+import edu.uwo.csd.dcsim.core.metrics.AvgSlaSeverityMetric;
+import edu.uwo.csd.dcsim.core.metrics.SlaViolationDurationMetric;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 import edu.uwo.csd.dcsim.host.Resources;
 
@@ -100,14 +103,14 @@ public class InteractiveApplication extends Application {
 			double cpuAvailableForWork = resourcesScheduled.getCpu() - cpuOverhead;
 			
 			//then divide by the amount of cpu required for each unit of work
-			workOutputLevel = cpuAvailableForWork / cpuPerWork;
+			workOutputLevel = Utility.roundDouble(cpuAvailableForWork / cpuPerWork, 6);
 			
 			//calculate sla violation and migration penalty
-			slaUnderprovisionRate = workLevel - workOutputLevel;
+			slaUnderprovisionRate = Utility.roundDouble(workLevel - workOutputLevel, 6);
 			
 			//calculate migration penalty as a percentage (configurable) of the completed work
 			if (vm.isMigrating()) {
-				slaMigrationPenaltyRate = workOutputLevel * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty"));
+				slaMigrationPenaltyRate = Utility.roundDouble(workOutputLevel * Double.parseDouble(Simulation.getProperty("vmMigrationSLAPenalty")), 6);
 			} else {
 				slaMigrationPenaltyRate = 0;
 			}
@@ -136,6 +139,14 @@ public class InteractiveApplication extends Application {
 		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addSlaVWork(slavUnderprovision + slavMig);
 		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addSlaVWork(slavUnderprovision);
 		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addSlaVWork(slavMig);
+		
+		if (slaUnderprovisionRate > 0) {			
+			//record SLA violation duration metric
+			SlaViolationDurationMetric.getMetric(simulation, Application.UNDERPROVISION_DURATION_METRIC).addSlaViolationTime(simulation.getElapsedTime());
+			
+			//record SLA violation average severity metric
+			AvgSlaSeverityMetric.getMetric(simulation, Application.UNDERPROVISION_AVG_SEVERITY_METRIC).addValue(slaUnderprovisionRate / workLevel);
+		}
 	}
 
 	@Override

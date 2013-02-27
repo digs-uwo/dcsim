@@ -15,6 +15,8 @@ public abstract class Application implements WorkProducer {
 	public static final String SLA_VIOLATION_METRIC = "slaViolation"; //name of the metric collection the SLA violation
 	public static final String SLA_VIOLATION_UNDERPROVISION_METRIC = "slaViolationUnderprovision"; //name of the metric collecting SLA violation due to under provisioning
 	public static final String SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC = "slaViolationMigOverhead"; //name of the metric collection SLA violation due to migration overhead
+	public static final String UNDERPROVISION_DURATION_METRIC = "underprovisionDuration"; //name of the metric collection the SLA violation duration
+	public static final String UNDERPROVISION_AVG_SEVERITY_METRIC = "underprovisionSeverity"; //name of the metric collection the SLA violation average severity
 	
 	protected VM vm; //the VM on which this application is running
 	protected Simulation simulation; //the simulation this Application is running within
