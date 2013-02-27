@@ -321,7 +321,7 @@ public final class Host implements SimulationEventListener {
 	 * VM Allocation
 	 */
 	
-	public void submitVM(VMAllocationRequest vmAllocationRequest) {
+	public VM submitVM(VMAllocationRequest vmAllocationRequest) {
 		
 		VMAllocation newAllocation;
 		
@@ -329,7 +329,6 @@ public final class Host implements SimulationEventListener {
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
-//			System.out.println("!!!!! ALLOC FAIL - SUBMIT - Host #" + this.getId());
 			throw new RuntimeException("Allocation failed on Host #" + this.getId() + 
 					" VM submission", e);
 			
@@ -344,6 +343,8 @@ public final class Host implements SimulationEventListener {
 		newVm.setVMAllocation(newAllocation);
 		
 		simulation.getLogger().debug("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
+		
+		return newVm;
 	}
 
 	

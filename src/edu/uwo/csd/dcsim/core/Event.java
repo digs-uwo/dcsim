@@ -33,7 +33,6 @@ public abstract class Event {
 			public void eventCallback(Event e) {
 				waitOnNextEvent = false;
 				postExecute();
-				log();
 				triggerCallback();
 			}
 			
@@ -43,7 +42,6 @@ public abstract class Event {
 	public final void cancelEventInSequence() {
 		waitOnNextEvent = false;
 		postExecute();
-		log();
 		triggerCallback();
 	}
 	
@@ -71,18 +69,12 @@ public abstract class Event {
 	}
 	
 	/**
-	 * Provides a hook for events to be logged, if desired
+	 * Provides a hook to run code just before this event is executed
 	 */
-	public void log() {
+	public void preExecute() {
 		//default behaviour is to do nothing
 	}
-	
-	public void triggerLog() {
-		if(!waitOnNextEvent) {
-			log();
-		}
-	}
-	
+		
 	public final void initialize(Simulation simulation) {
 		//only initialize if this is the first time the event has been sent
 		if (this.simulation == null) {

@@ -2,13 +2,10 @@ package edu.uwo.csd.dcsim.management.policies;
 
 import java.util.Collection;
 
-import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
-import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
-import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.action.InstantiateVmAction;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
-import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
@@ -72,15 +69,8 @@ public class DefaultVmPlacementPolicy extends Policy {
 			}
 			
 			if (allocatedHost != null) {
-				//if the host is not ON or POWERING_ON, then send an event to power on the host
-				if (allocatedHost.getCurrentStatus().getState() != Host.HostState.ON && allocatedHost.getCurrentStatus().getState() != Host.HostState.POWERING_ON) {
-					simulation.sendEvent(new PowerStateEvent(allocatedHost.getHost(), PowerState.POWER_ON));
-				}
-				
-				InstantiateVmEvent instantiateEvent = new InstantiateVmEvent(allocatedHost.getHostManager(), vmAllocationRequest);
-				event.addEventInSequence(instantiateEvent);
-				simulation.sendEvent(instantiateEvent);
-				
+				InstantiateVmAction instantiateVmAction = new InstantiateVmAction(allocatedHost, vmAllocationRequest, event);
+				instantiateVmAction.execute(simulation, this);
 			} else {
 				event.addFailedRequest(vmAllocationRequest); //add a failed request to the event for any event callback listeners to check
 			}

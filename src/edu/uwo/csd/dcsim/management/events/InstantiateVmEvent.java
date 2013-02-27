@@ -35,5 +35,11 @@ public class InstantiateVmEvent extends Event {
 	public boolean failed() {
 		return failed;
 	}
+	
+	@Override
+	public void postExecute() {
+		simulation.getTraceLogger().info("#vs," + vm.getId() + "," + vm.getVMAllocation().getHost().getId());
+	}
+	
 
 }

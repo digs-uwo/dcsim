@@ -22,4 +22,9 @@ public class ShutdownVmEvent extends Event {
 		return vmId;
 	}
 	
+	@Override
+	public void postExecute() {
+		simulation.getTraceLogger().info("#vc," + vmId + "," + hostId);
+	}
+	
 }

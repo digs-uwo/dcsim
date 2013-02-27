@@ -60,6 +60,7 @@ public class MigrationAction extends ManagementAction {
 
 			@Override
 			public void eventCallback(Event e) {
+				//add 'migration complete' to trace
 				completeAction();
 			}
 			

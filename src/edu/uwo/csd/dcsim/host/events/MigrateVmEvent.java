@@ -75,5 +75,17 @@ public class MigrateVmEvent extends Event {
 	public VMAllocation getVMAllocation() {
 		return vmAllocation;
 	}
+	
+	public void preExecute() {
+		if (!complete) {
+			simulation.getTraceLogger().info("#ms," + source.getId() + "," + target.getId() + "," + vm.getId());
+		}
+	}
+	
+	public void postExecute() {
+		if (complete) {
+			simulation.getTraceLogger().info("#mc," + source.getId() + "," + target.getId() + "," + vm.getId());
+		}
+	}
 
 }

@@ -29,7 +29,7 @@ public class HostOperationsPolicy extends Policy {
 			host.cancelPendingShutdown(); 
 		}
 		
-		host.submitVM(event.getVMAllocationRequest());
+		event.setVM(host.submitVM(event.getVMAllocationRequest()));
 		
 	}
 	

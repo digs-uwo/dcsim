@@ -336,10 +336,10 @@ public class Simulation implements SimulationEventListener {
 			//execute current events
 			while (!eventQueue.isEmpty() && (eventQueue.peek().getTime() == simulationTime)) {
 				e = eventQueue.poll();
-				
+
+				e.preExecute();
 				e.getTarget().handleEvent(e);	//the target handles the event
 				e.triggerPostExecute();				//run any additional logic required by the event
-				e.triggerLog();						//log event
 				e.triggerCallback();			//trigger any objects awaiting a post-event callback
 			}
 			

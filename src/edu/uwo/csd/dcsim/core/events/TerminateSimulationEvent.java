@@ -11,7 +11,7 @@ public class TerminateSimulationEvent extends Event {
 	}
 	
 	@Override
-	public void log() {
+	public void postExecute() {
 		simulation.getLogger().info("Simulation terminating");
 	}
 
