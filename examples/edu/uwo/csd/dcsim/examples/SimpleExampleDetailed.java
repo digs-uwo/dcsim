@@ -55,10 +55,9 @@ public class SimpleExampleDetailed extends SimulationTask {
 			logger.info(metric.getName() + "=" + metric.toString()); //metric.getValue() returns the raw value, while toString() provides formatting
 		}
 		
-		//write the metric values to a trace file
+		//write the metric values to a metric trace file
 		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
 		traceWriter.writeTrace();
-		
 	}
 	
 	public SimpleExampleDetailed(String name, long duration) {

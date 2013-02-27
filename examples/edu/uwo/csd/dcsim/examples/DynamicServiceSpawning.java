@@ -48,7 +48,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 	}
 	
 	public DynamicServiceSpawning(String name, long randomSeed) {
-		super(name, SimTime.days(1));
+		super(name, SimTime.days(5));
 		this.setRandomSeed(randomSeed);
 	}
 
@@ -91,14 +91,12 @@ public class DynamicServiceSpawning extends SimulationTask {
 		 * time. Time is relative to the simulation time at which ServiceProducer.start() is called (usually 0). The 'trace' is looped
 		 * once immediately upon reaching the end, thus if the first rate was at time '0', the last rate will never really be used. If you want
 		 * to maintain the last rate for some period of time, simply add another entry with the same rate at a later time, as has been done below.
-		 * In this example, a rate of '5' is set at 28800000, set again (with no effect) at time 43200000, and then 1000ms later (time 43201000)
-		 * the rate of '10' is set.
 		 */
 		ArrayList<Tuple<Long, Double>> serviceRates = new ArrayList<Tuple<Long, Double>>();
-		serviceRates.add(new Tuple<Long, Double>(1000l, 10d));
-		serviceRates.add(new Tuple<Long, Double>(14400000l, 30d));
-		serviceRates.add(new Tuple<Long, Double>(28800000l, 5d));
-		serviceRates.add(new Tuple<Long, Double>(43200000l, 5d));
+		serviceRates.add(new Tuple<Long, Double>(SimTime.seconds(1), 10d));
+		serviceRates.add(new Tuple<Long, Double>(SimTime.hours(4), 10d));
+		serviceRates.add(new Tuple<Long, Double>(SimTime.days(2), 2d));
+		serviceRates.add(new Tuple<Long, Double>(SimTime.days(5), 2d));
 		
 		/*
 		 * Create the ServiceProducer by extending the abstract class and specifying the buildService() method. This method is responsible
@@ -107,7 +105,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		 * Simulation superclass), the datacentre to submit Services to, a distribution describing the lifespan of services, and either
 		 * a static rate to create services given in services-per-hour, or a list of (time, rate) tuples.
 		 */
-		ServiceProducer serviceProducer = new ServiceProducer(simulation, dcAM, new NormalDistribution(14400000, 900000), serviceRates) {
+		ServiceProducer serviceProducer = new ServiceProducer(simulation, dcAM, new NormalDistribution(SimTime.days(3), SimTime.hours(4)), serviceRates) {
 
 			@Override
 			public Service buildService() {

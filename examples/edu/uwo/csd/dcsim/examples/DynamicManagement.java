@@ -35,16 +35,13 @@ public class DynamicManagement extends SimulationTask {
 		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
 			ExampleHelper.printMetrics(task.getResults());
-			
-			SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
-			traceWriter.writeTrace();
 		}
 
 	}
 	
 	public DynamicManagement(String name, long randomSeed) {
-		super(name, 864000000);
-		this.setMetricRecordStart(86400000);
+		super(name, SimTime.days(10));
+		this.setMetricRecordStart(SimTime.days(1));
 		this.setRandomSeed(randomSeed);
 	}
 

@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim.management.policies;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.uwo.csd.dcsim.host.Resources;
@@ -28,8 +29,14 @@ public class DefaultVmPlacementPolicy extends Policy {
 
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
 		
-		Collection<HostData> hosts = hostPool.getHosts();
-		
+		//filter out invalid host status
+		Collection<HostData> hosts = new ArrayList<HostData>(); 
+		for (HostData host : hostPool.getHosts()) {
+			if (host.isStatusValid()) {
+				hosts.add(host);
+			}
+		}
+				
 		//reset the sandbox host status to the current host status
 		for (HostData host : hosts) {
 			host.resetSandboxStatusToCurrent();
@@ -46,7 +53,7 @@ public class DefaultVmPlacementPolicy extends Policy {
 				reqResources.setMemory(vmAllocationRequest.getMemory());
 				reqResources.setBandwidth(vmAllocationRequest.getBandwidth());
 				reqResources.setStorage(vmAllocationRequest.getStorage());
-	
+
 				if (HostData.canHost(vmAllocationRequest.getVMDescription().getCores(), 
 						vmAllocationRequest.getVMDescription().getCoreCapacity(), 
 						reqResources,

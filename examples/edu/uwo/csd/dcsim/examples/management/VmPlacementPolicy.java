@@ -127,8 +127,8 @@ public class VmPlacementPolicy extends Policy {
 						reqResources,
 						target.getSandboxStatus(),
 						target.getHostDescription()) &&	//target has capability and capacity to host VM
-				 	(target.getSandboxStatus().getResourcesInUse().getCpu() + vmAllocationRequest.getCpu()) / 
-				 	target.getHostDescription().getResourceCapacity().getCpu() <= targetUtilization) {	// target will not exceed target utilization
+					 	(target.getSandboxStatus().getResourcesInUse().getCpu() + vmAllocationRequest.getCpu()) / 
+					 	target.getHostDescription().getResourceCapacity().getCpu() <= targetUtilization) {	// target will not exceed target utilization
 					
 					allocatedHost = target;
 					

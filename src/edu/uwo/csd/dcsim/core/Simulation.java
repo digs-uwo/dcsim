@@ -113,19 +113,6 @@ public class Simulation implements SimulationEventListener {
 			
 			Logger.getRootLogger().addAppender(mainFileAppender);
 		}
-		
-//		Properties properties = new Properties();
-//		
-//		try {
-//			properties.load(new FileInputStream(Simulation.getConfigDirectory() + "/logger.properties"));
-//		} catch (FileNotFoundException e) {
-//			throw new RuntimeException("Logging properties file could not be loaded", e);
-//		} catch (IOException e) {
-//			throw new RuntimeException("Logging properties file could not be loaded", e);
-//		}
-//		
-//		PropertyConfigurator.configure(properties);
-//		loggerProperties = properties;
 	}
 	
 	private static final Properties getProperties() {
