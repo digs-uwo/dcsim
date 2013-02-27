@@ -2,12 +2,12 @@ package edu.uwo.csd.dcsim.core.metrics;
 
 import edu.uwo.csd.dcsim.core.Simulation;
 
-public class ActionCountMetric extends Metric {
+public class CountMetric extends Metric {
 
 	private double total = 0;
 	private double current = 0;
 	
-	public ActionCountMetric(Simulation simulation, String name) {
+	public CountMetric(Simulation simulation, String name) {
 		super(simulation, name);
 	}
 
@@ -36,13 +36,13 @@ public class ActionCountMetric extends Metric {
 		//nothing to do
 	}
 	
-	public static ActionCountMetric getMetric(Simulation simulation, String name) {
-		ActionCountMetric metric;
+	public static CountMetric getMetric(Simulation simulation, String name) {
+		CountMetric metric;
 		if (simulation.hasMetric(name)) {
-			metric = (ActionCountMetric)simulation.getMetric(name);
+			metric = (CountMetric)simulation.getMetric(name);
 		}
 		else {
-			metric = new ActionCountMetric(simulation, name);
+			metric = new CountMetric(simulation, name);
 			simulation.addMetric(metric);
 		}
 		return metric;	

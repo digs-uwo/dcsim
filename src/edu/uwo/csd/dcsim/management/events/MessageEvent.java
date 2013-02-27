@@ -2,7 +2,7 @@ package edu.uwo.csd.dcsim.management.events;
 
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
-import edu.uwo.csd.dcsim.core.metrics.ActionCountMetric;
+import edu.uwo.csd.dcsim.core.metrics.CountMetric;
 
 public class MessageEvent extends Event {
 
@@ -15,7 +15,7 @@ public class MessageEvent extends Event {
 	public void preExecute() {
 		//record message count metric
 		if (simulation.isRecordingMetrics()) {
-			ActionCountMetric.getMetric(simulation, MESSAGE_COUNT_METRIC + "-" + this.getClass().getSimpleName()).incrementCount();
+			CountMetric.getMetric(simulation, MESSAGE_COUNT_METRIC + "-" + this.getClass().getSimpleName()).incrementCount();
 		}
 	}
 
