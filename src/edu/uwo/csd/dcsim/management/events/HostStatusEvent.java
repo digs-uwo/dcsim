@@ -1,10 +1,9 @@
 package edu.uwo.csd.dcsim.management.events;
 
-import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.SimulationEventListener;
 import edu.uwo.csd.dcsim.management.HostStatus;
 
-public class HostStatusEvent extends Event {
+public class HostStatusEvent extends MessageEvent {
 
 	private HostStatus hostStatus;
 
