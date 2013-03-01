@@ -51,7 +51,7 @@ public class AutonomicManagement extends SimulationTask {
 	}
 	
 	public AutonomicManagement(String name, long randomSeed) {
-		super(name, SimTime.days(1));
+		super(name, SimTime.days(5));
 		this.setRandomSeed(randomSeed);
 		this.setMetricRecordStart(SimTime.minutes(1));
 	}

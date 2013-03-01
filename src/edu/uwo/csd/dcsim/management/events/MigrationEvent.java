@@ -9,7 +9,6 @@ public class MigrationEvent extends Event {
 	private AutonomicManager sourceHostManager;
 	private Host targetHost;
 	private int vmId;
-	private boolean shutdownIfEmpty = false;
 	
 	public MigrationEvent(AutonomicManager sourceHostManager, Host targetHost, int vmId) {
 		super(sourceHostManager);
@@ -17,15 +16,6 @@ public class MigrationEvent extends Event {
 		this.sourceHostManager = sourceHostManager;
 		this.targetHost = targetHost;
 		this.vmId = vmId;
-	}
-	
-	public MigrationEvent(AutonomicManager sourceHostManager, Host targetHost, int vmId, boolean shutdownIfEmpty) {
-		super(sourceHostManager);
-		
-		this.sourceHostManager = sourceHostManager;
-		this.targetHost = targetHost;
-		this.vmId = vmId;
-		this.shutdownIfEmpty = shutdownIfEmpty;
 	}
 	
 	public AutonomicManager getSourceHostManager() {
@@ -39,9 +29,4 @@ public class MigrationEvent extends Event {
 	public int getVmId() {
 		return vmId;
 	}
-	
-	public boolean shutdownIfEmpty() {
-		return shutdownIfEmpty;
-	}
-
 }

@@ -76,8 +76,8 @@ public class HostStatus {
 	
 	public void migrate(VmStatus vm, HostStatus target) {
 		++outgoingMigrations;
-		
 		vms.remove(vm);
+
 		target.vms.add(vm);
 		++target.incomingMigrations;
 	}

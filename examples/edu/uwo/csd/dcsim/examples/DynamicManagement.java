@@ -40,8 +40,8 @@ public class DynamicManagement extends SimulationTask {
 	}
 	
 	public DynamicManagement(String name, long randomSeed) {
-		super(name, SimTime.days(10));
-		this.setMetricRecordStart(SimTime.days(1));
+		super(name, SimTime.days(1));
+		this.setMetricRecordStart(SimTime.days(0));
 		this.setRandomSeed(randomSeed);
 	}
 

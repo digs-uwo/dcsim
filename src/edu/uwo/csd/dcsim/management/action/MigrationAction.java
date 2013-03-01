@@ -53,7 +53,7 @@ public class MigrationAction extends ManagementAction {
 		}
 		
 		//send migration event to source
-		MigrationEvent migEvent = new MigrationEvent(sourceHostManager, target, vmId, true);
+		MigrationEvent migEvent = new MigrationEvent(sourceHostManager, target, vmId);
 		
 		//add a callback listener to indicate this action is completed once the migration is finished
 		migEvent.addCallbackListener(new EventCallbackListener() {

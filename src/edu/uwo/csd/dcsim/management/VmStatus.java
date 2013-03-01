@@ -64,4 +64,15 @@ public class VmStatus {
 		return new VmStatus(this);
 	}
 	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof VmStatus) {
+			VmStatus vm = (VmStatus)o;
+			if (vm.getId() == id) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }

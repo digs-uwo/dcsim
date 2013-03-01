@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim.management.policies;
 
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.*;
-import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.management.Policy;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
@@ -48,13 +47,7 @@ public class HostOperationsPolicy extends Policy {
 		MigrateVmEvent migEvent = new MigrateVmEvent(host, targetHost, vmAllocationRequest, vm);
 		event.addEventInSequence(migEvent); //defer completion of the original event until the MigrateVmEvent is complete
 		simulation.sendEvent(migEvent);
-		
-		if (event.shutdownIfEmpty()) {
-			//check if there is only one VM left (vm has not started migrating yet, so it is still present)
-			if (host.getVMAllocations().size() == 1) {
-				simulation.sendEvent(new PowerStateEvent(host, PowerState.POWER_OFF));
-			}
-		}
+
 		
 	}
 	

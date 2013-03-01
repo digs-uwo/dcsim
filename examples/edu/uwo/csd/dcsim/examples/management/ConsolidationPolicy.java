@@ -7,7 +7,9 @@ import java.util.HashSet;
 
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
+import edu.uwo.csd.dcsim.management.action.ManagementAction;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
+import edu.uwo.csd.dcsim.management.action.ShutdownHostAction;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 
 /**
@@ -58,7 +60,7 @@ public class ConsolidationPolicy extends Policy {
 		
 		ArrayList<HostData> sources = orderSourceHosts(unsortedSources);
 		ArrayList<HostData> targets = orderTargetHosts(partiallyUtilized, underUtilized);
-		ArrayList<MigrationAction> migrations = new ArrayList<MigrationAction>();
+		ArrayList<ManagementAction> actions = new ArrayList<ManagementAction>();
 		
 		HashSet<HostData> usedSources = new HashSet<HostData>();
 		HashSet<HostData> usedTargets = new HashSet<HostData>();
@@ -85,10 +87,14 @@ public class ConsolidationPolicy extends Policy {
 							source.invalidateStatus(simulation.getSimulationTime());
 							target.invalidateStatus(simulation.getSimulationTime());
 							
-							migrations.add(new MigrationAction(source.getHostManager(),
+							actions.add(new MigrationAction(source.getHostManager(),
 									source.getHost(),
 									target.getHost(), 
 									vm.getId()));
+							
+							if (source.getSandboxStatus().getVms().size() == 0) {
+								actions.add(new ShutdownHostAction(source.getHost()));
+							}
 							 
 							usedTargets.add(target);
 							usedSources.add(source);
@@ -101,8 +107,8 @@ public class ConsolidationPolicy extends Policy {
 		}
 		
 		// Trigger migrations.
-		for (MigrationAction migration : migrations) {
-			migration.execute(simulation, this);
+		for (ManagementAction action : actions) {
+			action.execute(simulation, this);
 		}
 	}
 	
