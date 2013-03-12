@@ -7,8 +7,9 @@ import java.util.HashSet;
 
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
-import edu.uwo.csd.dcsim.management.action.ManagementAction;
+import edu.uwo.csd.dcsim.management.action.ConcurrentManagementActionExecutor;
 import edu.uwo.csd.dcsim.management.action.MigrationAction;
+import edu.uwo.csd.dcsim.management.action.SequentialManagementActionExecutor;
 import edu.uwo.csd.dcsim.management.action.ShutdownHostAction;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 
@@ -60,7 +61,8 @@ public class ConsolidationPolicy extends Policy {
 		
 		ArrayList<HostData> sources = orderSourceHosts(unsortedSources);
 		ArrayList<HostData> targets = orderTargetHosts(partiallyUtilized, underUtilized);
-		ArrayList<ManagementAction> actions = new ArrayList<ManagementAction>();
+		ConcurrentManagementActionExecutor migrations = new ConcurrentManagementActionExecutor();
+		ConcurrentManagementActionExecutor shutdownActions = new ConcurrentManagementActionExecutor();
 		
 		HashSet<HostData> usedSources = new HashSet<HostData>();
 		HashSet<HostData> usedTargets = new HashSet<HostData>();
@@ -87,13 +89,13 @@ public class ConsolidationPolicy extends Policy {
 							source.invalidateStatus(simulation.getSimulationTime());
 							target.invalidateStatus(simulation.getSimulationTime());
 							
-							actions.add(new MigrationAction(source.getHostManager(),
+							migrations.addAction(new MigrationAction(source.getHostManager(),
 									source.getHost(),
 									target.getHost(), 
 									vm.getId()));
 							
 							if (source.getSandboxStatus().getVms().size() == 0) {
-								actions.add(new ShutdownHostAction(source.getHost()));
+								shutdownActions.addAction(new ShutdownHostAction(source.getHost()));
 							}
 							 
 							usedTargets.add(target);
@@ -107,9 +109,11 @@ public class ConsolidationPolicy extends Policy {
 		}
 		
 		// Trigger migrations.
-		for (ManagementAction action : actions) {
-			action.execute(simulation, this);
-		}
+		SequentialManagementActionExecutor actionExecutor = new SequentialManagementActionExecutor();
+		actionExecutor.addAction(migrations);
+		actionExecutor.addAction(shutdownActions);
+		actionExecutor.execute(simulation, this);
+
 	}
 	
 	private void classifyHosts(ArrayList<HostData> stressed, 

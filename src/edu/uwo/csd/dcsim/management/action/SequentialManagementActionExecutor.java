@@ -41,9 +41,12 @@ public class SequentialManagementActionExecutor extends ManagementAction {
 			ManagementAction action = actionQueue.pop();
 			action.setParentAction(this);
 			action.execute(simulation, triggeringEntity);
+		} else {
+			completeAction();
 		}
 	}
 	
+	@Override
 	public void subActionCompleted(ManagementAction action) {
 		//execute next action
 		execute(simulation, triggeringEntity);
