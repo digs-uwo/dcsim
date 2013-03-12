@@ -23,6 +23,9 @@ public class ConcurrentManagementActionExecutor extends ManagementAction {
 	
 	@Override
 	public void execute(Simulation simulation, Object triggeringEntity) {
+		if (actions.isEmpty())
+			completeAction();
+		
 		for (ManagementAction action : actions) {
 			action.setParentAction(this);
 			action.execute(simulation, triggeringEntity);
