@@ -42,10 +42,12 @@ public class VmmApplication extends Application {
 		
 		//calculate cpu and bandwidth requirements for migrating VMs
 		//TODO this needs to consider the number of migrating VMs and the bandwidth available on the management network link
-		for (VM migrating : migratingVms) {
-			cpuRequired += migrating.getResourcesScheduled().getCpu() * 0.1; //TODO is there something more accurate than this?
-			bandwidthRequired += 100; //TODO depends on available bandwidth?
-		}
+//		for (VM migrating : migratingVms) {
+//			cpuRequired += Double.parseDouble(Simulation.getProperty("vmMigrationCpuOverhead")); //TODO is there something more accurate than this?
+//			bandwidthRequired += 100; //TODO depends on available bandwidth?
+//		}
+		cpuRequired += Double.parseDouble(Simulation.getProperty("vmMigrationCpuOverhead")) * migratingVms.size();
+		bandwidthRequired += 100 * migratingVms.size();
 		
 		resourcesRequired.setCpu(cpuRequired);
 		resourcesRequired.setBandwidth(bandwidthRequired);
