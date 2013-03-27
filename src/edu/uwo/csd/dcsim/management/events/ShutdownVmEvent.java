@@ -7,6 +7,7 @@ public class ShutdownVmEvent extends Event {
 
 	private int hostId;
 	private int vmId;
+	private boolean log = true;
 	
 	public ShutdownVmEvent(AutonomicManager target, int hostId, int vmId) {
 		super(target);
@@ -22,9 +23,13 @@ public class ShutdownVmEvent extends Event {
 		return vmId;
 	}
 	
+	public void setLog(boolean log) {
+		this.log = log;
+	}
+	
 	@Override
 	public void postExecute() {
-		simulation.getTraceLogger().info("#vc," + vmId + "," + hostId);
+		if (log) simulation.getTraceLogger().info("#vc," + vmId + "," + hostId);
 	}
 	
 }

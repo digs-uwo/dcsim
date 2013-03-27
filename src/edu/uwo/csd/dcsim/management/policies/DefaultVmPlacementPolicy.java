@@ -91,6 +91,9 @@ public class DefaultVmPlacementPolicy extends Policy {
 		//mark host status as invalid
 		hostPool.getHost(event.getHostId()).invalidateStatus(simulation.getSimulationTime());
 		
+		//prevent the original event from logging, since we are creating a new event to forward to the host
+		event.setLog(false);
+		
 		ShutdownVmEvent shutdownEvent = new ShutdownVmEvent(hostManager, event.getHostId(), event.getVmId()); 
 		event.addEventInSequence(shutdownEvent);
 		simulation.sendEvent(shutdownEvent);
