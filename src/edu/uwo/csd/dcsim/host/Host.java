@@ -659,7 +659,9 @@ public final class Host implements SimulationEventListener {
 		
 		//trace output
 		simulation.getTraceLogger().info("#h," + getId() + "," + state + "," + (int)Math.round(resourceManager.getCpuInUse()) + "," +
-				resourceManager.getAllocatedBandwidth() + "," + resourceManager.getAllocatedMemory() + "," + resourceManager.getAllocatedStorage() + "," + 
+				resourceManager.getAllocatedMemory() + "," +
+				resourceManager.getAllocatedBandwidth() + "," +
+				resourceManager.getAllocatedStorage() + "," + 
 				Utility.roundDouble(this.getCurrentPowerConsumption(), 2));
 		
 		//log priv domain
