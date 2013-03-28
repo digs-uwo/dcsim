@@ -360,9 +360,11 @@ public class Simulation implements SimulationEventListener {
 		}
 		
 		//schedule the privileged domain (it takes priority over other VMs)
-		for (Host host : hosts) {		
-			host.getPrivDomainAllocation().getVm().updateResourceRequirements();
-			host.getResourceScheduler().schedulePrivDomain();
+		for (Host host : hosts) {
+			if (host.getState() == Host.HostState.ON) {
+				host.getPrivDomainAllocation().getVm().updateResourceRequirements();
+				host.getResourceScheduler().schedulePrivDomain();
+			}
 		}
 		
 		//schedule resources to vms in order, in rounds until all complete

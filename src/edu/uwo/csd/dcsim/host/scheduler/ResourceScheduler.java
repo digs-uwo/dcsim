@@ -49,7 +49,11 @@ public abstract class ResourceScheduler {
 		}
 		
 		//set the remaining CPU to the total CPU available
-		remainingCpu = host.getTotalCpu();
+		if (host.getState() == Host.HostState.ON) {
+			remainingCpu = host.getTotalCpu();
+		} else {
+			remainingCpu = 0;
+		}
 		
 		//indicate that the resource scheduler is ready to schedule resources
 		state = ResourceSchedulerState.READY;
