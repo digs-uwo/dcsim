@@ -55,21 +55,6 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="PeriodicHybridStrategyExperiment">
-        <java classname="edu.uwo.csd.dcsim.projects.centralized.PeriodicHybridStrategyExperiment" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
-    <target name="BroadcastExperiment">
-        <java classname="edu.uwo.csd.dcsim.projects.distributed.BroadcastExperiment" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
-    <target name="StaticPeakStrategyExperiment">
-        <java classname="edu.uwo.csd.dcsim.projects.svm2013.StaticPeakStrategyExperiment" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
     <target name="SimpleExample">
         <java classname="edu.uwo.csd.dcsim.examples.SimpleExample" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
