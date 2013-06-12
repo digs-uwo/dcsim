@@ -3,16 +3,16 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. -->
-<project basedir="." default="build" name="dcsim2">
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="dcsim2">
     <property environment="env"/>
+    <property name="ECLIPSE_HOME" value="../../../../usr/lib/eclipse"/>
     <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.6"/>
-    <property name="source" value="1.6"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
     <path id="dcsim2.classpath">
         <pathelement location="bin"/>
-        <pathelement location="lib/log4j-1.2.16.jar"/>
         <pathelement location="lib/commons-math3-3.0.jar"/>
+        <pathelement location="lib/log4j-1.2.16.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -35,11 +35,8 @@
     <target name="build-subprojects"/>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="dcsim2.classpath"/>
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" source="${source}" target="${target}">
             <src path="examples"/>
             <classpath refid="dcsim2.classpath"/>
         </javac>
@@ -58,13 +55,18 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="DynamicManagement">
-        <java classname="edu.uwo.csd.dcsim.examples.DynamicManagement" failonerror="true" fork="yes">
+    <target name="PeriodicHybridStrategyExperiment">
+        <java classname="edu.uwo.csd.dcsim.projects.centralized.PeriodicHybridStrategyExperiment" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
         </java>
     </target>
-    <target name="Replication">
-        <java classname="edu.uwo.csd.dcsim.examples.Replication" failonerror="true" fork="yes">
+    <target name="BroadcastExperiment">
+        <java classname="edu.uwo.csd.dcsim.projects.distributed.BroadcastExperiment" failonerror="true" fork="yes">
+            <classpath refid="dcsim2.classpath"/>
+        </java>
+    </target>
+    <target name="StaticPeakStrategyExperiment">
+        <java classname="edu.uwo.csd.dcsim.projects.svm2013.StaticPeakStrategyExperiment" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
         </java>
     </target>
@@ -73,18 +75,8 @@
             <classpath refid="dcsim2.classpath"/>
         </java>
     </target>
-    <target name="SimpleExampleDetailed">
-        <java classname="edu.uwo.csd.dcsim.examples.SimpleExampleDetailed" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
-    <target name="StaticAverage">
-        <java classname="edu.uwo.csd.dcsim.examples.StaticAverage" failonerror="true" fork="yes">
-            <classpath refid="dcsim2.classpath"/>
-        </java>
-    </target>
-    <target name="StaticPeak">
-        <java classname="edu.uwo.csd.dcsim.examples.StaticPeak" failonerror="true" fork="yes">
+    <target name="AutonomicManagement">
+        <java classname="edu.uwo.csd.dcsim.examples.AutonomicManagement" failonerror="true" fork="yes">
             <classpath refid="dcsim2.classpath"/>
         </java>
     </target>
