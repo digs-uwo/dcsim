@@ -585,6 +585,8 @@ public final class Host implements SimulationEventListener {
 					delay = Long.parseLong(Simulation.getProperty("hostSuspendDelay"));
 					delay += Long.parseLong(Simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
+				default:
+					break;
 			}
 			
 			PowerStateEvent completeEvent = new PowerStateEvent(this, PowerState.POWER_ON, true);

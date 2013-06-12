@@ -2,7 +2,6 @@ package edu.uwo.csd.dcsim.application;
 
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.AvgSlaSeverityMetric;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationDurationMetric;
 import edu.uwo.csd.dcsim.core.metrics.SlaViolationMetric;
 import edu.uwo.csd.dcsim.host.Resources;
