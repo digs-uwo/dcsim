@@ -16,6 +16,7 @@ public class InteractiveApplicationTier extends ApplicationTier {
 	private int memory;
 	private long storage;
 	
+	
 	public InteractiveApplicationTier(int memory, double bandwidth, long storage, double cpuPerWork, double cpuOverhead) {
 		this.memory = memory;
 		this.bandwidth = bandwidth;
@@ -24,9 +25,12 @@ public class InteractiveApplicationTier extends ApplicationTier {
 		this.cpuOverhead = cpuOverhead;
 	}
 	
+	
+	
 	@Override
 	protected InteractiveApplication instantiateApplication(Simulation simulation) {
 		return new InteractiveApplication(simulation, this, memory, bandwidth, storage, cpuPerWork, cpuOverhead);
 	}
+
 
 }

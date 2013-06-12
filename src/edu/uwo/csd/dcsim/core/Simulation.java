@@ -76,6 +76,8 @@ public class Simulation implements SimulationEventListener {
 	
 	private Map<String, Integer> nextIdMap = new HashMap<String, Integer>();
 	
+	private static Logger simLogger = Logger.getLogger(Simulation.class);
+	
 	private boolean complete = false;
 	
 	//Datacentre specific variables
@@ -261,11 +263,12 @@ public class Simulation implements SimulationEventListener {
 			recordingMetrics = true;
 		}
 		
-		logger.info("Starting DCSim");
-		logger.info("Random Seed: " + this.getRandomSeed());
+		simLogger.info("Starting DCSim");
+		simLogger.info("Random Seed: " + this.getRandomSeed());
 		
 		//main event loop
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
+			
 			//peak at next event
 			e = eventQueue.peek();
 						
@@ -336,7 +339,8 @@ public class Simulation implements SimulationEventListener {
 		
 		completeSimulation(duration);
 		
-		logger.info("Completed simulation " + name);
+		simLogger.info("");
+		simLogger.info("Completed simulation " + name);
 		
 		complete = true;
 		

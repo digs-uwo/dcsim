@@ -18,7 +18,7 @@ public class ShutdownHostAction extends ManagementAction {
 	@Override
 	public void execute(Simulation simulation, Object triggeringEntity) {
 		PowerStateEvent event = new PowerStateEvent(host, PowerState.POWER_OFF);
-		
+
 		event.addCallbackListener(new EventCallbackListener() {
 
 			@Override

@@ -94,6 +94,7 @@ public class ConsolidationPolicy extends Policy {
 									target.getHost(), 
 									vm.getId()));
 							
+							//if the host will be empty after this migration, instruct it to shut down
 							if (source.getSandboxStatus().getVms().size() == 0) {
 								shutdownActions.addAction(new ShutdownHostAction(source.getHost()));
 							}

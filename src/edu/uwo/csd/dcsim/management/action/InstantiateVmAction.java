@@ -1,5 +1,7 @@
 package edu.uwo.csd.dcsim.management.action;
 
+import edu.uwo.csd.dcsim.core.Event;
+import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
@@ -30,8 +32,18 @@ public class InstantiateVmAction extends ManagementAction {
 		
 		InstantiateVmEvent instantiateEvent = new InstantiateVmEvent(target.getHostManager(), vmAllocationRequest);
 		if (placementEvent != null) placementEvent.addEventInSequence(instantiateEvent);		
-		simulation.sendEvent(instantiateEvent);
 		
+		//add a callback listener to indicate this action is completed once the instantiation is finished
+		instantiateEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				completeAction();
+			}
+			
+		});
+		
+		simulation.sendEvent(instantiateEvent);
 		
 	}
 

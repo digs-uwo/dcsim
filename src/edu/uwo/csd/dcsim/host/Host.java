@@ -33,6 +33,7 @@ public final class Host implements SimulationEventListener {
 	public static final String HOST_TIME_METRIC = "hostTime";
 	public static final String DC_UTIL_METRIC = "avgDcUtil";
 	public static final String POWER_EFFICIENCY_METRIC = "powerEfficiency";
+	public static final String FAILED_MIG_ALLOC_METRIC = "failedMigrationAllocation";
 	
 	private Simulation simulation;
 	
@@ -61,7 +62,7 @@ public final class Host implements SimulationEventListener {
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	private PowerStateEvent powerOffAfterMigrations = null;
 	
-	private ArrayList<AutonomicManager> autonomicManagers = new ArrayList<AutonomicManager>();
+	private AutonomicManager autonomicManager = null;
 	
 	/*
 	 * Simulation metrics
@@ -220,17 +221,17 @@ public final class Host implements SimulationEventListener {
 	}
 	
 	public void installAutonomicManager(AutonomicManager manager) {
-		autonomicManagers.add(manager);
+		autonomicManager = manager;
 		manager.setContainer(this);
 	}
 	
-	public void uninstallAutonomicManager(AutonomicManager manager) {
-		autonomicManagers.remove(manager);
-		manager.setContainer(null);
+	public void uninstallAutonomicManager() {
+		autonomicManager.setContainer(null);
+		autonomicManager = null;
 	}
 	
-	public ArrayList<AutonomicManager> getAutonomicManagers() {
-		return autonomicManagers;
+	public AutonomicManager getAutonomicManager() {
+		return autonomicManager;
 	}
 	
 	@Override
@@ -239,7 +240,7 @@ public final class Host implements SimulationEventListener {
 		/**if the Host is in the process of powering on, queue any received events. This effectively
 		 * simulates the event sender retrying until the host has powered on, in a simplified fashion.
 		 */
-		
+
 		//determine if we should queue the event (all events except the POWER_ON completion event are queued
 		boolean queueEvent = false; //assume no queuing
 		if (state == Host.HostState.POWERING_ON) {
@@ -300,7 +301,8 @@ public final class Host implements SimulationEventListener {
 			} else {
 				this.migrateIn(migrateEvent);
 			}
-			
+		} else if (e instanceof SubmitVmEvent) {
+			submitVm((SubmitVmEvent)e);
 		} else {
 			//unknown event
 			throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getClass());
@@ -321,7 +323,9 @@ public final class Host implements SimulationEventListener {
 	 * VM Allocation
 	 */
 	
-	public VM submitVM(VMAllocationRequest vmAllocationRequest) {
+	public void submitVm(SubmitVmEvent event) {
+		
+		VMAllocationRequest vmAllocationRequest = event.getVmAllocationRequest();
 		
 		VMAllocation newAllocation;
 		
@@ -342,9 +346,8 @@ public final class Host implements SimulationEventListener {
 		newAllocation.setVm(newVm);
 		newVm.setVMAllocation(newAllocation);
 		
-		simulation.getLogger().debug("Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
-		
-		return newVm;
+		simulation.getLogger().debug(simulation.getSimulationTime() + " Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
+		simulation.getTraceLogger().info("#vs," + newVm.getId() + "," + newVm.getVMAllocation().getHost().getId());
 	}
 
 	
@@ -407,6 +410,7 @@ public final class Host implements SimulationEventListener {
 		VMAllocationRequest vmAllocationRequest = event.getVMAllocationRequest();
 		VM vm = event.getVM();
 		Host source = event.getSource();
+
 		
 		//verify source
 		if (vm.getVMAllocation().getHost() != source)
@@ -420,7 +424,6 @@ public final class Host implements SimulationEventListener {
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
-//			System.out.println("!!!!! ALLOC FAIL - MIG- Host #" + this.getId());
 			throw new RuntimeException("Allocation failed on Host # " + this.getId() + 
 					" for migrating in VM #" + vm.getId(), e);
 
@@ -486,7 +489,7 @@ public final class Host implements SimulationEventListener {
 		VMAllocation vmAllocation = event.getVMAllocation();
 		VM vm = event.getVM();
 		Host source = event.getSource();
-
+		
 		//first, inform the source host the the VM has completed migrating out
 		source.completeMigrationOut(vm);
 		
@@ -540,6 +543,7 @@ public final class Host implements SimulationEventListener {
 	}
 	
 	public void powerOff(PowerStateEvent event) {
+
 		if (state != HostState.OFF && state != HostState.POWERING_OFF) {
 			
 			if (migratingOut.size() != 0) {
@@ -559,6 +563,7 @@ public final class Host implements SimulationEventListener {
 	}
 	
 	public void powerOn(PowerStateEvent event) {
+		
 		if (state != HostState.ON && state != HostState.POWERING_ON) {
 			
 			long delay = 0;
@@ -589,14 +594,13 @@ public final class Host implements SimulationEventListener {
 			state = HostState.POWERING_ON;
 			
 			//inform any managers that the host is turning on
-			for (AutonomicManager manager : autonomicManagers) {
-				manager.onContainerStart();
-			}
+			if (autonomicManager != null)
+				autonomicManager.onContainerStart();
 		}
 	}
 	
 	private void completePowerOn() {
-		
+
 		if (state != HostState.ON) {
 			state = HostState.ON;
 			for (Event e : powerOnEventQueue) {
@@ -609,19 +613,15 @@ public final class Host implements SimulationEventListener {
 	private void completePowerOff() {
 		state = HostState.OFF;
 		
-		//inform any managers that the host is shutting down
-		for (AutonomicManager manager : autonomicManagers) {
-			manager.onContainerStop();
-		}
+		if (autonomicManager != null)
+			autonomicManager.onContainerStop();
 	}
 	
 	private void completeSuspend() {
 		state = HostState.SUSPENDED;
 		
-		//inform any managers that the host is shutting down
-		for (AutonomicManager manager : autonomicManagers) {
-			manager.onContainerStop();
-		}
+		if (autonomicManager != null)
+			autonomicManager.onContainerStop();
 	}
 	
 	public void fail() {
@@ -666,6 +666,15 @@ public final class Host implements SimulationEventListener {
 		
 		//log priv domain
 		privDomainAllocation.getVm().logState();
+		
+//		if (id == 189) {
+//			System.out.println("Host #" + getId() + 
+//					" CPU[" + (int)Math.round(resourceManager.getCpuInUse()) + "/" + resourceManager.getTotalCpu() + "] " +
+//					" BW[" + resourceManager.getAllocatedBandwidth() + "/" + resourceManager.getTotalBandwidth() + "] " +
+//					" MEM[" + resourceManager.getAllocatedMemory() + "/" + resourceManager.getTotalMemory() + "] " +
+//					" STORAGE[" + resourceManager.getAllocatedStorage() + "/" + resourceManager.getTotalStorage() + "] " +
+//					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");
+//		}
 		
 		for (VMAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null) {

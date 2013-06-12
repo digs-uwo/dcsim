@@ -18,12 +18,21 @@ public class MigrationAction extends ManagementAction {
 	private Host source;
 	private Host target;
 	private int vmId;
+	private boolean verifyVm = false; //when true, the action will first verify that the migrating VM hasn't left the DC prior to the action executing
 	
 	public MigrationAction(AutonomicManager sourceHostManager, Host source, Host target, int vmId) {
 		this.sourceHostManager = sourceHostManager;
 		this.source = source;
 		this.target = target;
 		this.vmId = vmId;
+	}
+	
+	public MigrationAction(AutonomicManager sourceHostManager, Host source, Host target, int vmId, boolean verifyVm) {
+		this.sourceHostManager = sourceHostManager;
+		this.source = source;
+		this.target = target;
+		this.vmId = vmId;
+		this.verifyVm = verifyVm;
 	}
 	
 	public AutonomicManager getSourceHostManager() {
@@ -47,6 +56,15 @@ public class MigrationAction extends ManagementAction {
 	 * @param triggeringEntity The SimulationEntity (VMRelocationPolicy, VMConsolidiationPolicy, etc.) that is triggering this migration
 	 */
 	public void execute(Simulation simulation, Object triggeringEntity) {
+		
+		//verify that the VM is still on the host (if it shut down after this action was created, it may not be)
+		if (verifyVm) {
+			if (source.getVMAllocation(vmId) == null) {
+				simulation.getLogger().debug(triggeringEntity.getClass().getName() + " Migrating VM #" + vmId + " from Host #" + source.getId() + " is not longer present on the source host");
+				completeAction();
+				return;
+			}
+		}
 		
 		if (target.getState() != Host.HostState.ON && target.getState() != Host.HostState.POWERING_ON) {
 			simulation.sendEvent(new PowerStateEvent(target, PowerState.POWER_ON));

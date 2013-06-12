@@ -18,10 +18,20 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	private double totalWork = 0;
 	private double completedWork = 0;
 	private WorkProducer completedWorkSource; //final work producer that completes the work produced by this workload
+	protected boolean enabled = true; //has this workload started producing work?
 
 	public Workload(Simulation simulation) {
 		
 		this.simulation = simulation;
+		
+		//schedule initial update event
+		simulation.sendEvent(new DaemonRunEvent(this));
+	}
+	
+	public Workload(Simulation simulation, boolean enabled) {
+		
+		this.simulation = simulation;
+		this.enabled = enabled;
 		
 		//schedule initial update event
 		simulation.sendEvent(new DaemonRunEvent(this));
@@ -48,15 +58,17 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 	 * Update metric values
 	 */
 	public void updateMetrics() {
-		/*
-		 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
-		 * more than once to the total (thus incorrectly reducing the SLA violation value)
-		 */
-		double work = getCurrentWorkLevel() * simulation.getElapsedSeconds();
-		
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(work);
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(work);
-		SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(work);
+		if (enabled) {
+			/*
+			 * The denominator for SLA violation metrics is added at the Workload to prevent multiple tiers from adding the same incoming work
+			 * more than once to the total (thus incorrectly reducing the SLA violation value)
+			 */
+			double work = getCurrentWorkLevel() * simulation.getElapsedSeconds();
+
+			SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_METRIC).addWork(work);
+			SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_UNDERPROVISION_METRIC).addWork(work);
+			SlaViolationMetric.getMetric(simulation, Application.SLA_VIOLATION_MIGRATION_OVERHEAD_METRIC).addWork(work);
+		}
 	}
 	
 	/**
@@ -84,11 +96,20 @@ public abstract class Workload implements SimulationEventListener, WorkProducer 
 
 	@Override
 	public double getWorkOutputLevel() {
+		if (!enabled) return 0;
 		return getCurrentWorkLevel();
 	}
 	
 	public void setCompletedWorkSource(WorkProducer completedWorkSource) {
 		this.completedWorkSource = completedWorkSource;
+	}
+	
+	public boolean isEnabled() {
+		return enabled;
+	}
+	
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 	
 	@Override

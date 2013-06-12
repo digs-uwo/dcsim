@@ -1,8 +1,10 @@
 package edu.uwo.csd.dcsim.management;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import edu.uwo.csd.dcsim.host.*;
+import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 /**
  * Compares host status by a (non-empty) series of attributes or factors. The 
@@ -99,6 +101,38 @@ public enum HostDataComparator implements Comparator<HostData> {
 				o2State = 0; //ranks off and transition states lowest
 			
 			return o1State - o2State;
+		}
+	},
+	VOLUME_ALLOC {
+		public int compare(HostData o1, HostData o2) {
+			
+			class Volume {
+				public double calculate(HostData host) {
+					ArrayList<VMAllocation> vms = new ArrayList<VMAllocation>(host.getHost().getVMAllocations());
+					vms.add(host.getHost().getPrivDomainAllocation());
+					
+					int cpu = 0;
+					int mem = 0;
+					double bw = 0;
+					for (VMAllocation vm : vms) {
+						// If the VMAllocation has an associated VM, record its resource allocation.
+						if (vm.getVm() != null)
+							cpu += vm.getCpu();
+							mem += vm.getMemory();
+							bw += vm.getBandwidth();
+					}
+					
+					Resources res = host.getHostDescription().getResourceCapacity();
+					return (cpu * mem * bw) / (res.getCpu() * res.getMemory() * res.getBandwidth());
+				}
+			}
+			
+			double compare = new Volume().calculate(o1) - new Volume().calculate(o2);
+			if (compare < 0)
+				return -1;
+			else if (compare > 0)
+				return 1;
+			return 0;
 		}
 	};
 	

@@ -26,6 +26,7 @@ public class ServiceBuilder implements ObjectBuilder<Service> {
 	 */
 	public ServiceBuilder workload(Workload value) {
 		this.workload = value;
+		value.setEnabled(false);
 		return this;
 	}
 	
@@ -66,8 +67,10 @@ public class ServiceBuilder implements ObjectBuilder<Service> {
 		//set the workload to get completed work from the last tier
 		workload.setCompletedWorkSource(tiers.get(tiers.size() - 1).getApplicationTier());
 		
-		for (Service.ServiceTier tier : tiers)
+		for (Service.ServiceTier tier : tiers) {
 			service.addServiceTier(tier);
+			tier.getApplicationTier().setService(service);
+		}
 		
 		
 		return service;

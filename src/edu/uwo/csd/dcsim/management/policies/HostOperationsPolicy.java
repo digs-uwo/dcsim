@@ -28,8 +28,9 @@ public class HostOperationsPolicy extends Policy {
 			host.cancelPendingShutdown(); 
 		}
 		
-		event.setVM(host.submitVM(event.getVMAllocationRequest()));
-		
+		SubmitVmEvent submitEvent = new SubmitVmEvent(host, event.getVMAllocationRequest());
+		event.addEventInSequence(submitEvent);		
+		simulation.sendEvent(submitEvent);
 	}
 	
 	public void execute(MigrationEvent event) {

@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.application;
 import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim.application.loadbalancer.LoadBalancer;
+import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.core.Simulation;
 
 /**
@@ -19,6 +20,7 @@ public abstract class ApplicationTier implements WorkProducer, ApplicationFactor
 	private WorkProducer workSource;
 	private LoadBalancer loadBalancer; //handles balancing load between Applications in the tier
 	private ArrayList<Application> applications = new ArrayList<Application>(); //the set of applications in the tier
+	private Service service;
 
 	/**
 	 * Create an Application instance for this tier
@@ -35,6 +37,15 @@ public abstract class ApplicationTier implements WorkProducer, ApplicationFactor
 	 */
 	public void startApplication(Application application) {
 		if (!applications.contains(application)) {
+			
+			//ensure that the workload is enabled
+			if (service != null) {
+				Workload workload = service.getWorkload();
+				if (workload != null) {
+					workload.setEnabled(true);
+				}
+			}
+			
 			applications.add(application);
 		} else {
 			throw new RuntimeException("Attempted to start an application that was already started");
@@ -128,6 +139,14 @@ public abstract class ApplicationTier implements WorkProducer, ApplicationFactor
 		}
 		
 		return output;
+	}
+	
+	public void setService(Service service) {
+		this.service = service;
+	}
+	
+	public Service getService() {
+		return service;
 	}
 	
 }

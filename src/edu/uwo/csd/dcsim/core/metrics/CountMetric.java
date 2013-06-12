@@ -16,6 +16,11 @@ public class CountMetric extends Metric {
 		++current;
 	}
 	
+	public void add(double value) {
+		total += value;
+		current += value;
+	}
+	
 	@Override
 	public double getValue() {
 		return total;

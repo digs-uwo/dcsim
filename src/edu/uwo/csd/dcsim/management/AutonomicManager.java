@@ -67,6 +67,7 @@ public class AutonomicManager implements SimulationEventListener {
 			//ensure that this AutonomicManager has the correct capabilities for this policy
 			if (policy.checkCapabilities(this)) {
 				policies.add(policy);
+				policy.onInstall();
 			} else {
 				//capability check failed, treat as a programming error and kill the simulation
 				throw new RuntimeException("Policy capability check failed for " + policy.getClass().toString());

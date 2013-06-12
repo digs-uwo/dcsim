@@ -16,7 +16,7 @@ import edu.uwo.csd.dcsim.host.Resources;
  */
 public class InteractiveApplication extends Application {
 
-	private ApplicationTier applicationTier; //the tier which this Application belongs to
+	private InteractiveApplicationTier applicationTier; //the tier which this Application belongs to
 	
 	private double workOutputLevel =  0;
 	
@@ -46,7 +46,7 @@ public class InteractiveApplication extends Application {
 	 * @param bwPerWork
 	 * @param cpuOverhead The amount of CPU required by the application even if there is no incoming work.
 	 */
-	public InteractiveApplication(Simulation simulation, ApplicationTier applicationTier, int memory, double bandwidth, long storage, double cpuPerWork, double cpuOverhead) {
+	public InteractiveApplication(Simulation simulation, InteractiveApplicationTier applicationTier, int memory, double bandwidth, long storage, double cpuPerWork, double cpuOverhead) {
 		super(simulation);
 		
 		this.memory = memory;
@@ -144,8 +144,8 @@ public class InteractiveApplication extends Application {
 			//record SLA violation duration metric
 			SlaViolationDurationMetric.getMetric(simulation, Application.UNDERPROVISION_DURATION_METRIC).addSlaViolationTime(simulation.getElapsedTime());
 			
-			//record SLA violation average severity metric
-			AvgSlaSeverityMetric.getMetric(simulation, Application.UNDERPROVISION_AVG_SEVERITY_METRIC).addValue(slaUnderprovisionRate / workLevel);
+			//record SLA violation average severity metric TODO not working properly
+//			AvgSlaSeverityMetric.getMetric(simulation, Application.UNDERPROVISION_AVG_SEVERITY_METRIC).addValue(slaUnderprovisionRate / workLevel);
 		}
 	}
 
