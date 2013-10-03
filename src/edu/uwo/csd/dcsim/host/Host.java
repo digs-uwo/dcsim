@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import edu.uwo.csd.dcsim.application.*;
+import edu.uwo.csd.dcsim.common.HashCodeUtil;
 import edu.uwo.csd.dcsim.common.ObjectBuilder;
 import edu.uwo.csd.dcsim.common.ObjectFactory;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.events.*;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
 import edu.uwo.csd.dcsim.host.power.*;
@@ -25,16 +25,6 @@ import edu.uwo.csd.dcsim.vm.*;
  */
 public final class Host implements SimulationEventListener {
 	
-	public static final String ACTIVE_HOST_METRIC = "activeHosts";
-	public static final String MIN_ACTIVE_METRIC = "minActiveHosts";
-	public static final String MAX_ACTIVE_METRIC = "maxActiveHosts";
-	public static final String POWER_CONSUMPTION_METRIC = "powerConsumption";
-	public static final String AVERAGE_UTILIZATION_METRIC = "avgHostUtil";
-	public static final String HOST_TIME_METRIC = "hostTime";
-	public static final String DC_UTIL_METRIC = "avgDcUtil";
-	public static final String POWER_EFFICIENCY_METRIC = "powerEfficiency";
-	public static final String FAILED_MIG_ALLOC_METRIC = "failedMigrationAllocation";
-	
 	private Simulation simulation;
 	
 	private int id;
@@ -43,26 +33,32 @@ public final class Host implements SimulationEventListener {
 	private int coreCapacity;
 	private int memory;	//in MB
 	private int bandwidth; //in KB
-	private long storage; //in MB
+	private int storage; //in MB
 	
 	private NetworkCard dataNetworkCard;
 	private NetworkCard mgmtNetworkCard;
+	private Rack rack;
 	
 	private ResourceManager resourceManager;
 	private ResourceScheduler resourceScheduler;
 	private HostPowerModel powerModel;
 	
-	private ArrayList<VMAllocation> vmAllocations = new ArrayList<VMAllocation>();
-	private VMAllocation privDomainAllocation;
-	private ArrayList<VMAllocation> migratingIn = new ArrayList<VMAllocation>();
-	private ArrayList<VMAllocation> migratingOut = new ArrayList<VMAllocation>();
-	private HashSet<VMAllocation> pendingOutgoingMigrations = new HashSet<VMAllocation>();
+	private VmmApplication vmmApplication;
+	
+	private ArrayList<VmAllocation> vmAllocations = new ArrayList<VmAllocation>();
+	private VmAllocation privDomainAllocation;
+	private ArrayList<VmAllocation> migratingIn = new ArrayList<VmAllocation>();
+	private ArrayList<VmAllocation> migratingOut = new ArrayList<VmAllocation>();
+	private HashSet<VmAllocation> pendingOutgoingMigrations = new HashSet<VmAllocation>();
+	private ArrayList<VmAllocation> startingVm = new ArrayList<VmAllocation>();
 	
 	public enum HostState {ON, SUSPENDED, OFF, POWERING_ON, SUSPENDING, POWERING_OFF, FAILED;}
 	private ArrayList<Event> powerOnEventQueue = new ArrayList<Event>();
 	private PowerStateEvent powerOffAfterMigrations = null;
 	
 	private AutonomicManager autonomicManager = null;
+	
+	private final int hashCode;
 	
 	/*
 	 * Simulation metrics
@@ -101,16 +97,17 @@ public final class Host implements SimulationEventListener {
 		 * Create and allocate privileged domain
 		 */
 		
-		//description allows privileged domain to use any or all of the resources of the host
-		VMDescription privDomainDescription = new VMDescription(getCoreCount(), getCoreCapacity(), builder.privMemory, builder.privBandwidth, builder.privStorage, builder.vmmApplicationFactory);
+		vmmApplication = new VmmApplication(simulation, this, builder.privCpu, builder.privMemory, builder.privBandwidth, builder.privStorage);
 		
+		VmDescription privDomainDescription = new VmDescription(vmmApplication.getVmmTask());
+
 		//create the allocation
-		privDomainAllocation = new VMAllocation(privDomainDescription, this);
+		privDomainAllocation = new VmAllocation(privDomainDescription, this);
 		
 		//request allocations from resource managers. Each manager determines how much resource to allocate
 		resourceManager.allocatePrivDomain(privDomainAllocation, builder.privCpu, builder.privMemory, builder.privBandwidth, builder.privStorage);
 
-		PrivDomainVM privVM = new PrivDomainVM(simulation, privDomainDescription, privDomainDescription.getApplicationFactory().createApplication(simulation));
+		PrivDomainVm privVM = new PrivDomainVm(simulation, privDomainDescription, vmmApplication.getVmmTaskInstance());
 		privDomainAllocation.attachVm(privVM);
 
 		//set default state
@@ -126,6 +123,9 @@ public final class Host implements SimulationEventListener {
 				this.getStorage() + "," + 
 				this.getPowerModel().getPowerConsumption(0) + "," +
 				this.getPowerModel().getPowerConsumption(1));
+		
+		//init hashCode
+		hashCode = generateHashCode();
 		
 	}
 	
@@ -144,19 +144,17 @@ public final class Host implements SimulationEventListener {
 		private int coreCapacity = -1;
 		private int memory = -1;
 		private int bandwidth = -1;
-		private long storage = -1;
+		private int storage = -1;
 		private int privCpu = 0;
 		private int privMemory = 0;
 		private int privBandwidth = 0;
-		private long privStorage = 0;
+		private int privStorage = 0;
 		
 		private ObjectFactory<? extends ResourceManager> resourceManagerFactory = null;
 		private ObjectFactory<? extends ResourceScheduler> resourceSchedulerFactory = null;
 		
 		private HostPowerModel powerModel = null;
-		
-		private ApplicationFactory vmmApplicationFactory = new VmmApplicationFactory(); //default value
-		
+				
 		public Builder(Simulation simulation) {
 			if (simulation == null)
 				throw new NullPointerException();
@@ -173,7 +171,7 @@ public final class Host implements SimulationEventListener {
 		
 		public Builder bandwidth(int val) {this.bandwidth = val; return this;}
 		
-		public Builder storage(long val) {this.storage = val; return this;}
+		public Builder storage(int val) {this.storage = val; return this;}
 				
 		public Builder privCpu(int val) {this.privCpu = val; return this;}
 		
@@ -181,7 +179,7 @@ public final class Host implements SimulationEventListener {
 		
 		public Builder privBandwidth(int val) {this.privBandwidth = val; return this;}
 		
-		public Builder privStorage(long val) {this.privStorage = val; return this;}
+		public Builder privStorage(int val) {this.privStorage = val; return this;}
 		
 		public Builder resourceManagerFactory(ObjectFactory<? extends ResourceManager> resourceManagerFactory) {
 			this.resourceManagerFactory = resourceManagerFactory;
@@ -195,11 +193,6 @@ public final class Host implements SimulationEventListener {
 		
 		public Builder powerModel(HostPowerModel powerModel) {
 			this.powerModel = powerModel;
-			return this;
-		}
-		
-		public Builder vmmApplicationFactory(ApplicationFactory vmmApplicationFactory) {
-			this.vmmApplicationFactory = vmmApplicationFactory;
 			return this;
 		}
 		
@@ -260,6 +253,9 @@ public final class Host implements SimulationEventListener {
 		if (queueEvent) {
 			powerOnEventQueue.add(e);
 			
+			//prevent event from triggering post event and callback methods
+			e.setBlockPostEvent(true);
+			
 			//if the queued event is for migration, inform the source of the pending migration
 			if (e instanceof MigrateVmEvent) {
 				MigrateVmEvent migrateEvent = (MigrateVmEvent)e;			
@@ -303,6 +299,8 @@ public final class Host implements SimulationEventListener {
 			}
 		} else if (e instanceof SubmitVmEvent) {
 			submitVm((SubmitVmEvent)e);
+		} else if (e instanceof VmStartEvent) {
+			completeVmStart((VmStartEvent)e);
 		} else {
 			//unknown event
 			throw new RuntimeException("Host #" + getId() + " received unknown event type "+ e.getClass());
@@ -325,16 +323,60 @@ public final class Host implements SimulationEventListener {
 	
 	public void submitVm(SubmitVmEvent event) {
 		
-		VMAllocationRequest vmAllocationRequest = event.getVmAllocationRequest();
+		VmAllocationRequest vmAllocationRequest = event.getVmAllocationRequest();
 		
-		VMAllocation newAllocation;
+		VmAllocation newAllocation;
 		
 		//create new allocation & allocate it resources
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
 			throw new RuntimeException("Allocation failed on Host #" + this.getId() + 
-					" VM submission", e);
+					" VM submission" , e);
+			
+		}
+		
+		//add the allocation to the Host list of allocations
+		vmAllocations.add(newAllocation);
+		startingVm.add(newAllocation);
+		
+		long vmStartDelay = Long.parseLong(Simulation.getProperty("vmStartTime"));
+		
+		VmStartEvent vmStartEvent = new VmStartEvent(this, newAllocation);
+		event.addEventInSequence(vmStartEvent); //defer completion of the original event until the VmStartEvent is complete
+		simulation.sendEvent(vmStartEvent, simulation.getSimulationTime() + vmStartDelay);
+		
+		simulation.getLogger().debug("Host #" + this.getId() + " created new VM allocation");
+	}
+
+	private void completeVmStart(VmStartEvent event) {
+				
+		VmAllocation newAllocation = event.getVmAllocation();
+		
+		//create a new VM in the allocation
+		Vm newVm = newAllocation.getVMDescription().createVM(simulation);
+		newAllocation.setVm(newVm);
+		newVm.setVMAllocation(newAllocation);
+		startingVm.remove(newAllocation);
+		
+		simulation.getLogger().debug("Host #" + this.getId() + " created & started VM #" + newAllocation.getVm().getId());
+		simulation.getTraceLogger().info("#vs," + newVm.getId() + "," + newVm.getVMAllocation().getHost().getId());
+	}
+	
+	/**
+	 * Helper function to facilitate testing by allowing VMs to be directly placed onto specific hosts. Should not be called during normal usage. Does not include VM start delay.
+	 * @param vmAllocationRequest
+	 */
+	public void submitVm(VmAllocationRequest vmAllocationRequest) {
+		
+		VmAllocation newAllocation;
+		
+		//create new allocation & allocate it resources
+		try {
+			newAllocation = allocate(vmAllocationRequest);
+		} catch (AllocationFailedException e) {
+			throw new RuntimeException("Allocation failed on Host #" + this.getId() + 
+					" VM submission" , e);
 			
 		}
 		
@@ -342,29 +384,28 @@ public final class Host implements SimulationEventListener {
 		vmAllocations.add(newAllocation);
 		
 		//create a new VM in the allocation
-		VM newVm = newAllocation.getVMDescription().createVM(simulation);
+		Vm newVm = newAllocation.getVMDescription().createVM(simulation);
 		newAllocation.setVm(newVm);
 		newVm.setVMAllocation(newAllocation);
 		
 		simulation.getLogger().debug(simulation.getSimulationTime() + " Host #" + this.getId() + " allocated & created VM #" + newAllocation.getVm().getId());
 		simulation.getTraceLogger().info("#vs," + newVm.getId() + "," + newVm.getVMAllocation().getHost().getId());
 	}
-
 	
-	public boolean isCapable(VMDescription vmDescription) {
+	public boolean isCapable(VmDescription vmDescription) {
 		return resourceManager.isCapable(vmDescription);
 	}
 	
-	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
+	public boolean hasCapacity(VmAllocationRequest vmAllocationRequest) {
 		return resourceManager.hasCapacity(vmAllocationRequest);
 	}
 	
-	public boolean hasCapacity(ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public boolean hasCapacity(ArrayList<VmAllocationRequest> vmAllocationRequests) {
 		return resourceManager.hasCapacity(vmAllocationRequests);
 	}
 	
-	public VMAllocation allocate(VMAllocationRequest vmAllocationRequest) throws AllocationFailedException {
-		VMAllocation vmAllocation = new VMAllocation(vmAllocationRequest.getVMDescription(), this);
+	public VmAllocation allocate(VmAllocationRequest vmAllocationRequest) throws AllocationFailedException {
+		VmAllocation vmAllocation = new VmAllocation(vmAllocationRequest.getVMDescription(), this);
 		
 		//allocate resources
 		if (!resourceManager.allocateResource(vmAllocationRequest, vmAllocation))
@@ -373,7 +414,7 @@ public final class Host implements SimulationEventListener {
 		return vmAllocation;
 	}
 	
-	public void deallocate(VMAllocation vmAllocation) {
+	public void deallocate(VmAllocation vmAllocation) {
 		resourceManager.deallocateResource(vmAllocation);
 		
 		vmAllocations.remove(vmAllocation);
@@ -383,7 +424,7 @@ public final class Host implements SimulationEventListener {
 	 * MIGRATION
 	 */
 	
-	private void markVmForMigration(VM vm) {
+	private void markVmForMigration(Vm vm) {
 		if (!vmAllocations.contains(vm.getVMAllocation()))
 				throw new IllegalStateException("Attempted to mark VM #" + vm.getId() +" for migration from Host #" + getId() + 
 						" but it resides on Host #" + vm.getVMAllocation().getHost().getId());
@@ -391,11 +432,11 @@ public final class Host implements SimulationEventListener {
 		pendingOutgoingMigrations.add(vm.getVMAllocation());
 	}
 	
-	public boolean isMigrating(VM vm) {
+	public boolean isMigrating(Vm vm) {
 		return migratingOut.contains(vm.getVMAllocation());
 	}
 	
-	public boolean isPendingMigration(VM vm) {
+	public boolean isPendingMigration(Vm vm) {
 		return pendingOutgoingMigrations.contains(vm.getVMAllocation());
 	}
 	
@@ -407,8 +448,8 @@ public final class Host implements SimulationEventListener {
 	 */
 	private void migrateIn(MigrateVmEvent event) {
 
-		VMAllocationRequest vmAllocationRequest = event.getVMAllocationRequest();
-		VM vm = event.getVM();
+		VmAllocationRequest vmAllocationRequest = event.getVMAllocationRequest();
+		Vm vm = event.getVM();
 		Host source = event.getSource();
 
 		
@@ -420,7 +461,7 @@ public final class Host implements SimulationEventListener {
 		
 		//create new allocation & allocate it resources
 		
-		VMAllocation newAllocation;
+		VmAllocation newAllocation;
 		try {
 			newAllocation = allocate(vmAllocationRequest);
 		} catch (AllocationFailedException e) {
@@ -434,10 +475,6 @@ public final class Host implements SimulationEventListener {
 		
 		//add the allocation to migratingIn list
 		migratingIn.add(newAllocation);
-		
-		//add to VMM
-		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
-		vmm.addMigratingVm(vm);	
 		
 		//inform the source host that the VM is migrating out
 		source.migrateOut(vm);
@@ -457,9 +494,9 @@ public final class Host implements SimulationEventListener {
 		
 	}
 	
-	private void migrateOut(VM vm) {
+	private void migrateOut(Vm vm) {
 		//get the allocation for this vm
-		VMAllocation vmAllocation = vm.getVMAllocation();
+		VmAllocation vmAllocation = vm.getVMAllocation();
 		
 		if (migratingOut.contains(vmAllocation)) {
 			System.out.println("?");
@@ -470,10 +507,6 @@ public final class Host implements SimulationEventListener {
 		
 		if (isPendingMigration(vm))
 			pendingOutgoingMigrations.remove(vm);
-		
-		//add to VMM
-		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
-		vmm.addMigratingVm(vm);
 		
 		simulation.getLogger().debug("Host #" + this.getId() + " migrating out VM #" + vm.getId());
 	}
@@ -486,8 +519,8 @@ public final class Host implements SimulationEventListener {
 	 */
 	private void completeMigrationIn(MigrateVmEvent event) {
 
-		VMAllocation vmAllocation = event.getVMAllocation();
-		VM vm = event.getVM();
+		VmAllocation vmAllocation = event.getVMAllocation();
+		Vm vm = event.getVM();
 		Host source = event.getSource();
 		
 		//first, inform the source host the the VM has completed migrating out
@@ -495,10 +528,6 @@ public final class Host implements SimulationEventListener {
 		
 		//remove from migratingIn list
 		migratingIn.remove(vmAllocation);
-		
-		//remove from VMM
-		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
-		vmm.removeMigratingVm(vm);
 		
 		//attach VM to allocation
 		vmAllocation.setVm(vm);
@@ -508,14 +537,10 @@ public final class Host implements SimulationEventListener {
 		
 	}
 	
-	private void completeMigrationOut(VM vm) {
+	private void completeMigrationOut(Vm vm) {
 		//get the allocation for this vm
-		VMAllocation vmAllocation = vm.getVMAllocation();
+		VmAllocation vmAllocation = vm.getVMAllocation();
 		migratingOut.remove(vmAllocation);
-		
-		//add to VMM
-		VmmApplication vmm = (VmmApplication)privDomainAllocation.getVm().getApplication();
-		vmm.removeMigratingVm(vm);
 		
 		//deallocate the VM
 		deallocate(vmAllocation);
@@ -586,7 +611,7 @@ public final class Host implements SimulationEventListener {
 					delay += Long.parseLong(Simulation.getProperty("hostPowerOnFromSuspendDelay"));
 					break;
 				default:
-					break;
+					throw new RuntimeException("Invalid Host State encountered - " + state);
 			}
 			
 			PowerStateEvent completeEvent = new PowerStateEvent(this, PowerState.POWER_ON, true);
@@ -606,7 +631,10 @@ public final class Host implements SimulationEventListener {
 		if (state != HostState.ON) {
 			state = HostState.ON;
 			for (Event e : powerOnEventQueue) {
+				e.setBlockPostEvent(false);
 				handleEvent(e);
+				e.triggerPostExecute();
+				e.triggerCallback();
 			}
 			powerOnEventQueue.clear();
 		}
@@ -678,7 +706,7 @@ public final class Host implements SimulationEventListener {
 //					"Power[" + Utility.roundDouble(this.getCurrentPowerConsumption(), 2) + "W]");
 //		}
 		
-		for (VMAllocation vmAllocation : vmAllocations) {
+		for (VmAllocation vmAllocation : vmAllocations) {
 			if (vmAllocation.getVm() != null) {
 				vmAllocation.getVm().logState();
 			} else {
@@ -686,38 +714,6 @@ public final class Host implements SimulationEventListener {
 			}
 		}
 		
-	}
-	
-	public void updateMetrics() {
-		
-		if (getResourceManager().getCpuUtilization() > 1)
-			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getResourceManager().getCpuUtilization() * 100));
-	
-		if (getResourceManager().getCpuUtilization() < 0)
-			throw new IllegalStateException("Host #" + getId() + " reporting CPU utilization of " + (getResourceManager().getCpuUtilization() * 100));	
-		
-		
-		if (state == HostState.ON) {
-			
-			HostAvgCpuUtilMetric.getMetric(simulation, AVERAGE_UTILIZATION_METRIC).addHostUtilization(getResourceManager().getCpuUtilization());
-			ActiveHostMetric.getMetric(simulation, ACTIVE_HOST_METRIC).incrementHostCount();
-			MaxMetric.getMetric(simulation, MAX_ACTIVE_METRIC).incrementCount();
-			MinMetric.getMetric(simulation, MIN_ACTIVE_METRIC).incrementCount();
-			HostTimeMetric.getSimulationMetric(simulation, HOST_TIME_METRIC).addValue(simulation.getElapsedSeconds());
-			
-		}
-		
-		//Power metrics
-		PowerMetric.getMetric(simulation, POWER_CONSUMPTION_METRIC).addHostPowerConsumption(getCurrentPowerConsumption());
-		PowerEfficiencyMetric.getMetric(simulation, POWER_EFFICIENCY_METRIC).addHostInfo(getResourceManager().getCpuInUse(), getCurrentPowerConsumption());
-		
-		//DataCentre utilization metric
-		DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC).addHostUse(getResourceManager().getCpuInUse(), getTotalCpu());
-		
-		for (VMAllocation vmAllocation : vmAllocations) {
-			if (vmAllocation.getVm() != null)
-				vmAllocation.getVm().updateMetrics();
-		}
 	}
 	
 	/**
@@ -745,7 +741,7 @@ public final class Host implements SimulationEventListener {
 	
 	public int getBandwidth() { return bandwidth; }
 	
-	public long getStorage() {	return storage; }
+	public int getStorage() {	return storage; }
 	
 	public HostState getState() { return state; }
 	
@@ -758,6 +754,14 @@ public final class Host implements SimulationEventListener {
 	public NetworkCard getMgmtNetworkCard() { return mgmtNetworkCard; }
 	
 	public void setMgmtNetworkCard(NetworkCard mgmtNetworkCard) { this.mgmtNetworkCard = mgmtNetworkCard; }
+	
+	public Rack getRack() {
+		return rack;
+	}
+	
+	public void setRack(Rack rack) {
+		this.rack = rack;
+	}
 		
 	public ResourceManager getResourceManager() {	return resourceManager;	 }
 	
@@ -773,10 +777,10 @@ public final class Host implements SimulationEventListener {
 		resourceScheduler.setHost(this);
 	}
 	
-	public ArrayList<VMAllocation> getVMAllocations() { return vmAllocations;	}
+	public ArrayList<VmAllocation> getVMAllocations() { return vmAllocations;	}
 	
-	public VMAllocation getVMAllocation(int vmId) {
-		for (VMAllocation vmAlloc : vmAllocations) {
+	public VmAllocation getVMAllocation(int vmId) {
+		for (VmAllocation vmAlloc : vmAllocations) {
 			if (vmAlloc.getVm() != null && vmAlloc.getVm().getId() == vmId) {
 				return vmAlloc;
 			}
@@ -784,11 +788,13 @@ public final class Host implements SimulationEventListener {
 		return null;
 	}
 	
-	public VMAllocation getPrivDomainAllocation() { 	return privDomainAllocation; }
+	public VmAllocation getPrivDomainAllocation() { 	return privDomainAllocation; }
 	
-	public ArrayList<VMAllocation> getMigratingIn() { return migratingIn;	}
+	public ArrayList<VmAllocation> getMigratingIn() { return migratingIn;	}
 	
-	public ArrayList<VMAllocation> getMigratingOut() {	return migratingOut; }
+	public ArrayList<VmAllocation> getMigratingOut() {	return migratingOut; }
+	
+	public ArrayList<VmAllocation> getStartingVms() { return startingVm; }
 	
 	public HostPowerModel getPowerModel() { 	return powerModel;	}
 	
@@ -804,4 +810,20 @@ public final class Host implements SimulationEventListener {
 	
 	public boolean isShutdownPending() {	return powerOffAfterMigrations != null; }
 
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+	
+	private int generateHashCode() {
+		int result = HashCodeUtil.SEED;
+		result = HashCodeUtil.hash(result, id);
+		result = HashCodeUtil.hash(result, nCores);
+		result = HashCodeUtil.hash(result, coreCapacity);
+		result = HashCodeUtil.hash(result, memory);
+		result = HashCodeUtil.hash(result, bandwidth);
+		result = HashCodeUtil.hash(result, storage);
+		return result;
+	}
+	
 }

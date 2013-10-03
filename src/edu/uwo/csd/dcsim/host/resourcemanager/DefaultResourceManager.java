@@ -2,8 +2,8 @@ package edu.uwo.csd.dcsim.host.resourcemanager;
 
 import java.util.Collection;
 
-import edu.uwo.csd.dcsim.vm.VMAllocation;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VmAllocation;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 /**
  * The DefaultResourceManager implements a resource manager that oversubscribes CPU, and uses fixed, non-oversubscribed allocations for all other resources.
@@ -14,8 +14,8 @@ import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
 public class DefaultResourceManager extends ResourceManager {
 
 	@Override
-	public boolean hasCapacity(int cpu, int memory, int bandwidth, long storage) {
-		
+	public boolean hasCapacity(int cpu, int memory, int bandwidth, int storage) {
+
 		//note that we don't check CPU, as we are oversubscribing it
 		return 	(memory <= getAvailableMemory()) &&
 				(bandwidth <= getAvailableBandwidth()) &&
@@ -24,18 +24,18 @@ public class DefaultResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public boolean hasCapacity(VMAllocationRequest vmAllocationRequest) {
+	public boolean hasCapacity(VmAllocationRequest vmAllocationRequest) {
 		return hasCapacity(vmAllocationRequest.getCpu(), vmAllocationRequest.getMemory(), vmAllocationRequest.getBandwidth(), vmAllocationRequest.getStorage());
 	}
 
 	@Override
-	public boolean hasCapacity(Collection<VMAllocationRequest> vmAllocationRequests) {
+	public boolean hasCapacity(Collection<VmAllocationRequest> vmAllocationRequests) {
 		int totalCpu = 0;
 		int totalMemory = 0;
 		int totalBandwidth = 0;
 		int totalStorage = 0;
 		
-		for (VMAllocationRequest allocationRequest : vmAllocationRequests) {
+		for (VmAllocationRequest allocationRequest : vmAllocationRequests) {
 			totalCpu += allocationRequest.getCpu();
 			totalMemory += allocationRequest.getMemory();
 			totalBandwidth += allocationRequest.getBandwidth();
@@ -46,8 +46,8 @@ public class DefaultResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public boolean allocateResource(VMAllocationRequest vmAllocationRequest,
-			VMAllocation vmAllocation) {
+	public boolean allocateResource(VmAllocationRequest vmAllocationRequest,
+			VmAllocation vmAllocation) {
 		
 		if (hasCapacity(vmAllocationRequest)) {
 			vmAllocation.setCpu(vmAllocationRequest.getCpu());
@@ -62,7 +62,7 @@ public class DefaultResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public void deallocateResource(VMAllocation vmAllocation) {
+	public void deallocateResource(VmAllocation vmAllocation) {
 		vmAllocation.setCpu(0);
 		vmAllocation.setMemory(0);
 		vmAllocation.setBandwidth(0);
@@ -70,8 +70,8 @@ public class DefaultResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public void allocatePrivDomain(VMAllocation privDomainAllocation,
-			int cpu, int memory, int bandwidth, long storage) {
+	public void allocatePrivDomain(VmAllocation privDomainAllocation,
+			int cpu, int memory, int bandwidth, int storage) {
 		
 		if (hasCapacity(cpu, memory, bandwidth, storage)) {
 			privDomainAllocation.setCpu(cpu);

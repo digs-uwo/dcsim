@@ -2,6 +2,7 @@ package edu.uwo.csd.dcsim;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.*;
 
 import org.apache.log4j.Logger;
@@ -39,15 +40,15 @@ public class SimulationExecutor {
 	 * 
 	 * @return
 	 */
-	public Collection<SimulationTask> execute() {
+	public List<SimulationTask> execute() {
 		return execute(Executors.newCachedThreadPool());
 	}
 	
-	public Collection<SimulationTask> execute(int nThreads) {
+	public List<SimulationTask> execute(int nThreads) {
 		return execute(Executors.newFixedThreadPool(nThreads));
 	}
 	
-	private Collection<SimulationTask> execute(ExecutorService executorService) {
+	private List<SimulationTask> execute(ExecutorService executorService) {
 		
 		long startTime = System.currentTimeMillis();
 		

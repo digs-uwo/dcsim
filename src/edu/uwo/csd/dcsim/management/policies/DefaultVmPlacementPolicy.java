@@ -9,7 +9,7 @@ import edu.uwo.csd.dcsim.management.action.InstantiateVmAction;
 import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 /**
  * DefaultVmPlacementPolicy takes a very basic approach to placement. It simply iterates through the set of hosts, in
@@ -36,14 +36,14 @@ public class DefaultVmPlacementPolicy extends Policy {
 				hosts.add(host);
 			}
 		}
-				
+		
 		//reset the sandbox host status to the current host status
 		for (HostData host : hosts) {
 			host.resetSandboxStatusToCurrent();
 		}
 		
 		//iterate though each VM to place
-		for (VMAllocationRequest vmAllocationRequest : event.getVMAllocationRequests()) {
+		for (VmAllocationRequest vmAllocationRequest : event.getVMAllocationRequests()) {
 			HostData allocatedHost = null;
 			
 			//simply iterate through the list of hosts until we find one that has enough capacity for the VM
@@ -61,7 +61,7 @@ public class DefaultVmPlacementPolicy extends Policy {
 						target.getHostDescription())) {	//target has capability and capacity to host VM
 					
 					allocatedHost = target;
-					
+
 					//add a dummy placeholder VM to keep track of placed VM resource requirements
 					target.getSandboxStatus().instantiateVm(
 							new VmStatus(vmAllocationRequest.getVMDescription().getCores(),

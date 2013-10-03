@@ -6,15 +6,13 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import edu.uwo.csd.dcsim.DataCentre;
-import edu.uwo.csd.dcsim.VmExecutionOrderComparator;
-import edu.uwo.csd.dcsim.application.workload.Workload;
+import edu.uwo.csd.dcsim.application.Application;
+//import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.common.Utility;
 import edu.uwo.csd.dcsim.core.events.*;
 import edu.uwo.csd.dcsim.core.metrics.*;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.host.scheduler.ResourceScheduler;
 import edu.uwo.csd.dcsim.logging.*;
-import edu.uwo.csd.dcsim.vm.VMAllocation;
 
 import java.util.*;
 import java.io.*;
@@ -69,7 +67,7 @@ public class Simulation implements SimulationEventListener {
 	private long metricRecordStart;
 	private boolean recordingMetrics;
 	private long eventSendCount = 0;
-	protected Map<String, Metric> metrics = new HashMap<String, Metric>();
+	protected SimulationMetrics simulationMetrics;
 		
 	private Random random;
 	private long randomSeed;
@@ -82,7 +80,7 @@ public class Simulation implements SimulationEventListener {
 	
 	//Datacentre specific variables
 	private ArrayList<DataCentre> datacentres = new ArrayList<DataCentre>(); //collection of datacentres within the simulation
-	private Set<Workload> workloads = new HashSet<Workload>(); //set of all Workload objects feeding applications in the simulation
+	private Set<Application> applications = new HashSet<Application>();
 	
 	public static final void initializeLogging() {
 		
@@ -227,20 +225,11 @@ public class Simulation implements SimulationEventListener {
 		//initialize Random
 		setRandomSeed(new Random().nextLong());
 		
-	}
-
-	private ArrayList<VMAllocation> buildVmList(ArrayList<Host> hosts) {
-		ArrayList<VMAllocation> vmList = new ArrayList<VMAllocation>();
+		simulationMetrics = new SimulationMetrics(this);
 		
-		for (Host host : hosts) {
-			vmList.addAll(host.getVMAllocations());
-		}
-		Collections.sort(vmList, new VmExecutionOrderComparator());
-		
-		return vmList;
 	}
 	
-	public final Collection<Metric> run(long duration, long metricRecordStart) {
+	public final SimulationMetrics run(long duration, long metricRecordStart) {
 		
 		//ensure this simulation hasn't been run yet
 		if (complete)
@@ -269,6 +258,8 @@ public class Simulation implements SimulationEventListener {
 		//main event loop
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
 			
+//			System.out.println(SimTime.toHumanReadable(simulationTime));
+			
 			//peak at next event
 			e = eventQueue.peek();
 						
@@ -283,18 +274,18 @@ public class Simulation implements SimulationEventListener {
 			if (e.getTime() != 0) {
 				//Simulation time is advancing
 				
-				//inform metrics of new time interval
-				for (Metric metric : this.metrics.values())
-					metric.startTimeInterval();
-				
 				//schedule/allocate resources
 				scheduleResources(hosts);
 
 				//revise/amend
-				postScheduling(hosts);
+				postScheduling();
 				
 				//get the next event, which may have changed during the revise step
 				e = eventQueue.peek();
+				
+				//make sure that the event is in the future
+				if (e.getTime() < simulationTime)
+					throw new IllegalStateException("Encountered post-scheduling event (" + e.getClass() + ") with time < current simulation time");
 				
 				//advance to time e.getTime()
 				lastUpdate = simulationTime;
@@ -302,20 +293,13 @@ public class Simulation implements SimulationEventListener {
 				advanceSimulation(hosts);
 
 				if (this.isRecordingMetrics()) {	
-					//update data centre/host/vm metrics
-					for (DataCentre dc : datacentres) {
-						dc.updateMetrics();
-					}
+					//update host metrics
+					simulationMetrics.getHostMetrics().recordHostMetrics(hosts);
 					
-					//update metrics tracked by workloads (i.e. SLA)
-					for (Workload workload : workloads)
-						workload.updateMetrics();
+					//update application metrics
+					simulationMetrics.getApplicationMetrics().recordApplicationMetrics(applications);
+					
 				}
-				
-				//inform metrics of completed time interval
-				for (Metric metric : this.metrics.values())
-					metric.completeTimeInterval();
-				
 			}
 
 			//log current state
@@ -336,85 +320,62 @@ public class Simulation implements SimulationEventListener {
 		}
 		
 		//Simulation is now completed
-		
+		simulationMetrics.completeSimulation();
 		completeSimulation(duration);
 		
 		simLogger.info("");
 		simLogger.info("Completed simulation " + name);
 		
 		complete = true;
-		
-		//wrap result in new Collection so that Collection is modifiable, as modifying the values() collection of a HashMap directly breaks things.
-		Vector<Metric> result = new Vector<Metric>(metrics.values());
-		Collections.sort(result, new MetricAlphaComparator());
-		
-		return result;
+
+		return simulationMetrics;
 		
 	}
 
-	private void scheduleResources(ArrayList<Host> hosts) {		
-		//retrieve ordered list of vm allocations
-		ArrayList<VMAllocation> vmList = buildVmList(hosts);
+	private void scheduleResources(ArrayList<Host> hosts) {	
+				
+		//reset host schedulers
+		for (Host host : hosts) {
+			//reset all scheduled resources to zero (subsequently, hosts not 'ON' will not be scheduled and will remain at zero)
+			host.getResourceScheduler().resetScheduling();
+		}
+		
+		//initialize Applications (reset scheduled/demand, set scheduled = size)
+		for (Application application : applications) {
+			application.initializeScheduling();
+		}
 
-		//initialize resource scheduling
-		for (Host host : hosts) {
-			
-			//initialize scheduling (resets resources scheduled resources to VMs)
-			host.getResourceScheduler().initScheduling();
+		//update application demands (includes solving MVA and updating cpu demand)
+		for (Application application : applications) {
+			application.updateDemand();
 		}
 		
-		//schedule the privileged domain (it takes priority over other VMs)
-		for (Host host : hosts) {
-			if (host.getState() == Host.HostState.ON) {
-				host.getPrivDomainAllocation().getVm().updateResourceRequirements();
-				host.getResourceScheduler().schedulePrivDomain();
-			}
-		}
 		
-		//schedule resources to vms in order, in rounds until all complete
-		HashSet<VMAllocation> completedVms = new HashSet<VMAllocation>(); //set of VMs that have completed execution
-		boolean done = false; //true while execution is not complete
-		
-		do {
-			done = true; //start by assuming done
-		
-			//Execute a round of scheduling
-			
-			//instruct resource schedulers that a round is beginning
+		//while not done
+		boolean done = false;
+		while (!done) {
+			done = true;
+			//schedule cpu on all hosts (in no order)
 			for (Host host : hosts) {
-				//only schedule if the host is 'ON'
+				//schedule cpu
 				if (host.getState() == Host.HostState.ON) {
-					host.getResourceScheduler().beginRound();
+					host.getResourceScheduler().scheduleResources();
 				}
 			}
-			
-			//execute VMs, in order
-			for (VMAllocation vmAllocation : vmList) {
-				//if the VM has not be executed, the VM Allocation actually contains a VM, and the host is ON
-				if (!completedVms.contains(vmAllocation) && vmAllocation.getVm() != null && vmAllocation.getHost().getState() == Host.HostState.ON) {					
-					//if the resource scheduler has not indicated that is is COMPLETE (i.e. out of resources)
-					if (vmAllocation.getHost().getResourceScheduler().getState() != ResourceScheduler.ResourceSchedulerState.COMPLETE) {
-						//update the resource requirements of this VM
-						vmAllocation.getVm().updateResourceRequirements();
-						
-						//schedule resources for the VM
-						if (vmAllocation.getHost().getResourceScheduler().scheduleVM(vmAllocation)) {
-							//returned true = VM requires more resource to meet incoming work
-							done = false; //not done yet
-						} else {
-							//returned false = VM is done (no more work to schedule)
-							completedVms.add(vmAllocation);
-						}
-					}
-				}
+			for (Application application : applications) {
+				boolean appUpdate = application.updateDemand(); 
+				done = done && !appUpdate; //stop when no calls to updateDemand result in changes  
 			}
-			
-		} while (!done); //if not done, execute another round
+		}
+		
+		
 
 	}
 	
-	private void postScheduling(ArrayList<Host> hosts) {
-		
+	private void postScheduling() {
+		for (Application app : applications) {
+			app.postScheduling();
+		}
 	}
 	
 	/**
@@ -424,17 +385,8 @@ public class Simulation implements SimulationEventListener {
 	 */
 	private void advanceSimulation(ArrayList<Host> hosts) {
 		//execute all applications up to the current simulation time
-		for (Host host : hosts) {
-			for (VMAllocation vmAlloc : host.getVMAllocations()) {
-				if (vmAlloc.getVm() != null) {
-					vmAlloc.getVm().getApplication().execute();
-				}
-			}
-		}
-		
-		//update workloads
-		for (Workload workload : workloads) {
-			workload.advanceToCurrentTime();
+		for (Application app : applications) {
+			app.advanceSimulation();
 		}
 
 	}
@@ -531,7 +483,6 @@ public class Simulation implements SimulationEventListener {
 		if (random == null) {
 			random = new Random();
 			setRandomSeed(random.nextLong());
-			//setRandomSeed()
 		}
 	
 		return random;
@@ -544,22 +495,6 @@ public class Simulation implements SimulationEventListener {
 	public final void setRandomSeed(long seed) {
 		randomSeed = seed;
 		random = new Random(randomSeed);
-	}
-	
-	public final boolean hasMetric(String name) {
-		return metrics.containsKey(name);
-	}
-	
-	public final Metric getMetric(String name) {
-		return metrics.get(name);
-	}
-	
-	public final void addMetric(Metric metric) {
-		if (!metrics.containsKey(metric)) {
-			metrics.put(metric.getName(), metric);
-		} else {
-			throw new RuntimeException("Metric " + metric.getName() + " already exists in simulation. Cannot add multiple copies of the same metric to the same simulation.");
-		}
 	}
 
 	public final long getSimulationTime() {
@@ -592,6 +527,10 @@ public class Simulation implements SimulationEventListener {
 	
 	public final boolean isRecordingMetrics() {
 		return recordingMetrics;
+	}
+	
+	public final SimulationMetrics getSimulationMetrics() {
+		return simulationMetrics;
 	}
 	
 	/**
@@ -630,8 +569,8 @@ public class Simulation implements SimulationEventListener {
 	public static final String getConfigDirectory() {
 		return getHomeDirectory() + CONFIG_DIRECTORY;
 	}
-		
 	public static final boolean hasProperty(String name) {
+		
 		if (System.getProperty(name) != null || getProperties().getProperty(name) != null)
 			return true;
 		return false;
@@ -696,21 +635,12 @@ public class Simulation implements SimulationEventListener {
 		datacentres.add(dc);
 	}
 	
-	/**
-	 * Add a Workload to the simulation. Note that all Workloads feeding applications
-	 * within the simulation MUST be added to DataCentreSimulation
-	 * @param workload
-	 */
-	public void addWorkload(Workload workload) {
-		workloads.add(workload);
+	public void addApplication(Application application) {
+		applications.add(application);
 	}
 	
-	/**
-	 * Remove a Workload from the simulation.
-	 * @param workload
-	 */
-	public void removeWorkload(Workload workload) {
-		workloads.remove(workload);
+	public void removeApplication(Application application) {
+		applications.remove(application);
 	}
 	
 	/**

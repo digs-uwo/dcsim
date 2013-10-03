@@ -2,6 +2,7 @@ package edu.uwo.csd.dcsim.host;
 
 import java.util.ArrayList;
 
+import edu.uwo.csd.dcsim.common.HashCodeUtil;
 import edu.uwo.csd.dcsim.common.ObjectBuilder;
 import edu.uwo.csd.dcsim.core.*;
 
@@ -17,18 +18,20 @@ public final class Cluster implements SimulationEventListener {
 	private Simulation simulation;
 	
 	private int id = 0;
-	private int nRacks = 0;				// Number of racks in the cluster.
-	private int nSwitches = 0;			// Number of switches in the cluster.
+	private int nRacks = 0;								// Number of racks in the cluster.
+	private int nSwitches = 0;								// Number of switches in the cluster.
 	
-	private ArrayList<Rack> racks = null;						// List of racks.
+	private ArrayList<Rack> racks = null;					// List of racks.
 	
-	private ArrayList<Switch> dataSwitches = null;				// Data network switches.
-	private ArrayList<Switch> mgmtSwitches = null;				// Management network switches.
+	private ArrayList<Switch> dataSwitches = null;			// Data network switches.
+	private ArrayList<Switch> mgmtSwitches = null;			// Management network switches.
 	
-	private Switch mainDataSwitch = null;						// Data network main (top-level) switch.
-	private Switch mainMgmtSwitch = null;						// Management network main (top-level) switch.
+	private Switch mainDataSwitch = null;					// Data network main (top-level) switch.
+	private Switch mainMgmtSwitch = null;					// Management network main (top-level) switch.
 	
-	// Do we want a _state_ attribute ???
+	public enum ClusterState {ON, SUSPENDED, OFF;}
+	
+	private final int hashCode;
 	
 	private Cluster(Builder builder) {
 		
@@ -49,6 +52,7 @@ public final class Cluster implements SimulationEventListener {
 		this.racks = new ArrayList<Rack>(nRacks);
 		for (int i = 0; i < nRacks; i++) {
 			Rack rack = builder.rackBuilder.build();
+			rack.setCluster(this);
 			
 			// Set Data Network.
 			Switch rackSwitch = rack.getDataNetworkSwitch();
@@ -96,6 +100,9 @@ public final class Cluster implements SimulationEventListener {
 		
 		// Set default state.
 		//state = RackState.OFF;
+		
+		//init hashCode
+		hashCode = generateHashCode();
 	}
 	
 	/**
@@ -171,5 +178,18 @@ public final class Cluster implements SimulationEventListener {
 	public Switch getMainDataSwitch() {	return mainDataSwitch; }
 	
 	public Switch getMainMgmtSwitch() {	return mainMgmtSwitch; }
+	
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+	
+	private int generateHashCode() {
+		int result = HashCodeUtil.SEED;
+		result = HashCodeUtil.hash(result, id);
+		result = HashCodeUtil.hash(result, nRacks);
+		result = HashCodeUtil.hash(result, nSwitches);
+		return result;
+	}
 	
 }

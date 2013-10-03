@@ -3,115 +3,92 @@ package edu.uwo.csd.dcsim.application;
 import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
-import edu.uwo.csd.dcsim.vm.*;
 
-/**
- * VmmApplication is a special application that handles the virtual machine manager on a Host.
- * @author Michael Tighe
- *
- */
 public class VmmApplication extends Application {
 
-	private ArrayList<VM> migratingVms = new ArrayList<VM>();
-	private Resources resourcesScheduled = new Resources();
+	private Host host;
+	private int cpuOverhead;
+	private int migOverhead;
+	private VmmTask vmmTask;
+	private VmmTaskInstance vmmTaskInstance;
+	private int cpuDemand;
 	
-	protected double cpuOverhead = 300; //fixed cpu overhead
-	
-	public VmmApplication(Simulation simulation) {
+	public VmmApplication(Simulation simulation, Host host,
+			int cpu, int memory, int bandwidth, int storage) {
 		super(simulation);
-	}
-	
-	public void addMigratingVm(VM vm) {
-		migratingVms.add(vm);
-	}
-	
-	public void removeMigratingVm(VM vm) {
-		migratingVms.remove(vm);
-	}
-
-	
-	@Override
-	public Resources calculateResourcesRequired() {
-		Resources resourcesRequired = new Resources();
-		resourcesRequired.setMemory(0);
-		resourcesRequired.setStorage(0);
 		
-		double cpuRequired = cpuOverhead;
-		double bandwidthRequired = 0;
+		cpuOverhead = Integer.parseInt(Simulation.getProperty("vmmCpuOverhead"));
+		migOverhead = Integer.parseInt(Simulation.getProperty("vmMigrationCpuOverhead"));
 		
-		//calculate cpu and bandwidth requirements for migrating VMs
-		//TODO this needs to consider the number of migrating VMs and the bandwidth available on the management network link
-//		for (VM migrating : migratingVms) {
-//			cpuRequired += Double.parseDouble(Simulation.getProperty("vmMigrationCpuOverhead")); //TODO is there something more accurate than this?
-//			bandwidthRequired += 100; //TODO depends on available bandwidth?
-//		}
-		cpuRequired += Double.parseDouble(Simulation.getProperty("vmMigrationCpuOverhead")) * migratingVms.size();
-		bandwidthRequired += 100 * migratingVms.size();
+		this.host = host;
 		
-		resourcesRequired.setCpu(cpuRequired);
-		resourcesRequired.setBandwidth(bandwidthRequired);
+		//create VmmTask
+		VmmTask task = new VmmTask(this, 1, 1, 1, new Resources(cpu, memory, bandwidth, storage));
+		vmmTask = task;
+		vmmTaskInstance = vmmTask.getInstance();
 		
-		return resourcesRequired;
 	}
 
 	@Override
-	public void scheduleResources(Resources resourcesScheduled) {
-		// TODO not sure if we need to do anything here...
-		this.resourcesScheduled = resourcesScheduled;
+	public void initializeScheduling() {
+		Resources resourcesDemand = new Resources();
+		resourcesDemand.setMemory(0);
+		resourcesDemand.setBandwidth(0);
+		resourcesDemand.setStorage(0);
+		resourcesDemand.setCpu(cpuOverhead + migOverhead * (host.getMigratingIn().size() + host.getMigratingOut().size()));
+		
+		vmmTaskInstance.setResourceDemand(resourcesDemand);
+		vmmTaskInstance.setFullDemand(resourcesDemand);
+		
+		cpuDemand = resourcesDemand.getCpu();
 	}
-	
+
+	@Override
+	public boolean updateDemand() {
+		//VMM resource demand is independent of all other task resource demands and therefore needs only to be calculated once 		
+		
+		return false;
+	}
+
 	@Override
 	public void postScheduling() {
-		//TODO this is where we will calculate VM migration times based on available bandwidth and trigger/update migration completion events
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public void execute() {
-		//ensure that we have enough resources... for now, halt the simulation if insufficient resources were scheduled
-		//TODO is there anything else to do here?
-		Resources resourcesRequired = getResourcesRequired();
+	public void advanceSimulation() {
+		// TODO Auto-generated method stub
 		
-		if (resourcesScheduled.getCpu() < resourcesRequired.getCpu()
-				|| resourcesScheduled.getBandwidth() < resourcesRequired.getBandwidth()) {
-			throw new RuntimeException(simulation.getSimulationTime() + " - VMM was underallocated. CPU [" + resourcesRequired.getCpu() + "], BW [" + resourcesRequired.getBandwidth() + "], Migs[" + migratingVms.size() + "] Host #" + migratingVms.get(0).getVMAllocation().getHost().getId());
-		}
 	}
 	
 	@Override
-	public void updateMetrics() {
-
+	public int getTotalCpuDemand() {
+		return cpuDemand;
 	}
 
 	@Override
-	public double getWorkOutputLevel() {
-		// there is no work output
-		return 0;
+	public int getTotalCpuScheduled() {
+		return cpuDemand; //scheduled is the same as demand, as we assume the Vmm always gets full demand
+	}
+	
+	public VmmTask getVmmTask() {
+		return vmmTask;
+	}
+	
+	public VmmTaskInstance getVmmTaskInstance() {
+		return vmmTaskInstance;
 	}
 
 	@Override
-	public double getTotalIncomingWork() {
-		return 0;
+	public ArrayList<Task> getTasks() {
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		tasks.add(vmmTask);
+		return tasks;
 	}
 
-	@Override
-	public double getTotalSLAViolatedWork() {
-		return 0;
-	}
 
-	@Override
-	public Resources getResourcesInUse() {
-		return resourcesScheduled;
-	}
-
-	@Override
-	public double getSLAUnderprovisionRate() {
-		return 0;
-	}
-
-	@Override
-	public double getSLAMigrationPenaltyRate() {
-		return 0;
-	}
 
 }

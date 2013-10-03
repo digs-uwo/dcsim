@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim.*;
+import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.vm.*;
@@ -31,14 +32,14 @@ public class StaticPeak extends SimulationTask {
 		
 		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
-			ExampleHelper.printMetrics(task.getResults());
+			task.getMetrics().printDefault(logger);
 		}
 		
 	}
 	
 	public StaticPeak(String name, long randomSeed) {
-		super(name, 864000000);
-		this.setMetricRecordStart(86400000);
+		super(name, SimTime.days(10));
+		this.setMetricRecordStart(SimTime.days(1));
 		this.setRandomSeed(randomSeed);
 	}
 
@@ -47,7 +48,7 @@ public class StaticPeak extends SimulationTask {
 	public void setup(Simulation simulation) {
 		AutonomicManager dcAM = ExampleHelper.createDataCentre(simulation);
 		
-		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
+		ArrayList<VmAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
 				
 		ExampleHelper.placeVms(vmList, dcAM, simulation);
 

@@ -2,6 +2,7 @@ package edu.uwo.csd.dcsim.management;
 
 import java.util.ArrayList;
 
+import edu.uwo.csd.dcsim.common.HashCodeUtil;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.Resources;
 
@@ -17,6 +18,8 @@ public class HostData {
 	
 	private ArrayList<HostStatus> history = new ArrayList<HostStatus>();
 	
+	private final int hashCode;
+	
 	public HostData(Host host, AutonomicManager hostManager) {
 		this.host = host;
 		this.hostManager = hostManager;
@@ -25,6 +28,9 @@ public class HostData {
 		
 		//initialize currentStatus in order to maintain a status of powered off Hosts
 		currentStatus = new HostStatus(host, 0);
+		
+		//init hashCode
+		hashCode = generateHashCode();
 	}
 	
 	public void addHostStatus(HostStatus hostStatus, int historyWindowSize) {
@@ -68,7 +74,7 @@ public class HostData {
 		//return a copy of the history to ensure that it is read-only
 		ArrayList<HostStatus> historyCopy = new ArrayList<HostStatus>();
 		for (HostStatus status : history) {
-			historyCopy.add(status);
+			historyCopy.add(status.copy());
 		}
 		return historyCopy;
 	}
@@ -98,7 +104,7 @@ public class HostData {
 		invalidationTime = time;
 	}
 	
-	public static boolean canHost(VmStatus vm, HostStatus currentStatus, HostDescription hostDescription) {
+	public static boolean canHost(VmStatus vm, HostStatus currentStatus, HostDescription hostDescription) {		
 		return canHost(vm.getCores(), vm.getCoreCapacity(), vm.getResourcesInUse(), currentStatus, hostDescription);
 	}
 	
@@ -124,4 +130,16 @@ public class HostData {
 		
 		return true;
 	}
+	
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+	
+	private int generateHashCode() {
+		int result = HashCodeUtil.SEED;
+		result = HashCodeUtil.hash(result, host.getId());
+		return result;
+	}
+	
 }

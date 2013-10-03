@@ -7,28 +7,29 @@ import java.util.Map;
 
 import edu.uwo.csd.dcsim.core.*;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
+import edu.uwo.csd.dcsim.management.capabilities.ManagerCapability;
 import edu.uwo.csd.dcsim.management.events.RepeatingPolicyExecutionEvent;
 
 public class AutonomicManager implements SimulationEventListener {
 
+	private boolean running = true;
 	private Simulation simulation;
 	private ArrayList<Policy> policies = new ArrayList<Policy>();
-	private Map<Class<? extends HostCapability>, Object> capabilities = new HashMap<Class<? extends HostCapability>, Object>();
+	private Map<Class<? extends ManagerCapability>, Object> capabilities = new HashMap<Class<? extends ManagerCapability>, Object>();
 	private Map<RepeatingPolicyExecutionEvent, Policy> policyExecutionEvents = new HashMap<RepeatingPolicyExecutionEvent, Policy>();
 	private Map<Policy, RepeatingPolicyExecutionEvent> policyToExectionEvent = new HashMap<Policy, RepeatingPolicyExecutionEvent>();
 	
 	private Host container = null; //if this AutonomicManager is running within a Host, it is stored here
 	
-	public AutonomicManager(Simulation simulation, HostCapability... capabilities) {
+	public AutonomicManager(Simulation simulation, ManagerCapability... capabilities) {
 		this.simulation = simulation;
 		
-		for (HostCapability capability : capabilities) {
+		for (ManagerCapability capability : capabilities) {
 			addCapability(capability);
 		}
 	}
 	
-	public void addCapability(HostCapability capability) {
+	public void addCapability(ManagerCapability capability) {
 		capabilities.put(capability.getClass(), capability);
 	}
 	
@@ -53,7 +54,7 @@ public class AutonomicManager implements SimulationEventListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T extends HostCapability> T getCapability(Class<T> type) {
+	public <T extends ManagerCapability> T getCapability(Class<T> type) {
 		T r = (T)capabilities.get(type);
 		return r;
 	}
@@ -100,8 +101,22 @@ public class AutonomicManager implements SimulationEventListener {
 		return policyToExectionEvent.get(policy);
 	}
 	
+	public void shutdown() {
+		//uninstall all policies (stops repeating events)
+		ArrayList<Policy> policiesCopy = new ArrayList<Policy>();
+		policiesCopy.addAll(policies);
+		for (Policy policy : policiesCopy) {
+			uninstallPolicy(policy);
+		}
+		
+		//set running flag to false to prevent event handling
+		running = false;
+	}
+	
 	@Override
 	public void handleEvent(Event e) {
+
+		if (!running) return;
 		
 		//first, check if the Host container this manager is running in (if any) is ON
 		if (container != null && !(container.getState() == Host.HostState.ON || container.getState() == Host.HostState.POWERING_ON)) {

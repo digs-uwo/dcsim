@@ -13,7 +13,8 @@ public class HostStatus {
 	private int outgoingMigrations;
 	private ArrayList<VmStatus> migratingInVms = new ArrayList<VmStatus>();
 	private Host.HostState state;
-
+	private ArrayList<Resources> startingVmAllocations = new ArrayList<Resources>();
+	
 	private double powerConsumption;
 	
 	VmStatus privDomain;
@@ -32,14 +33,19 @@ public class HostStatus {
 		
 		privDomain = new VmStatus(host.getPrivDomainAllocation().getVm(), timeStamp);
 		
-		for (VMAllocation vmAlloc : host.getVMAllocations()) {
+		for (VmAllocation vmAlloc : host.getVMAllocations()) {
 			if (vmAlloc.getVm() != null) {
 				vms.add(new VmStatus(vmAlloc.getVm(), timeStamp));
 			}
 		}
 		
+		//keep track of resources promised to starting VMs
+		for (VmAllocation vmAlloc : host.getStartingVms()) {
+			startingVmAllocations.add(new Resources(vmAlloc.getCpu(), vmAlloc.getMemory(), vmAlloc.getBandwidth(), vmAlloc.getStorage()));
+		}
+		
 		//keep track of resources promised to incoming VMs
-		for (VMAllocation vmAlloc : host.getMigratingIn()) {
+		for (VmAllocation vmAlloc : host.getMigratingIn()) {
 			Resources resources = new Resources();
 			resources.setCpu(vmAlloc.getVMDescription().getCpu());
 			resources.setMemory(vmAlloc.getVMDescription().getMemory());
@@ -61,12 +67,21 @@ public class HostStatus {
 		outgoingMigrations = host.outgoingMigrations;
 		state = host.state;
 		
+		startingVmAllocations = new ArrayList<Resources>();
+		for (Resources r : host.startingVmAllocations) {
+			startingVmAllocations.add(r.copy());
+		}
+		
 		powerConsumption = host.powerConsumption;
 		
 		privDomain = host.privDomain.copy();
 		
 		for (VmStatus vm : host.vms) {
 			vms.add(vm.copy());
+		}
+		
+		for (VmStatus vm : host.migratingInVms) {
+			migratingInVms.add(vm.copy());
 		}
 	}
 	
@@ -110,11 +125,44 @@ public class HostStatus {
 		return vms;
 	}
 	
+	public ArrayList<Resources> getStartingVmAllocations() {
+		return startingVmAllocations;
+	}
+	
+	public ArrayList<VmStatus> getMigratingInVms() {
+		return migratingInVms;
+	}
+	
+	public int getCpuAllocated() {
+		int cpu = 0;
+		
+		for (VmStatus vmStatus : vms) {
+			cpu += vmStatus.getCores() * vmStatus.getCoreCapacity();
+		}
+		
+		//add resources promised to starting VMs
+		for (Resources resources : startingVmAllocations) {
+			cpu += resources.getCpu();
+		}
+		
+		//add resources promised to incoming VMs
+		for (VmStatus vmStatus : migratingInVms) {
+			cpu += vmStatus.getCores() * vmStatus.getCoreCapacity();
+		}
+		
+		return cpu;
+	}
+	
 	public Resources getResourcesInUse() {
 		Resources resourcesInUse = privDomain.getResourcesInUse();
 		
 		for (VmStatus vmStatus : vms) {
 			resourcesInUse = resourcesInUse.add(vmStatus.getResourcesInUse());
+		}
+		
+		//add resources promised to starting VMs
+		for (Resources resources : startingVmAllocations) {
+			resourcesInUse = resourcesInUse.add(resources);
 		}
 		
 		//add resources promised to incoming VMs

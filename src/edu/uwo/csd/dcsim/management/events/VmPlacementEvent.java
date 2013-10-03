@@ -4,33 +4,33 @@ import java.util.ArrayList;
 
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 public class VmPlacementEvent extends Event {
 	
-	private ArrayList<VMAllocationRequest> vmAllocationRequests;
-	private ArrayList<VMAllocationRequest> failedRequests = new ArrayList<VMAllocationRequest>();
+	private ArrayList<VmAllocationRequest> vmAllocationRequests;
+	private ArrayList<VmAllocationRequest> failedRequests = new ArrayList<VmAllocationRequest>();
 	
-	public VmPlacementEvent(AutonomicManager target, ArrayList<VMAllocationRequest> vmAllocationRequests) {
+	public VmPlacementEvent(AutonomicManager target, ArrayList<VmAllocationRequest> vmAllocationRequests) {
 		super(target);
 		this.vmAllocationRequests = vmAllocationRequests;
 	}	
 	
-	public VmPlacementEvent(AutonomicManager target, VMAllocationRequest vmAllocationRequest) {
+	public VmPlacementEvent(AutonomicManager target, VmAllocationRequest vmAllocationRequest) {
 		super(target);
-		this.vmAllocationRequests = new ArrayList<VMAllocationRequest>();
+		this.vmAllocationRequests = new ArrayList<VmAllocationRequest>();
 		vmAllocationRequests.add(vmAllocationRequest);
 	}
 	
-	public ArrayList<VMAllocationRequest> getVMAllocationRequests() {
+	public ArrayList<VmAllocationRequest> getVMAllocationRequests() {
 		return vmAllocationRequests;
 	}
 	
-	public ArrayList<VMAllocationRequest> getFailedRequests() {
+	public ArrayList<VmAllocationRequest> getFailedRequests() {
 		return failedRequests;
 	}
 	
-	public void addFailedRequest(VMAllocationRequest failedRequest) {
+	public void addFailedRequest(VmAllocationRequest failedRequest) {
 		failedRequests.add(failedRequest);
 	}
 	

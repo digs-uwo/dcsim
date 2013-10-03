@@ -1,7 +1,6 @@
 package edu.uwo.csd.dcsim.examples;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.apache.commons.math3.distribution.*;
 import org.apache.log4j.Logger;
@@ -12,7 +11,6 @@ import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Simulation;
-import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
 import edu.uwo.csd.dcsim.host.*;
@@ -37,13 +35,7 @@ public class DynamicServiceSpawning extends SimulationTask {
 		
 		task.run();
 		
-		//get the results of the simulation
-		Collection<Metric> metrics = task.getResults();
-		
-		//output metric values
-		for (Metric metric : metrics) {
-			logger.info(metric.getName() + "=" + metric.toString()); //metric.getValue() returns the raw value, while toString() provides formatting
-		}
+		task.getMetrics().printDefault(logger);
 		
 	}
 	
@@ -105,14 +97,16 @@ public class DynamicServiceSpawning extends SimulationTask {
 		 * Simulation superclass), the datacentre to submit Services to, a distribution describing the lifespan of services, and either
 		 * a static rate to create services given in services-per-hour, or a list of (time, rate) tuples.
 		 */
-		ServiceProducer serviceProducer = new ServiceProducer(simulation, dcAM, new NormalDistribution(SimTime.days(3), SimTime.hours(4)), serviceRates) {
+		ApplicationGeneratorLegacy serviceProducer = new ApplicationGeneratorLegacy(simulation, dcAM, new NormalDistribution(SimTime.days(3), SimTime.hours(4)), serviceRates) {
 
 			@Override
-			public Service buildService() {
-				Workload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, 0);
-				simulation.addWorkload(workload);
+			public Application buildApplication() {
+				TraceWorkload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, 0);
 				
-				return Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE);
+				InteractiveApplication application = Applications.singleTaskInteractiveApplication(simulation, workload, 1, 2500, 1024, 12800, 1024, 0.001f);
+				workload.setScaleFactor(application.calculateMaxWorkloadUtilizationLimit(0.98f));
+				
+				return application;
 			}
 			
 		};

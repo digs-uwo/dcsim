@@ -1,7 +1,6 @@
 package edu.uwo.csd.dcsim.examples;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
@@ -11,7 +10,6 @@ import edu.uwo.csd.dcsim.application.*;
 import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.VmPlacementPolicy;
 import edu.uwo.csd.dcsim.host.*;
 import edu.uwo.csd.dcsim.host.resourcemanager.*;
@@ -39,9 +37,9 @@ public class ExampleHelper {
 	public static final int[] VM_SIZES = {1500, 2500, 3000, 3000};
 	public static final int[] VM_CORES = {1, 1, 1, 2};
 	public static final int[] VM_RAM = {512, 1024, 1024, 1024};
-	public static final int N_VM_SIZES = 4;
+		public static final int N_VM_SIZES = 4;
 	
-	public static final int N_TRACES = 5; 
+	public static final int N_TRACES = 4; 
 	public static final String[] TRACES = {"traces/clarknet", 
 		"traces/epa",
 		"traces/sdsc",
@@ -52,6 +50,7 @@ public class ExampleHelper {
 	public static final long[] OFFSET_MAX = {200000000, 40000000, 40000000, 15000000, 15000000, 15000000, 15000000};
 	public static final double[] TRACE_AVG = {0.32, 0.25, 0.32, 0.72, 0.74, 0.77, 0.83};
 	
+	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(ExampleHelper.class);
 	
 	public static AutonomicManager createDataCentre(Simulation simulation) {
@@ -85,6 +84,7 @@ public class ExampleHelper {
 			
 			if (i % 2 == 1) {
 				host = proLiantDL360G5E5450.build();
+//				host = proLiantDL360G5E5450.build();
 			} else {
 				host = proLiantDL160G5E5420.build();
 			}
@@ -104,9 +104,9 @@ public class ExampleHelper {
 		return hosts;
 	}
 	
-	public static ArrayList<VMAllocationRequest> createVmList(Simulation simulation, boolean allocAvg) {
+	public static ArrayList<VmAllocationRequest> createVmList(Simulation simulation, boolean allocAvg) {
 		
-		ArrayList<VMAllocationRequest> vmList = new ArrayList<VMAllocationRequest>(N_VMS);
+		ArrayList<VmAllocationRequest> vmList = new ArrayList<VmAllocationRequest>(N_VMS);
 		
 		for (int i = 0; i < N_VMS; ++i) {
 			String trace = TRACES[i % N_TRACES];
@@ -116,16 +116,16 @@ public class ExampleHelper {
 			int cores = VM_CORES[i % N_VM_SIZES];
 			int memory = VM_RAM[i % N_VM_SIZES];
 			
-			Service service = createService(simulation, trace, offset, size, cores, memory);
+			Application application = createApplication(simulation, trace, offset, size, cores, memory);
 			
-			//vmList.addAll(service.createInitialVmRequests());
+			ArrayList<VmAllocationRequest> requests = application.createInitialVmRequests(); 
 			
-			VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
+			if (allocAvg) {
+				for (VmAllocationRequest request : requests)
+					request.setCpu((int)Math.round(TRACE_AVG[i % N_TRACES] * (size - CPU_OVERHEAD) + CPU_OVERHEAD));
+			}
 			
-			if (allocAvg)
-				vmAllocationRequest.setCpu((int)Math.round(TRACE_AVG[i % N_TRACES] * (size - CPU_OVERHEAD) + CPU_OVERHEAD));
-			
-			vmList.add(vmAllocationRequest);
+			vmList.addAll(requests);
 		}
 		
 		Collections.shuffle(vmList, simulation.getRandom());
@@ -134,23 +134,22 @@ public class ExampleHelper {
 	}
 	
 
-	private static Service createService(Simulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
+	private static Application createApplication(Simulation simulation, String fileName, long offset, int coreCapacity, int cores, int memory) {
 		
 		//create workload (external)
-		Workload workload = new TraceWorkload(simulation, fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas
-		simulation.addWorkload(workload);
-		
+		TraceWorkload workload = new TraceWorkload(simulation, fileName, (coreCapacity * cores) - CPU_OVERHEAD, offset); //scale to n replicas		
 		
 		int bandwidth = 12800; //100 Mb/s
-		long storage = 1024; //1GB
+		int storage = 1024; //1GB
 
-		Service service = Services.singleTierInteractiveService(workload, cores, coreCapacity, memory, bandwidth, storage, 1, CPU_OVERHEAD, 1, Integer.MAX_VALUE); 
+		InteractiveApplication application = Applications.singleTaskInteractiveApplication(simulation, workload, cores, coreCapacity, memory, bandwidth, storage, 0.001f);
+		workload.setScaleFactor((int)application.calculateMaxWorkloadUtilizationLimit(0.98f)); 
 		
-		return service;
+		return application;
 
 	}
 	
-	public static void placeVms(ArrayList<VMAllocationRequest> vmList, AutonomicManager dcAM, Simulation simulation) {
+	public static void placeVms(ArrayList<VmAllocationRequest> vmList, AutonomicManager dcAM, Simulation simulation) {
 		
 		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmList);
 		
@@ -168,14 +167,6 @@ public class ExampleHelper {
 		});
 		
 		simulation.sendEvent(vmPlacementEvent, 0);
-	}
-	
-	public static void printMetrics(Collection<Metric> metrics) {
-		for (Metric metric : metrics) {
-			logger.info(metric.getName() +
-					" = " +
-					metric.toString());
-		}
 	}
 	
 }

@@ -13,7 +13,7 @@ import edu.uwo.csd.dcsim.management.capabilities.HostPoolManager;
 import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 public class VmPlacementPolicy extends Policy {
 
@@ -113,7 +113,7 @@ public class VmPlacementPolicy extends Policy {
 		// Create target hosts list.
 		ArrayList<HostData> targets = this.orderTargetHosts(partiallyUtilized, underUtilized, empty);
 
-		for (VMAllocationRequest vmAllocationRequest : event.getVMAllocationRequests()) {
+		for (VmAllocationRequest vmAllocationRequest : event.getVMAllocationRequests()) {
 			HostData allocatedHost = null;
 			for (HostData target : targets) {
 				Resources reqResources = new Resources();
@@ -153,7 +153,7 @@ public class VmPlacementPolicy extends Policy {
 		}
 	}
 	
-	private long sendVM(VMAllocationRequest vmAllocationRequest, HostData host) {
+	private long sendVM(VmAllocationRequest vmAllocationRequest, HostData host) {
 		//if the host is not ON or POWERING_ON, then send an event to power on the host
 		if (host.getCurrentStatus().getState() != Host.HostState.ON && host.getCurrentStatus().getState() != Host.HostState.POWERING_ON) {
 			simulation.sendEvent(new PowerStateEvent(host.getHost(), PowerState.POWER_ON));

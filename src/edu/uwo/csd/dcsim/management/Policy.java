@@ -4,7 +4,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.management.capabilities.HostCapability;
+import edu.uwo.csd.dcsim.management.capabilities.ManagerCapability;
 import edu.uwo.csd.dcsim.management.events.RepeatingPolicyExecutionEvent;
 
 public abstract class Policy {
@@ -12,18 +12,18 @@ public abstract class Policy {
 	public final String EXECUTE_METHOD_NAME = "execute";
 	
 	private boolean enabled = true;
-	private ArrayList<Class<? extends HostCapability>> requiredCapabilities = new ArrayList<Class<? extends HostCapability>>();
+	private ArrayList<Class<? extends ManagerCapability>> requiredCapabilities = new ArrayList<Class<? extends ManagerCapability>>();
 	
 	protected AutonomicManager manager;
 	protected Simulation simulation;
 	
-	public final void addRequiredCapability(Class<? extends HostCapability> hostCapability) {
+	public final void addRequiredCapability(Class<? extends ManagerCapability> hostCapability) {
 		requiredCapabilities.add(hostCapability);
 	}
 	
 	public final boolean checkCapabilities(AutonomicManager m) {
 		
-		for (Class<? extends HostCapability> type : requiredCapabilities) {
+		for (Class<? extends ManagerCapability> type : requiredCapabilities) {
 			if (m.getCapability(type) == null)
 				return false;
 		}

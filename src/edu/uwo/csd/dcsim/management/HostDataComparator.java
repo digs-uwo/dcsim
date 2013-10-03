@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import edu.uwo.csd.dcsim.host.*;
-import edu.uwo.csd.dcsim.vm.VMAllocation;
+import edu.uwo.csd.dcsim.vm.VmAllocation;
 
 /**
  * Compares host status by a (non-empty) series of attributes or factors. The 
@@ -108,13 +108,13 @@ public enum HostDataComparator implements Comparator<HostData> {
 			
 			class Volume {
 				public double calculate(HostData host) {
-					ArrayList<VMAllocation> vms = new ArrayList<VMAllocation>(host.getHost().getVMAllocations());
+					ArrayList<VmAllocation> vms = new ArrayList<VmAllocation>(host.getHost().getVMAllocations());
 					vms.add(host.getHost().getPrivDomainAllocation());
 					
 					int cpu = 0;
 					int mem = 0;
 					double bw = 0;
-					for (VMAllocation vm : vms) {
+					for (VmAllocation vm : vms) {
 						// If the VMAllocation has an associated VM, record its resource allocation.
 						if (vm.getVm() != null)
 							cpu += vm.getCpu();

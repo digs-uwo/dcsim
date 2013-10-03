@@ -80,7 +80,8 @@ public class ConsolidationPolicy extends Policy {
 								HostData.canHost(vm, target.getSandboxStatus(), target.getHostDescription()) &&		//target has capability and capacity to host VM
 								(target.getSandboxStatus().getResourcesInUse().getCpu() + vm.getResourcesInUse().getCpu()) / 
 								target.getHostDescription().getResourceCapacity().getCpu() <= targetUtilization) {				//target will not exceed target utilization
-							 
+							
+							
 							//modify host and vm states to indicate the future migration. Note we can do this because
 							//we are using the designated 'sandbox' host status
 							source.getSandboxStatus().migrate(vm, target.getSandboxStatus());

@@ -5,9 +5,9 @@ import java.util.*;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.management.*;
 
-public class HostPoolManager extends HostCapability {
+public class HostPoolManager extends ManagerCapability {
 	
-	private Map<Integer, HostData> hostMap = new HashMap<Integer, HostData>();
+	protected Map<Integer, HostData> hostMap = new HashMap<Integer, HostData>();
 
 	public void addHost(Host host, AutonomicManager hostManager) {
 		hostMap.put(host.getId(), new HostData(host, hostManager));

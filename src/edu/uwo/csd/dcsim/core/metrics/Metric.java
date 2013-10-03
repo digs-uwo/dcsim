@@ -1,75 +1,45 @@
 package edu.uwo.csd.dcsim.core.metrics;
 
-import java.util.*;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
-import edu.uwo.csd.dcsim.core.Simulation;
+public class Metric {
 
-public abstract class Metric {
-
-	protected Simulation simulation;
-	private final String name;
-	private ArrayList<MetricRecord> recordedValues =  new ArrayList<MetricRecord>();
+	private double tempValue = 0;
 	
-	public Metric(Simulation simulation, String name) {
-		this.simulation = simulation;
-		this.name = name;
+	SummaryStatistics stats = new SummaryStatistics();
+	
+	public void add(double val) {
+		stats.addValue(val);
 	}
 	
-	public String getName() {
-		return name;
+	public double getTempValue() {
+		return tempValue;
 	}
 	
-	public ArrayList<MetricRecord> getRecordedValues() {
-		return recordedValues;
-	}
-
-	/**
-	 * Format an arbitrary value of the type recorded by this metric.
-	 * @param value
-	 * @return
-	 */
-	public abstract String format(double value);
-	
-	@Override
-	public String toString() {
-		return format(getValue());
+	public void setTempValue(double tempValue) {
+		this.tempValue = tempValue;
 	}
 	
-	/**
-	 * This gets the value of the metric as calculated since the start of metric recording
-	 * @return
-	 */
-	public abstract double getValue();
-	
-	/**
-	 * This gets the value of the metric over the current time interval
-	 * @return
-	 */
-	public abstract double getCurrentValue();
-	
-	public abstract void onStartTimeInterval();
-	public abstract void onCompleteTimeInterval();
-	
-	public final void startTimeInterval() {
-		onStartTimeInterval();
+	public double getMean() {
+		return stats.getMean();
 	}
 	
-	public final void completeTimeInterval() {
-		onCompleteTimeInterval();
-		MetricRecord record = new MetricRecord(simulation.getSimulationTime(), getCurrentValue());
-		recordedValues.add(record);
+	public double getVariance() {
+		return stats.getVariance();
 	}
 	
-	public class MetricRecord {
-		
-		public final long time;
-		public final double value;
-		
-		public MetricRecord(long time, double value) {
-			this.time = time;
-			this.value = value;
-		}
-		
+	public double getSum() {
+		return stats.getSum();
 	}
+	
+	public double getMax() {
+		return stats.getMax();
+	}
+	
+	public double getMin() {
+		return stats.getMin();
+	}
+	
+	
 	
 }

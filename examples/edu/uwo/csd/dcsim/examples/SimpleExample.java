@@ -1,17 +1,15 @@
 package edu.uwo.csd.dcsim.examples;
 
-import java.util.Collection;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
 import edu.uwo.csd.dcsim.*;
-import edu.uwo.csd.dcsim.application.Service;
-import edu.uwo.csd.dcsim.application.Services;
+import edu.uwo.csd.dcsim.application.Applications;
+import edu.uwo.csd.dcsim.application.InteractiveApplication;
 import edu.uwo.csd.dcsim.application.workload.TraceWorkload;
-import edu.uwo.csd.dcsim.application.workload.Workload;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.Metric;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.HostModels;
@@ -25,7 +23,7 @@ import edu.uwo.csd.dcsim.management.policies.HostMonitoringPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostOperationsPolicy;
 import edu.uwo.csd.dcsim.management.policies.HostStatusPolicy;
 import edu.uwo.csd.dcsim.management.policies.DefaultVmPlacementPolicy;
-import edu.uwo.csd.dcsim.vm.VMAllocationRequest;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 /**
  * A basic example of how to setup and run a simulation.
@@ -42,24 +40,14 @@ public class SimpleExample extends SimulationTask {
 		//MUST initialize logging when starting simulations
 		Simulation.initializeLogging();
 		
-		//create an instance of our task, with the name "simple", to run for 86400000ms (1 day)
-		//DCSimulationTask task = new SimpleExample("simple", 86400000);
+		//create an instance of our task, with the name "simple", to run for 10 minutes
 		SimulationTask task = new SimpleExample("simple", SimTime.minutes(10));
 		
 		//run the simulation
 		task.run();
-		
-		//get the results of the simulation
-		Collection<Metric> metrics = task.getResults();
-		
-		//output metric values
-		for (Metric metric : metrics) {
-			logger.info(metric.getName() + "=" + metric.toString()); //metric.getValue() returns the raw value, while toString() provides formatting
-		}
 
-		//write the metric values to a metric trace file
-		SimulationTraceWriter traceWriter = new SimulationTraceWriter(task);
-		traceWriter.writeTrace();
+		//output metric values
+		task.getMetrics().printDefault(logger);
 		
 	}
 	
@@ -143,39 +131,40 @@ public class SimpleExample extends SimulationTask {
 		 * Next, we create a Service to run on in DataCentre.
 		 * 
 		 * First, we create a Workload to generate work for the Service. We create a TraceWorkload,
-		 * which bases the workload on a trace file. We will use the "clarknet" trace. We set the scaleFactor
-		 * to 2200, which effectively sets the range of the workload to [0, 2200]. We chose 2200 because a single
-		 * core of our Host has 2500 CPU, and later we are going to create an InteractiveApplication that requires
-		 * 1 CPU to complete 1 Work. In addition, we will set a 300 CPU fixed overhead, thus, 2500 - 300 = 2200 will
-		 * give us an incoming workload that at peak value will completely saturate one core of our Host.
+		 * which bases the workload on a trace file. We will use the "clarknet" trace. The final value
+		 * is the time offset at which to start the trace, which we will leave at 0. 
 		 */
-		Workload workload = new TraceWorkload(simulation, "traces/clarknet", 2200, 0);
-		simulation.addWorkload(workload); //be sure to add the Workload to the simulation, or incoming workload will not be retrieved
+		TraceWorkload workload = new TraceWorkload(simulation, "traces/clarknet", 0);
 		
 		/*
-		 * We use the Services helper class to build a single tier service running InteractiveApplication application instances.
+		 * We use the Applications helper class to build an Interactive Application with a single Task. The Task will have only one Task Instance, and
+		 * therefore only one VM will be required to run this Application.
 		 * 
-		 * We specify that VMs in the service should use 1 core of 2500 capacity, 1024MB of RAM, 12800KB of Bandwidth (100Mb/s) (NOTE: bandwidth is in KB),
-		 * 1024MB of storage. The Application running on the VM requires 1 CPU and 1 Bandwidth to complete 1 work, and has a fixed overhead of 300 CPU. Finally,
-		 * the tier has a minimum of 1 application (VM), and an unlimited maximum. These values are to be used by ManagementPolicies, and will not automatically
-		 * have any effect.
+		 * We specify that VM in the Task should use 1 core of 2500 capacity, 1024MB of RAM, 12800KB of Bandwidth (100Mb/s) (NOTE: bandwidth is in KB),
+		 * 1024MB of storage. The Task requires 0.01 to service a single request.
 		 */
-		Service service = Services.singleTierInteractiveService(workload, 1, 2500, 1024, 12800, 1024, 1, 300, 1, Integer.MAX_VALUE); 
+		InteractiveApplication application = Applications.singleTaskInteractiveApplication(simulation, workload, 1, 2500, 1024, 12800, 1024, 0.01);
 		
 		/*
-		 * Now we create a VMAllocationRequest to submit to the DataCentre. A VMAllocationRequest represents a request for a Host to allocate
-		 * resources for the instantiation of a VM. We can create one based on a VMDescription, which we can grab from the single tier of our
-		 * Service.
+		 * Now we must scale the workload to match our Application. Trace workloads have values in the range [0, 1], which must be scale appropriately
+		 * to provide the required number of clients for the Interactive Application. We set the scale equal to the calculated maximum number of clients
+		 * required to push the Application utilization to 98%. We choose 98% instead of 100% because it requires a significantly larger number of clients
+		 * to push the Application completely to 100% utilization.
 		 */
-		VMAllocationRequest vmAllocationRequest = new VMAllocationRequest(service.getServiceTiers().get(0).getVMDescription());
+		workload.setScaleFactor(application.calculateMaxWorkloadUtilizationLimit(0.98));
 		
 		/*
-		 * Next we submit the VMAllocationRequest to the DataCentre, which will place it on a Host. Since we only have one Host, that is 
+		 * Now we create the VMAllocationRequest(s) to submit to the DataCentre. A VMAllocationRequest represents a request for a Host to allocate
+		 * resources for the instantiation of a VM. We can get the set of requests for initial deployment from the Application. In this case, there
+		 * will be only one.
+		 */
+		ArrayList<VmAllocationRequest> vmAllocationRequests = application.createInitialVmRequests();
+		
+		/*
+		 * Next we submit the VMAllocationRequest list to the DataCentre, which will place it on a Host. Since we only have one Host, that is 
 		 * where it will be placed. This is done by sending a VmPlacmentEvent to the datacentre AutonomicManager.
-		 * Note that we have to delay the placement until time '1', so that the datacentre AutonomicManager has received at least one status
-		 * message from the Hosts.
 		 */
-		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmAllocationRequest); 
+		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmAllocationRequests); 
 
 		//Ensure that all VMs are placed, or kill the simulation
 		vmPlacementEvent.addCallbackListener(new EventCallbackListener() {

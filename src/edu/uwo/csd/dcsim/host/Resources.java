@@ -8,21 +8,30 @@ package edu.uwo.csd.dcsim.host;
  */
 public class Resources {
 	
-	private double cpu = 0;
+	private int cores = 1;
+	private int cpu = 0;
 	private int memory = 0;
-	private double bandwidth = 0;
-	private long storage = 0;
+	private int bandwidth = 0;
+	private int storage = 0;
 
 	public Resources() {
 		//allow default constructor
 	}
 	
 	public Resources(Resources resources) {
-		this(resources.getCpu(), resources.getMemory(), resources.getBandwidth(), resources.getStorage());
+		this(resources.getCores(), resources.getCoreCapacity(), resources.getMemory(), resources.getBandwidth(), resources.getStorage());
 	}
 	
-	public Resources(double cpu, int memory, double bandwidth, long storage) {
+	public Resources(int cpu, int memory, int bandwidth, int storage) {
 		this.cpu = cpu;
+		this.memory = memory;
+		this.bandwidth = bandwidth;
+		this.storage = storage;
+	}
+	
+	public Resources(int cores, int coreCapacity, int memory, int bandwidth, int storage) {
+		this.cores = cores;
+		this.cpu = cores * coreCapacity;
 		this.memory = memory;
 		this.bandwidth = bandwidth;
 		this.storage = storage;
@@ -62,11 +71,19 @@ public class Resources {
 		return new Resources(this);
 	}
 	
-	public double getCpu() {
+	public int getCores() {
+		return cores;
+	}
+	
+	public void setCores(int cores) {
+		this.cores = cores;
+	}
+	
+	public int getCpu() {
 		return cpu;
 	}
 	
-	public void setCpu(double cpu) {
+	public void setCpu(int cpu) {
 		this.cpu = cpu;
 	}
 	
@@ -78,19 +95,23 @@ public class Resources {
 		this.memory = memory;
 	}
 	
-	public double getBandwidth() {
+	public int getCoreCapacity() {
+		return (int)cpu / cores;
+	}
+	
+	public int getBandwidth() {
 		return bandwidth;
 	}
 	
-	public void setBandwidth(double bandwidth) {
+	public void setBandwidth(int bandwidth) {
 		this.bandwidth = bandwidth;
 	}
 	
-	public long getStorage() {
+	public int getStorage() {
 		return storage;
 	}
 	
-	public void setStorage(long storage) {
+	public void setStorage(int storage) {
 		this.storage = storage;
 	}
 	

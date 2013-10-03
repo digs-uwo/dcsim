@@ -18,7 +18,7 @@ public class TraceWorkload extends Workload {
 
 	private static Map<String, WorkloadTrace> workloadTraces =  new HashMap<String, WorkloadTrace>();
 	
-	double scaleFactor; //the factor by which to scale work values
+	int scaleFactor = 1; //the factor by which to scale work values
 	WorkloadTrace workloadTrace; //the workload trace
 	
 	int currentPosition; //the current position in the trace
@@ -30,12 +30,9 @@ public class TraceWorkload extends Workload {
 	 * @param scaleFactor The factor by which to scale trace workload values. Traces values are in the range [0, 1], so workload values are in the range [0, scaleFactor]
 	 * @param offset The offset in simulation time to start the trace at.
 	 */
-	public TraceWorkload(Simulation simulation, String fileName, double scaleFactor, long offset) {
+	public TraceWorkload(Simulation simulation, String fileName, int scaleFactor, long offset) {
 		super(simulation);
-		
-		if (scaleFactor <= 0)
-			throw new RuntimeException("Invalid scaleFactor (must be postive): " + scaleFactor);
-		
+
 		this.scaleFactor = scaleFactor;
 		if (workloadTraces.containsKey(fileName)) {
 			workloadTrace = workloadTraces.get(fileName);
@@ -47,9 +44,22 @@ public class TraceWorkload extends Workload {
 		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
 	}
 	
+	public TraceWorkload(Simulation simulation, String fileName, long offset) {
+		super(simulation);
+
+		if (workloadTraces.containsKey(fileName)) {
+			workloadTrace = workloadTraces.get(fileName);
+		} else {
+			workloadTrace = new WorkloadTrace(fileName);
+			workloadTraces.put(fileName, workloadTrace);
+		}
+		
+		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
+	}
+	
 	@Override
-	protected double getCurrentWorkLevel() {
-		return workloadTrace.getValues().get(currentPosition) * scaleFactor;
+	protected int getCurrentWorkLevel() {
+		return (int)(workloadTrace.getValues().get(currentPosition) * scaleFactor);
 	}
 
 	@Override
@@ -64,6 +74,14 @@ public class TraceWorkload extends Workload {
 		 * is a performance optimization to reduce the number of time jumps in the simulation.
 		 */
 		return (simulation.getSimulationTime() - (simulation.getSimulationTime() % workloadTrace.getStepSize())) + workloadTrace.getStepSize();
+	}
+	
+	public void setScaleFactor(int scaleFactor) {
+		this.scaleFactor = scaleFactor;
+	}
+	
+	public int getScaleFactor() {
+		return scaleFactor;
 	}
 	
 	private class WorkloadTrace {

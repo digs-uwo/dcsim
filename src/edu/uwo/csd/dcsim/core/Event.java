@@ -12,6 +12,7 @@ public abstract class Event {
 	private ArrayList<EventCallbackListener> callbackListeners = new ArrayList<EventCallbackListener>();
 	
 	private boolean waitOnNextEvent = false; //true if we are waiting for another event to run
+	private boolean blockPostEvent = false;
 	
 	public Event(SimulationEventListener target) {
 		this.target = target;
@@ -53,7 +54,7 @@ public abstract class Event {
 	}
 	
 	public final void triggerPostExecute() {
-		if (!waitOnNextEvent) {
+		if (!waitOnNextEvent && !blockPostEvent) {
 			postExecute();
 		}
 	}
@@ -61,7 +62,7 @@ public abstract class Event {
 	
 	
 	public final void triggerCallback() {
-		if (!waitOnNextEvent) {
+		if (!waitOnNextEvent && !blockPostEvent) {
 			for (EventCallbackListener listener : callbackListeners) {
 				listener.eventCallback(this);
 			}
@@ -109,6 +110,14 @@ public abstract class Event {
 	
 	public final Simulation getSimulation() {
 		return simulation;
+	}
+	
+	public final boolean isPostEventBlocked() {
+		return blockPostEvent;
+	}
+	
+	public final void setBlockPostEvent(boolean blockPostEvent) {
+		this.blockPostEvent = blockPostEvent;
 	}
 	
 }

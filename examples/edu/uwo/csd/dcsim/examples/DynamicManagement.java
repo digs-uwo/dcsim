@@ -34,13 +34,13 @@ public class DynamicManagement extends SimulationTask {
 		
 		for(SimulationTask task : completedTasks) {
 			logger.info(task.getName());
-			ExampleHelper.printMetrics(task.getResults());
+			task.getMetrics().printDefault(logger);
 		}
 
 	}
 	
 	public DynamicManagement(String name, long randomSeed) {
-		super(name, SimTime.days(1));
+		super(name, SimTime.days(10));
 		this.setMetricRecordStart(SimTime.days(0));
 		this.setRandomSeed(randomSeed);
 	}
@@ -50,7 +50,7 @@ public class DynamicManagement extends SimulationTask {
 		
 		AutonomicManager dcAM = ExampleHelper.createDataCentre(simulation);
 		
-		ArrayList<VMAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
+		ArrayList<VmAllocationRequest> vmList = ExampleHelper.createVmList(simulation, false);
 				
 		ExampleHelper.placeVms(vmList, dcAM, simulation);
 		

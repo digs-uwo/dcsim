@@ -1,102 +1,124 @@
 package edu.uwo.csd.dcsim.host.scheduler;
 
+import java.util.ArrayList;
+
 import edu.uwo.csd.dcsim.host.Resources;
-import edu.uwo.csd.dcsim.vm.VMAllocation;
+import edu.uwo.csd.dcsim.vm.*;
 
 public class DefaultResourceScheduler extends ResourceScheduler {
-
-	private double roundCpuShare;
-	private int nVms; 
-	private double minShare;
 	
-	public enum ResourceSchedulerState {READY, COMPLETE;}
-		
-	/**
-	 * Initialize scheduling, including resetting scheduled resources from last time interval.
-	 */
 	@Override
-	public void beginScheduling() {
-		//set the number of VMs to schedule
-		nVms = host.getVMAllocations().size();
+	public void scheduleResources() {
+
+		Resources resourcesRemaining = new Resources (host.getResourceManager().getTotalCpu(), 
+				host.getResourceManager().getTotalMemory(),
+				host.getResourceManager().getTotalBandwidth(),
+				host.getResourceManager().getTotalStorage()); 
 		
-		if (nVms > 0) {
-			minShare = 1.0d / nVms; //use 1.0d to ensure the calculate returns a double, not an int
-		}
-	}
-	
-	public void schedulePrivDomain() {
-		//allocate all of the required cpu
-		Resources requiredResources = host.getPrivDomainAllocation().getVm().getResourcesRequired();
-		Resources scheduledResources = host.getPrivDomainAllocation().getVm().getResourcesScheduled();
+		//first, schedule privileged domain (VMM) its full demand
+		Vm privDomainVm = host.getPrivDomainAllocation().getVm();
+		Resources privResourceDemand = privDomainVm.getResourceDemand();
 		
-		double requiredCpu = requiredResources.getCpu();
-		
-		//we always want to schedule the priv domain all it requires first, and there should be sufficient CPU to handle it. If not, kill the simulation. 
-		if (requiredCpu > getRemainingCpu()) {
-			throw new RuntimeException("Insufficient resources to run privileged domain on host #" + host.getId());
-		}
-		
-		scheduledResources.setCpu(requiredCpu);
-		
-		host.getPrivDomainAllocation().getVm().scheduleResources(scheduledResources);
-		
-		scheduleCpu(requiredCpu);
-	}
-	
-	public void beginRound() {
-		if (nVms > 0) {
-			roundCpuShare = getRemainingCpu() / nVms;
-			
-			//put a lower limit on the round share to avoid scheduling very small amounts
-			if (roundCpuShare < minShare)
-				roundCpuShare = minShare;
-			
+		if (resourcesRemaining.getCpu() >= privResourceDemand.getCpu()) {
+			resourcesRemaining.setCpu(resourcesRemaining.getCpu() - privResourceDemand.getCpu());
 		} else {
-			roundCpuShare = 0; //irrelevant value, as there are no VMs which will execute
+			throw new RuntimeException("Host #" + host.getId() + " does not have enough CPU to execute the VMM (privileged domain)");
 		}
-	}
-	
-	/**
-	 * 
-	 * @param vmAlloc
-	 * @return true, if the VM required more resource during this scheduling round, false otherwise
-	 */
-	@Override
-	public boolean scheduleVM(VMAllocation vmAlloc) {
-		//get the requested and scheduled CPU from the VM
-		Resources requiredResources = vmAlloc.getVm().getResourcesRequired();
-		Resources scheduledResources = vmAlloc.getVm().getResourcesScheduled();
-		
-		//if the VM requires no more CPU than already scheduled, then we can return false
-		if (requiredResources.getCpu() <= scheduledResources.getCpu()) {
-			--nVms;
-			return false;
+		if (resourcesRemaining.getMemory() >= privResourceDemand.getMemory()) {
+			resourcesRemaining.setMemory(resourcesRemaining.getMemory() - privResourceDemand.getMemory());
+		} else {
+			throw new RuntimeException("Host #" + host.getId() + " does not have enough memory to execute the VMM (privileged domain)");
 		}
-				
-		//try to give as much as we can, up to any predetermined limit for the round and no more than remaining CPU
-		double additionalCpu = requiredResources.getCpu() - scheduledResources.getCpu();
+		if (resourcesRemaining.getBandwidth() >= privResourceDemand.getBandwidth()) {
+			resourcesRemaining.setBandwidth(resourcesRemaining.getBandwidth() - privResourceDemand.getBandwidth());
+		} else {
+			throw new RuntimeException("Host #" + host.getId() + " does not have enough bandwidth to execute the VMM (privileged domain)");
+		}
+		if (resourcesRemaining.getStorage() >= privResourceDemand.getStorage()) {
+			resourcesRemaining.setStorage(resourcesRemaining.getStorage() - privResourceDemand.getStorage());
+		} else {
+			throw new RuntimeException("Host #" + host.getId() + " does not have enough storage to execute the VMM (privileged domain)");
+		}
 		
-		//cap additionalCpu at the round share
-		additionalCpu = Math.min(additionalCpu, roundCpuShare);
-		additionalCpu = Math.min(additionalCpu, getRemainingCpu()); //overcome rounding errors that allow sightly more CPU to be used than available
+		privDomainVm.scheduleResources(privResourceDemand);
+		
+		//build list of VM allocations that current contain a VM
+		ArrayList<VmAllocation> vmAllocations = new ArrayList<VmAllocation>();
+		for (VmAllocation vmAlloc : host.getVMAllocations()) {
+			if (vmAlloc.getVm() != null) vmAllocations.add(vmAlloc);
+		}
 
-		//if there is more CPU required, and we have some left
-		if (additionalCpu > 0 && getRemainingCpu() > 0) {
-			//add either the required additional cpu or the amount we have left, whichever is smaller
-			double cpuToAdd = Math.min(additionalCpu, getRemainingCpu());
-
-			//add the cpu to the scheduled resources of the vm
-			scheduledResources.setCpu(scheduledResources.getCpu() + cpuToAdd);
+		//initialize resource scheduling
+		for (VmAllocation vmAlloc : vmAllocations) {
 			
-			//allocate new resource amount
-			vmAlloc.getVm().scheduleResources(scheduledResources);
+			Vm vm = vmAlloc.getVm();
+			
+			//start with CPU at 0 and all other resources equal to demand
+			Resources scheduled = new Resources(vm.getResourceDemand());
+			scheduled.setCpu(0);
+			
+			//verify that enough memory, bandwidth and storage are available. For now, we simply kill the simulation if this is not the case, the the behaviour is presently undefined
+			if (scheduled.getMemory() <= resourcesRemaining.getMemory()) {
+				resourcesRemaining.setMemory(resourcesRemaining.getMemory() - scheduled.getMemory());
+			} else {
+				throw new RuntimeException("Host #" + host.getId() + " does not have enough memory to execute VM #" + vm.getId());
+			}
+			if (scheduled.getBandwidth() <= resourcesRemaining.getBandwidth()) {
+				resourcesRemaining.setBandwidth(resourcesRemaining.getBandwidth() - scheduled.getBandwidth());
+			} else {
+				throw new RuntimeException("Host #" + host.getId() + " does not have enough bandwidth to execute VM #" + vm.getId());
+			}
+			if (scheduled.getStorage() <= resourcesRemaining.getStorage()) {
+				resourcesRemaining.setStorage(resourcesRemaining.getStorage() - scheduled.getStorage());
+			} else {
+				throw new RuntimeException("Host #" + host.getId() + " does not have enough storage to execute VM #" + vm.getId());
+			}
+			
+			vm.scheduleResources(scheduled);
+			
+		}
+
+		//now, we schedule CPU fairly among all VMs
+		int cpuShare = 0;
+		int incompleteVms = vmAllocations.size();
 		
-			//subtract from remainingCpu
-			scheduleCpu(cpuToAdd);
+		//adjust incompleteVm count to remove any VMs that have 0 CPU demand
+		for (VmAllocation vmAlloc : vmAllocations) {
+			if (vmAlloc.getVm().getResourceDemand().getCpu() == 0) --incompleteVms;
+		}
+
+		while (resourcesRemaining.getCpu() > 0 && incompleteVms > 0) {
+			
+			cpuShare = resourcesRemaining.getCpu() / incompleteVms;
+			
+			//if resourcesRemaining is small enough, it could be rounded to 0. Set '1' as minimum share. 
+			cpuShare = Math.max(cpuShare, 1);
+
+			for (VmAllocation vmAlloc : vmAllocations) {			
+				Vm vm = vmAlloc.getVm();
+				Resources scheduled = vm.getResourcesScheduled();
+								
+				int remainingCpuDemand = vm.getResourceDemand().getCpu() - scheduled.getCpu();
+
+				if (remainingCpuDemand > 0) {
+					if (remainingCpuDemand <= cpuShare) {
+						scheduled.setCpu(scheduled.getCpu() + remainingCpuDemand);
+						resourcesRemaining.setCpu(resourcesRemaining.getCoreCapacity() - remainingCpuDemand);
+						--incompleteVms;
+					} else {
+						scheduled.setCpu(scheduled.getCpu() + cpuShare);
+						resourcesRemaining.setCpu(resourcesRemaining.getCpu() - cpuShare);
+					}
+					
+					vm.scheduleResources(scheduled);
+				}
+				
+				//check if we are out of CPU. This can occur when share is defaulted to '1' as minimum
+				if (resourcesRemaining.getCpu() == 0) break;
+
+			}
 		}
 		
-		//Note that even if additionalCPU is now zero, we don't return false unless no additional CPU was scheduled during this round	
-		return true;
 	}
 
 	

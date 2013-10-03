@@ -1,9 +1,7 @@
 package edu.uwo.csd.dcsim;
 
-import java.util.Collection;
-
 import edu.uwo.csd.dcsim.core.Simulation;
-import edu.uwo.csd.dcsim.core.metrics.Metric;
+import edu.uwo.csd.dcsim.core.metrics.SimulationMetrics;
 
 /**
  * SimulationTaskWrapper wraps a simulation task for execute in order to act as the sole reference to the task, allowing
@@ -14,7 +12,7 @@ import edu.uwo.csd.dcsim.core.metrics.Metric;
 public class SimulationTaskWrapper extends SimulationTask {
 
 	SimulationTask task;
-	Collection<Metric> results = null;
+	SimulationMetrics metrics = null;
 	
 	public SimulationTaskWrapper(SimulationTask task) {
 		super(task.getName(), task.getDuration());
@@ -55,7 +53,7 @@ public class SimulationTaskWrapper extends SimulationTask {
 		task.run();
 		
 		//save the results
-		results = task.getResults();
+		metrics = task.getMetrics();
 		
 		//clear the reference to the task in order to free memory
 		task = null;
@@ -64,11 +62,11 @@ public class SimulationTaskWrapper extends SimulationTask {
 	}
 
 	@Override
-	public Collection<Metric> getResults() {
-		if (results == null)
+	public SimulationMetrics getMetrics() {
+		if (metrics == null)
 			throw new IllegalStateException("Attempted to get results from DCSimulationTaskWrapper which has not executed a task");
 		
-		return results;
+		return metrics;
 	}
 
 	@Override

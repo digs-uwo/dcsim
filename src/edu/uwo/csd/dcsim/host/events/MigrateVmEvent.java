@@ -9,10 +9,10 @@ public class MigrateVmEvent extends Event {
 	boolean complete;
 	Host source;
 	Host target;
-	VMAllocationRequest vmAllocationRequest;
-	VM vm;
+	VmAllocationRequest vmAllocationRequest;
+	Vm vm;
 	
-	VMAllocation vmAllocation;
+	VmAllocation vmAllocation;
 	
 	/**
 	 * Creates MigrateVmEvent triggering the start of a migration, as indicated by passing a VMAllocationRequest instead of a VMAllocation
@@ -21,7 +21,7 @@ public class MigrateVmEvent extends Event {
 	 * @param vmAllocationRequest
 	 * @param vm
 	 */
-	public MigrateVmEvent(Host source, Host target, VMAllocationRequest vmAllocationRequest, VM vm) {
+	public MigrateVmEvent(Host source, Host target, VmAllocationRequest vmAllocationRequest, Vm vm) {
 		super(target);
 		
 		this.source = source;
@@ -38,7 +38,7 @@ public class MigrateVmEvent extends Event {
 	 * @param vmAllocation
 	 * @param vm
 	 */
-	public MigrateVmEvent(Host source, Host target, VMAllocation vmAllocation, VM vm) {
+	public MigrateVmEvent(Host source, Host target, VmAllocation vmAllocation, Vm vm) {
 		super(target);
 		
 		this.source = source;
@@ -60,19 +60,19 @@ public class MigrateVmEvent extends Event {
 		return target;
 	}
 	
-	public VMAllocationRequest getVMAllocationRequest() {
+	public VmAllocationRequest getVMAllocationRequest() {
 		return vmAllocationRequest;
 	}
 	
-	public VM getVM() {
+	public Vm getVM() {
 		return vm;
 	}
 	
-	public void setVMAllocation(VMAllocation vmAllocation) {
+	public void setVMAllocation(VmAllocation vmAllocation) {
 		this.vmAllocation = vmAllocation;
 	}
 	
-	public VMAllocation getVMAllocation() {
+	public VmAllocation getVMAllocation() {
 		return vmAllocation;
 	}
 	

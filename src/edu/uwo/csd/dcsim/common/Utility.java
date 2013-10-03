@@ -10,4 +10,12 @@ public class Utility {
 		return Math.round(d * (Math.pow(10, (double)precision))) / (Math.pow(10, (double)precision));
 	}
 	
+	public static double toKWH(double power) {
+		return power / 3600000;
+	}
+	
+	public static double toPercentage(double value) {
+		return value * 100;
+	}
+	
 }

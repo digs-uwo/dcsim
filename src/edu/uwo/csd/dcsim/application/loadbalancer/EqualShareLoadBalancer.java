@@ -1,14 +1,9 @@
 package edu.uwo.csd.dcsim.application.loadbalancer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import edu.uwo.csd.dcsim.application.Application;
+import edu.uwo.csd.dcsim.application.TaskInstance;
+import edu.uwo.csd.dcsim.common.ObjectBuilder;
 
 /**
- * EqualShareLoadBalancer is a LoadBalancer that splits incoming work equal among all Applications in an
- * ApplicationTier
  * 
  * @author Michael Tighe
  *
@@ -16,23 +11,23 @@ import edu.uwo.csd.dcsim.application.Application;
 public class EqualShareLoadBalancer extends LoadBalancer {
 
 	@Override
-	public Map<Application, Double> distributeWork(double work) {
-		double workPerApp;
-
-		Map<Application, Double> applicationWorkLevel = new HashMap<Application, Double>();
+	public float getInstanceShare(TaskInstance taskInstance) {
 		
-		ArrayList<Application> applications = this.getApplicationTier().getApplications();
-		
-		if (applications.size() > 0) {
-			workPerApp = work / applications.size();
-			
-			for (Application app : applications) {
-				applicationWorkLevel.put(app, workPerApp);
-			}
-			
+		if (task == null) {
+			throw new RuntimeException("Load Balancer called with null Task");
 		}
 		
-		return applicationWorkLevel;
+		return 1 / (float)task.getInstances().size();
 	}
+
+	public static class Builder implements ObjectBuilder<LoadBalancer> {
+
+		@Override
+		public LoadBalancer build() {
+			return new EqualShareLoadBalancer();
+		}
+		
+	}
+
 
 }

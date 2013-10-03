@@ -11,7 +11,7 @@ import edu.uwo.csd.dcsim.core.Simulation;
 public class RandomWorkload extends Workload {
 
 	long stepSize; //the interval on which to change the workload level
-	double scaleFactor; //the maximum workload level
+	int scaleFactor = 1; //the maximum workload level
 	int workLevel = 0; //the current workload level
 	
 	/**
@@ -20,7 +20,7 @@ public class RandomWorkload extends Workload {
 	 * @param scaleFactor The amount by which to scale the workload level. Workload levels will be in the range [0, scaleFactor]
 	 * @param stepSize The time interval on which to generate a new random workload level
 	 */
-	public RandomWorkload(Simulation simulation, double scaleFactor, long stepSize) {
+	public RandomWorkload(Simulation simulation, int scaleFactor, long stepSize) {
 		super(simulation);	
 		
 		this.stepSize = stepSize;
@@ -29,12 +29,28 @@ public class RandomWorkload extends Workload {
 		workLevel = generateRandomWorkLevel();
 	}
 	
+	public RandomWorkload(Simulation simulation, long stepSize) {
+		super(simulation);	
+		
+		this.stepSize = stepSize;
+		
+		workLevel = generateRandomWorkLevel();
+	}
+	
+	public void setScaleFactor(int scaleFactor) {
+		this.scaleFactor = scaleFactor;
+	}
+	
+	public int getScaleFactor() {
+		return scaleFactor;
+	}
+	
 	protected int generateRandomWorkLevel() {
 		return (int)Math.round(simulation.getRandom().nextDouble() * scaleFactor);
 	}
 	
 	@Override
-	protected double getCurrentWorkLevel() {
+	protected int getCurrentWorkLevel() {
 		return workLevel;
 	}
 

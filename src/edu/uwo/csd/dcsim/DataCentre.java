@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.DCCpuUtilMetric;
-import edu.uwo.csd.dcsim.core.metrics.OptimalPowerRatioMetric;
 import edu.uwo.csd.dcsim.host.*;
 
 /**
@@ -20,9 +18,6 @@ import edu.uwo.csd.dcsim.host.*;
  */
 public class DataCentre implements SimulationEventListener {
 	
-	public static final String DC_UTIL_METRIC = "avgDcUtil";
-	public static final String OPTIMAL_POWER_RATIO_METRIC = "optimalPowerEfficiencyRatio";
-
 	private ArrayList<Host> hosts; //the hosts in this datacentre
 	Simulation simulation;
 	
@@ -49,6 +44,7 @@ public class DataCentre implements SimulationEventListener {
 		this.dataNetworkSwitch = switchFactory.newInstance();
 		this.mgmtNetworkSwitch = switchFactory.newInstance();
 		this.clusters = new ArrayList<Cluster>();
+		hosts = new ArrayList<Host>();
 	}
 	
 	/**
@@ -79,22 +75,6 @@ public class DataCentre implements SimulationEventListener {
 	public void handleEvent(Event e) {
 		//at present, there are no events received by DataCentre. This is left as a hook in case of future need
 	}
-
-	/**
-	 * Update metrics regarding the DataCentre
-	 */
-	public void updateMetrics() {
-		
-		DCCpuUtilMetric dcUtilMetric = DCCpuUtilMetric.getMetric(simulation, DC_UTIL_METRIC);
-		
-		for (Host host : hosts) {
-			host.updateMetrics();
-			
-			dcUtilMetric.addHostUse(host.getResourceManager().getCpuInUse(), host.getTotalCpu());
-		}
-		
-		OptimalPowerRatioMetric.getMetric(simulation, OPTIMAL_POWER_RATIO_METRIC).update(hosts);
-	}
 	
 	/**
 	 * Log state of the DataCentre
@@ -113,8 +93,10 @@ public class DataCentre implements SimulationEventListener {
 	}
 	
 	/**
-	 * Adds a cluster to the data centre, connecting it to both data and 
-	 * management networks.
+	 * Adds a cluster to the data centre, connecting it to both data and management networks.
+	 * 
+	 * It also adds the Hosts in the Cluster to the DataCentre (required for the Simulation class 
+	 * to work properly).
 	 */
 	public void addCluster(Cluster cluster) {
 		// Set Data Network.
@@ -130,6 +112,10 @@ public class DataCentre implements SimulationEventListener {
 		mgmtNetworkSwitch.addPort(link);
 		
 		clusters.add(cluster);
+		
+		for (Rack rack : cluster.getRacks()) {
+			hosts.addAll(rack.getHosts());
+		}
 	}
 	
 	public ArrayList<Cluster> getClusters() { return clusters; }

@@ -1,24 +1,21 @@
 package edu.uwo.csd.dcsim.management.action;
 
 import edu.uwo.csd.dcsim.core.*;
-import edu.uwo.csd.dcsim.core.metrics.CountMetric;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.management.events.VmPlacementEvent;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class ReplicateAction extends ManagementAction {
 
-	private static final String REPLICATE_COUNT_METRIC = "replicationCount";
-	
-	private VMDescription vmDescription;
+	private VmDescription vmDescription;
 	private AutonomicManager dcManager;
 	
-	public ReplicateAction(VMDescription vmDescription, AutonomicManager dcManager) {
+	public ReplicateAction(VmDescription vmDescription, AutonomicManager dcManager) {
 		this.vmDescription = vmDescription;
 		this.dcManager = dcManager;
 	}
 	
-	public VMDescription getVMDescription() {
+	public VmDescription getVMDescription() {
 		return vmDescription;
 	}
 	
@@ -27,7 +24,7 @@ public class ReplicateAction extends ManagementAction {
 	}
 
 	public void execute(Simulation simulation, Object triggeringEntity) {
-		VMAllocationRequest request = new VMAllocationRequest(vmDescription);
+		VmAllocationRequest request = new VmAllocationRequest(vmDescription);
 		
 		VmPlacementEvent placementEvent = new VmPlacementEvent(dcManager, request);
 		
@@ -42,9 +39,6 @@ public class ReplicateAction extends ManagementAction {
 		});
 		simulation.sendEvent(placementEvent);		
 
-		if (simulation.isRecordingMetrics()) {
-			CountMetric.getMetric(simulation, REPLICATE_COUNT_METRIC).incrementCount();
-		}
 	}
 	
 }

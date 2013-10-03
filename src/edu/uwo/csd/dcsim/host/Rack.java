@@ -17,15 +17,20 @@ public final class Rack implements SimulationEventListener {
 	private Simulation simulation;
 	
 	private int id = 0;
-	private int nSlots = 0;				// Number of hosts that can be hosted in the rack.
-	private int nHosts = 0;				// Number of hosts actually hosted in the rack.
+	private int nSlots = 0;								// Number of hosts that can be hosted in the rack.
+	private int nHosts = 0;								// Number of hosts actually hosted in the rack.
+	
+	private Cluster cluster;
 	
 	private ArrayList<Host> hosts = null;					// List of hosts.
 	
 	private Switch dataNetworkSwitch = null;				// Data network switch.
 	private Switch mgmtNetworkSwitch = null;				// Management network switch.
 	
-	// Do we want a _state_ attribute ???
+	private final int hashCode;
+	
+	public enum RackState {ON, SUSPENDED, OFF;}
+	//private RackState state;
 	
 	private Rack(Builder builder) {
 		
@@ -42,6 +47,7 @@ public final class Rack implements SimulationEventListener {
 		this.hosts = new ArrayList<Host>(nHosts);
 		for (int i = 0; i < nHosts; i++) {
 			Host host = builder.hostBuilder.build();
+			host.setRack(this);
 			
 			// Set Data Network.
 			NetworkCard networkCard = host.getDataNetworkCard();
@@ -60,6 +66,10 @@ public final class Rack implements SimulationEventListener {
 		
 		// Set default state.
 		//state = RackState.OFF;
+		
+		//init hashCode
+		hashCode = generateHashCode();
+		
 	}
 	
 	/**
@@ -128,10 +138,31 @@ public final class Rack implements SimulationEventListener {
 	
 	public int getSlotCount() { return nSlots; }
 	
+	public Cluster getCluster() {
+		return cluster;
+	}
+	
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
+	
 	public ArrayList<Host> getHosts() { return hosts; }
 	
 	public Switch getDataNetworkSwitch() { return dataNetworkSwitch; }
 	
 	public Switch getMgmtNetworkSwitch() { return mgmtNetworkSwitch; }
+	
+	@Override
+	public int hashCode() {
+		return hashCode;
+	}
+	
+	private int generateHashCode() {
+		int result = HashCodeUtil.SEED;
+		result = HashCodeUtil.hash(result, id);
+		result = HashCodeUtil.hash(result, nSlots);
+		result = HashCodeUtil.hash(result, nHosts);
+		return result;
+	}
 
 }

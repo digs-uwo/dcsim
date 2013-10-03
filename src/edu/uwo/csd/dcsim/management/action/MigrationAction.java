@@ -3,7 +3,6 @@ package edu.uwo.csd.dcsim.management.action;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
-import edu.uwo.csd.dcsim.core.metrics.CountMetric;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
@@ -11,8 +10,6 @@ import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.management.events.MigrationEvent;
 
 public class MigrationAction extends ManagementAction {
-	
-	private static final String MIGRATION_COUNT_METRIC = "migrationCount";
 
 	private AutonomicManager sourceHostManager;
 	private Host source;
@@ -86,7 +83,7 @@ public class MigrationAction extends ManagementAction {
 		simulation.sendEvent(migEvent);
 		
 		if (simulation.isRecordingMetrics()) {
-			CountMetric.getMetric(simulation, MIGRATION_COUNT_METRIC + "-" + triggeringEntity.getClass().getSimpleName()).incrementCount();
+			simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass());
 		}
 
 		//TODO improve logging output
