@@ -30,7 +30,7 @@ public final class Rack implements SimulationEventListener {
 	private final int hashCode;
 	
 	public enum RackState {ON, SUSPENDED, OFF;}
-	//private RackState state;
+	private RackState state;
 	
 	private Rack(Builder builder) {
 		
@@ -65,7 +65,7 @@ public final class Rack implements SimulationEventListener {
 		}
 		
 		// Set default state.
-		//state = RackState.OFF;
+		state = RackState.OFF;
 		
 		//init hashCode
 		hashCode = generateHashCode();
@@ -125,6 +125,50 @@ public final class Rack implements SimulationEventListener {
 		
 	}
 	
+	public double getCurrentPowerConsumption() {
+		double power = 0;
+		
+		for (Host host : hosts)
+			power += host.getCurrentPowerConsumption();
+		
+		power += dataNetworkSwitch.getPowerConsumption();
+		power += mgmtNetworkSwitch.getPowerConsumption();
+		
+		return power;
+	}
+	
+	public void updateState() {
+		RackState oldState = state;
+		
+		// Calculate number of active and suspended Hosts -- the rest are powered-off.
+		int activeHosts = 0;
+		int suspendedHosts = 0;
+		for (Host host : hosts) {
+			Host.HostState state = host.getState();
+			if (state == Host.HostState.ON || 
+				state == Host.HostState.POWERING_ON || 
+				state == Host.HostState.SUSPENDING || 
+				state == Host.HostState.POWERING_OFF)
+				
+				activeHosts++;
+			else if (state == Host.HostState.SUSPENDED)
+				suspendedHosts++;
+			// ELSE Host is OFF or FAILED
+		}
+		
+		// Determine Rack's current state.
+		if (activeHosts > 0)
+			state = RackState.ON;
+		else if (suspendedHosts > 0)
+			state = RackState.SUSPENDED;
+		else
+			state = RackState.OFF;
+		
+		// If there was a change in state, update parent Cluster's state.
+		if (state != oldState)
+			cluster.updateState();
+	}
+	
 	@Override
 	public void handleEvent(Event e) {
 		// TODO Auto-generated method stub
@@ -151,6 +195,8 @@ public final class Rack implements SimulationEventListener {
 	public Switch getDataNetworkSwitch() { return dataNetworkSwitch; }
 	
 	public Switch getMgmtNetworkSwitch() { return mgmtNetworkSwitch; }
+	
+	public RackState getState() { return state; }
 	
 	@Override
 	public int hashCode() {

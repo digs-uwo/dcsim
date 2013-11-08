@@ -21,6 +21,11 @@ public class ManagementMetrics extends MetricCollection {
 	Map<Class<?>, Long> migrationCount = new HashMap<Class<?>, Long>();
 	long placements;
 	
+	public enum MigrationType {INTRARACK, INTRACLUSTER, INTERCLUSTER;}
+	long intrarack = 0;
+	long intracluster = 0;
+	long intercluster = 0;
+	
 	public void addMessage(MessageEvent message) {
 		
 		long count = 0;
@@ -46,6 +51,23 @@ public class ManagementMetrics extends MetricCollection {
 		++count;
 		
 		migrationCount.put(triggeringClass, count);
+	}
+	
+	public void addMigration(Class<?> triggeringClass, MigrationType type) {
+		this.addMigration(triggeringClass);
+		
+		switch (type) {
+			case INTRARACK: 	intrarack++;
+								break;
+								
+			case INTRACLUSTER: intracluster++;
+								break;
+								
+			case INTERCLUSTER: intercluster++;
+								break;
+								
+			default: 			break;
+		}
 	}
 	
 	public Map<Class<? extends MessageEvent>, Long> getMessageCount() {
@@ -110,6 +132,9 @@ public class ManagementMetrics extends MetricCollection {
 		for (Entry<Class<?>, Long> entry : getMigrationCount().entrySet()) {
 			out.info("    " + entry.getKey().getName() + ": " + entry.getValue());
 		}
+		out.info("    Intrarack: " + intrarack);
+		out.info("    Intracluster: " + intracluster);
+		out.info("    Intercluster: " + intercluster);
 	}
 
 	@Override
@@ -125,6 +150,9 @@ public class ManagementMetrics extends MetricCollection {
 		for (Entry<Class<?>, Long> entry : getMigrationCount().entrySet()) {
 			metrics.add(new Tuple<String, Object>("migrations-" + entry.getKey().getName(),  entry.getValue()));
 		}
+		metrics.add(new Tuple<String, Object>("migrations-intrarack", intrarack));
+		metrics.add(new Tuple<String, Object>("migrations-intracluster", intracluster));
+		metrics.add(new Tuple<String, Object>("migrations-intercluster", intercluster));
 		
 		return metrics;
 	}

@@ -3,6 +3,7 @@ package edu.uwo.csd.dcsim.management.action;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.core.metrics.ManagementMetrics.MigrationType;
 import edu.uwo.csd.dcsim.host.Host;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent;
 import edu.uwo.csd.dcsim.host.events.PowerStateEvent.PowerState;
@@ -83,7 +84,14 @@ public class MigrationAction extends ManagementAction {
 		simulation.sendEvent(migEvent);
 		
 		if (simulation.isRecordingMetrics()) {
-			simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass());
+			//simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass());
+			
+			if (source.getRack() == target.getRack())
+				simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass(), MigrationType.INTRARACK);
+			else if (source.getRack().getCluster() == target.getRack().getCluster())
+				simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass(), MigrationType.INTRACLUSTER);
+			else
+				simulation.getSimulationMetrics().getManagementMetrics().addMigration(triggeringEntity.getClass(), MigrationType.INTERCLUSTER);
 		}
 
 		//TODO improve logging output

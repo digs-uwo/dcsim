@@ -32,8 +32,9 @@ public class DataCentre implements SimulationEventListener {
 	 * @param vmPlacementPolicy
 	 */
 	public DataCentre(Simulation simulation) {
-		hosts = new ArrayList<Host>();
 		this.simulation = simulation;
+		hosts = new ArrayList<Host>();
+		clusters = new ArrayList<Cluster>();
 	}
 	
 	/**

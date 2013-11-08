@@ -13,6 +13,7 @@ public class SimulationMetrics {
 
 	Simulation simulation;
 	HostMetrics hostMetrics;
+	ClusterMetrics clusterMetrics;
 	ApplicationMetrics applicationMetrics;
 	ManagementMetrics managementMetrics;
 	Map<Class<? extends MetricCollection>, MetricCollection> customMetrics = new HashMap<Class<? extends MetricCollection>, MetricCollection>();
@@ -24,12 +25,17 @@ public class SimulationMetrics {
 		this.simulation = simulation;
 		
 		hostMetrics = new HostMetrics(simulation);
+		clusterMetrics = new ClusterMetrics(simulation);
 		applicationMetrics = new ApplicationMetrics(simulation);
 		managementMetrics = new ManagementMetrics(simulation);
 	}
 	
 	public HostMetrics getHostMetrics() {
 		return hostMetrics;
+	}
+	
+	public ClusterMetrics getClusterMetrics() {
+		return clusterMetrics;
 	}
 	
 	public ApplicationMetrics getApplicationMetrics() {
@@ -42,6 +48,7 @@ public class SimulationMetrics {
 	
 	public void completeSimulation() {
 		hostMetrics.completeSimulation();
+		clusterMetrics.completeSimulation();
 		applicationMetrics.completeSimulation();
 		managementMetrics.completeSimulation();
 	}
@@ -79,6 +86,8 @@ public class SimulationMetrics {
 		
 		hostMetrics.printDefault(out);
 		out.info("");
+		clusterMetrics.printDefault(out);
+		out.info("");
 		applicationMetrics.printDefault(out);
 		out.info("");
 		managementMetrics.printDefault(out);
@@ -108,6 +117,7 @@ public class SimulationMetrics {
 		metrics.add(new Tuple<String, Object>("appSchedulingTimeout", applicationSchedulingTimedOut));
 
 		metrics.addAll(hostMetrics.getMetricValues());
+		metrics.addAll(clusterMetrics.getMetricValues());
 		metrics.addAll(applicationMetrics.getMetricValues());
 		metrics.addAll(managementMetrics.getMetricValues());
 		

@@ -30,6 +30,7 @@ public final class Cluster implements SimulationEventListener {
 	private Switch mainMgmtSwitch = null;					// Management network main (top-level) switch.
 	
 	public enum ClusterState {ON, SUSPENDED, OFF;}
+	private ClusterState state;
 	
 	private final int hashCode;
 	
@@ -99,7 +100,7 @@ public final class Cluster implements SimulationEventListener {
 		}
 		
 		// Set default state.
-		//state = RackState.OFF;
+		state = ClusterState.OFF;
 		
 		//init hashCode
 		hashCode = generateHashCode();
@@ -156,6 +157,45 @@ public final class Cluster implements SimulationEventListener {
 		
 	}
 	
+	public double getCurrentPowerConsumption() {
+		double power = 0;
+		
+		for (Rack rack : racks)
+			power += rack.getCurrentPowerConsumption();
+		
+		// Add power consumption of the Cluster's Switches.
+		power += mainDataSwitch.getPowerConsumption();
+		power += mainMgmtSwitch.getPowerConsumption();
+		if (nSwitches > 1) {	// Star topology.
+			for (Switch s : dataSwitches)
+				power += s.getPowerConsumption();
+			for (Switch s : mgmtSwitches)
+				power += s.getPowerConsumption();
+		}		
+		
+		return power;
+	}
+	
+	public void updateState() {
+		// Calculate number of active and suspended Racks -- the rest are powered-off.
+		int activeRacks = 0;
+		int suspendedRacks = 0;
+		for (Rack rack : racks) {
+			if (rack.getState() == Rack.RackState.ON)
+				activeRacks++;
+			else if (rack.getState() == Rack. RackState.SUSPENDED)
+				suspendedRacks++;
+		}
+		
+		// Determine Rack's current state.
+		if (activeRacks > 0)
+			state = ClusterState.ON;
+		else if (suspendedRacks > 0)
+			state = ClusterState.SUSPENDED;
+		else
+			state = ClusterState.OFF;
+	}
+	
 	@Override
 	public void handleEvent(Event e) {
 		// TODO Auto-generated method stub
@@ -178,6 +218,8 @@ public final class Cluster implements SimulationEventListener {
 	public Switch getMainDataSwitch() {	return mainDataSwitch; }
 	
 	public Switch getMainMgmtSwitch() {	return mainMgmtSwitch; }
+	
+	public ClusterState getState() { return state; }
 	
 	@Override
 	public int hashCode() {
