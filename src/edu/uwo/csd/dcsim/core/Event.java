@@ -11,7 +11,7 @@ public abstract class Event {
 	private long sendOrder;
 	private ArrayList<EventCallbackListener> callbackListeners = new ArrayList<EventCallbackListener>();
 	
-	private boolean waitOnNextEvent = false; //true if we are waiting for another event to run
+	private int waitOnEvent = 0; //0 if we are waiting for another event to run, > 0 depending on number of events to wait for
 	private boolean blockPostEvent = false;
 	
 	public Event(SimulationEventListener target) {
@@ -25,14 +25,14 @@ public abstract class Event {
 	
 	public final void addEventInSequence(Event nextEvent) {
 		//flag that we are waiting to trigger postExecute, log, and callbackListeners until the next event is done
-		waitOnNextEvent = true;
+		waitOnEvent++;
 		
 		//add a listener to trigger methods once the next event completes. This can cause a cascade back through several sequenced events.
 		nextEvent.addCallbackListener(new EventCallbackListener() {
 
 			@Override
 			public void eventCallback(Event e) {
-				waitOnNextEvent = false;
+				waitOnEvent--;
 				postExecute();
 				triggerCallback();
 			}
@@ -41,7 +41,7 @@ public abstract class Event {
 	}
 	
 	public final void cancelEventInSequence() {
-		waitOnNextEvent = false;
+		waitOnEvent--;
 		postExecute();
 		triggerCallback();
 	}
@@ -54,7 +54,7 @@ public abstract class Event {
 	}
 	
 	public final void triggerPostExecute() {
-		if (!waitOnNextEvent && !blockPostEvent) {
+		if (waitOnEvent == 0 && !blockPostEvent) {
 			postExecute();
 		}
 	}
@@ -62,7 +62,7 @@ public abstract class Event {
 	
 	
 	public final void triggerCallback() {
-		if (!waitOnNextEvent && !blockPostEvent) {
+		if (waitOnEvent == 0 && !blockPostEvent) {
 			for (EventCallbackListener listener : callbackListeners) {
 				listener.eventCallback(this);
 			}
