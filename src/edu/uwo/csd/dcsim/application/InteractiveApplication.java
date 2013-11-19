@@ -106,7 +106,7 @@ public class InteractiveApplication extends Application {
 				dead = true;
 			}
 		}
-		if (dead) {
+		if (dead || !this.isActive()) {
 			for (InteractiveTask task : tasks) {
 				for (InteractiveTaskInstance instance : task.getInteractiveTaskInstances()) {
 					instance.getResourceDemand().setCpu(0);

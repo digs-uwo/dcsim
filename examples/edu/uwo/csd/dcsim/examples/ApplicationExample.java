@@ -9,6 +9,8 @@ import edu.uwo.csd.dcsim.application.InteractiveApplication;
 import edu.uwo.csd.dcsim.application.sla.InteractiveServiceLevelAgreement;
 import edu.uwo.csd.dcsim.application.workload.*;
 import edu.uwo.csd.dcsim.common.SimTime;
+import edu.uwo.csd.dcsim.core.Event;
+import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
@@ -31,7 +33,7 @@ public class ApplicationExample extends SimulationTask {
 	
 		Simulation.initializeLogging();
 		
-		SimulationTask task = new ApplicationExample("AppExample", SimTime.days(10));
+		SimulationTask task = new ApplicationExample("AppExample", SimTime.days(1));
 		
 		task.run();
 		
@@ -41,7 +43,7 @@ public class ApplicationExample extends SimulationTask {
 	
 	public ApplicationExample(String name, long duration) {
 		super(name, duration);
-		this.setMetricRecordStart(SimTime.minutes(10));
+		this.setMetricRecordStart(SimTime.minutes(0));
 		this.setRandomSeed(6662890007189740306l);
 	}
 
@@ -99,7 +101,7 @@ public class ApplicationExample extends SimulationTask {
 		//Create applications
 		ArrayList<VmAllocationRequest> vmRequests = new ArrayList<VmAllocationRequest>();
 		
-		for (int i = 0; i < 80; ++i) {
+		for (int i = 0; i < 50; ++i) {
 //			StaticWorkload workload = new StaticWorkload(simulation);
 			TraceWorkload workload = new TraceWorkload(simulation, "traces/clarknet", (int)(simulation.getRandom().nextDouble() * 200000000));
 			InteractiveApplication.Builder appBuilder = new InteractiveApplication.Builder(simulation).workload(workload).thinkTime(4)
@@ -120,6 +122,17 @@ public class ApplicationExample extends SimulationTask {
 		}
 		
 		VmPlacementEvent vmPlacementEvent = new VmPlacementEvent(dcAM, vmRequests);
+		vmPlacementEvent.addCallbackListener(new EventCallbackListener() {
+
+			@Override
+			public void eventCallback(Event e) {
+				VmPlacementEvent event = (VmPlacementEvent)e;
+				if (event.getFailedRequests().size() > 0) {
+					System.out.println("FAILED VM PLACEMENTS: " + event.getFailedRequests().size());
+				}
+			}
+			
+		});
 		simulation.sendEvent(vmPlacementEvent, 0);
 		
 		dcAM.installPolicy(new RelocationPolicy(0.5, 0.9, 0.85), SimTime.hours(1), SimTime.hours(1) + 1);

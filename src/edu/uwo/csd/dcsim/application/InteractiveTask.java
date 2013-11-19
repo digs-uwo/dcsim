@@ -114,13 +114,13 @@ public class InteractiveTask extends Task {
 	}
 
 	@Override
-	public void startInstance(TaskInstance instance) {
+	public void doStartInstance(TaskInstance instance) {
 		//ensure that workload is started
 		application.getWorkload().setEnabled(true);
 	}
 
 	@Override
-	public void stopInstance(TaskInstance instance) {
+	public void doStopInstance(TaskInstance instance) {
 		// TODO ...remove from Task/Load Balancer? When is this even used?
 		
 	}

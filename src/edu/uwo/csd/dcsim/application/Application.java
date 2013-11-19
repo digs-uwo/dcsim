@@ -25,7 +25,7 @@ public abstract class Application {
 	ServiceLevelAgreement sla = null;
 	private ArrayList<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
 	private final int hashCode;
-	
+		
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
 		simulation.addApplication(this);
@@ -33,6 +33,27 @@ public abstract class Application {
 		
 		//init hashCode
 		hashCode = generateHashCode();
+	}
+	
+	/**
+	 * Indicates whether or not this Application is Active. Active Applications have had at least one instance
+	 * of each Task created at some point in the simulation. Metrics are only recorded for active Applications.
+	 * @return
+	 */
+	public boolean isActive() {
+		for (Task t : getTasks()) {
+			if (!t.isActive()) return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * Force all tasks (and therefore, the application) to be active. Irreversible.
+	 */
+	public void activate() {
+		for (Task t : getTasks()) {
+			t.activate();
+		}
 	}
 	
 	public abstract void initializeScheduling();

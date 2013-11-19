@@ -59,6 +59,9 @@ public class ApplicationMetrics extends MetricCollection {
 			//we don't want to record stats for Vmm applications
 			if (application instanceof VmmApplication) continue;
 			
+			//we don't want to record stats for inactive applications
+			if (!application.isActive()) continue;
+			
 			if (!cpuUnderProvision.containsKey(application)) {
 				cpuUnderProvision.put(application, new WeightedMetric());
 				cpuDemand.put(application, new WeightedMetric());
@@ -82,6 +85,9 @@ public class ApplicationMetrics extends MetricCollection {
 			
 			if (application.getSla() != null) {
 				val = application.getSla().calculatePenalty();
+				
+				
+				
 				slaPenalty.get(application).add(val, simulation.getElapsedSeconds());
 				currentSlaPenalty += val;
 				
@@ -93,7 +99,7 @@ public class ApplicationMetrics extends MetricCollection {
 			totalTime.put(application, totalTime.get(application) + simulation.getElapsedTime());
 			
 			if (application instanceof InteractiveApplication) {
-				
+	
 				if (!responseTime.containsKey(application)) {
 					responseTime.put(application, new WeightedMetric());
 					throughput.put(application, new WeightedMetric());
