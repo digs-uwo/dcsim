@@ -12,6 +12,7 @@ import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.core.metrics.SimulationMetrics;
 import edu.uwo.csd.dcsim.examples.management.ConsolidationPolicy;
 import edu.uwo.csd.dcsim.examples.management.RelocationPolicy;
 import edu.uwo.csd.dcsim.host.Host;
@@ -38,6 +39,8 @@ public class ApplicationExample extends SimulationTask {
 		task.run();
 		
 		task.getMetrics().printDefault(logger);
+		
+//		SimulationMetrics.writeToODS("test", task.getMetrics());
 		
 	}
 	

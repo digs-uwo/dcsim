@@ -1,10 +1,19 @@
 package edu.uwo.csd.dcsim.core.metrics;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.*;
 
-import org.apache.log4j.Logger;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
+import org.apache.log4j.Logger;
+import org.jopendocument.dom.OOUtils;
+import org.jopendocument.dom.spreadsheet.Sheet;
+import org.jopendocument.dom.spreadsheet.SpreadSheet;
+
+import edu.uwo.csd.dcsim.SimulationTask;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Simulation;
@@ -148,5 +157,50 @@ public class SimulationMetrics {
 			out.print("," + metric.b);
 		}
 		out.println("");
+	}
+	
+	public static void writeToODS(String fileName, SimulationMetrics simMetrics) {
+		List<SimulationMetrics> list = new ArrayList<SimulationMetrics>();
+		list.add(simMetrics);
+		
+		writeToODS(fileName, list);
+	}
+	
+	public static void writeToODS(String fileName, List<SimulationMetrics> simMetrics) {
+
+		Vector<String> columnNames = new Vector<String>();
+		Vector<Vector<Object>> data = new Vector<Vector<Object>>();
+		
+		
+		//TODO verify that all simulation results return the same list of metrics
+		
+		//Build column names
+		columnNames.add("Name");
+		for (Tuple<String, Object> metric : simMetrics.get(0).getMetricValues()) {
+			columnNames.add(metric.a);
+		}
+		
+		//Build data
+		for (SimulationMetrics metrics : simMetrics) {
+			Vector<Object> simData = new Vector<Object>();
+			simData.add(metrics.simulation.getName());
+			for (Tuple<String, Object> metric : metrics.getMetricValues()) {
+				simData.add(metric.b);
+			}
+			data.add(simData);
+		}
+		
+		TableModel model = new DefaultTableModel(data, columnNames);  
+		
+		SpreadSheet spreadsheet = SpreadSheet.createEmpty(model);	
+		
+		// Save the data to an ODS file and open it.
+		final File file = new File(fileName + ".ods");
+		try {
+			spreadsheet.saveAs(file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
