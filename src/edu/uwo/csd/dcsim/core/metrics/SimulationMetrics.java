@@ -60,6 +60,10 @@ public class SimulationMetrics {
 		clusterMetrics.completeSimulation();
 		applicationMetrics.completeSimulation();
 		managementMetrics.completeSimulation();
+		
+		for (MetricCollection custom : customMetrics.values()) {
+			custom.completeSimulation();
+		}
 	}
 	
 	public void setExecutionTime(long time) {

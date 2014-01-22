@@ -12,7 +12,7 @@ import edu.uwo.csd.dcsim.core.*;
  * @author Gaston Keller
  *
  */
-public final class Rack implements SimulationEventListener {
+public final class Rack implements SimulationEventListener, Comparable<Rack> {
 	
 	private Simulation simulation;
 	
@@ -209,6 +209,11 @@ public final class Rack implements SimulationEventListener {
 		result = HashCodeUtil.hash(result, nSlots);
 		result = HashCodeUtil.hash(result, nHosts);
 		return result;
+	}
+
+	@Override
+	public int compareTo(Rack arg0) {
+		return arg0.id - id;
 	}
 
 }
