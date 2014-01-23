@@ -10,9 +10,11 @@ public class VmStatus {
 	int cores;
 	int coreCapacity;
 	Resources resourcesInUse;
+	Vm vm;
 	
 	public VmStatus(Vm vm, long timeStamp){
 		this.timeStamp = timeStamp;
+		this.vm = vm;
 		
 		id = vm.getId();
 		cores = vm.getVMDescription().getCores();
@@ -20,12 +22,13 @@ public class VmStatus {
 		resourcesInUse = vm.getResourcesScheduled().copy();
 	}
 	
-	public VmStatus(VmStatus vm) {
-		timeStamp = vm.timeStamp;
-		id = vm.id;
-		cores = vm.cores;
-		coreCapacity = vm.coreCapacity;
-		resourcesInUse = vm.resourcesInUse.copy();
+	public VmStatus(VmStatus vmStatus) {
+		timeStamp = vmStatus.timeStamp;
+		vm = vmStatus.getVm();
+		id = vmStatus.id;
+		cores = vmStatus.cores;
+		coreCapacity = vmStatus.coreCapacity;
+		resourcesInUse = vmStatus.resourcesInUse.copy();
 	}
 	
 	/**
@@ -63,6 +66,10 @@ public class VmStatus {
 	
 	public VmStatus copy() {
 		return new VmStatus(this);
+	}
+	
+	public Vm getVm() {
+		return vm;
 	}
 	
 	@Override

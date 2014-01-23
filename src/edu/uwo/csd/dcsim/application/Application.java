@@ -6,6 +6,7 @@ import edu.uwo.csd.dcsim.application.sla.ServiceLevelAgreement;
 import edu.uwo.csd.dcsim.common.HashCodeUtil;
 import edu.uwo.csd.dcsim.core.Simulation;
 import edu.uwo.csd.dcsim.host.Host;
+import edu.uwo.csd.dcsim.host.Rack;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.vm.*;
@@ -176,6 +177,29 @@ public abstract class Application {
 			size += task.getInstances().size();
 		}
 		return size;
+	}
+	
+	public Rack getMajorityRack() {
+		HashMap<Rack, Integer> racks = new HashMap<Rack, Integer>();
+		ArrayList<Task> tasks = getTasks();
+		Rack rack = null;
+		int count = 0;
+		
+		for (Task task : tasks) {
+			for (TaskInstance instance : task.getInstances()) {
+				rack = instance.getVM().getVMAllocation().getHost().getRack();
+				count = 0;
+				if (racks.containsKey(rack)) count = racks.get(rack);
+				racks.put(rack, count + 1);
+			}
+		}
+		
+		rack = null;
+		count = 0;
+		for (Map.Entry<Rack, Integer> entry : racks.entrySet()) {
+			if (entry.getValue() > count) rack = entry.getKey();
+		}
+		return rack;
 	}
 	
 }

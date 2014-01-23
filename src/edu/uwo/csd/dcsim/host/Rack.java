@@ -215,5 +215,9 @@ public final class Rack implements SimulationEventListener, Comparable<Rack> {
 	public int compareTo(Rack arg0) {
 		return arg0.id - id;
 	}
+	
+	public boolean containsHost(Host host) {
+		return hosts.contains(host);
+	}
 
 }
