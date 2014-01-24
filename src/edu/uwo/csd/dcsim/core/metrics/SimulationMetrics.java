@@ -57,6 +57,12 @@ public class SimulationMetrics {
 		return managementMetrics;
 	}
 	
+	public void recordMetrics() {
+		for (MetricCollection custom : customMetrics.values()) {
+			custom.recordMetrics();
+		}
+	}
+	
 	public void recordApplicationMetrics(Collection<Application> applications) {
 		applicationMetrics.recordApplicationMetrics(applications); 
 		for (MetricCollection custom : customMetrics.values()) {

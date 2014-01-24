@@ -308,6 +308,9 @@ public class Simulation implements SimulationEventListener {
 					
 					//update application metrics
 					simulationMetrics.recordApplicationMetrics(applications);
+				
+					//generic call to custom metrics to record
+					simulationMetrics.recordMetrics();
 					
 				}
 			}

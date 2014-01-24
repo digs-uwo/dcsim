@@ -13,7 +13,7 @@ import edu.uwo.csd.dcsim.host.Host;
 
 public abstract class MetricCollection {
 
-	Simulation simulation;
+	protected Simulation simulation;
 	
 	public MetricCollection(Simulation simulation) {
 		this.simulation = simulation;
@@ -24,6 +24,11 @@ public abstract class MetricCollection {
 	public abstract void printDefault(Logger out);
 	
 	public abstract List<Tuple<String, Object>> getMetricValues();
+	
+	public void recordMetrics() {
+		//DO NOTHING - Override if desired
+		//TODO: change this to abstract, use to replace other three
+	}
 	
 	public void recordApplicationMetrics(Collection<Application> applications) {
 		//DO NOTHING - Override if desired 
