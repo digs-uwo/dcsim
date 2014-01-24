@@ -202,4 +202,15 @@ public abstract class Application {
 		return rack;
 	}
 	
+	public int getPlacementSpread() {
+		HashSet<Rack> racks = new HashSet<Rack>();
+		
+		for (Task task : getTasks()) {
+			for (TaskInstance instance : task.getInstances()) {
+				racks.add(instance.getVM().getVMAllocation().getHost().getRack());
+			}
+		}
+		return racks.size();
+	}
+	
 }
