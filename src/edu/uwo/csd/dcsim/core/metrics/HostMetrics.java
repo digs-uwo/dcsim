@@ -24,6 +24,7 @@ public class HostMetrics extends MetricCollection {
 		super(simulation);
 	}
 	
+	@Override
 	public void recordHostMetrics(Collection<Host> hosts) {
 		double currentPowerConsumption = 0;
 		double currentActiveHosts = 0;

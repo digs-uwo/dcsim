@@ -9,14 +9,16 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.log4j.Logger;
-import org.jopendocument.dom.OOUtils;
-import org.jopendocument.dom.spreadsheet.Sheet;
+//import org.jopendocument.dom.OOUtils;
+//import org.jopendocument.dom.spreadsheet.Sheet;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
-import edu.uwo.csd.dcsim.SimulationTask;
+import edu.uwo.csd.dcsim.application.Application;
 import edu.uwo.csd.dcsim.common.SimTime;
 import edu.uwo.csd.dcsim.common.Tuple;
 import edu.uwo.csd.dcsim.core.Simulation;
+import edu.uwo.csd.dcsim.host.Cluster;
+import edu.uwo.csd.dcsim.host.Host;
 
 public class SimulationMetrics {
 
@@ -53,6 +55,27 @@ public class SimulationMetrics {
 	
 	public ManagementMetrics getManagementMetrics() {
 		return managementMetrics;
+	}
+	
+	public void recordApplicationMetrics(Collection<Application> applications) {
+		applicationMetrics.recordApplicationMetrics(applications); 
+		for (MetricCollection custom : customMetrics.values()) {
+			custom.recordApplicationMetrics(applications);
+		}
+	}
+	
+	public void recordHostMetrics(Collection<Host> hosts) {
+		hostMetrics.recordHostMetrics(hosts);
+		for (MetricCollection custom : customMetrics.values()) {
+			custom.recordHostMetrics(hosts);
+		}
+	}
+	
+	public void recordClusterMetrics(Collection<Cluster> clusters) {
+		clusterMetrics.recordClusterMetrics(clusters);
+		for (MetricCollection custom : customMetrics.values()) {
+			custom.recordClusterMetrics(clusters);
+		}
 	}
 	
 	public void completeSimulation() {

@@ -36,6 +36,7 @@ public class ClusterMetrics extends MetricCollection {
 		super(simulation);
 	}
 	
+	@Override
 	public void recordClusterMetrics(Collection<Cluster> clusters) {
 		double currentPowerConsumption = 0;
 		double currentTotalCpuInUse = 0;

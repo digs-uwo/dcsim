@@ -300,14 +300,14 @@ public class Simulation implements SimulationEventListener {
 
 				if (this.isRecordingMetrics()) {	
 					//update host metrics
-					simulationMetrics.getHostMetrics().recordHostMetrics(hosts);
+					simulationMetrics.recordHostMetrics(hosts);
 					
 					// If data centre is organized in Clusters, update Cluster metrics.
 					if (clusters.size() > 0)
-						simulationMetrics.getClusterMetrics().recordClusterMetrics(clusters);
+						simulationMetrics.recordClusterMetrics(clusters);
 					
 					//update application metrics
-					simulationMetrics.getApplicationMetrics().recordApplicationMetrics(applications);
+					simulationMetrics.recordApplicationMetrics(applications);
 					
 				}
 			}

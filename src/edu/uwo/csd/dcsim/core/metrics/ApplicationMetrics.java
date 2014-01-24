@@ -44,6 +44,7 @@ public class ApplicationMetrics extends MetricCollection {
 		super(simulation);
 	}
 	
+	@Override
 	public void recordApplicationMetrics(Collection<Application> applications) {
 		
 		double currentCpuUnderProvision = 0;
