@@ -40,8 +40,14 @@ public class ApplicationMetrics extends MetricCollection {
 	long applicationsShutdown = 0;
 	long applicationPlacementsFailed = 0;
 	
+	long appSlaGraceTime = 0;
+	
 	public ApplicationMetrics(Simulation simulation) {
 		super(simulation);
+		
+		if (Simulation.hasProperty("appSlaGraceTime")) {
+			appSlaGraceTime = Long.parseLong(Simulation.getProperty("appSlaGraceTime"));
+		}
 	}
 	
 	@Override
@@ -61,7 +67,10 @@ public class ApplicationMetrics extends MetricCollection {
 			if (application instanceof VmmApplication) continue;
 			
 			//we don't want to record stats for inactive applications
-			if (!application.isActive()) continue;
+			if (!application.isActive()) continue;		
+			
+			//don't record metrics for an application before the 'SLA grace time' is up (allows application scaling to adjust to initial load)
+			if (simulation.getSimulationTime() - application.getActivateTimeStamp() < appSlaGraceTime) continue;
 			
 			if (!cpuUnderProvision.containsKey(application)) {
 				cpuUnderProvision.put(application, new WeightedMetric());
@@ -86,9 +95,7 @@ public class ApplicationMetrics extends MetricCollection {
 			
 			if (application.getSla() != null) {
 				val = application.getSla().calculatePenalty();
-				
-				
-				
+
 				slaPenalty.get(application).add(val, simulation.getElapsedSeconds());
 				currentSlaPenalty += val;
 				

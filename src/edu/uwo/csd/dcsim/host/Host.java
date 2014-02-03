@@ -353,6 +353,14 @@ public final class Host implements SimulationEventListener {
 				
 		VmAllocation newAllocation = event.getVmAllocation();
 		
+		//verify that Application hasn't completed during startup
+		if (newAllocation.getVMDescription().getTask().getApplication().isComplete()) {
+			
+			//cancel the VM start
+			deallocate(newAllocation);
+			return;
+		}
+		
 		//create a new VM in the allocation
 		Vm newVm = newAllocation.getVMDescription().createVM(simulation);
 		newAllocation.setVm(newVm);

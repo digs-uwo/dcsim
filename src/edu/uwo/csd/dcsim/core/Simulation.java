@@ -57,6 +57,7 @@ public class Simulation implements SimulationEventListener {
 	protected final Logger logger; //logger
 	protected final Logger traceLogger; //logger for trace file
 	protected boolean enableTrace;
+	protected boolean enableProgressOutput = false;
 	
 	private static Properties properties; //simulation properties
 	
@@ -194,6 +195,12 @@ public class Simulation implements SimulationEventListener {
 			}
 		}
 		
+		//check for 'enableProgressOutput' flag (determines if console messages indicate progression through sim time)
+		if (getProperties().getProperty("enableProgressOutput") != null &&
+				Boolean.parseBoolean(getProperties().getProperty("enableProgressOutput"))) {
+			enableProgressOutput = true;
+		}
+		
 		//configure simulation trace logger
 		enableTrace = false;
 		if (getProperties().getProperty("enableTrace") != null) {
@@ -257,8 +264,12 @@ public class Simulation implements SimulationEventListener {
 		simLogger.info("Starting DCSim");
 		simLogger.info("Random Seed: " + this.getRandomSeed());
 		
+		long nSteps = 0;
+		
 		//main event loop
 		while (!eventQueue.isEmpty() && simulationTime < duration) {
+			
+			simulationMetrics.incrementNSteps();
 			
 //			System.out.println(SimTime.toHumanReadable(simulationTime));
 			
@@ -295,7 +306,7 @@ public class Simulation implements SimulationEventListener {
 				advanceSimulation(hosts);
 				
 				// Show progression over time.
-				if (simulationTime % SimTime.hours(1) == 0)
+				if (enableProgressOutput && simulationTime % SimTime.hours(1) == 0)
 					simLogger.info(SimTime.toHumanReadable(simulationTime));
 
 				if (this.isRecordingMetrics()) {	

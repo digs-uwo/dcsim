@@ -31,6 +31,7 @@ public class SimulationMetrics {
 	
 	long executionTime;
 	int applicationSchedulingTimedOut = 0;
+	long nSteps = 0;
 	
 	public SimulationMetrics(Simulation simulation) {
 		this.simulation = simulation;
@@ -103,6 +104,14 @@ public class SimulationMetrics {
 		return executionTime;
 	}
 	
+	public long getNSteps() {
+		return nSteps;
+	}
+	
+	public void incrementNSteps() {
+		++nSteps;
+	}
+	
 	public int getApplicationSchedulingTimedOut() {
 		return applicationSchedulingTimedOut;
 	}
@@ -146,6 +155,7 @@ public class SimulationMetrics {
 		out.info("   metric recording start: " + SimTime.toHumanReadable(simulation.getMetricRecordStart()));
 		out.info("   metric recording duration: " + SimTime.toHumanReadable(simulation.getDuration() - simulation.getMetricRecordStart()));
 		out.info("   application scheduling timed out: " + applicationSchedulingTimedOut);
+		out.info("   simulation time steps: " + nSteps);
 		
 	}
 	
@@ -157,6 +167,7 @@ public class SimulationMetrics {
 		metrics.add(new Tuple<String, Object>("metricRecordStart", simulation.getMetricRecordStart()));
 		metrics.add(new Tuple<String, Object>("metricRecordDuration", simulation.getDuration() - simulation.getMetricRecordStart()));
 		metrics.add(new Tuple<String, Object>("appSchedulingTimeout", applicationSchedulingTimedOut));
+		metrics.add(new Tuple<String, Object>("nSteps", nSteps));
 
 		metrics.addAll(hostMetrics.getMetricValues());
 		metrics.addAll(clusterMetrics.getMetricValues());

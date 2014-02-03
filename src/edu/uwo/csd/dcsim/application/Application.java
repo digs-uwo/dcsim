@@ -26,6 +26,8 @@ public abstract class Application {
 	ServiceLevelAgreement sla = null;
 	private ArrayList<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
 	private final int hashCode;
+	private boolean complete = false;
+	private long activateTimestamp = Long.MIN_VALUE;
 		
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
@@ -45,6 +47,9 @@ public abstract class Application {
 		for (Task t : getTasks()) {
 			if (!t.isActive()) return false;
 		}
+		
+		if(activateTimestamp == Long.MIN_VALUE) activateTimestamp = simulation.getSimulationTime();
+		
 		return true;
 	}
 	
@@ -55,6 +60,10 @@ public abstract class Application {
 		for (Task t : getTasks()) {
 			t.activate();
 		}
+	}
+	
+	public long getActivateTimeStamp() {
+		return activateTimestamp;
 	}
 	
 	public abstract void initializeScheduling();
@@ -92,6 +101,8 @@ public abstract class Application {
 	}
 	
 	public void shutdownApplication(AutonomicManager target, Simulation simulation) {
+
+		complete = true;
 		
 		for (Task task : getTasks()) {
 			ArrayList<TaskInstance> instances = task.getInstances();
@@ -103,7 +114,7 @@ public abstract class Application {
 				if (vm.isMigrating() || instance.getVM().isPendingMigration())
 					throw new RuntimeException("Tried to shutdown migrating VM #" + vm.getId() + ". Operation not allowed in simulation.");
 				
-				simulation.sendEvent(new ShutdownVmEvent(target, host.getId(), vm.getId()));				
+				simulation.sendEvent(new ShutdownVmEvent(target, host.getId(), vm.getId()));
 			}
 		}
 		
@@ -177,6 +188,10 @@ public abstract class Application {
 			size += task.getInstances().size();
 		}
 		return size;
+	}
+	
+	public boolean isComplete() {
+		return complete;
 	}
 	
 	public Rack getMajorityRack() {

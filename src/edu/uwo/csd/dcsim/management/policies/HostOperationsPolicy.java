@@ -19,6 +19,9 @@ public class HostOperationsPolicy extends Policy {
 		HostManager hostManager = manager.getCapability(HostManager.class);
 		Host host = hostManager.getHost();
 		
+		//verify that the application isn't complete before instantiating the VM (can happen if event is sent before app finishes, received after)
+		if (event.getVMAllocationRequest().getVMDescription().getTask().getApplication().isComplete()) return;
+		
 		//if the host is set to shutdown upon completion of outgoing migrations, cancel this shutdown
 		if (host.isShutdownPending()) {
 			/*
@@ -27,7 +30,7 @@ public class HostOperationsPolicy extends Policy {
 			 */
 			host.cancelPendingShutdown(); 
 		}
-		
+
 		SubmitVmEvent submitEvent = new SubmitVmEvent(host, event.getVMAllocationRequest());
 		event.addEventInSequence(submitEvent);		
 		simulation.sendEvent(submitEvent);

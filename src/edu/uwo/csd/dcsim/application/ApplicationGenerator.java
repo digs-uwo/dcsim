@@ -28,6 +28,7 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 	List<Tuple<Long, Double>> applicationsPerHour;
 	int currentRate = -1;
 	long startTime = 0;
+	long arrivalSyncInterval = 0;
 	
 	protected Simulation simulation;
 	
@@ -55,6 +56,10 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 			lifespanDist.reseedRandomGenerator(simulation.getRandom().nextLong());
 		
 		setArrivalRate(applicationsPerHour);
+	}
+	
+	public void setArrivalSyncInterval(long arrivalSyncInterval) {
+		this.arrivalSyncInterval = arrivalSyncInterval;
 	}
 	
 	private void setArrivalRate(double applicationsPerHour) {
@@ -101,7 +106,7 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 		
 		//remove the application from the simulation
 		simulation.removeApplication(application);
-		
+
 		//check to see if the application is ready to shutdown (i.e. no VMs are migrating)
 		if (application.canShutdown()) {
 			application.shutdownApplication(dcTarget, simulation);
@@ -130,6 +135,11 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 		//Check to make sure we are spawning applications. Setting an applicationsPerHour rate of 0 results in the mean of the distribution being positive infinity
 		if (!(arrivalDist.getMean() == Double.POSITIVE_INFINITY)) {
 			long nextSpawn =  simulation.getSimulationTime() + (long)Math.round(arrivalDist.sample());
+			
+			//sync with arrival sync rate (performance optimization to synchronize events and reduce time steps required)
+			if (nextSpawn % arrivalSyncInterval != 0) {
+				nextSpawn = nextSpawn + (arrivalSyncInterval - (nextSpawn % arrivalSyncInterval));
+			}
 			
 			simulation.sendEvent(new SpawnApplicationEvent(this, currentRate), nextSpawn);
 		}
