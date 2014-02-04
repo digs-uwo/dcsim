@@ -66,8 +66,8 @@ public class ApplicationMetrics extends MetricCollection {
 			//we don't want to record stats for Vmm applications
 			if (application instanceof VmmApplication) continue;
 			
-			//we don't want to record stats for inactive applications
-			if (!application.isActive()) continue;		
+			//we don't want to record stats for inactive or complete applications
+			if (!application.isActive() || application.isComplete()) continue;		
 			
 			//don't record metrics for an application before the 'SLA grace time' is up (allows application scaling to adjust to initial load)
 			if (simulation.getSimulationTime() - application.getActivateTimeStamp() < appSlaGraceTime) continue;
@@ -174,6 +174,14 @@ public class ApplicationMetrics extends MetricCollection {
 	
 	public Map<Application, WeightedMetric> getSlaPenalty() {
 		return slaPenalty;
+	}
+	
+	public Map<Application, Long> getSlaAchieved() {
+		return slaAchieved;
+	}
+	
+	public Map<Application, Long> getAppTotalTime() {
+		return totalTime;
 	}
 
 	public Map<Application, WeightedMetric> getResponseTime() {

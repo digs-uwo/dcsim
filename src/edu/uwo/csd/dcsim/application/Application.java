@@ -27,8 +27,9 @@ public abstract class Application {
 	private ArrayList<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
 	private final int hashCode;
 	private boolean complete = false;
-	private long activateTimestamp = Long.MIN_VALUE;
-		
+	private long activateTimeStamp = Long.MIN_VALUE;
+	private long completeTimeStamp = Long.MIN_VALUE;	
+	
 	public Application(Simulation simulation) {
 		this.simulation = simulation;
 		simulation.addApplication(this);
@@ -48,7 +49,7 @@ public abstract class Application {
 			if (!t.isActive()) return false;
 		}
 		
-		if(activateTimestamp == Long.MIN_VALUE) activateTimestamp = simulation.getSimulationTime();
+		if(activateTimeStamp == Long.MIN_VALUE) activateTimeStamp = simulation.getSimulationTime();
 		
 		return true;
 	}
@@ -63,7 +64,11 @@ public abstract class Application {
 	}
 	
 	public long getActivateTimeStamp() {
-		return activateTimestamp;
+		return activateTimeStamp;
+	}
+	
+	public long getCompleteTimeStamp() {
+		return completeTimeStamp;
 	}
 	
 	public abstract void initializeScheduling();
@@ -103,6 +108,7 @@ public abstract class Application {
 	public void shutdownApplication(AutonomicManager target, Simulation simulation) {
 
 		complete = true;
+		completeTimeStamp = simulation.getSimulationTime();
 		
 		for (Task task : getTasks()) {
 			ArrayList<TaskInstance> instances = task.getInstances();

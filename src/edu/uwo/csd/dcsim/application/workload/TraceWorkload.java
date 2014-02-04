@@ -23,6 +23,9 @@ public class TraceWorkload extends Workload {
 	
 	int currentPosition; //the current position in the trace
 	
+	int rampUpPosition;
+	int rampUpSteps;
+	
 	/**
 	 * Create a new TraceWorkload.
 	 * @param simulation
@@ -57,16 +60,32 @@ public class TraceWorkload extends Workload {
 		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
 	}
 	
+	public void setRampUp(long time) {
+		rampUpPosition = 0;
+		rampUpSteps = (int)Math.ceil(time / (double)workloadTrace.stepSize);
+	}
+	
 	@Override
 	protected int getCurrentWorkLevel() {
-		return (int)(workloadTrace.getValues().get(currentPosition) * scaleFactor);
+		int level = (int)(workloadTrace.getValues().get(currentPosition) * scaleFactor);
+		
+		if (rampUpPosition < rampUpSteps) {
+			level = level * (int)Math.floor((rampUpPosition / (double)rampUpSteps));
+		}
+		
+		return level;
 	}
 
 	@Override
 	protected long updateWorkLevel() {
-		++currentPosition;
-		if (currentPosition >= workloadTrace.getTimes().size())
-			currentPosition = 0;
+		
+		if (rampUpPosition < rampUpSteps) {
+			++rampUpPosition;
+		} else {
+			++currentPosition;
+			if (currentPosition >= workloadTrace.getTimes().size())
+				currentPosition = 0;
+		}
 		
 		/*
 		 * Calculate the update time so that the event times are always divisible by the step size. This ensures that regardless
