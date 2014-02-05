@@ -46,6 +46,7 @@ public abstract class Workload implements SimulationEventListener {
 	
 	public int getWorkOutputLevel() {
 		if (!enabled) return 0;
+		
 		return getCurrentWorkLevel();
 	}
 

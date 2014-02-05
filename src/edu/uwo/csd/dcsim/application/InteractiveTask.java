@@ -115,8 +115,8 @@ public class InteractiveTask extends Task {
 
 	@Override
 	public void doStartInstance(TaskInstance instance) {
-		//ensure that workload is started
-		application.getWorkload().setEnabled(true);
+		//if the application is active, ensure that the workload is enabled
+		if (application.isActive())	application.getWorkload().setEnabled(true);
 	}
 
 	@Override

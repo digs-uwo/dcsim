@@ -34,7 +34,7 @@ public class TraceWorkload extends Workload {
 	 * @param offset The offset in simulation time to start the trace at.
 	 */
 	public TraceWorkload(Simulation simulation, String fileName, int scaleFactor, long offset) {
-		super(simulation);
+		super(simulation, false); //start trace workload NOT enabled -  application should enable the workload
 
 		this.scaleFactor = scaleFactor;
 		if (workloadTraces.containsKey(fileName)) {
@@ -48,7 +48,7 @@ public class TraceWorkload extends Workload {
 	}
 	
 	public TraceWorkload(Simulation simulation, String fileName, long offset) {
-		super(simulation);
+		super(simulation, false); //start trace workload NOT enabled -  application should enable the workload
 
 		if (workloadTraces.containsKey(fileName)) {
 			workloadTrace = workloadTraces.get(fileName);
@@ -70,7 +70,7 @@ public class TraceWorkload extends Workload {
 		int level = (int)(workloadTrace.getValues().get(currentPosition) * scaleFactor);
 		
 		if (rampUpPosition < rampUpSteps) {
-			level = level * (int)Math.floor((rampUpPosition / (double)rampUpSteps));
+			level = (int)Math.floor(level * (rampUpPosition / (double)rampUpSteps));
 		}
 		
 		return level;
@@ -79,12 +79,14 @@ public class TraceWorkload extends Workload {
 	@Override
 	protected long updateWorkLevel() {
 		
-		if (rampUpPosition < rampUpSteps) {
-			++rampUpPosition;
-		} else {
-			++currentPosition;
-			if (currentPosition >= workloadTrace.getTimes().size())
-				currentPosition = 0;
+		if (enabled) {
+			if (rampUpPosition < rampUpSteps) {
+				++rampUpPosition;
+			} else {
+				++currentPosition;
+				if (currentPosition >= workloadTrace.getTimes().size())
+					currentPosition = 0;
+			}
 		}
 		
 		/*
