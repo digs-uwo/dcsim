@@ -24,7 +24,7 @@ public class TraceWorkload extends Workload {
 	int currentPosition; //the current position in the trace
 	
 	int rampUpPosition;
-	int rampUpSteps;
+	int rampUpSteps = 0;
 	
 	/**
 	 * Create a new TraceWorkload.
@@ -44,7 +44,7 @@ public class TraceWorkload extends Workload {
 			workloadTraces.put(fileName, workloadTrace);
 		}
 		
-		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
+		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize);
 	}
 	
 	public TraceWorkload(Simulation simulation, String fileName, long offset) {
@@ -57,7 +57,7 @@ public class TraceWorkload extends Workload {
 			workloadTraces.put(fileName, workloadTrace);
 		}
 		
-		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize) - 1;
+		currentPosition = (int)Math.floor((offset % (workloadTrace.getLastTime() + workloadTrace.stepSize)) / workloadTrace.stepSize);
 	}
 	
 	public void setRampUp(long time) {
@@ -67,6 +67,7 @@ public class TraceWorkload extends Workload {
 	
 	@Override
 	protected int getCurrentWorkLevel() {
+		
 		int level = (int)(workloadTrace.getValues().get(currentPosition) * scaleFactor);
 		
 		if (rampUpPosition < rampUpSteps) {
