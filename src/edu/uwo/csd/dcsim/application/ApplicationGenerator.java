@@ -137,7 +137,7 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 			long nextSpawn =  simulation.getSimulationTime() + (long)Math.round(arrivalDist.sample());
 			
 			//sync with arrival sync rate (performance optimization to synchronize events and reduce time steps required)
-			if (nextSpawn % arrivalSyncInterval != 0) {
+			if (arrivalSyncInterval != 0 && nextSpawn % arrivalSyncInterval != 0) {
 				nextSpawn = nextSpawn + (arrivalSyncInterval - (nextSpawn % arrivalSyncInterval));
 			}
 			
