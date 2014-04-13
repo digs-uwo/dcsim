@@ -535,6 +535,18 @@ public class InteractiveApplication extends Application {
 		antiAffinityTasks.add(task);
 	}
 	
+	public ArrayList<InteractiveTask> getAffinitySet(InteractiveTask task) {
+		
+		for (ArrayList<InteractiveTask> affinitySet : affinityTasks) {
+			for (InteractiveTask t : affinitySet) {
+				if (t.getId() == task.getId())
+					return new ArrayList<InteractiveTask>(affinitySet);
+			}
+		}
+		
+		return null;
+	}
+	
 	public ArrayList<ArrayList<InteractiveTask>> getAffinityTasks() {
 		return new ArrayList<ArrayList<InteractiveTask>>(affinityTasks);
 	}
