@@ -9,6 +9,7 @@ public class VmStatus {
 	int id = 0;
 	int cores;
 	int coreCapacity;
+	int hostCoreCapacity;
 	Resources resourcesInUse;
 	Vm vm;
 	
@@ -19,6 +20,7 @@ public class VmStatus {
 		id = vm.getId();
 		cores = vm.getVMDescription().getCores();
 		coreCapacity = vm.getVMDescription().getCoreCapacity();
+		hostCoreCapacity = vm.getVMAllocation().getHost().getCoreCapacity();
 		resourcesInUse = vm.getResourcesScheduled().copy();
 	}
 	
@@ -28,6 +30,7 @@ public class VmStatus {
 		id = vmStatus.id;
 		cores = vmStatus.cores;
 		coreCapacity = vmStatus.coreCapacity;
+		hostCoreCapacity = vmStatus.hostCoreCapacity;
 		resourcesInUse = vmStatus.resourcesInUse.copy();
 	}
 	
@@ -62,6 +65,10 @@ public class VmStatus {
 	
 	public int getCoreCapacity() {
 		return coreCapacity;
+	}
+	
+	public int getHostCoreCapacity() {
+		return hostCoreCapacity;
 	}
 	
 	public VmStatus copy() {
