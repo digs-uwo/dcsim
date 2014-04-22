@@ -19,10 +19,13 @@ public class HostStatusPolicy extends Policy {
 		this.windowSize = windowSize;
 	}
 
-	public void execute(HostStatusEvent event) {		
+	public void execute(HostStatusEvent event) {
 		HostPoolManager hostPool = manager.getCapability(HostPoolManager.class);
+		HostStatus status = event.getHostStatus();
 		
-		hostPool.getHost(event.getHostStatus().getId()).addHostStatus(event.getHostStatus(), windowSize);
+		simulation.getLogger().debug("Status update for Host #" + status.getId());
+		
+		hostPool.getHost(status.getId()).addHostStatus(status, windowSize);
 	}
 
 	@Override
