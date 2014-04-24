@@ -8,7 +8,7 @@ import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.management.Policy;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
-import edu.uwo.csd.dcsim.management.events.MigrationCompletedEvent;
+import edu.uwo.csd.dcsim.management.events.MigrationCompleteEvent;
 import edu.uwo.csd.dcsim.management.events.MigrationEvent;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.vm.*;
@@ -75,7 +75,7 @@ public class HostOperationsPolicy extends Policy {
 				@Override
 				public void eventCallback(Event e) {
 					MigrateVmEvent event = (MigrateVmEvent) e;
-					simulation.sendEvent(new MigrationCompletedEvent(target, event.getSource().getId(), event.getTargetHost().getId(), event.getVM().getId()));
+					simulation.sendEvent(new MigrationCompleteEvent(target, event.getSource().getId(), event.getTargetHost().getId(), event.getVM().getId()));
 				}
 			});
 		

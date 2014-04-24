@@ -3,13 +3,13 @@ package edu.uwo.csd.dcsim.management.events;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
 
-public class MigrationCompletedEvent extends Event {
+public class MigrationCompleteEvent extends Event {
 
 	private int sourceHostId;
 	private int targetHostId;
 	private int vmId;
 	
-	public MigrationCompletedEvent(AutonomicManager target, int sourceHostId, int targetHostId, int vmId) {
+	public MigrationCompleteEvent(AutonomicManager target, int sourceHostId, int targetHostId, int vmId) {
 		super(target);
 		
 		this.sourceHostId = sourceHostId;
