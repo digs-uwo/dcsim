@@ -19,6 +19,13 @@ public final class HostModels {
 		return new Host.Builder(simulation).nCpu(2).nCores(4).coreCapacity(2500).memory(16384).bandwidth(1310720).storage(36864).powerModel(powerModel);
 	}
 	
+	public static Host.Builder HalfProLiantDL160G5E5420(Simulation simulation) {
+		//Power Efficiency: 85.84 cpu/watt
+		HostPowerModel powerModel = new SPECHostPowerModel(10, 148, 159, 167, 175, 184, 194, 204, 213, 220, 227, 233);
+		
+		return new Host.Builder(simulation).nCpu(1).nCores(4).coreCapacity(2500).memory(8192).bandwidth(1310720).storage(36864).powerModel(powerModel);
+	}
+	
 	public static Host.Builder ProLiantDL360G5E5450(Simulation simulation) {
 		//Power Efficiency: 83.33 cpu/watt
 		HostPowerModel powerModel = new SPECHostPowerModel(10, 180, 190, 200, 210, 221, 234, 247, 258, 270, 281, 288);
@@ -31,6 +38,13 @@ public final class HostModels {
 		HostPowerModel powerModel = new SPECHostPowerModel(10, 172, 177, 182, 187, 195, 205, 218, 229, 242, 252, 258);
 		
 		return new Host.Builder(simulation).nCpu(2).nCores(2).coreCapacity(3000).memory(8192).bandwidth(1310720).storage(36864).powerModel(powerModel);
+	}
+	
+	public static Host.Builder HalfProLiantDL380G5QuadCore(Simulation simulation) {
+		//Power Efficiency: 46.51 cpu/watt
+		HostPowerModel powerModel = new SPECHostPowerModel(10, 172, 177, 182, 187, 195, 205, 218, 229, 242, 252, 258);
+		
+		return new Host.Builder(simulation).nCpu(1).nCores(2).coreCapacity(3000).memory(4096).bandwidth(1310720).storage(36864).powerModel(powerModel);
 	}
 	
 	public static Host.Builder ProLiantDL380G6EightCore(Simulation simulation) {

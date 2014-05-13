@@ -64,19 +64,4 @@
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
     </target>
-    <target name="ElTesto">
-        <java classname="edu.uwo.csd.dcsim.examples.ElTesto" failonerror="true" fork="yes">
-            <classpath refid="dcsim.classpath"/>
-        </java>
-    </target>
-    <target name="SimpleExample (1)">
-        <java classname="edu.uwo.csd.dcsim.examples.SimpleExample" failonerror="true" fork="yes">
-            <classpath refid="dcsim.classpath"/>
-        </java>
-    </target>
-    <target name="ApplicationExample (1)">
-        <java classname="edu.uwo.csd.dcsim.examples.ApplicationExample" failonerror="true" fork="yes">
-            <classpath refid="dcsim.classpath"/>
-        </java>
-    </target>
 </project>
