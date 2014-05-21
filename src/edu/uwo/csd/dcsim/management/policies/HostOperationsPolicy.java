@@ -1,5 +1,6 @@
 package edu.uwo.csd.dcsim.management.policies;
 
+import edu.uwo.csd.dcsim.application.Task;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.host.Host;
@@ -11,6 +12,7 @@ import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
 import edu.uwo.csd.dcsim.management.events.MigrationCompleteEvent;
 import edu.uwo.csd.dcsim.management.events.MigrationEvent;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
+import edu.uwo.csd.dcsim.management.events.VmInstantiationCompleteEvent;
 import edu.uwo.csd.dcsim.vm.*;
 
 public class HostOperationsPolicy extends Policy {
@@ -45,7 +47,23 @@ public class HostOperationsPolicy extends Policy {
 		}
 
 		SubmitVmEvent submitEvent = new SubmitVmEvent(host, event.getVMAllocationRequest());
-		event.addEventInSequence(submitEvent);		
+		event.addEventInSequence(submitEvent);
+		
+		// Add a callback listener to inform the target manager that the VM instantiation is complete.
+		if (null != target)
+			submitEvent.addCallbackListener(new EventCallbackListener() {
+				@Override
+				public void eventCallback(Event e) {
+					SubmitVmEvent event = (SubmitVmEvent) e;
+					Task task = event.getVmAllocationRequest().getVMDescription().getTask();
+					simulation.sendEvent(new VmInstantiationCompleteEvent(target,
+							task.getApplication().getId(),
+							task.getId(),
+							event.getVmAllocation().getVm().getId(),
+							manager.getCapability(HostManager.class).getHost().getId()));
+				}
+			});
+		
 		simulation.sendEvent(submitEvent);
 	}
 	

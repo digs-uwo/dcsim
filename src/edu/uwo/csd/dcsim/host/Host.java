@@ -340,6 +340,9 @@ public final class Host implements SimulationEventListener {
 		vmAllocations.add(newAllocation);
 		startingVm.add(newAllocation);
 		
+		// Set VM allocation in incoming event.
+		event.setVmAllocation(newAllocation);
+		
 		long vmStartDelay = Long.parseLong(Simulation.getProperty("vmStartTime"));
 		
 		VmStartEvent vmStartEvent = new VmStartEvent(this, newAllocation);
