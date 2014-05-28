@@ -4,16 +4,20 @@ import edu.uwo.csd.dcsim.application.Task;
 import edu.uwo.csd.dcsim.core.Event;
 import edu.uwo.csd.dcsim.core.EventCallbackListener;
 import edu.uwo.csd.dcsim.host.Host;
-import edu.uwo.csd.dcsim.host.events.*;
+import edu.uwo.csd.dcsim.host.events.MigrateVmEvent;
+import edu.uwo.csd.dcsim.host.events.SubmitVmEvent;
 import edu.uwo.csd.dcsim.management.AutonomicManager;
 import edu.uwo.csd.dcsim.management.Policy;
 import edu.uwo.csd.dcsim.management.capabilities.HostManager;
 import edu.uwo.csd.dcsim.management.events.InstantiateVmEvent;
 import edu.uwo.csd.dcsim.management.events.MigrationCompleteEvent;
 import edu.uwo.csd.dcsim.management.events.MigrationEvent;
+import edu.uwo.csd.dcsim.management.events.ShutdownVmCompleteEvent;
 import edu.uwo.csd.dcsim.management.events.ShutdownVmEvent;
 import edu.uwo.csd.dcsim.management.events.VmInstantiationCompleteEvent;
-import edu.uwo.csd.dcsim.vm.*;
+import edu.uwo.csd.dcsim.vm.Vm;
+import edu.uwo.csd.dcsim.vm.VmAllocation;
+import edu.uwo.csd.dcsim.vm.VmAllocationRequest;
 
 public class HostOperationsPolicy extends Policy {
 
@@ -108,6 +112,9 @@ public class HostOperationsPolicy extends Policy {
 		//stop the VM and deallocate it from the host
 		vmAlloc.getVm().stopTaskInstance();
 		host.deallocate(vmAlloc);
+		
+		// Inform the target manager that the VM shutdown is complete.
+		simulation.sendEvent(new ShutdownVmCompleteEvent(target, event.getHostId(), event.getVmId()));
 	}
 
 	@Override
