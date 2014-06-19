@@ -60,10 +60,12 @@ public class HostOperationsPolicy extends Policy {
 				public void eventCallback(Event e) {
 					SubmitVmEvent event = (SubmitVmEvent) e;
 					Task task = event.getVmAllocationRequest().getVMDescription().getTask();
+					Vm vm = event.getVmAllocation().getVm();
 					simulation.sendEvent(new VmInstantiationCompleteEvent(target,
 							task.getApplication().getId(),
 							task.getId(),
-							event.getVmAllocation().getVm().getId(),
+							vm.getTaskInstance().getId(),
+							vm.getId(),
 							manager.getCapability(HostManager.class).getHost().getId()));
 				}
 			});

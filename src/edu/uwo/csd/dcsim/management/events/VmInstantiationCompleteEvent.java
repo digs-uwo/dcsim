@@ -7,14 +7,16 @@ public class VmInstantiationCompleteEvent extends Event {
 
 	private int applicationId;
 	private int taskId;
+	private long instanceId;
 	private int vmId;
 	private int hostId;
 	
-	public VmInstantiationCompleteEvent(AutonomicManager target, int applicationId, int taskId, int vmId, int hostId) {
+	public VmInstantiationCompleteEvent(AutonomicManager target, int applicationId, int taskId, long instanceId, int vmId, int hostId) {
 		super(target);
 		
 		this.applicationId = applicationId;
 		this.taskId = taskId;
+		this.instanceId = instanceId;
 		this.vmId = vmId;
 		this.hostId = hostId;
 	}
@@ -25,6 +27,10 @@ public class VmInstantiationCompleteEvent extends Event {
 	
 	public int getTaskId() {
 		return taskId;
+	}
+	
+	public long getInstanceId() {
+		return instanceId;
 	}
 	
 	public int getVmId() {
