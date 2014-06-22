@@ -40,6 +40,9 @@ public class ApplicationMetrics extends MetricCollection {
 	long applicationsShutdown = 0;
 	long applicationPlacementsFailed = 0;
 	
+	long vmsInstantiated = 0;
+	WeightedMetric activeVms = new WeightedMetric();
+	
 	long appSlaGraceTime = 0;
 	
 	public ApplicationMetrics(Simulation simulation) {
@@ -59,6 +62,7 @@ public class ApplicationMetrics extends MetricCollection {
 		double currentResponseTime = 0;
 		double currentThroughput = 0;
 		double interactiveApplications = 0;
+		double currentActiveVms = 0;
 		
 		double val;
 		for (Application application : applications) {
@@ -83,6 +87,9 @@ public class ApplicationMetrics extends MetricCollection {
 			
 			//record the size of the application as VMs/Max VMs
 			size.get(application).add(application.getSize() / (double)application.getMaxSize(), simulation.getElapsedTime());
+			
+			// Calculate total number of VMs in the data centre.
+			currentActiveVms += application.getSize();
 			
 			if (application.getTotalCpuDemand() > application.getTotalCpuScheduled()) {
 				val = (double)application.getTotalCpuDemand() - application.getTotalCpuScheduled();
@@ -132,6 +139,8 @@ public class ApplicationMetrics extends MetricCollection {
 		aggregateSlaPenalty.add(currentSlaPenalty, simulation.getElapsedSeconds());
 		aggregateResponseTime.add(currentResponseTime / interactiveApplications, simulation.getElapsedTime());
 		aggregateThroughput.add(currentThroughput / interactiveApplications, simulation.getElapsedTime());
+		
+		activeVms.add(currentActiveVms, simulation.getElapsedTime());
 	}
 	
 	@Override
@@ -290,6 +299,22 @@ public class ApplicationMetrics extends MetricCollection {
 		++ applicationPlacementsFailed;
 	}
 	
+	public long getVmsInstantiated() {
+		return vmsInstantiated;
+	}
+	
+	public void setVmsInstantiated(long vmsInstantiated) {
+		this.vmsInstantiated = vmsInstantiated;
+	}
+	
+	public void incrementVmsInstantiated() {
+		++vmsInstantiated;
+	}
+	
+	public WeightedMetric getActiveVms() {
+		return activeVms;
+	}
+	
 	public boolean isMVAApproximate() {
 		return InteractiveApplication.approximateMVA;
 	}
@@ -302,6 +327,11 @@ public class ApplicationMetrics extends MetricCollection {
 		out.info("   shutdown: " + getApplicationsShutdown());
 		out.info("   failed placement: " + getApplicationPlacementsFailed());
 		out.info("   average size: " + Utility.roundDouble(Utility.toPercentage(getSizeStats().getMean())) + "%");
+		out.info("  Active VMs");
+		out.info("    total: " + getVmsInstantiated());
+		out.info("    max: " + Utility.roundDouble(getActiveVms().getMax(), Simulation.getMetricPrecision()));
+		out.info("    mean: " + Utility.roundDouble(getActiveVms().getMean(), Simulation.getMetricPrecision()));
+		out.info("    min: " + Utility.roundDouble(getActiveVms().getMin(), Simulation.getMetricPrecision()));
 		out.info("CPU Underprovision");
 		out.info("   percentage: " + Utility.roundDouble(Utility.toPercentage(getAggregateCpuUnderProvision().getSum() / getAggregateCpuDemand().getSum()), Simulation.getMetricPrecision()) + "%");
 		out.info("SLA");
@@ -390,10 +420,15 @@ public class ApplicationMetrics extends MetricCollection {
 		metrics.add(new Tuple<String, Object>("throughputMean", Utility.roundDouble(getAggregateThroughput().getMean(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("throughputMin", Utility.roundDouble(getAggregateThroughput().getMin(), Simulation.getMetricPrecision())));
 		
+		metrics.add(new Tuple<String, Object>("applicationsTotal", getTotalApplicationCount()));
 		metrics.add(new Tuple<String, Object>("applicationsSpawned", getApplicationsSpawned()));
 		metrics.add(new Tuple<String, Object>("applicationsShutdown", getApplicationsShutdown()));
 		metrics.add(new Tuple<String, Object>("applicationPlacementsFailed", getApplicationPlacementsFailed()));
 		metrics.add(new Tuple<String, Object>("averageSize", Utility.roundDouble(getSizeStats().getMean(), Simulation.getMetricPrecision())));
+		metrics.add(new Tuple<String, Object>("vmsInstantiated", getVmsInstantiated()));
+		metrics.add(new Tuple<String, Object>("activeVmsMax", Utility.roundDouble(getActiveVms().getMax(), Simulation.getMetricPrecision())));
+		metrics.add(new Tuple<String, Object>("activeVmsMean", Utility.roundDouble(getActiveVms().getMean(), Simulation.getMetricPrecision())));
+		metrics.add(new Tuple<String, Object>("activeVmsMin", Utility.roundDouble(getActiveVms().getMin(), Simulation.getMetricPrecision())));
 		
 		return metrics;
 	}
