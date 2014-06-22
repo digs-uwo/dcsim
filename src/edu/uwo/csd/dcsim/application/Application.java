@@ -22,6 +22,7 @@ import edu.uwo.csd.dcsim.vm.*;
 public abstract class Application {
 
 	int id;
+	int type = 0;		// Default type : 0 (zero)
 	protected Simulation simulation;
 	ServiceLevelAgreement sla = null;
 	private ArrayList<ApplicationListener> applicationListeners = new ArrayList<ApplicationListener>();
@@ -158,6 +159,14 @@ public abstract class Application {
 
 	public int getId() {
 		return id;
+	}
+	
+	public int getType() {
+		return type;
+	}
+	
+	public void setType(int type) {
+		this.type = type;
 	}
 	
 	public ServiceLevelAgreement getSla() {
