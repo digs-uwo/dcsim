@@ -43,6 +43,9 @@ public class ApplicationMetrics extends MetricCollection {
 	long vmsInstantiated = 0;
 	WeightedMetric activeVms = new WeightedMetric();
 	
+	Map<Integer, Long> applicationTypesSpawned = new HashMap<Integer, Long>();
+	Map<Integer, Long> applicationTypesDeployed = new HashMap<Integer, Long>();
+	
 	long appSlaGraceTime = 0;
 	
 	public ApplicationMetrics(Simulation simulation) {
@@ -315,6 +318,28 @@ public class ApplicationMetrics extends MetricCollection {
 		return activeVms;
 	}
 	
+	public Map<Integer, Long> getApplicationTypesSpawned() {
+		return applicationTypesSpawned;
+	}
+	
+	public void incrementApplicationTypeSpawned(int type) {
+		long count = 0l;
+		if (applicationTypesSpawned.containsKey(type))
+			count = applicationTypesSpawned.get(type);
+		applicationTypesSpawned.put(type, ++count);
+	}
+	
+	public Map<Integer, Long> getApplicationTypesDeployed() {
+		return applicationTypesDeployed;
+	}
+	
+	public void incrementApplicationTypeDeployed(int type) {
+		long count = 0l;
+		if (applicationTypesDeployed.containsKey(type))
+			count = applicationTypesDeployed.get(type);
+		applicationTypesDeployed.put(type, ++count);
+	}
+	
 	public boolean isMVAApproximate() {
 		return InteractiveApplication.approximateMVA;
 	}
@@ -332,6 +357,14 @@ public class ApplicationMetrics extends MetricCollection {
 		out.info("    max: " + Utility.roundDouble(getActiveVms().getMax(), Simulation.getMetricPrecision()));
 		out.info("    mean: " + Utility.roundDouble(getActiveVms().getMean(), Simulation.getMetricPrecision()));
 		out.info("    min: " + Utility.roundDouble(getActiveVms().getMin(), Simulation.getMetricPrecision()));
+		out.info("  Types");
+		for (Map.Entry<Integer, Long> entry : getApplicationTypesSpawned().entrySet()) {
+			int type = entry.getKey();
+			long deployed = 0l;
+			if (applicationTypesDeployed.containsKey(type))
+				deployed = applicationTypesDeployed.get(type);
+			out.info(String.format("    %d: %d / %d", type, deployed, entry.getValue()));
+		}
 		out.info("CPU Underprovision");
 		out.info("   percentage: " + Utility.roundDouble(Utility.toPercentage(getAggregateCpuUnderProvision().getSum() / getAggregateCpuDemand().getSum()), Simulation.getMetricPrecision()) + "%");
 		out.info("SLA");
@@ -429,6 +462,12 @@ public class ApplicationMetrics extends MetricCollection {
 		metrics.add(new Tuple<String, Object>("activeVmsMax", Utility.roundDouble(getActiveVms().getMax(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeVmsMean", Utility.roundDouble(getActiveVms().getMean(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeVmsMin", Utility.roundDouble(getActiveVms().getMin(), Simulation.getMetricPrecision())));
+		for (Map.Entry<Integer, Long> entry : getApplicationTypesSpawned().entrySet()) {
+			metrics.add(new Tuple<String, Object>(String.format("applicationSpawnedType-%d", entry.getKey()), entry.getValue()));
+		}
+		for (Map.Entry<Integer, Long> entry : getApplicationTypesDeployed().entrySet()) {
+			metrics.add(new Tuple<String, Object>(String.format("applicationDeployedType-%d", entry.getKey()), entry.getValue()));
+		}
 		
 		return metrics;
 	}
