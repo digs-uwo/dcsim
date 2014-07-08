@@ -456,17 +456,18 @@ public class ApplicationMetrics extends MetricCollection {
 		metrics.add(new Tuple<String, Object>("applicationsTotal", getTotalApplicationCount()));
 		metrics.add(new Tuple<String, Object>("applicationsSpawned", getApplicationsSpawned()));
 		metrics.add(new Tuple<String, Object>("applicationsShutdown", getApplicationsShutdown()));
-		metrics.add(new Tuple<String, Object>("applicationPlacementsFailed", getApplicationPlacementsFailed()));
-		metrics.add(new Tuple<String, Object>("averageSize", Utility.roundDouble(getSizeStats().getMean(), Simulation.getMetricPrecision())));
-		metrics.add(new Tuple<String, Object>("vmsInstantiated", getVmsInstantiated()));
+		metrics.add(new Tuple<String, Object>("applicationsPlacementsFailed", getApplicationPlacementsFailed()));
+		metrics.add(new Tuple<String, Object>("applicationsAverageSize", Utility.roundDouble(getSizeStats().getMean(), Simulation.getMetricPrecision())));
+		
+		metrics.add(new Tuple<String, Object>("activeVmsTotal", getVmsInstantiated()));
 		metrics.add(new Tuple<String, Object>("activeVmsMax", Utility.roundDouble(getActiveVms().getMax(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeVmsMean", Utility.roundDouble(getActiveVms().getMean(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeVmsMin", Utility.roundDouble(getActiveVms().getMin(), Simulation.getMetricPrecision())));
 		for (Map.Entry<Integer, Long> entry : getApplicationTypesSpawned().entrySet()) {
-			metrics.add(new Tuple<String, Object>(String.format("applicationSpawnedType-%d", entry.getKey()), entry.getValue()));
+			metrics.add(new Tuple<String, Object>(String.format("applicationsSpawnedType-%d", entry.getKey()), entry.getValue()));
 		}
 		for (Map.Entry<Integer, Long> entry : getApplicationTypesDeployed().entrySet()) {
-			metrics.add(new Tuple<String, Object>(String.format("applicationDeployedType-%d", entry.getKey()), entry.getValue()));
+			metrics.add(new Tuple<String, Object>(String.format("applicationsDeployedType-%d", entry.getKey()), entry.getValue()));
 		}
 		
 		return metrics;

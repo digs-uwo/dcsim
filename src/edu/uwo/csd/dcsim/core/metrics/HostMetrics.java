@@ -113,10 +113,12 @@ public class HostMetrics extends MetricCollection {
 		out.info("   max: " + Utility.roundDouble(getActiveHosts().getMax(), Simulation.getMetricPrecision()));
 		out.info("   mean: " + Utility.roundDouble(getActiveHosts().getMean(), Simulation.getMetricPrecision()));
 		out.info("   min: " + Utility.roundDouble(getActiveHosts().getMin(), Simulation.getMetricPrecision()));
-		out.info("   util: " + Utility.roundDouble(Utility.toPercentage(getHostUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
-		out.info("   total util: " + Utility.roundDouble(Utility.toPercentage(getTotalUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
+		out.info("   CPU util: " + Utility.roundDouble(Utility.toPercentage(getHostUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
 		out.info("   MEM util: " + Utility.roundDouble(Utility.toPercentage(getMemoryUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
-		out.info("   total MEM util: " + Utility.roundDouble(Utility.toPercentage(getTotalMemoryUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
+		
+		out.info("Data Centre");
+		out.info("   CPU util: " + Utility.roundDouble(Utility.toPercentage(getTotalUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
+		out.info("   MEM util: " + Utility.roundDouble(Utility.toPercentage(getTotalMemoryUtilization().getMean()), Simulation.getMetricPrecision()) + "%");
 		
 		out.info("Power");
 		out.info("   consumed: " + Utility.roundDouble(Utility.toKWH(getPowerConsumption().getSum()), Simulation.getMetricPrecision()) + "kWh");
@@ -136,10 +138,11 @@ public class HostMetrics extends MetricCollection {
 		metrics.add(new Tuple<String, Object>("activeHostsMax", Utility.roundDouble(getActiveHosts().getMax(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeHostsMean", Utility.roundDouble(getActiveHosts().getMean(), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeHostsMin", Utility.roundDouble(getActiveHosts().getMin(), Simulation.getMetricPrecision())));
-		metrics.add(new Tuple<String, Object>("activeHostsUtil", Utility.roundDouble(Utility.toPercentage(getHostUtilization().getMean()), Simulation.getMetricPrecision())));
-		metrics.add(new Tuple<String, Object>("totalUtil", Utility.roundDouble(Utility.toPercentage(getTotalUtilization().getMean()), Simulation.getMetricPrecision())));
+		metrics.add(new Tuple<String, Object>("activeHostsCpuUtil", Utility.roundDouble(Utility.toPercentage(getHostUtilization().getMean()), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("activeHostsMemUtil", Utility.roundDouble(Utility.toPercentage(getMemoryUtilization().getMean()), Simulation.getMetricPrecision())));
-		metrics.add(new Tuple<String, Object>("totalMemUtil", Utility.roundDouble(Utility.toPercentage(getTotalMemoryUtilization().getMean()), Simulation.getMetricPrecision())));
+		
+		metrics.add(new Tuple<String, Object>("dcCpuUtil", Utility.roundDouble(Utility.toPercentage(getTotalUtilization().getMean()), Simulation.getMetricPrecision())));
+		metrics.add(new Tuple<String, Object>("dcMemUtil", Utility.roundDouble(Utility.toPercentage(getTotalMemoryUtilization().getMean()), Simulation.getMetricPrecision())));
 		
 		metrics.add(new Tuple<String, Object>("powerConsumed", Utility.roundDouble(Utility.toKWH(getPowerConsumption().getSum()), Simulation.getMetricPrecision())));
 		metrics.add(new Tuple<String, Object>("powerMax", Utility.roundDouble(getPowerConsumption().getMax(), Simulation.getMetricPrecision())));
