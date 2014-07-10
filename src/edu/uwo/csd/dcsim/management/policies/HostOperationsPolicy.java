@@ -73,6 +73,11 @@ public class HostOperationsPolicy extends Policy {
 		simulation.sendEvent(submitEvent);
 	}
 	
+	public void execute(MigrationCompleteEvent event) {
+		// Forward incoming migration complete event to the target manager.
+		simulation.sendEvent(new MigrationCompleteEvent(target, event.getSourceHostId(), event.getTargetHostId(), event.getVmId()));
+	}
+	
 	public void execute(MigrationEvent event) {
 		HostManager hostManager = manager.getCapability(HostManager.class);
 		Host host = hostManager.getHost();
@@ -94,12 +99,14 @@ public class HostOperationsPolicy extends Policy {
 		event.addEventInSequence(migEvent); //defer completion of the original event until the MigrateVmEvent is complete
 		
 		// Add a callback listener to inform the target manager that the migration is complete.
+		// Notify as well the target Host's manager.
 		if (null != target)
 			migEvent.addCallbackListener(new EventCallbackListener() {
 				@Override
 				public void eventCallback(Event e) {
 					MigrateVmEvent event = (MigrateVmEvent) e;
 					simulation.sendEvent(new MigrationCompleteEvent(target, event.getSource().getId(), event.getTargetHost().getId(), event.getVM().getId()));
+					simulation.sendEvent(new MigrationCompleteEvent(event.getTargetHost().getAutonomicManager(), event.getSource().getId(), event.getTargetHost().getId(), event.getVM().getId()));
 				}
 			});
 		
