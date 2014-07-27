@@ -89,7 +89,11 @@ public abstract class SimulationTask implements Runnable {
 		}
 		
 	}
-
+	
+	public boolean isComplete() {
+		return complete;
+	}
+	
 	public SimulationMetrics getMetrics() {
 		if (!complete)
 			throw new IllegalStateException("Simulation task results cannot be obtained until the task has been run");
