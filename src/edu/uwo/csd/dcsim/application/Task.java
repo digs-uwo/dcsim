@@ -19,6 +19,9 @@ public abstract class Task {
 	Resources resourceSize;
 	private boolean active = false;
 	
+	public enum TaskConstraintType {INDEPENDENT, ANTI_AFFINITY, AFFINITY;}
+	protected TaskConstraintType constraintType = TaskConstraintType.INDEPENDENT;
+	
 	public Task(int defaultInstances, Resources resourceSize) {
 		this.defaultInstances = defaultInstances;
 		this.maxInstances = defaultInstances;
@@ -102,4 +105,12 @@ public abstract class Task {
 		this.id = id;
 	}
 	
+	public TaskConstraintType getConstraintType() {
+		return constraintType;
+	}
+	
+	public void setConstraintType (TaskConstraintType constraintType) {
+		this.constraintType = constraintType;
+	}
+
 }

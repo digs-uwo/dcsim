@@ -97,6 +97,14 @@ public class HostStatus {
 		++target.incomingMigrations;
 	}
 	
+	public void unmigrate(VmStatus vm, HostStatus target) {
+		--outgoingMigrations;
+		vms.add(vm);
+
+		target.vms.remove(vm);
+		--target.incomingMigrations;
+	}
+	
 	public long getTimeStamp() {
 		return timeStamp;
 	}

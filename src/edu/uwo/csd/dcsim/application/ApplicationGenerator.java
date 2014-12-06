@@ -92,6 +92,8 @@ public abstract class ApplicationGenerator implements SimulationEventListener {
 		simulation.getLogger().debug("Created New Application");
 		
 		simulation.getSimulationMetrics().getApplicationMetrics().incrementApplicationsSpawned();
+		
+		simulation.getSimulationMetrics().getApplicationMetrics().incrementApplicationTypeSpawned(application.getType());
 
 		ApplicationPlacementEvent placementEvent = new ApplicationPlacementEvent(dcTarget, application);
 		

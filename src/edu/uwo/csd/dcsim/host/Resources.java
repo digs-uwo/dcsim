@@ -71,6 +71,11 @@ public class Resources {
 		return new Resources(this);
 	}
 	
+	@Override
+	public String toString() {
+		return String.format("[%d, %d, %d, %d, %d]", cores, getCoreCapacity(), memory, bandwidth, storage);
+	}
+	
 	public int getCores() {
 		return cores;
 	}

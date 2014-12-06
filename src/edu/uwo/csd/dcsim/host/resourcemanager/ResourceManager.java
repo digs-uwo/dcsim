@@ -125,6 +125,21 @@ public abstract class ResourceManager {
 	 */
 	public final int getTotalMemory() { return getHost().getMemory(); }
 	
+	/**
+	 * Get the amount of physical memory capacity in use.
+	 * 
+	 * Since at the moment a VM is considered to use all its memory allocation, memory in use is equivalent to allocated memory.
+	 */
+	public final int getMemoryInUse() {
+		return getAllocatedMemory();
+	}
+	
+	/**
+	 * Get the fraction of physical memory capacity that is currently in use (real usage, not allocation)
+	 * @return
+	 */
+	public final float getMemoryUtilization() { return (float) getMemoryInUse() / (float) getTotalMemory(); }
+	
 	
 	/*
 	 * Bandwidth

@@ -30,6 +30,11 @@ public class InteractiveApplication extends Application {
 
 	int schedulingRounds;
 	
+	// Tasks arranged by their constraints.
+	private ArrayList<InteractiveTask> independentTasks = new ArrayList<InteractiveTask>();
+	private ArrayList<InteractiveTask> antiAffinityTasks = new ArrayList<InteractiveTask>();
+	private ArrayList<ArrayList<InteractiveTask>> affinityTasks = new ArrayList<ArrayList<InteractiveTask>>();
+	
 	public InteractiveApplication(Simulation simulation) {
 		super(simulation);
 		
@@ -512,6 +517,42 @@ public class InteractiveApplication extends Application {
 	public ArrayList<Task> getTasks() {
 		ArrayList<Task> simpleTasks = new ArrayList<Task>(tasks);
 		return simpleTasks;
+	}
+	
+	public ArrayList<InteractiveTask> getIndependentTasks() {
+		return new ArrayList<InteractiveTask>(independentTasks);
+	}
+	
+	public void addIndependentTask(InteractiveTask task) {
+		independentTasks.add(task);
+	}
+	
+	public ArrayList<InteractiveTask> getAntiAffinityTasks() {
+		return new ArrayList<InteractiveTask>(antiAffinityTasks);
+	}
+	
+	public void addAntiAffinityTask(InteractiveTask task) {
+		antiAffinityTasks.add(task);
+	}
+	
+	public ArrayList<InteractiveTask> getAffinitySet(InteractiveTask task) {
+		
+		for (ArrayList<InteractiveTask> affinitySet : affinityTasks) {
+			for (InteractiveTask t : affinitySet) {
+				if (t.getId() == task.getId())
+					return new ArrayList<InteractiveTask>(affinitySet);
+			}
+		}
+		
+		return null;
+	}
+	
+	public ArrayList<ArrayList<InteractiveTask>> getAffinityTasks() {
+		return new ArrayList<ArrayList<InteractiveTask>>(affinityTasks);
+	}
+	
+	public void addAffinityTasks(ArrayList<InteractiveTask> tasks) {
+		affinityTasks.add(tasks);
 	}
 	
 	private class DummyTask {

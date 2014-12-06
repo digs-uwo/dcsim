@@ -44,6 +44,8 @@ public class InstantiateVmAction extends ManagementAction {
 		
 		simulation.sendEvent(instantiateEvent);
 		
+		simulation.getSimulationMetrics().getApplicationMetrics().incrementVmsInstantiated();
+		
 	}
 	
 	public HostData getTarget() {
