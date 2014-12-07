@@ -4,19 +4,19 @@ DCSim
 
 
 #### Simulator Code
-- the core simulation code is located in the src/ directory
+- The core simulation code is located in the src/ directory
 
 #### Traces
-- a set of trace files to use with the simulator are located in the traces/ directory
-- trace files are csv files, with each line containing the pair [time, value]
-  - time is simulation time in ms
-  - value is a normalized load value in the range [0, 1], where 0 represents 0 load, and 1 represents the largest load in the trace
+- A set of trace files to use with the simulator are located in the traces/ directory
+- Trace files are csv files, with each line containing the pair [time, value]
+  - Time is simulation time in ms
+  - Value is a normalized load value in the range [0, 1], where 0 represents 0 load, and 1 represents the largest load in the trace
 
 #### Configuration
-- the config/simulation.config file contains a set of configuration parameters to configure host and VM state transition delays (i.e. for powering on and off, starting a VM), migration penalty and overhead values, and simulation output. You can also choose to use an approximate MVA calculation for VM queuing model calculation, to improve simulation performance (recommended).
+- The config/simulation.config file contains a set of configuration parameters to configure host and VM state transition delays (i.e. for powering on and off, starting a VM), migration penalty and overhead values, and simulation output. You can also choose to use an approximate MVA calculation for VM queuing model calculation, to improve simulation performance (recommended).
 
 #### Examples
-- the examples/ directory contains a set of basic examples of how to use the simulator
+- The examples/ directory contains a set of basic examples of how to use the simulator
 - SimpleExample is a good starting point to using the simulator. You can run this file directly, and read the code for a basic introduction
 
 #### Configuring and Using the Simulator
